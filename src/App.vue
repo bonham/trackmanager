@@ -1,11 +1,19 @@
 <template>
   <div id="app">
-    <b-navbar>
-      <b-navbar-nav>
-        <b-nav-item to="/">
+    <b-navbar
+      class="shadow-sm bg-white border-bottom"
+    >
+      <b-navbar-nav class="my-2 my-md-0 mr-md-3">
+        <b-nav-item
+          to="/"
+          class="p-2 text-dark"
+        >
           Home
         </b-nav-item>
-        <b-nav-item to="/about">
+        <b-nav-item
+          to="/about"
+          class="p-2 text-dark"
+        >
           About
         </b-nav-item>
       </b-navbar-nav>

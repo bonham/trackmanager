@@ -1,5 +1,5 @@
 {
-  "name": "trackmanager",
+  "name": "trackmanager-client",
   "version": "0.1.0",
   "private": true,
   "scripts": {

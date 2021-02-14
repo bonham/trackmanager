@@ -1,0 +1,22 @@
+* list tracks from database
+or
+* list tracks from filesystem
+
+* upload tracks to database
+* upload via drag and drop
+
+* show small preview icon
+* show cumulated distance, elevation
+
+* show a gpx track within osm map
+* show multiple / all tracks within osm map
+
+* update proximator page after upload
+
+* integrate proximator page and trackmanager page
+
+* integrate with openrouteservice ??
+
+
+
+

@@ -1,6 +1,8 @@
 <template>
   <div>
-    <button v-on:click="getMyList">Get Data</button>
+    <button @click="getMyList">
+      Get Data
+    </button>
     <div>
       C: {{ myDataList }}
     </div>
@@ -15,12 +17,14 @@ export default {
       myDataList: ['x']
     }
   },
+
   methods: {
     getMyList () {
-      fetch('http://localhost:3000/users')
+      fetch('/users')
         .then(response => response.json())
         .then(data => (this.myDataList = data))
     }
   }
 }
+
 </script>

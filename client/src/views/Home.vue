@@ -1,6 +1,6 @@
 <template>
-<b-row>
-  <b-col>
+  <b-row>
+    <b-col>
       <div class="px-3 py-3 pt-md-5 pb-md-4 mx-auto">
         <div>
           <b-card
@@ -27,8 +27,8 @@
           </b-card>
         </div>
       </div>
-  </b-col>
-</b-row>
+    </b-col>
+  </b-row>
 </template>
 
 <script>

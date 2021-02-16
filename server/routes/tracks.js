@@ -12,11 +12,9 @@ router.get('/', function(req, res, next) {
   })
 
   client.connect()
-    .then(() => { return client.query("select src from tracks")})
+    .then(() => { return client.query("select id, src from tracks")})
     .then((result) => {
-      res.json(
-        result.rows.map((item) => { return item.src } )
-      )
+      res.json(result.rows)
     })
     .catch(err => {
       console.log(err)

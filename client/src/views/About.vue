@@ -4,16 +4,16 @@
     <div>
       x y z
     </div>
-    <HelloWorld></HelloWorld>
+    <HelloWorld2 />
   </div>
 </template>
 
 <script>
-import HelloWorld from '@/components/HelloWorld.vue'
+import HelloWorld2 from '@/components/HelloWorld2.vue'
 export default {
   name: 'About',
   components: {
-    HelloWorld
+    HelloWorld2
   }
 }
 </script>

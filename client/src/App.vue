@@ -19,7 +19,7 @@
       </b-navbar-nav>
     </b-navbar>
     <b-container>
-      <router-view/>
+      <router-view />
     </b-container>
   </div>
 </template>

@@ -10,13 +10,19 @@ router.get('/', function(req, res, next) {
     host: 'localhost',
     database: 'tmp1',
   })
-  client.connect()
-  client.query('SELECT SRC from TRACKS', (err, sqlres) => {
-    res.json(sqlres.rows)
-    console.log(err, sqlres)
-    client.end()
-  })
 
+  client.connect()
+    .then(() => { return client.query("select src from tracks")})
+    .then((result) => {
+      res.json(
+        result.rows.map((item) => { return item.src } )
+      )
+    })
+    .catch(err => {
+      console.log(err)
+      res.status(500).send(err.message)
+    })
+  
 });
 
 module.exports = router;

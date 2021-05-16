@@ -8,6 +8,7 @@
 		}
 	],
 	"settings": {
-		"eslint.alwaysShowStatus": true
+		"eslint.alwaysShowStatus": true,
+		"javascript.format.enable": false
 	}
 }

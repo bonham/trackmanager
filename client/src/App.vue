@@ -11,6 +11,12 @@
           Home
         </b-nav-item>
         <b-nav-item
+          to="/testpage1"
+          class="p-2 text-dark"
+        >
+          Testpage1
+        </b-nav-item>
+        <b-nav-item
           to="/about"
           class="p-2 text-dark"
         >

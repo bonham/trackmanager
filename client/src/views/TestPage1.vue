@@ -1,9 +1,6 @@
 <template>
   <div>
     <h1>This is Test Page 1</h1>
-    <div>
-      x y z
-    </div>
     <TrackList />
   </div>
 </template>

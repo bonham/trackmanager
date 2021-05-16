@@ -13,7 +13,7 @@
           >
             <b-card-text>
               {{ Math.round(item.length / 1000) }} km
-              / {{ Math.round(item.ascent) }} km
+              / {{ Math.round(item.ascent) }} m
               / {{ (item.timelength == null ? 0 : Math.floor(item.timelength/3600) + ":" + Math.round((item.timelength / 60) % 60)) }} h
             </b-card-text>
           </b-card>

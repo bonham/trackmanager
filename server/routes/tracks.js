@@ -8,11 +8,11 @@ router.get('/', function(req, res, next) {
   const client = new Client({
     user: 'postgres',
     host: 'localhost',
-    database: 'tmp1',
+    database: 'gpx1',
   })
 
   client.connect()
-    .then(() => { return client.query("select id, src from tracks")})
+    .then(() => { return client.query("select id, name, length, src, time, timelength, ascent from tracks")})
     .then((result) => {
       res.json(result.rows)
     })

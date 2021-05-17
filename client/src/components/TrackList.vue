@@ -14,7 +14,7 @@
             <b-card-text>
               {{ Math.round(item.length / 1000) }} km
               / {{ Math.round(item.ascent) }} m
-              / {{ (item.timelength == null ? 0 : Math.floor(item.timelength/3600) + ":" + Math.round((item.timelength / 60) % 60)) }} h
+              / {{ item.timeLengthFormatted() }} h
             </b-card-text>
           </b-card>
         </div>
@@ -24,6 +24,7 @@
 </template>
 
 <script>
+import Track from '@/lib/Track.js'
 export default {
   name: 'TrackList',
   data () {
@@ -36,7 +37,7 @@ export default {
     fetch('/tracks')
       .then(response => response.json())
       .then(data => {
-        this.myDataList = data
+        this.myDataList = data.map(e => { return new Track(e) })
       })
   }
 }

@@ -9,7 +9,7 @@ module.exports = {
     port: 8080,
     open: 'Chrome',
     proxy: { // https://cli.vuejs.org/guide/html-and-static-assets.html#disable-index-generation
-      '/*': { // everything from root
+      '/tracks/*': {
         target: 'http://localhost:3000',
         secure: false,
         ws: false
@@ -18,11 +18,11 @@ module.exports = {
         target: 'http://localhost:3000',
         secure: false,
         ws: true
-      },
-      '!/': { // except root, which is served by webpack's devserver, to faciliate instant updates
-        target: 'http://localhost:3000/',
-        secure: false,
-        ws: false
+      // },
+      // '!/': { // except root, which is served by webpack's devserver, to faciliate instant updates
+      //   target: 'http://localhost:3000/',
+      //   secure: false,
+      //   ws: false
       }
     }
   }

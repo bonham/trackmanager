@@ -29,7 +29,7 @@ export default {
   name: 'TrackList',
   data () {
     return {
-      myDataList: ['x']
+      myDataList: []
     }
   },
 

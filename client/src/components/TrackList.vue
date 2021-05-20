@@ -11,11 +11,13 @@
             :title="item.src"
             class="my-2"
           >
-            <b-card-text>
-              {{ Math.round(item.length / 1000) }} km
-              / {{ Math.round(item.ascent) }} m
-              / {{ item.timeLengthFormatted() }} h
-            </b-card-text>
+            <router-link :to="'/track/'+item.id">
+              <b-card-text>
+                {{ Math.round(item.length / 1000) }} km
+                / {{ Math.round(item.ascent) }} m
+                / {{ item.timeLengthFormatted() }} h
+              </b-card-text>
+            </router-link>
           </b-card>
         </div>
       </div>

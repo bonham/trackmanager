@@ -23,4 +23,12 @@ router.get('/', function(req, res, next) {
   
 });
 
+router.get('/:trackId', function(req, res, next) {
+
+    r = {}
+    r.id = req.params["trackId"]
+    res.json(r)
+  
+});
+
 module.exports = router;

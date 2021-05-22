@@ -36,7 +36,7 @@ export default {
   },
 
   created: function () {
-    fetch('/tracks')
+    fetch('/api/tracks')
       .then(response => response.json())
       .then(data => {
         this.myDataList = data.map(e => { return new Track(e) })

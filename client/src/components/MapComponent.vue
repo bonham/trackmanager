@@ -1,5 +1,8 @@
 <template>
-  <div id="mapdiv" />
+  <div>
+    <div>Map with parameter {{ trackId }}</div>
+    <div id="mapdiv" />
+  </div>
 </template>
 
 <script>
@@ -21,13 +24,20 @@ function initMap () {
       zoom: 0
     })
   })
+  this.map = map
 }
 
 export default {
   name: 'MapComponent',
+  props: {
+    trackId: {
+      type: Number,
+      required: true
+    }
+  },
   data () {
     return {
-      dummy: []
+      map: null
     }
   },
   mounted: initMap

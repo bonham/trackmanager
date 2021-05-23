@@ -1,7 +1,7 @@
 <template>
   <div>
     <h1>Track {{ $route.params.id }} Details</h1>
-    <MapComponent />
+    <MapComponent :track-id="1" />
   </div>
 </template>
 

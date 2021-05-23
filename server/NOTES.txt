@@ -1,0 +1,7 @@
+Bbox beispiel:
+
+bbox
+
+8.695869,49.269657,8.779084,49.319545
+
+xmin, ymin, xmax, ymax

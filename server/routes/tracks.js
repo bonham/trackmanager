@@ -1,22 +1,18 @@
 const express = require('express');
 const router = express.Router();
-const { Client } = require('pg')
+const { Pool } = require('pg')
 const logger = require('morgan');
 
-
+const pool = new Pool({
+  user: 'postgres',
+  host: 'localhost',
+  database: 'gpx1',
+})
 
 /* GET users listing. */
 router.get('/', function(req, res, next) {
 
-  const client = new Client({
-    user: 'postgres',
-    host: 'localhost',
-    database: 'gpx1',
-  })
-  
-
-  client.connect()
-    .then(() => { return client.query("select id, name, length, src, time, timelength, ascent from tracks")})
+  pool.query("select id, name, length, src, time, timelength, ascent from tracks")
     .then((result) => {
       res.json(result.rows)
     })
@@ -29,19 +25,12 @@ router.get('/', function(req, res, next) {
 
 router.get('/:trackId', function(req, res, next) {
 
-  const client = new Client({
-    user: 'postgres',
-    host: 'localhost',
-    database: 'gpx1',
-  })
-  
   trackId = req.params["trackId"]
 
-  query = "select ST_AsGeoJSON(wkb_geometry) from tracks where id = '"+trackId+"'"
+  query = "select ST_AsGeoJSON(wkb_geometry,6,9) from tracks where id = '"+trackId+"'"
   logger(query)
 
-  client.connect()
-  .then(() => { return client.query(query)})
+  pool.query(query)
   .then((result) => {
     jsonString = result.rows[0]["st_asgeojson"]
     geoJson = JSON.parse(jsonString)

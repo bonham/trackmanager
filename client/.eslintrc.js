@@ -10,13 +10,10 @@ module.exports = {
     '@vue/standard'
   ],
   parserOptions: {
-    parser: 'babel-eslint'
+    parser: '@babel/eslint-parser'
   },
   'plugins': [
-    'eslint:recommended',
-    'plugin:vue/recommended',
-    '@vue/standard',
-    'plugin:vue/standard'
+    'vue'
   ],
   rules: {
     'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',

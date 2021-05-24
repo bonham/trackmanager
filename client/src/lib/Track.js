@@ -7,6 +7,7 @@ export default class Track {
     this.src = initData.src
     this.timelength = (initData.timelength === null ? 0 : initData.timelength)
     this.ascent = initData.ascent
+    this.geojson = ('geojson' in initData ? initData.geojson : null)
   }
 
   secondsToHms (s) {

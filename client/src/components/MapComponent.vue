@@ -75,6 +75,7 @@ function getTrack (tid, map) {
           }
         )
       })
+      // console.log('vsource: ' + vectorSource.getExtent())
 
       const vectorLayer = new VectorLayer({
         source: vectorSource,

@@ -8,8 +8,10 @@
 <script>
 import { Map, View } from 'ol'
 import { transformExtent } from 'ol/proj'
-import TileLayer from 'ol/layer/Tile'
-import OSM from 'ol/source/OSM'
+import { Tile as TileLayer, Vector as VectorLayer } from 'ol/layer'
+import { OSM, Vector as VectorSource } from 'ol/source'
+import { Stroke, Style } from 'ol/style'
+import GeoJSON from 'ol/format/GeoJSON'
 import Track from '@/lib/Track.js'
 
 function initMap () {
@@ -44,16 +46,42 @@ function getTrack (tid, map) {
     .then(response => response.json())
     .then(data => {
       const track = new Track(data)
+
+      // zoom to bbox
       const extent = transformExtent(
         track.geojson.bbox,
         'EPSG:4326',
         'EPSG:3857'
       )
-
       map.getView().fit(
         extent,
         map.getSize()
       )
+
+      // load track
+      const style = new Style({
+        stroke: new Stroke({
+          color: 'brown',
+          width: 2
+        })
+      })
+
+      const vectorSource = new VectorSource({
+        features: new GeoJSON().readFeatures(
+          track.geojson,
+          {
+            dataProjection: 'EPSG:4326',
+            featureProjection: 'EPSG:3857'
+          }
+        )
+      })
+
+      const vectorLayer = new VectorLayer({
+        source: vectorSource,
+        style: style
+      })
+
+      map.addLayer(vectorLayer)
     })
 }
 

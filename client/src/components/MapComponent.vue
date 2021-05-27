@@ -29,7 +29,7 @@ function initMap () {
   })
   this.map = map
 
-  getTrack(this.trackId, map)
+  setMapViewAndDrawTrack(this.trackId, map)
 }
 
 function setTarget () {
@@ -40,7 +40,7 @@ function setTarget () {
 
 // }
 
-function getTrack (tid, map) {
+function setMapViewAndDrawTrack (tid, map) {
   const url = '/api/tracks/' + tid
   fetch(url)
     .then(response => response.json())
@@ -53,9 +53,13 @@ function getTrack (tid, map) {
         'EPSG:4326',
         'EPSG:3857'
       )
-      map.getView().fit(
+
+      const mapSize = map.getSize()
+      const view = map.getView()
+
+      view.fit(
         extent,
-        map.getSize()
+        mapSize
       )
 
       // load track
@@ -83,6 +87,11 @@ function getTrack (tid, map) {
       })
 
       map.addLayer(vectorLayer)
+
+      // zoom a bit out
+      const scale = 0.97
+      view.animate(
+        { zoom: view.getZoom() * scale })
     })
 }
 

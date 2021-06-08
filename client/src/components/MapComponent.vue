@@ -12,7 +12,7 @@ import { Tile as TileLayer, Vector as VectorLayer } from 'ol/layer'
 import { OSM, Vector as VectorSource } from 'ol/source'
 import { Stroke, Style } from 'ol/style'
 import GeoJSON from 'ol/format/GeoJSON'
-import Track from '@/lib/Track.js'
+import { Track } from '@/lib/Track.js'
 
 function initMap () {
 // eslint-disable-next-line no-unused-vars

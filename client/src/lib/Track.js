@@ -1,5 +1,6 @@
+import { DateTime } from 'luxon'
 const sprintf = require('sprintf-js').sprintf
-export default class Track {
+class Track {
   constructor (initData) { // id, name, length, src, time, timelength, ascent
     this.id = initData.id
     this.name = initData.name
@@ -8,6 +9,7 @@ export default class Track {
     this.timelength = (initData.timelength === null ? 0 : initData.timelength)
     this.ascent = initData.ascent
     this.geojson = ('geojson' in initData ? initData.geojson : null)
+    this.time = DateTime.fromISO(initData.time)
   }
 
   secondsToHms (s) {
@@ -28,3 +30,15 @@ export default class Track {
     return sprintf('%d:%02d', thms.hours, thms.minutes)
   }
 }
+
+class TrackCollection {
+  constructor () {
+    this.tlist = []
+  }
+
+  add (track) {
+    this.tlist.push(track)
+  }
+}
+
+export { Track, TrackCollection }

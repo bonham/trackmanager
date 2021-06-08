@@ -13,7 +13,8 @@
           >
             <router-link :to="'/track/'+item.id">
               <b-card-text>
-                {{ Math.round(item.length / 1000) }} km
+                {{ item.time.toLocaleString({ month: 'long', day: 'numeric' }) }}
+                / {{ Math.round(item.length / 1000) }} km
                 / {{ Math.round(item.ascent) }} m
                 / {{ item.timeLengthFormatted() }} h
               </b-card-text>
@@ -26,7 +27,8 @@
 </template>
 
 <script>
-import Track from '@/lib/Track.js'
+import { Track } from '@/lib/Track.js'
+
 export default {
   name: 'TrackList',
   data () {
@@ -34,7 +36,6 @@ export default {
       myDataList: []
     }
   },
-
   created: function () {
     fetch('/api/tracks')
       .then(response => response.json())

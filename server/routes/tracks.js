@@ -5,7 +5,7 @@ const { Pool } = require('pg')
 const pool = new Pool({
   user: 'postgres',
   host: 'localhost',
-  database: 'gpx1',
+  database: 'gpxall',
 })
 
 /* GET users listing. */

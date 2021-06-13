@@ -32,12 +32,16 @@ class Track {
 }
 
 class TrackCollection {
-  constructor () {
-    this.tlist = []
+  constructor (listOfTracks) {
+    this.tlist = listOfTracks
   }
 
   add (track) {
     this.tlist.push(track)
+  }
+
+  members () {
+    return this.tlist
   }
 }
 

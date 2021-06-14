@@ -30,14 +30,14 @@ export default {
         // create tracks and separate by year
         data.forEach(element => {
           const track = new Track(element)
-          const year = track.time.year // luxon datetime obj
+          const year = track.year() // luxon datetime obj
           tracksByYear[year] = (tracksByYear[year] || [])
           tracksByYear[year].push(track)
         })
 
         // loop over years, create TrackCollections and push to reactive property
         const yearList = Object.keys(tracksByYear)
-        yearList.sort()
+        yearList.sort().reverse()
         this.yearList = yearList
 
         yearList.forEach(y => {

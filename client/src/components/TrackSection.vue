@@ -4,7 +4,16 @@
     <b-row>
       <b-col>
         <div class="px-3 py-3 pt-md-5 pb-md-4 mx-auto">
-          <div> Label: {{ label }} </div>
+          <b-card
+            bg-variant="light"
+            border-variant="primary"
+            :title="label"
+            class="my-2"
+          >
+            <b-card-text>
+              {{ Math.round(coll.distance() / 1000) }} km total
+            </b-card-text>
+          </b-card>
           <div>
             <TrackCard
               v-for="item in myDataList"

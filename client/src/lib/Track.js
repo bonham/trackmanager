@@ -9,7 +9,27 @@ class Track {
     this.timelength = (initData.timelength === null ? 0 : initData.timelength)
     this.ascent = initData.ascent
     this.geojson = ('geojson' in initData ? initData.geojson : null)
-    this.time = DateTime.fromISO(initData.time)
+    this.time = (initData.time === null ? null : DateTime.fromISO(initData.time))
+  }
+
+  distance () {
+    return (this.length ? this.length : 0)
+  }
+
+  year () {
+    if (this.time === null) {
+      return 'Unknown Year'
+    } else {
+      return this.time.year
+    }
+  }
+
+  monthAndDay () {
+    return (
+      this.time === null
+        ? 'Unknown Day'
+        : this.time.toLocaleString({ month: 'long', day: 'numeric' })
+    )
   }
 
   secondsToHms (s) {
@@ -42,6 +62,11 @@ class TrackCollection {
 
   members () {
     return this.tlist
+  }
+
+  distance () {
+    const sum = this.members().reduce((s, tr) => s + tr.distance(), 0)
+    return sum
   }
 }
 

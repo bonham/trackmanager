@@ -7,8 +7,8 @@
   >
     <router-link :to="'/track/'+track.id">
       <b-card-text>
-        {{ track.time.toLocaleString({ month: 'long', day: 'numeric' }) }}
-        / {{ Math.round(track.length / 1000) }} km
+        {{ track.monthAndDay() }}
+        / {{ Math.round(track.distance() / 1000) }} km
         / {{ Math.round(track.ascent) }} m
         / {{ track.timeLengthFormatted() }} h
       </b-card-text>

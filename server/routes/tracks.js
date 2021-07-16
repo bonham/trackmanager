@@ -11,7 +11,7 @@ const pool = new Pool({
 /* GET users listing. */
 router.get('/', function(req, res, next) {
 
-  pool.query("select id, name, length, src, time, timelength, ascent from tracks")
+  pool.query("select id, name, length, src, time, timelength, ascent from tracks order by time")
     .then((result) => {
       res.json(result.rows)
     })

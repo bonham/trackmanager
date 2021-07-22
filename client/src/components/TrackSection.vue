@@ -54,21 +54,17 @@ export default {
   data () {
     return {
       myDataList: this.coll.members(),
-      expandIcon: 'ArrowDownCircleFill',
       expanded: true
+    }
+  },
+  computed: {
+    expandIcon: function () {
+      return (this.expanded ? 'ArrowDownCircleFill' : 'ArrowRightCircleFill')
     }
   },
   methods: {
     toggleMemberVisibility: function () {
-      if (this.expanded) {
-        // toggle to collapsed
-        this.expandIcon = 'ArrowRightCircleFill'
-        this.expanded = false
-      } else {
-        // toggle to expand
-        this.expandIcon = 'ArrowDownCircleFill'
-        this.expanded = true
-      }
+      this.expanded = !(this.expanded)
     }
   }
 }

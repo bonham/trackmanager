@@ -11,10 +11,13 @@
             class="my-2"
           >
             <b-card-text>
+              <b-button @click="toggleMemberVisibility">
+                <b-icon :icon="expandIcon" />
+              </b-button>
               {{ Math.round(coll.distance() / 1000) }} km total
             </b-card-text>
           </b-card>
-          <div>
+          <div v-if="expanded">
             <TrackCard
               v-for="item in myDataList"
               :key="item.id"
@@ -50,7 +53,22 @@ export default {
   },
   data () {
     return {
-      myDataList: this.coll.members()
+      myDataList: this.coll.members(),
+      expandIcon: 'ArrowDownCircleFill',
+      expanded: true
+    }
+  },
+  methods: {
+    toggleMemberVisibility: function () {
+      if (this.expanded) {
+        // toggle to collapsed
+        this.expandIcon = 'ArrowRightCircleFill'
+        this.expanded = false
+      } else {
+        // toggle to expand
+        this.expandIcon = 'ArrowDownCircleFill'
+        this.expanded = true
+      }
     }
   }
 }

@@ -4,8 +4,6 @@
     router-tag="div"
   >
     <b-card
-      bg-variant="light"
-      border-variant="secondary"
       :title="track.src"
       class="my-2"
     >

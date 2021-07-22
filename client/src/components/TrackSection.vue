@@ -6,15 +6,17 @@
         <div class="px-3 py-3 pt-md-5 pb-md-4 mx-auto">
           <b-card
             bg-variant="light"
-            border-variant="primary"
             :title="label"
             class="my-2"
+            @click="toggleMemberVisibility"
           >
             <b-card-text>
-              <b-button @click="toggleMemberVisibility">
+              <b-button>
                 <b-icon :icon="expandIcon" />
               </b-button>
-              {{ Math.round(coll.distance() / 1000) }} km total
+              <span class="mx-2">
+                {{ Math.round(coll.distance() / 1000) }} km total
+              </span>
             </b-card-text>
           </b-card>
           <div v-if="expanded">

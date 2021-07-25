@@ -103,7 +103,7 @@ export default {
     // see comment from Vitim.us in https://stackoverflow.com/a/49381030/4720160
     resizeEventHandler: function () {
       this.maxHeight = window.innerHeight
-      console.log('Resixze: ' + this.label + ', ' + this.innerHeight)
+      // console.log(`Resixze: ${this.label}, ${this.innerHeight}`)
     }
   }
 }

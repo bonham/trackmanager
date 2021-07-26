@@ -67,7 +67,7 @@ export default {
       myLabel: this.label,
       expanded: true,
       maxHeight: window.innerHeight,
-      myEh: null
+      myEventHandler: null
     }
   },
   computed: {
@@ -89,11 +89,11 @@ export default {
     // resize event handler need to be stored in data object so that
     // there is a different handler for each instance of this component.
     // Debouncing needs to happen per component instance
-    this.myEh = debounce(this.resizeEventHandler, 200)
-    window.addEventListener('resize', this.myEh)
+    this.myEventHandler = debounce(this.resizeEventHandler, 200)
+    window.addEventListener('resize', this.myEventHandler)
   },
   destroyed: function () {
-    window.removeEventListener('resize', this.myEh)
+    window.removeEventListener('resize', this.myEventHandler)
   },
   methods: {
     toggleMemberVisibility: function () {

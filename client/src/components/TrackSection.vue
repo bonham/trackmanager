@@ -12,10 +12,9 @@
           >
             <b-card-text>
               <b-button
-                :class="visible ? null : 'collapsed'"
-                :aria-expanded="visible ? 'true' : 'false'"
+                :class="expanded ? null : 'collapsed'"
+                :aria-expanded="expanded ? 'true' : 'false'"
                 :aria-controls="collapseId"
-                @click="visible = !visible"
               >
                 <b-icon
                   :icon="expandIcon"
@@ -28,7 +27,7 @@
           </b-card>
           <b-collapse
             :id="collapseId"
-            v-model="visible"
+            v-model="expanded"
           >
             <TrackCard
               v-for="item in myDataList"
@@ -70,8 +69,7 @@ export default {
   data () {
     return {
       myDataList: this.coll.members(),
-      expanded: true,
-      visible: true
+      expanded: !this.collapsed
     }
   },
   computed: {

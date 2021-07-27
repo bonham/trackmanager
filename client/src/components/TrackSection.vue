@@ -19,20 +19,13 @@
               </span>
             </b-card-text>
           </b-card>
-          <transition
-            name="section"
-          >
-            <div
-              v-if="expanded"
-              :style="styleObject"
-            >
-              <TrackCard
-                v-for="item in myDataList"
-                :key="item.id"
-                :track="item"
-              />
-            </div>
-          </transition>
+          <div v-if="expanded">
+            <TrackCard
+              v-for="item in myDataList"
+              :key="item.id"
+              :track="item"
+            />
+          </div>
         </div>
       </b-col>
     </b-row>
@@ -43,7 +36,6 @@
 // import TrackHeader from '@/components/TrackHeader.vue'
 import TrackCard from '@/components/TrackCard.vue'
 import { TrackCollection } from '@/lib/Track.js'
-import { debounce } from 'debounce'
 
 export default {
   name: 'TrackSection',
@@ -64,62 +56,18 @@ export default {
   data () {
     return {
       myDataList: this.coll.members(),
-      myLabel: this.label,
-      expanded: true,
-      maxHeight: window.innerHeight,
-      myEventHandler: null
+      expanded: true
     }
   },
   computed: {
     expandIcon: function () {
       return (this.expanded ? 'ArrowDownCircleFill' : 'ArrowRightCircleFill')
-    },
-    styleObject () {
-      // maxheight style must be dynamically adjusted and needs to be
-      // taller than content of div. Therefore his needs to come from
-      // data field which is dynamically updated on window resize
-      // ---maxh is a css variable. See transition style below where it is used.
-      return {
-        '--maxh': this.maxHeight + 'px',
-        overflow: 'hidden'
-      }
     }
-  },
-  created: function () {
-    // resize event handler need to be stored in data object so that
-    // there is a different handler for each instance of this component.
-    // Debouncing needs to happen per component instance
-    this.myEventHandler = debounce(this.resizeEventHandler, 200)
-    window.addEventListener('resize', this.myEventHandler)
-  },
-  destroyed: function () {
-    window.removeEventListener('resize', this.myEventHandler)
   },
   methods: {
     toggleMemberVisibility: function () {
       this.expanded = !(this.expanded)
-    },
-    // this eventhandler is the 'class' method and should not be registered directly
-    // see comment from Vitim.us in https://stackoverflow.com/a/49381030/4720160
-    resizeEventHandler: function () {
-      this.maxHeight = window.innerHeight
-      // console.log(`Resixze: ${this.label}, ${this.innerHeight}`)
     }
   }
 }
 </script>
-
-<style scoped>
-
-.section-enter-active,
-.section-leave-active {
-  transition: all 0.2s linear 0s;
-  max-height: var(--maxh);
-}
-
-.section-enter,
-.section-leave-to {
-  max-height: 0px;
-}
-
-</style>

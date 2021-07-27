@@ -14,7 +14,7 @@
               <b-button
                 :class="visible ? null : 'collapsed'"
                 :aria-expanded="visible ? 'true' : 'false'"
-                aria-controls="toggle-2021"
+                :aria-controls="collapseId"
                 @click="visible = !visible"
               >
                 <b-icon
@@ -61,6 +61,10 @@ export default {
     coll: {
       type: TrackCollection,
       default: null
+    },
+    collapsed: {
+      type: Boolean,
+      default: false
     }
   },
   data () {

@@ -5,6 +5,7 @@
       :key="trCol.year"
       :coll="trCol.collection"
       :label="trCol.year"
+      :collapsed="isYearCollapsed(trCol.year)"
     />
   </div>
 </template>
@@ -48,6 +49,12 @@ export default {
           })
         })
       })
+  },
+  methods: {
+    isYearCollapsed: function (thisYear) {
+      const firstYearInCollection = this.trackCollections[0].year
+      return thisYear !== firstYearInCollection
+    }
   }
 }
 </script>

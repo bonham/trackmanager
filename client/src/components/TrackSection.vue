@@ -11,7 +11,12 @@
             @click="toggleMemberVisibility"
           >
             <b-card-text>
-              <b-button v-b-toggle="collapseId">
+              <b-button
+                :class="visible ? null : 'collapsed'"
+                :aria-expanded="visible ? 'true' : 'false'"
+                aria-controls="toggle-2021"
+                @click="visible = !visible"
+              >
                 <b-icon
                   :icon="expandIcon"
                 />
@@ -23,7 +28,7 @@
           </b-card>
           <b-collapse
             :id="collapseId"
-            visible
+            v-model="visible"
           >
             <TrackCard
               v-for="item in myDataList"
@@ -61,7 +66,8 @@ export default {
   data () {
     return {
       myDataList: this.coll.members(),
-      expanded: true
+      expanded: true,
+      visible: true
     }
   },
   computed: {

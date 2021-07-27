@@ -11,21 +11,26 @@
             @click="toggleMemberVisibility"
           >
             <b-card-text>
-              <b-button>
-                <b-icon :icon="expandIcon" />
+              <b-button v-b-toggle="collapseId">
+                <b-icon
+                  :icon="expandIcon"
+                />
               </b-button>
               <span class="mx-2">
                 {{ Math.round(coll.distance() / 1000) }} km total
               </span>
             </b-card-text>
           </b-card>
-          <div v-if="expanded">
+          <b-collapse
+            :id="collapseId"
+            visible
+          >
             <TrackCard
               v-for="item in myDataList"
               :key="item.id"
               :track="item"
             />
-          </div>
+          </b-collapse>
         </div>
       </b-col>
     </b-row>
@@ -62,6 +67,10 @@ export default {
   computed: {
     expandIcon: function () {
       return (this.expanded ? 'ArrowDownCircleFill' : 'ArrowRightCircleFill')
+    },
+    collapseId: function () {
+      const origLabel = this.label.replace(/\s+/, '-').toLowerCase()
+      return `toggle-${origLabel}`
     }
   },
   methods: {

@@ -1,6 +1,6 @@
 <template>
   <b-row>
-    <b-col class="px-3 py-3 pt-md-5 pb-md-4 mx-auto">
+    <b-col>
       <b-card
         bg-variant="light"
         :title="label"

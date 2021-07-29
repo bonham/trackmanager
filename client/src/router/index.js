@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Home from '../views/Home.vue'
-import TestPage1 from '../views/TestPage1.vue'
+import TrackOverviewPage from '../views/TrackOverviewPage.vue'
 import TrackDetail from '../views/TrackDetail.vue'
 
 Vue.use(VueRouter)
@@ -13,9 +13,9 @@ const routes = [
     component: Home
   },
   {
-    path: '/testpage1',
-    name: 'TestPage1',
-    component: TestPage1
+    path: '/toverview',
+    name: 'TrackOverviewPage',
+    component: TrackOverviewPage
   },
   {
     path: '/about',

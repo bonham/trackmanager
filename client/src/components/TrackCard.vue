@@ -19,12 +19,13 @@
           cols="4"
           class="text-end"
         >
-          <b-icon-check-square class="mx-4 card-icon" />
-          <b-link
-            class="mx-4 card-icon"
-            :to="'/track/'+track.id"
-            router-tag="b-icon-zoom-in"
-          />
+          <b-link :to="'/track/'+track.id">
+            <b-icon
+              icon="chevron-right"
+              class="card-icon bg-light p-3"
+              variant="secondary"
+            />
+          </b-link>
         </b-col>
       </b-row>
     </b-card-text>
@@ -47,6 +48,6 @@ export default {
 </script>
 <style scoped>
 .card-icon {
-  font-size: 3rem;
+  font-size: 4rem;
 }
 </style>

@@ -4,7 +4,7 @@
   >
     <b-card-text>
       <b-row class="align-items-center">
-        <b-col cols="8">
+        <b-col cols="10">
           <h4>
             {{ track.src }}
           </h4>
@@ -16,13 +16,20 @@
           </div>
         </b-col>
         <b-col
-          cols="4"
-          class="text-end"
+          cols="2"
+          class="d-flex align-items-center justify-content-end"
         >
-          <b-link :to="'/track/'+track.id">
+          <div
+            class="mx-2 mybox d-flex align-items-center justify-content-center"
+          >
+            X
+          </div>
+          <b-link
+            :to="'/track/'+track.id"
+          >
             <b-icon
               icon="chevron-right"
-              class="card-icon bg-light p-3"
+              class="mx-2 card-icon bg-light p-3"
               variant="secondary"
             />
           </b-link>
@@ -49,5 +56,13 @@ export default {
 <style scoped>
 .card-icon {
   font-size: 4rem;
+}
+
+.mybox {
+  width: 4rem;
+  min-width: 4rem;
+  height: 4rem;
+  background-color: azure;
+
 }
 </style>

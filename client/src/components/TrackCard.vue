@@ -4,7 +4,10 @@
   >
     <b-card-text>
       <b-row class="align-items-center">
-        <b-col cols="10">
+        <b-col
+          cols="9"
+          class="border"
+        >
           <h4>
             {{ track.src }}
           </h4>
@@ -16,8 +19,8 @@
           </div>
         </b-col>
         <b-col
-          cols="2"
-          class="d-flex align-items-center justify-content-end"
+          cols="3"
+          class="border d-flex align-items-center justify-content-end"
         >
           <div
             class="mx-2 mybox d-flex align-items-center justify-content-center"

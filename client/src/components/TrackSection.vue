@@ -1,39 +1,52 @@
 <template>
-  <b-row>
-    <b-col>
-      <b-card
-        bg-variant="light"
-        :title="label"
-        class="my-2"
-        @click="toggleMemberVisibility"
-      >
-        <b-card-text>
-          <b-button
-            :class="expanded ? null : 'collapsed'"
-            :aria-expanded="expanded ? 'true' : 'false'"
-            :aria-controls="collapseId"
+  <div>
+    <b-card
+      bg-variant="light"
+      class="my-2"
+      @click="toggleMemberVisibility"
+    >
+      <b-card-text>
+        <b-row class="align-items-center">
+          <b-col
+            cols="9"
+            class="d-flex flex-row align-items-center border"
           >
-            <b-icon
-              :icon="expandIcon"
-            />
-          </b-button>
-          <span class="mx-2">
-            {{ Math.round(coll.distance() / 1000) }} km total
-          </span>
-        </b-card-text>
-      </b-card>
-      <b-collapse
-        :id="collapseId"
-        v-model="expanded"
-      >
-        <TrackCard
-          v-for="item in myDataList"
-          :key="item.id"
-          :track="item"
-        />
-      </b-collapse>
-    </b-col>
-  </b-row>
+            <b-button
+              :class="expanded ? null : 'collapsed'"
+              :aria-expanded="expanded ? 'true' : 'false'"
+              :aria-controls="collapseId"
+            >
+              <b-icon
+                :icon="expandIcon"
+              />
+            </b-button>
+            <h4 class="mx-2 my-0">
+              {{ label }}
+            </h4>
+            <div class="mx-2">
+              {{ Math.round(coll.distance() / 1000) }} km total
+            </div>
+          </b-col>
+          <b-col
+            cols="3"
+            class="border"
+          >
+            x
+          </b-col>
+        </b-row>
+      </b-card-text>
+    </b-card>
+    <b-collapse
+      :id="collapseId"
+      v-model="expanded"
+    >
+      <TrackCard
+        v-for="item in myDataList"
+        :key="item.id"
+        :track="item"
+      />
+    </b-collapse>
+  </div>
 </template>
 
 <script>

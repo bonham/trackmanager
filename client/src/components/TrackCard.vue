@@ -22,11 +22,21 @@
           cols="3"
           class="border d-flex align-items-center justify-content-end"
         >
-          <div
-            class="mx-2 mybox d-flex align-items-center justify-content-center"
-          >
-            X
-          </div>
+          <a href="#">
+            <div
+              class="mx-2 mybox d-flex align-items-center justify-content-center"
+            >
+              <div class="border">
+                <input
+                  id="defaultCheck1"
+                  class="form-check-input m-0"
+                  type="checkbox"
+                  style="font-size: 1.5rem;"
+                  value=""
+                >
+              </div>
+            </div>
+          </a>
           <b-link
             :to="'/track/'+track.id"
           >

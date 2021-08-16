@@ -16,7 +16,10 @@ import TrackSection from '@/components/TrackSection.vue'
 
 export default {
   name: 'TrackOverview',
-  components: { TrackSection },
+  components: {
+    TrackSection
+    // TrackSection: () => import(/* webpackChunkName: "TrackSection" */ '@/components/TrackSection.vue')
+  },
   data () {
     return {
       trackCollections: []

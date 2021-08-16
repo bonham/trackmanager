@@ -1,8 +1,5 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import Home from '../views/Home.vue'
-import TrackOverviewPage from '../views/TrackOverviewPage.vue'
-import TrackDetail from '../views/TrackDetail.vue'
 
 Vue.use(VueRouter)
 
@@ -10,12 +7,12 @@ const routes = [
   {
     path: '/',
     name: 'Home',
-    component: Home
+    component: () => import(/* webpackChunkName: "Home" */ '../views/Home.vue')
   },
   {
     path: '/toverview',
     name: 'TrackOverviewPage',
-    component: TrackOverviewPage
+    component: () => import(/* webpackChunkName: "TrackOverViewPage" */ '../views/TrackOverviewPage.vue')
   },
   {
     path: '/about',
@@ -28,7 +25,7 @@ const routes = [
   {
     path: '/track/:id',
     name: 'TrackDetail',
-    component: TrackDetail
+    component: () => import(/* webpackChunkName: "TrackDetail" */ '../views/TrackDetail.vue')
   }
 ]
 

@@ -8,11 +8,10 @@
 </template>
 
 <script>
-import TrackOverview from '@/components/TrackOverview.vue'
 export default {
   name: 'TrackOverviewPage',
   components: {
-    TrackOverview
+    TrackOverview: () => import(/* webpackChunkName: "TrackOverView" */ '@/components/TrackOverview.vue')
   }
 }
 </script>

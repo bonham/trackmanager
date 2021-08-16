@@ -32,6 +32,15 @@
 </template>
 
 <script>
-// @ is an alias to /src
+
+import { BCard, BCardText } from 'bootstrap-vue'
+
+export default {
+  name: 'HomeView',
+  components: {
+    BCard,
+    BCardText
+  }
+}
 
 </script>

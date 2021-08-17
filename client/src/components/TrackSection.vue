@@ -3,7 +3,6 @@
     <b-card
       bg-variant="light"
       class="my-2"
-      @click="toggleMemberVisibility"
     >
       <b-card-text>
         <b-row class="align-items-center">
@@ -15,6 +14,7 @@
               :class="expanded ? null : 'collapsed'"
               :aria-expanded="expanded ? 'true' : 'false'"
               :aria-controls="collapseId"
+              @click="toggleMemberVisibility"
             >
               <b-icon
                 :icon="expandIcon"
@@ -38,13 +38,15 @@
     </b-card>
     <b-collapse
       :id="collapseId"
-      v-model="expanded"
+      :visible="expanded"
     >
-      <TrackCard
-        v-for="item in myDataList"
-        :key="item.id"
-        :track="item"
-      />
+      <div v-if="everVisible">
+        <TrackCard
+          v-for="item in myDataList"
+          :key="item.id"
+          :track="item"
+        />
+      </div>
     </b-collapse>
   </div>
 </template>
@@ -85,7 +87,8 @@ export default {
   data () {
     return {
       myDataList: this.coll.members(),
-      expanded: !this.collapsed
+      expanded: !this.collapsed,
+      everVisible: !this.collapsed
     }
   },
   computed: {
@@ -99,7 +102,11 @@ export default {
   },
   methods: {
     toggleMemberVisibility: function () {
-      this.expanded = !(this.expanded)
+      const toBeValue = !(this.expanded)
+      // render if it was not rendered before, but never destroy again
+      this.everVisible = this.everVisible || toBeValue
+      // expand after rendering
+      this.expanded = toBeValue
     }
   }
 }

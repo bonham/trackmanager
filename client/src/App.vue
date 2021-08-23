@@ -8,19 +8,13 @@
           to="/"
           class="p-2 text-dark"
         >
-          Home
-        </b-nav-item>
-        <b-nav-item
-          to="/toverview"
-          class="p-2 text-dark"
-        >
           Tracks
         </b-nav-item>
         <b-nav-item
-          to="/about"
+          to="/Upload"
           class="p-2 text-dark"
         >
-          About
+          Upload
         </b-nav-item>
       </b-navbar-nav>
     </b-navbar>

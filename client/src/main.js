@@ -1,14 +1,18 @@
-import '@babel/polyfill'
-import 'mutationobserver-shim'
+// import '@babel/polyfill'
+// import 'mutationobserver-shim'
 import Vue from 'vue'
-import './plugins/bootstrap-vue'
+import { BootstrapVue, IconsPlugin } from 'bootstrap-vue'
+// import './plugins/bootstrap-vue'
+
+// Import Bootstrap an BootstrapVue CSS files (order is important)
+import 'bootstrap/dist/css/bootstrap.css'
+import 'bootstrap-vue/dist/bootstrap-vue.css'
+
 import App from './App.vue'
 import router from './router'
 
-import { BootstrapVue, BootstrapVueIcons } from 'bootstrap-vue'
-
 Vue.use(BootstrapVue)
-Vue.use(BootstrapVueIcons)
+Vue.use(IconsPlugin)
 
 new Vue({
   router,

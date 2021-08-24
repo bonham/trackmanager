@@ -1,19 +1,35 @@
 <template>
-  <div class="about">
-    <h1>This is an about page</h1>
-    <div>
-      x y z
+  <div>
+    <!-- Styled -->
+    <b-form-file
+      v-model="file1"
+      :state="Boolean(file1)"
+      placeholder="Choose a file or drop it here..."
+      drop-placeholder="Drop file here..."
+    />
+    <div class="mt-3">
+      Selected file: {{ file1 ? file1.name : '' }}
     </div>
-    <HelloWorld2 />
+
+    <!-- Plain mode -->
+    <b-form-file
+      v-model="file2"
+      class="mt-3"
+      plain
+    />
+    <div class="mt-3">
+      Selected file: {{ file2 ? file2.name : '' }}
+    </div>
   </div>
 </template>
 
 <script>
-import HelloWorld2 from '@/components/HelloWorld2.vue'
 export default {
-  name: 'About',
-  components: {
-    HelloWorld2
+  data () {
+    return {
+      file1: null,
+      file2: null
+    }
   }
 }
 </script>

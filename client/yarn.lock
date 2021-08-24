@@ -3354,7 +3354,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"bootstrap@npm:>=4.5.3 <5.0.0":
+"bootstrap@npm:>=4.5.3 <5.0.0, bootstrap@npm:^4.6.0":
   version: 4.6.0
   resolution: "bootstrap@npm:4.6.0"
   peerDependencies:
@@ -12424,6 +12424,7 @@ fsevents@~2.3.1:
     "@vue/cli-service": ~4
     "@vue/eslint-config-standard": "*"
     babel-eslint: ^10
+    bootstrap: ^4.6.0
     bootstrap-vue: ~2
     core-js: ~3
     eslint: "*"

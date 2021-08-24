@@ -9,6 +9,7 @@
 	],
 	"settings": {
 		"eslint.alwaysShowStatus": true,
-		"javascript.format.enable": false
+		"javascript.format.enable": false,
+		"npm.packageManager": "yarn"
 	}
 }

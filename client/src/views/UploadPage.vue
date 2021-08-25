@@ -10,19 +10,6 @@
     <div class="mt-3">
       Selected no of files: {{ files ? files.length : '' }}
     </div>
-    <b-button
-      type="submit"
-      variant="primary"
-    >
-      Submit
-    </b-button>
-    <b-button
-      type="reset"
-      variant="danger"
-      @click="onReset"
-    >
-      Reset
-    </b-button>
   </div>
 </template>
 
@@ -69,11 +56,6 @@ export default {
             .then(json => console.log(`Text: ${json.message}`))
         )
       }
-    }
-  },
-  methods: {
-    onReset (event) {
-      this.files = null
     }
   }
 }

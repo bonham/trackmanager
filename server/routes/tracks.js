@@ -1,6 +1,10 @@
 const express = require('express');
+const multer  = require('multer')
+const upload = multer({ dest: 'uploads/' })
+
 const router = express.Router();
 const { Pool } = require('pg')
+
 
 const pool = new Pool({
   user: 'postgres',
@@ -8,7 +12,6 @@ const pool = new Pool({
   database: 'gpxall',
 })
 
-/* GET users listing. */
 router.get('/', function(req, res, next) {
 
   pool.query("select id, name, length, src, time, timelength, ascent from tracks order by time")
@@ -48,5 +51,11 @@ router.get('/:trackId', function(req, res, next) {
   
   
 });
+
+router.post('/addtrack', upload.single('newtrack'), function (req, res, next) {
+
+  console.log(req.file, req.body)
+  res.json({'message':'ok'})
+})
 
 module.exports = router;

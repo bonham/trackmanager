@@ -1,57 +1,79 @@
 <template>
   <div>
-    <b-form
-      v-if="show"
-      @submit="onSubmit"
-      @reset="onReset"
+    <b-form-file
+      v-model="files"
+      multiple
+      :state="Boolean(files)"
+      placeholder="Choose a file or drop it here..."
+      drop-placeholder="Drop file here..."
+    />
+    <div class="mt-3">
+      Selected no of files: {{ files ? files.length : '' }}
+    </div>
+    <b-button
+      type="submit"
+      variant="primary"
     >
-      <b-form-file
-        v-model="file1"
-        :state="Boolean(file1)"
-        placeholder="Choose a file or drop it here..."
-        drop-placeholder="Drop file here..."
-      />
-      <div class="mt-3">
-        Selected file: {{ file1 ? file1.name : '' }}
-      </div>
-      <b-button
-        type="submit"
-        variant="primary"
-      >
-        Submit
-      </b-button>
-      <b-button
-        type="reset"
-        variant="danger"
-      >
-        Reset
-      </b-button>
-    </b-form>
+      Submit
+    </b-button>
+    <b-button
+      type="reset"
+      variant="danger"
+      @click="onReset"
+    >
+      Reset
+    </b-button>
   </div>
 </template>
 
 <script>
-import { BForm, BFormFile } from 'bootstrap-vue'
+import { BFormFile } from 'bootstrap-vue'
+
+async function uploadFile (fileBlob, url, formParameter) {
+  // construct body
+
+  const formData = new FormData()
+  formData.set(formParameter, fileBlob)
+
+  const response = await fetch(url, {
+    method: 'POST',
+    body: formData
+  })
+
+  if (!response.ok) {
+    throw new Error('HTTP error, status = ' + response.status)
+  }
+
+  return response.json()
+}
+
 export default {
   name: 'UploadPage',
   components: {
-    BForm,
     BFormFile
   },
   data () {
     return {
-      file1: null,
-      show: true
+      files: null
+    }
+  },
+  watch: {
+    files: function (newVal, oldVal) {
+      // avoid firing if 'Reset button clicked'
+      if (newVal) {
+        console.log(newVal)
+
+        const url = '/api/tracks/addtrack'
+        this.files.forEach(thisFile =>
+          uploadFile(thisFile, url, 'newtrack')
+            .then(json => console.log(`Text: ${json.message}`))
+        )
+      }
     }
   },
   methods: {
-    onSubmit (event) {
-      event.preventDefault()
-      alert(`submit ${this.file1.name}`)
-    },
     onReset (event) {
-      event.preventDefault()
-      this.file1 = null
+      this.files = null
     }
   }
 }

@@ -10,6 +10,17 @@
     <div class="mt-3">
       Selected no of files: {{ files ? files.length : '' }}
     </div>
+    <div>
+      Upload Queue:
+      <ul>
+        <li
+          v-for="item in uploadQueue"
+          :key="item.key"
+        >
+          {{ item.fname }}
+        </li>
+      </ul>
+    </div>
   </div>
 </template>
 
@@ -41,21 +52,44 @@ export default {
   },
   data () {
     return {
-      files: null
+      files: null,
+      uploadQueue: []
     }
   },
   watch: {
     files: function (newVal, oldVal) {
-      // avoid firing if 'Reset button clicked'
-      if (newVal) {
-        console.log(newVal)
-
-        const url = '/api/tracks/addtrack'
-        this.files.forEach(thisFile =>
-          uploadFile(thisFile, url, 'newtrack')
-            .then(json => console.log(`Text: ${json.message}`))
-        )
+      // avoid firing if files variable is reset to null
+      if (newVal && (newVal.length > 0)) {
+        this.processDrop()
+        // reset early to allow re-drop same file ( although rarely used )
+        this.files = []
       }
+    }
+  },
+  methods: {
+    processDrop () {
+      const url = '/api/tracks/addtrack'
+      let key = 0
+      this.files.forEach(thisFile => {
+        // const delay = key + 1
+        // const url = `https://httpbin.org/delay/${delay}`
+        const fName = thisFile.name
+        key += 1
+        const queueItem = {
+          key: key,
+          fname: fName
+        }
+        this.uploadQueue.push(queueItem)
+
+        uploadFile(thisFile, url, 'newtrack')
+          .then(json => {
+            console.log(`Fname: ${fName}, Message: ${json.message}`)
+
+            // delete from queue
+            this.uploadQueue = this.uploadQueue.filter(ele => ele.fname !== fName)
+          })
+      }
+      )
     }
   }
 }

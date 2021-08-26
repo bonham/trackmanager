@@ -3053,6 +3053,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"async@npm:^3.2.1":
+  version: 3.2.1
+  resolution: "async@npm:3.2.1"
+  checksum: fcd6dc73d36bdb0e5bf978ea27832136cc8116cef15e0a2dc9a5c63f362c5f82363996a349bf3046d590587b7f30614ac340a4f3db6d48780a07f40f81941e0c
+  languageName: node
+  linkType: hard
+
 "asynckit@npm:^0.4.0":
   version: 0.4.0
   resolution: "asynckit@npm:0.4.0"
@@ -12423,6 +12430,7 @@ fsevents@~2.3.1:
     "@vue/cli-plugin-router": ~4
     "@vue/cli-service": ~4
     "@vue/eslint-config-standard": "*"
+    async: ^3.2.1
     babel-eslint: ^10
     bootstrap: ^4.6.0
     bootstrap-vue: ~2

@@ -14,21 +14,43 @@
       Key: {{ key }}
     </div>
     <div class="mt-3">
-      Upload Queue:
+      Waiting:
       <ul>
         <li
-          v-for="item in uploadQueue"
+          v-for="item in statusQueue.waiting"
           :key="item.key"
         >
-          {{ item.fname }}
+          {{ item.key }}: {{ item.fname }}
         </li>
       </ul>
     </div>
     <div class="mt-3">
-      Failed Files:
+      Progress:
       <ul>
         <li
-          v-for="item in failedUploads"
+          v-for="item in statusQueue.progress"
+          :key="item.key"
+        >
+          {{ item.key }}: {{ item.fname }}
+        </li>
+      </ul>
+    </div>
+    <div class="mt-3">
+      Complete:
+      <ul>
+        <li
+          v-for="item in statusQueue.done"
+          :key="item.key"
+        >
+          {{ item.key }}: {{ item.fname }}
+        </li>
+      </ul>
+    </div>
+    <div class="mt-3">
+      Failed:
+      <ul>
+        <li
+          v-for="item in statusQueue.failed"
           :key="item.key"
         >
           {{ item.key }}: {{ item.fname }}, {{ item.error }}
@@ -40,14 +62,19 @@
 
 <script>
 import { BFormFile } from 'bootstrap-vue'
+import queue from 'async/queue'
 
-async function uploadFile (fileBlob, url, formParameter) {
+const FORMPARAM = 'newtrack'
+const WORKERS = 4
+const UP_URL = '/api/tracks/addtrack'
+
+async function uploadFile (fileIdObject, uploadUrl, formParameter) {
   // construct body
 
   const formData = new FormData()
-  formData.set(formParameter, fileBlob)
+  formData.set(formParameter, fileIdObject.fileBlob)
 
-  const response = await fetch(url, {
+  const response = await fetch(uploadUrl, {
     method: 'POST',
     body: formData
   })
@@ -59,6 +86,37 @@ async function uploadFile (fileBlob, url, formParameter) {
   return response.json()
 }
 
+const removeKeyFromQueue = function (statqueue, queueName, keyToRemove) {
+  statqueue[queueName] = statqueue[queueName].filter(ele => ele.key !== keyToRemove)
+}
+
+// queue from async package
+const workerQueue = queue(function (task, callback) {
+  const fileIdObj = task.fileIdObject
+  const statusQueue = task.statusQueue
+  const thisKey = fileIdObj.key
+  console.log(`Queue function called for id ${thisKey}`)
+
+  statusQueue.progress.push(fileIdObj)
+  removeKeyFromQueue(statusQueue, 'waiting', thisKey)
+
+  // do the work in async way
+  uploadFile(fileIdObj, UP_URL, FORMPARAM)
+    .then(json => {
+      console.log(`Finished uploading key ${fileIdObj.key}, Message: ${json.message}`)
+      statusQueue.done.push(fileIdObj)
+      removeKeyFromQueue(statusQueue, 'progress', thisKey)
+      callback()
+    })
+    .catch(err => {
+      fileIdObj.error = err
+      statusQueue.error.push(fileIdObj)
+      removeKeyFromQueue(statusQueue, 'progress', thisKey)
+      callback(err)
+    })
+}, WORKERS)
+
+/* vue instance */
 export default {
   name: 'UploadPage',
   components: {
@@ -67,8 +125,12 @@ export default {
   data () {
     return {
       files: null,
-      uploadQueue: [],
-      failedUploads: [],
+      statusQueue: {
+        waiting: [],
+        progress: [],
+        done: [],
+        failed: []
+      },
       key: 0
     }
   },
@@ -76,46 +138,48 @@ export default {
     files: function (newVal, oldVal) {
       // avoid firing if files variable is reset to null
       if (newVal && (newVal.length > 0)) {
-        this.processDrop()
+        this.processDragDrop()
         // reset early to allow re-drop same file ( although rarely used )
         this.files = []
       }
     }
   },
   methods: {
-    processDrop () {
-      const url = '/api/tracks/addtrack'
-      this.files.forEach(thisFile => {
-        const thisKey = this.getNextKey()
-        // const delay = thisKey % 10
-        // const url = `https://httpbin.org/delay/${delay}`
-        // const url = 'https://httpbin.org/status/502'
-        const fName = thisFile.name
-        const queueItem = {
-          key: thisKey,
-          fname: fName
-        }
-        this.uploadQueue.push(queueItem)
 
-        uploadFile(thisFile, url, 'newtrack')
-          .then(json => {
-            console.log(`Finished Fname: ${fName}, Key ${thisKey}, Message: ${json.message}`)
-            this.removeKeyFromUploadQueue(thisKey)
-          })
-          .catch(err => {
-            queueItem.error = err
-            this.failedUploads.push(queueItem)
-            this.removeKeyFromUploadQueue(thisKey)
-          })
+    makeFileIdObject (file) {
+      const thisKey = this.getNextKey()
+      const fName = file.name
+      return {
+        key: thisKey,
+        fname: fName,
+        fileBlob: file,
+        error: null
       }
-      )
+    },
+
+    // Queue new files. Triggered by watch
+    processDragDrop () {
+      // take files from input
+      this.files.forEach(thisFile => {
+        const fileIdObject = this.makeFileIdObject(thisFile)
+        this.statusQueue.waiting.push(fileIdObject)
+
+        const task = {
+          fileIdObject,
+          statusQueue: this.statusQueue
+        }
+
+        workerQueue.push(task, function (err) {
+          // callback on completion
+          if (err) console.log(err)
+          console.log(`Finished processing ${task.fileIdObject.key}`)
+        })
+      })
     },
     getNextKey () {
       return (this.key += 1)
-    },
-    removeKeyFromUploadQueue (keyToRemove) {
-      this.uploadQueue = this.uploadQueue.filter(ele => ele.key !== keyToRemove)
     }
+
   }
 }
 </script>

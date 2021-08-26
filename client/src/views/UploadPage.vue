@@ -67,6 +67,7 @@ import queue from 'async/queue'
 const FORMPARAM = 'newtrack'
 const WORKERS = 4
 const UP_URL = '/api/tracks/addtrack'
+// const UP_URL = 'https://httpbin.org/status/500'
 
 async function uploadFile (fileIdObject, uploadUrl, formParameter) {
   // construct body
@@ -110,7 +111,7 @@ const workerQueue = queue(function (task, callback) {
     })
     .catch(err => {
       fileIdObj.error = err
-      statusQueue.error.push(fileIdObj)
+      statusQueue.failed.push(fileIdObj)
       removeKeyFromQueue(statusQueue, 'progress', thisKey)
       callback(err)
     })

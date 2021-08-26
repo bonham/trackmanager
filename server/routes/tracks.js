@@ -54,7 +54,7 @@ router.get('/:trackId', function(req, res, next) {
 
 router.post('/addtrack', upload.single('newtrack'), function (req, res, next) {
 
-  console.log(req.file, req.body)
+  console.log(req.file, req.file.size)
   res.json({'message':'ok'})
 })
 

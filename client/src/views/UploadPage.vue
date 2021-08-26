@@ -10,7 +10,10 @@
     <div class="mt-3">
       Selected no of files: {{ files ? files.length : '' }}
     </div>
-    <div>
+    <div class="mt-3">
+      Key: {{ key }}
+    </div>
+    <div class="mt-3">
       Upload Queue:
       <ul>
         <li
@@ -18,6 +21,17 @@
           :key="item.key"
         >
           {{ item.fname }}
+        </li>
+      </ul>
+    </div>
+    <div class="mt-3">
+      Failed Files:
+      <ul>
+        <li
+          v-for="item in failedUploads"
+          :key="item.key"
+        >
+          {{ item.key }}: {{ item.fname }}, {{ item.error }}
         </li>
       </ul>
     </div>
@@ -53,7 +67,9 @@ export default {
   data () {
     return {
       files: null,
-      uploadQueue: []
+      uploadQueue: [],
+      failedUploads: [],
+      key: 0
     }
   },
   watch: {
@@ -69,27 +85,36 @@ export default {
   methods: {
     processDrop () {
       const url = '/api/tracks/addtrack'
-      let key = 0
       this.files.forEach(thisFile => {
-        // const delay = key + 1
+        const thisKey = this.getNextKey()
+        // const delay = thisKey % 10
         // const url = `https://httpbin.org/delay/${delay}`
+        // const url = 'https://httpbin.org/status/502'
         const fName = thisFile.name
-        key += 1
         const queueItem = {
-          key: key,
+          key: thisKey,
           fname: fName
         }
         this.uploadQueue.push(queueItem)
 
         uploadFile(thisFile, url, 'newtrack')
           .then(json => {
-            console.log(`Fname: ${fName}, Message: ${json.message}`)
-
-            // delete from queue
-            this.uploadQueue = this.uploadQueue.filter(ele => ele.fname !== fName)
+            console.log(`Finished Fname: ${fName}, Key ${thisKey}, Message: ${json.message}`)
+            this.removeKeyFromUploadQueue(thisKey)
+          })
+          .catch(err => {
+            queueItem.error = err
+            this.failedUploads.push(queueItem)
+            this.removeKeyFromUploadQueue(thisKey)
           })
       }
       )
+    },
+    getNextKey () {
+      return (this.key += 1)
+    },
+    removeKeyFromUploadQueue (keyToRemove) {
+      this.uploadQueue = this.uploadQueue.filter(ele => ele.key !== keyToRemove)
     }
   }
 }

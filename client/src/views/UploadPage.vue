@@ -1,13 +1,16 @@
 <template>
   <div>
-    <b-row>
-      <b-form-file
-        v-model="files"
-        multiple
-        :state="files.length > 0"
-        placeholder="Choose a file or drop it here..."
-        drop-placeholder="Drop file here..."
-      />
+    <b-row class="mt-3">
+      <b-col>
+        <b-form-file
+          v-model="files"
+          multiple
+          :state="files.length > 0"
+          placeholder="Choose some files or drop them here..."
+          drop-placeholder="Drop files here..."
+          size="lg"
+        />
+      </b-col>
     </b-row>
     <b-row
       v-for="item in uploadList"

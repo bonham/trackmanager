@@ -1,6 +1,9 @@
 const express = require('express');
 const multer  = require('multer')
-const upload = multer({ dest: 'uploads/' })
+
+const path = require('path');
+const fs = require('fs')
+const os = require('os')
 
 const router = express.Router();
 const { Pool } = require('pg')
@@ -52,9 +55,21 @@ router.get('/:trackId', function(req, res, next) {
   
 });
 
+const prefix = path.join(os.tmpdir(), 'tm-upload-')
+const uploadTmpdir = fs.mkdtempSync(prefix)
+console.log(`Upload directory is ${uploadTmpdir}`)
+
+const upload = multer({ dest: uploadTmpdir })
+
 router.post('/addtrack', upload.single('newtrack'), function (req, res, next) {
 
   console.log(req.file, req.file.size)
+  const filePath = req.file.path
+  fs.unlink(filePath, (err) => {
+    if (err) throw err
+    console.log(`${filePath} was deleted`)
+  })
+
   res.json({'message':'ok'})
 })
 

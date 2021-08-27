@@ -13,25 +13,26 @@
       v-for="item in uploadList"
       :key="item.key"
     >
-      <b-card>
-        <b-row class="align-items-center">
-          <b-col>{{ item.fname }} </b-col>
-          <b-col>{{ item.status }} </b-col>
-        </b-row>
-      </b-card>
+      <b-col>
+        <UploadItem
+          :fname="item.fname"
+          :status="item.status"
+        />
+      </b-col>
     </b-row>
   </div>
 </template>
 
 <script>
-import { BFormFile, BCard } from 'bootstrap-vue'
+import { BFormFile } from 'bootstrap-vue'
 import queue from 'async/queue'
+import UploadItem from '@/components/UploadItem.vue'
 
 const FORMPARAM = 'newtrack'
 const WORKERS = 4
-// const UP_URL = '/api/tracks/addtrack'
+const UP_URL = '/api/tracks/addtrack'
 // const UP_URL = 'https://httpbin.org/status/500'
-const UP_URL = 'https://httpbin.org/delay/3'
+// const UP_URL = 'https://httpbin.org/delay/3'
 
 async function uploadFile (fileIdObject, uploadUrl, formParameter) {
   // construct body
@@ -68,7 +69,7 @@ const workerQueue = queue(function (fileIdObject, callback) {
     })
     .catch(err => {
       fileIdObject.error = err
-      fileIdObject.status = 'Failede'
+      fileIdObject.status = 'Failed'
       callback(err)
     })
 }, WORKERS)
@@ -78,13 +79,14 @@ export default {
   name: 'UploadPage',
   components: {
     BFormFile,
-    BCard
+    UploadItem
   },
+
   data () {
     return {
       files: null,
       uploadList: [],
-      itemIdx: {},
+      // uploadList: [{ key: -1, fname: 'One', status: 'Queued' }, { key: -2, fname: 'One', status: 'Queued' }, { key: -3, fname: 'One', status: 'Queued' }],
       maxKey: 0
     }
   },
@@ -98,6 +100,7 @@ export default {
       }
     }
   },
+
   methods: {
 
     makeFileIdObject (file) {
@@ -129,11 +132,6 @@ export default {
         const fileIdObject = this.makeFileIdObject(thisFile)
         this.addItemToQueue(fileIdObject)
       })
-    },
-
-    setStatusForKey (key, newStatus) {
-      const idx = this.itemIdx[key]
-      this.statusQueue[idx].status = newStatus
     },
 
     getNextKey () {

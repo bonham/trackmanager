@@ -1,9 +1,13 @@
 <template>
   <div>
-    <b-card class="m-1">
+    <b-card
+      no-body
+      class="m-1"
+      bg-variant="light"
+    >
       <b-row class="align-items-center">
         <b-col cols="10">
-          <span>{{ fname }}</span>
+          <span class="ml-2">{{ fname }}</span>
         </b-col>
         <b-col
           cols="2"

@@ -9,6 +9,7 @@
           placeholder="Choose some files or drop them here..."
           drop-placeholder="Drop files here..."
           size="lg"
+          @input="onChange"
         />
       </b-col>
     </b-row>
@@ -93,18 +94,30 @@ export default {
       maxKey: 0
     }
   },
-  watch: {
-    files: function (newVal, oldVal) {
-      // avoid firing if files variable is reset to null
-      if (newVal && (newVal.length > 0)) {
-        this.processDragDrop()
-        // reset early to allow re-drop same file ( although rarely used )
-        this.files = []
-      }
-    }
-  },
+  // watch: {
+  //   files: function (newVal, oldVal) {
+  //     // avoid firing if files variable is reset to null
+  //     if (newVal && (newVal.length > 0)) {
+  //       this.processDragDrop()
+  //       // reset early to allow re-drop same file ( although rarely used )
+  //       this.files = []
+  //     }
+  //   }
+  // },
 
   methods: {
+    onChange (event) {
+      this.processDragDrop()
+    },
+
+    // Queue new files
+    processDragDrop () {
+      // take files from input
+      this.files.forEach(thisFile => {
+        const fileIdObject = this.makeFileIdObject(thisFile)
+        this.addItemToQueue(fileIdObject)
+      })
+    },
 
     makeFileIdObject (file) {
       const thisKey = this.getNextKey()
@@ -126,16 +139,6 @@ export default {
         if (err) console.log(err)
         console.log(`Finished processing ${fileIdObject.key}`)
       })
-    },
-
-    // Queue new files. Triggered by watch
-    processDragDrop () {
-      // take files from input
-      this.files.forEach(thisFile => {
-        const fileIdObject = this.makeFileIdObject(thisFile)
-        this.addItemToQueue(fileIdObject)
-      })
-      this.files = []
     },
 
     getNextKey () {

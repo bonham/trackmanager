@@ -13,7 +13,15 @@
           cols="2"
           class="d-flex"
         >
-          <span :class="statusClass">{{ status }}</span>
+          <span :class="statusClass">
+            {{ status }}
+            <span
+              v-if="status == 'Processing'"
+              class="spinner-border spinner-border-sm"
+              role="status"
+              aria-hidden="true"
+            />
+          </span>
         </b-col>
       </b-row>
     </b-card>
@@ -47,7 +55,7 @@ export default {
         Queued: 'bg-secondary text-light',
         Processing: 'bg-warning',
         Completed: 'bg-success text-light',
-        Failed: 'bg-danger'
+        Failed: 'bg-danger text-light'
       }
       return prefix + ' ' + lookup[this.status]
     }

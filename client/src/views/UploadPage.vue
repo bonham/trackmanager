@@ -51,23 +51,22 @@ async function uploadFile (fileIdObject, uploadUrl, formParameter) {
 
 // queue from async package
 // eslint-disable-next-line no-unused-vars
-const workerQueue = queue(function (task, callback) {
-  const fileIdObj = task.fileIdObject
-  const thisKey = fileIdObj.key
+const workerQueue = queue(function (fileIdObject, callback) {
+  const thisKey = fileIdObject.key
   console.log(`Queue function called for id ${thisKey}`)
 
-  fileIdObj.status = 'Processing'
+  fileIdObject.status = 'Processing'
 
   // do the work in async way
-  uploadFile(fileIdObj, UP_URL, FORMPARAM)
+  uploadFile(fileIdObject, UP_URL, FORMPARAM)
     .then(json => {
-      console.log(`Finished uploading key ${fileIdObj.key}, Message: ${json.message}`)
-      fileIdObj.status = 'Completed'
+      console.log(`Finished uploading key ${fileIdObject.key}, Message: ${json.message}`)
+      fileIdObject.status = 'Completed'
       callback()
     })
     .catch(err => {
-      fileIdObj.error = err
-      fileIdObj.status = 'Failede'
+      fileIdObject.error = err
+      fileIdObject.status = 'Failede'
       callback(err)
     })
 }, WORKERS)
@@ -111,13 +110,13 @@ export default {
       }
     },
 
-    addItemToQueue (task) {
-      this.uploadList.push(task.fileIdObject)
+    addItemToQueue (fileIdObject) {
+      this.uploadList.push(fileIdObject)
 
-      workerQueue.push(task, function (err) {
+      workerQueue.push(fileIdObject, function (err) {
         // callback on completion
         if (err) console.log(err)
-        console.log(`Finished processing ${task.fileIdObject.key}`)
+        console.log(`Finished processing ${fileIdObject.key}`)
       })
     },
 
@@ -126,19 +125,7 @@ export default {
       // take files from input
       this.files.forEach(thisFile => {
         const fileIdObject = this.makeFileIdObject(thisFile)
-
-        // create task for async queue
-        const task = {
-          fileIdObject
-        }
-
-        console.log('A')
-        console.log(this.uploadList)
-
-        this.addItemToQueue(task)
-
-        console.log('B')
-        console.log(this.uploadList)
+        this.addItemToQueue(fileIdObject)
       })
     },
 

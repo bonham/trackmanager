@@ -7,6 +7,7 @@ Work is in progress. Technologies used are postgis, node, express, vuejs single 
 ## Planned features
 
 * Mobile friendly
+* Authentication
 ### Start page
 
 * Overview of tracks. A list of tracks with name, lengtj , datetime and ascent
@@ -42,6 +43,13 @@ Work is in progress. Technologies used are postgis, node, express, vuejs single 
     * km , ascent per year
     * cumulated km over date of year
 
+## Upload Page
+
+* Bigger drop space
+* Check in upload ( multer ) if xml file - otherwise discard
+* Disable Browse Button
+* Drop on TrackOverview (?)
+* Spinner
 ## Technical todos
 * Store retrieve scroll position
 * Create small track shape preview in performant way - either openlayers during runtime or pre created thumbnails

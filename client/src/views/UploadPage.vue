@@ -1,73 +1,35 @@
 <template>
   <div>
-    <b-form-file
-      v-model="files"
-      multiple
-      :state="Boolean(files)"
-      placeholder="Choose a file or drop it here..."
-      drop-placeholder="Drop file here..."
-    />
-    <div class="mt-3">
-      Selected no of files: {{ files ? files.length : '' }}
-    </div>
-    <div class="mt-3">
-      Key: {{ key }}
-    </div>
-    <div class="mt-3">
-      Waiting:
-      <ul>
-        <li
-          v-for="item in statusQueue.waiting"
-          :key="item.key"
-        >
-          {{ item.key }}: {{ item.fname }}
-        </li>
-      </ul>
-    </div>
-    <div class="mt-3">
-      Progress:
-      <ul>
-        <li
-          v-for="item in statusQueue.progress"
-          :key="item.key"
-        >
-          {{ item.key }}: {{ item.fname }}
-        </li>
-      </ul>
-    </div>
-    <div class="mt-3">
-      Complete:
-      <ul>
-        <li
-          v-for="item in statusQueue.done"
-          :key="item.key"
-        >
-          {{ item.key }}: {{ item.fname }}
-        </li>
-      </ul>
-    </div>
-    <div class="mt-3">
-      Failed:
-      <ul>
-        <li
-          v-for="item in statusQueue.failed"
-          :key="item.key"
-        >
-          {{ item.key }}: {{ item.fname }}, {{ item.error }}
-        </li>
-      </ul>
-    </div>
+    <b-row>
+      <b-form-file
+        v-model="files"
+        multiple
+        :state="Boolean(files)"
+        placeholder="Choose a file or drop it here..."
+        drop-placeholder="Drop file here..."
+      />
+    </b-row>
+    <b-row>
+      <b-card
+        v-for="item in uploadList"
+        :key="item.key"
+      >
+        <b-col>{{ item.fname }} </b-col>
+        <b-col>{{ item.status }} </b-col>
+      </b-card>
+    </b-row>
   </div>
 </template>
 
 <script>
-import { BFormFile } from 'bootstrap-vue'
+import { BFormFile, BCard } from 'bootstrap-vue'
 import queue from 'async/queue'
 
 const FORMPARAM = 'newtrack'
 const WORKERS = 4
-const UP_URL = '/api/tracks/addtrack'
+// const UP_URL = '/api/tracks/addtrack'
 // const UP_URL = 'https://httpbin.org/status/500'
+const UP_URL = 'https://httpbin.org/delay/3'
 
 async function uploadFile (fileIdObject, uploadUrl, formParameter) {
   // construct body
@@ -87,32 +49,25 @@ async function uploadFile (fileIdObject, uploadUrl, formParameter) {
   return response.json()
 }
 
-const removeKeyFromQueue = function (statqueue, queueName, keyToRemove) {
-  statqueue[queueName] = statqueue[queueName].filter(ele => ele.key !== keyToRemove)
-}
-
 // queue from async package
+// eslint-disable-next-line no-unused-vars
 const workerQueue = queue(function (task, callback) {
   const fileIdObj = task.fileIdObject
-  const statusQueue = task.statusQueue
   const thisKey = fileIdObj.key
   console.log(`Queue function called for id ${thisKey}`)
 
-  statusQueue.progress.push(fileIdObj)
-  removeKeyFromQueue(statusQueue, 'waiting', thisKey)
+  fileIdObj.status = 'Processing'
 
   // do the work in async way
   uploadFile(fileIdObj, UP_URL, FORMPARAM)
     .then(json => {
       console.log(`Finished uploading key ${fileIdObj.key}, Message: ${json.message}`)
-      statusQueue.done.push(fileIdObj)
-      removeKeyFromQueue(statusQueue, 'progress', thisKey)
+      fileIdObj.status = 'Completed'
       callback()
     })
     .catch(err => {
       fileIdObj.error = err
-      statusQueue.failed.push(fileIdObj)
-      removeKeyFromQueue(statusQueue, 'progress', thisKey)
+      fileIdObj.status = 'Failede'
       callback(err)
     })
 }, WORKERS)
@@ -121,18 +76,15 @@ const workerQueue = queue(function (task, callback) {
 export default {
   name: 'UploadPage',
   components: {
-    BFormFile
+    BFormFile,
+    BCard
   },
   data () {
     return {
       files: null,
-      statusQueue: {
-        waiting: [],
-        progress: [],
-        done: [],
-        failed: []
-      },
-      key: 0
+      uploadList: [],
+      itemIdx: {},
+      maxKey: 0
     }
   },
   watch: {
@@ -154,8 +106,19 @@ export default {
         key: thisKey,
         fname: fName,
         fileBlob: file,
-        error: null
+        error: null,
+        status: 'Queued'
       }
+    },
+
+    addItemToQueue (task) {
+      this.uploadList.push(task.fileIdObject)
+
+      workerQueue.push(task, function (err) {
+        // callback on completion
+        if (err) console.log(err)
+        console.log(`Finished processing ${task.fileIdObject.key}`)
+      })
     },
 
     // Queue new files. Triggered by watch
@@ -163,22 +126,29 @@ export default {
       // take files from input
       this.files.forEach(thisFile => {
         const fileIdObject = this.makeFileIdObject(thisFile)
-        this.statusQueue.waiting.push(fileIdObject)
 
+        // create task for async queue
         const task = {
-          fileIdObject,
-          statusQueue: this.statusQueue
+          fileIdObject
         }
 
-        workerQueue.push(task, function (err) {
-          // callback on completion
-          if (err) console.log(err)
-          console.log(`Finished processing ${task.fileIdObject.key}`)
-        })
+        console.log('A')
+        console.log(this.uploadList)
+
+        this.addItemToQueue(task)
+
+        console.log('B')
+        console.log(this.uploadList)
       })
     },
+
+    setStatusForKey (key, newStatus) {
+      const idx = this.itemIdx[key]
+      this.statusQueue[idx].status = newStatus
+    },
+
     getNextKey () {
-      return (this.key += 1)
+      return (this.maxKey += 1)
     }
 
   }

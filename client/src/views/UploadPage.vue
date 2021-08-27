@@ -4,7 +4,7 @@
       <b-form-file
         v-model="files"
         multiple
-        :state="Boolean(files)"
+        :state="files.length > 0"
         placeholder="Choose a file or drop it here..."
         drop-placeholder="Drop file here..."
       />
@@ -84,7 +84,7 @@ export default {
 
   data () {
     return {
-      files: null,
+      files: [],
       uploadList: [],
       // uploadList: [{ key: -1, fname: 'One', status: 'Queued' }, { key: -2, fname: 'One', status: 'Queued' }, { key: -3, fname: 'One', status: 'Queued' }],
       maxKey: 0
@@ -132,6 +132,7 @@ export default {
         const fileIdObject = this.makeFileIdObject(thisFile)
         this.addItemToQueue(fileIdObject)
       })
+      this.files = []
     },
 
     getNextKey () {

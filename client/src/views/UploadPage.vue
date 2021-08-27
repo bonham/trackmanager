@@ -9,13 +9,15 @@
         drop-placeholder="Drop file here..."
       />
     </b-row>
-    <b-row>
-      <b-card
-        v-for="item in uploadList"
-        :key="item.key"
-      >
-        <b-col>{{ item.fname }} </b-col>
-        <b-col>{{ item.status }} </b-col>
+    <b-row
+      v-for="item in uploadList"
+      :key="item.key"
+    >
+      <b-card>
+        <b-row class="align-items-center">
+          <b-col>{{ item.fname }} </b-col>
+          <b-col>{{ item.status }} </b-col>
+        </b-row>
       </b-card>
     </b-row>
   </div>

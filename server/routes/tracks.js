@@ -7,10 +7,14 @@ const router = express.Router()
 const { Pool } = require('pg')
 const { execFileSync } = require('child_process')
 
+// config
+const config = require('../config')
+const { tracks: { database, uploadTmpDirPrefix, python, gpx2dbScript } } = config
+
 const pool = new Pool({
   user: 'postgres',
   host: 'localhost',
-  database: 'gpxall'
+  database: database
 })
 
 router.get('/', function (req, res, next) {
@@ -49,8 +53,7 @@ router.get('/:trackId', function (req, res, next) {
 })
 
 // tmpdir calculation
-const prefix = path.join(os.tmpdir(), 'tm-upload-')
-const uploadTmpdir = fs.mkdtempSync(prefix)
+const uploadTmpdir = fs.mkdtempSync(uploadTmpDirPrefix)
 console.log(`Upload directory is ${uploadTmpdir}`)
 
 // initialization
@@ -62,17 +65,17 @@ router.post('/addtrack', upload.single('newtrack'), function (req, res, next) {
   const filePath = req.file.path
 
   // build arguments
-  const executable = 'C:\\Users\\Michael\\poc\\gpx_track_neighborhood\\venv\\Scripts\\python.exe'
+
   const args = [
-    'C:\\Users\\Michael\\poc\\gpx_track_neighborhood\\gpx2postgres.py',
+    gpx2dbScript,
     // '--createdb',
     filePath,
-    'trackmanager2'
+    database
   ]
 
   // run child process
   try {
-    const out = execFileSync(executable, args)
+    const out = execFileSync(python, args)
     console.log('Stdout ', out)
   } catch (err) {
     console.log('Child error', err.message)

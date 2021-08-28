@@ -8,6 +8,12 @@
       <b-row class="align-items-center">
         <b-col cols="10">
           <span class="ml-2">{{ fname }}</span>
+          <span
+            v-if="error"
+            v-b-tooltip.hover
+            class="text-danger"
+            :title="error.cause"
+          > {{ error.message }}</span>
         </b-col>
         <b-col
           cols="2"
@@ -45,6 +51,10 @@ export default {
     status: {
       type: String,
       default: 'Queued'
+    },
+    error: {
+      type: Error,
+      default: null
     }
   },
 

@@ -21,6 +21,7 @@
         <UploadItem
           :fname="item.fname"
           :status="item.status"
+          :error="item.error"
         />
       </b-col>
     </b-row>
@@ -50,7 +51,8 @@ async function uploadFile (fileIdObject, uploadUrl, formParameter) {
   })
 
   if (!response.ok) {
-    throw new Error('HTTP error, status = ' + response.status)
+    const errDetail = await response.text()
+    throw new Error('HTTP error, status = ' + response.status, { cause: errDetail })
   }
 
   return response.json()
@@ -127,6 +129,7 @@ export default {
         fname: fName,
         fileBlob: file,
         error: null,
+        details: null,
         status: 'Queued'
       }
     },

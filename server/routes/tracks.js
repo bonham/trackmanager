@@ -2,6 +2,8 @@ const express = require('express')
 const multer = require('multer')
 
 const fs = require('fs')
+const fsprom = require('fs/promises')
+const path = require('path')
 
 const router = express.Router()
 const { Pool } = require('pg')
@@ -9,7 +11,8 @@ const { execFileSync } = require('child_process')
 
 // config
 const config = require('../config')
-const { tracks: { database, uploadTmpDirPrefix, python, gpx2dbScript } } = config
+const { tracks: { database, uploadDir, python, gpx2dbScript } } = config
+const uploadDirPrefix = 'trackmanager-upload-'
 
 const pool = new Pool({
   user: 'postgres',
@@ -52,20 +55,41 @@ router.get('/:trackId', function (req, res, next) {
     })
 })
 
-// tmpdir calculation
-const uploadTmpdir = fs.mkdtempSync(uploadTmpDirPrefix)
-console.log(`Upload directory is ${uploadTmpdir}`)
+// initialization - multer - it is a middleware for uploading files
 
-// initialization
-const upload = multer({ dest: uploadTmpdir })
+// multer storage engine
+const storage = multer.diskStorage({
+
+  destination: function (req, file, cb) {
+    const newDestinationPrefix = path.join(uploadDir, uploadDirPrefix)
+    const newDestination = fs.mkdtempSync(newDestinationPrefix)
+    cb(null, newDestination)
+  },
+
+  filename: function (req, file, cb) {
+    cb(null, file.originalname)
+  }
+
+})
+
+// multer object
+const upload = multer(
+  {
+    limits: {
+      fieldNameSize: 100,
+      fileSize: 60000000
+    },
+    storage: storage
+  }
+)
 
 // route
 router.post('/addtrack', upload.single('newtrack'), function (req, res, next) {
   console.log(req.file, req.file.size)
   const filePath = req.file.path
+  const uploadDir = req.file.destination
 
   // build arguments
-
   const args = [
     gpx2dbScript,
     // '--createdb',
@@ -82,11 +106,11 @@ router.post('/addtrack', upload.single('newtrack'), function (req, res, next) {
     res.status(422).json({ message: err.message })
     return
   } finally {
-    // cleanup
-    fs.unlink(filePath, (err) => {
-      if (err) throw err
-      console.log(`${filePath} was deleted`)
-    })
+    // cleanup of file and directory
+    fsprom.rmdir(uploadDir, { recursive: true }).then(
+      (result) => console.log('Success'),
+      (err) => { console.log('Error, could not remove directory', err) }
+    )
   }
 
   res.json({ message: 'ok' })

@@ -37,6 +37,9 @@ Work is in progress. Technologies used are postgis, node, express, vuejs single 
     * Color by length or ascent or start area
     * Select track by klick / tip in convenient way. Highlight selected track and show details in baloon
 
+### Multi tenancy
+
+* Isolate multiple tenants for different users ... probably into schemas
 ### Statistics page
 
 * Compare years

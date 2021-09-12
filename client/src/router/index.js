@@ -13,7 +13,12 @@ const routes = [
   {
     path: '/upload',
     name: 'UploadPage',
-    component: () => import(/* webpackChunkName: "TrackOverViewPage" */ '../views/UploadPage.vue')
+    component: () => import(/* webpackChunkName: "UploadPage" */ '../views/UploadPage.vue')
+  },
+  {
+    path: '/track_multi_edit',
+    name: 'TrackMultiEdit',
+    component: () => import(/* webpackChunkName: "TrackMultiEdit" */ '../views/TrackMultiEdit.vue')
   },
   {
     path: '/track/:id',

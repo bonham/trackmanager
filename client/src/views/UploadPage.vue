@@ -1,5 +1,9 @@
 <template>
   <div>
+    <h1 class="mt-4 mb-4">
+      Upload new Tracks
+    </h1>
+
     <b-row class="mt-3">
       <b-col>
         <b-form-file

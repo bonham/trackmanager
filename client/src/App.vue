@@ -11,7 +11,13 @@
           Tracks
         </b-nav-item>
         <b-nav-item
-          to="/Upload"
+          to="/track_multi_edit"
+          class="p-2 text-dark"
+        >
+          Edit
+        </b-nav-item>
+        <b-nav-item
+          to="/upload"
           class="p-2 text-dark"
         >
           Upload

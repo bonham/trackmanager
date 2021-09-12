@@ -8,7 +8,7 @@
         <b-row class="align-items-center">
           <b-col
             cols="9"
-            class="d-flex flex-row align-items-center border"
+            class="d-flex flex-row align-items-center"
           >
             <b-button
               :class="expanded ? null : 'collapsed'"
@@ -29,7 +29,6 @@
           </b-col>
           <b-col
             cols="3"
-            class="border"
           >
             x
           </b-col>

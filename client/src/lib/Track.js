@@ -1,5 +1,10 @@
 import { DateTime } from 'luxon'
 const sprintf = require('sprintf-js').sprintf
+/**
+ * Track class is representing a gpx track.
+ *
+ * It can calculate properties etc
+ */
 class Track {
   constructor (initData) { // id, name, length, src, time, timelength, ascent
     this.id = initData.id
@@ -51,6 +56,38 @@ class Track {
   }
 }
 
+const trackTableFields = [
+  {
+    key: 'name',
+    label: 'Name',
+    sortable: 'true'
+  },
+  {
+    key: 'length',
+    label: 'Length',
+    sortable: 'true'
+  },
+  {
+    key: 'src',
+    label: 'File Name',
+    sortable: 'true'
+  },
+  {
+    key: 'time',
+    label: 'Start Time',
+    sortable: 'true'
+  },
+  {
+    key: 'timelength',
+    label: 'Duration',
+    sortable: 'true'
+  },
+  {
+    key: 'ascent',
+    label: 'Ascent',
+    sortable: 'true'
+  }
+]
 class TrackCollection {
   constructor (listOfTracks) {
     this.tlist = listOfTracks
@@ -70,4 +107,4 @@ class TrackCollection {
   }
 }
 
-export { Track, TrackCollection }
+export { Track, TrackCollection, trackTableFields }

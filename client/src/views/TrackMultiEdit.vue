@@ -7,21 +7,32 @@
       striped
       hover
       :items="trackFlatList"
-    />
+      :fields="trackTableFields"
+    >
+      <template #cell(name)="data">
+        <b-form-input
+          type="text"
+          :value="data.value"
+        />
+      </template>
+    </b-table>
   </div>
 </template>
 
 <script>
-import { BTable } from 'bootstrap-vue'
+import { BTable, BFormInput } from 'bootstrap-vue'
+import { trackTableFields } from '@/lib/Track.js'
 
 export default {
   name: 'TrackMultiEdit',
   components: {
-    BTable
+    BTable,
+    BFormInput
   },
   data () {
     return {
-      trackFlatList: []
+      trackFlatList: [],
+      trackTableFields: trackTableFields
     }
   },
   created: function () {

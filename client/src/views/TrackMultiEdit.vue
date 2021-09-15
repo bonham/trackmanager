@@ -6,7 +6,7 @@
     <b-table
       striped
       hover
-      :items="trackFlatList"
+      :items="niceItems"
       :fields="trackTableFields"
     >
       <template #cell(name)="data">
@@ -21,8 +21,31 @@
 
 <script>
 import { BTable, BFormInput } from 'bootstrap-vue'
-import { trackTableFields } from '@/lib/Track.js'
+import { getAllTracks } from '@/lib/trackServices.js'
 
+const trackTableFields = [
+  {
+    key: 'name',
+    label: 'Name',
+    sortable: 'true'
+  },
+  {
+    key: 'src',
+    label: 'File Name',
+    sortable: 'true'
+  },
+  {
+    key: 'time',
+    label: 'Date',
+    sortable: 'true'
+  },
+  {
+    key: 'length',
+    label: 'Length',
+    sortable: 'true'
+  }
+
+]
 export default {
   name: 'TrackMultiEdit',
   components: {
@@ -35,13 +58,22 @@ export default {
       trackTableFields: trackTableFields
     }
   },
-  created: function () {
-    fetch('/api/tracks')
-      .then(response => response.json())
-      .then(data => {
-        this.trackFlatList = data.sort((a, b) => { return (a.id - b.id) })
-        return data
-      }, err => console.log(err))
+  computed: {
+    niceItems: function () {
+      return this.trackFlatList.map(t => {
+        const o = {}
+        o.id = t.id
+        o.name = t.name
+        o.src = t.src
+        o.length = (t.distance() / 1000).toFixed(0)
+        o.time = t.localeDateShort()
+
+        return o
+      })
+    }
+  },
+  created: async function () {
+    this.trackFlatList = await getAllTracks()
   }
 
 }

@@ -12,6 +12,7 @@
     "bootstrap": "^4.6.0",
     "bootstrap-vue": "~2",
     "core-js": "~3",
+    "lodash": "^4.17.21",
     "luxon": "^1.27.0",
     "ol": "^6.5.0",
     "sprintf-js": "~1",

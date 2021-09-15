@@ -37,6 +37,14 @@ class Track {
     )
   }
 
+  localeDateShort () {
+    return (
+      this.time === null
+        ? ''
+        : this.time.toLocaleString(DateTime.DATE_SHORT)
+    )
+  }
+
   secondsToHms (s) {
     const hms = {}
 
@@ -56,38 +64,6 @@ class Track {
   }
 }
 
-const trackTableFields = [
-  {
-    key: 'name',
-    label: 'Name',
-    sortable: 'true'
-  },
-  {
-    key: 'length',
-    label: 'Length',
-    sortable: 'true'
-  },
-  {
-    key: 'src',
-    label: 'File Name',
-    sortable: 'true'
-  },
-  {
-    key: 'time',
-    label: 'Start Time',
-    sortable: 'true'
-  },
-  {
-    key: 'timelength',
-    label: 'Duration',
-    sortable: 'true'
-  },
-  {
-    key: 'ascent',
-    label: 'Ascent',
-    sortable: 'true'
-  }
-]
 class TrackCollection {
   constructor (listOfTracks) {
     this.tlist = listOfTracks
@@ -107,4 +83,4 @@ class TrackCollection {
   }
 }
 
-export { Track, TrackCollection, trackTableFields }
+export { Track, TrackCollection }

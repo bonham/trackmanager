@@ -11,8 +11,10 @@
 </template>
 
 <script>
-import { Track, TrackCollection } from '@/lib/Track.js'
+import { TrackCollection } from '@/lib/Track.js'
+import { getAllTracks } from '@/lib/trackServices.js'
 import TrackSection from '@/components/TrackSection.vue'
+const collection = require('lodash/collection')
 
 export default {
   name: 'TrackOverview',
@@ -25,33 +27,20 @@ export default {
       trackCollections: []
     }
   },
-  created: function () {
-    fetch('/api/tracks')
-      .then(response => response.json())
-      .then(data => {
-        const tracksByYear = {}
+  created: async function () {
+    const allTracks = await getAllTracks()
+    const tracksByYear = collection.groupBy(allTracks, x => x.year())
+    const yearList = Object.keys(tracksByYear)
+    yearList.sort().reverse()
+    this.yearList = yearList
 
-        // create tracks and separate by year
-        data.forEach(element => {
-          const track = new Track(element)
-          const year = track.year() // luxon datetime obj
-          tracksByYear[year] = (tracksByYear[year] || [])
-          tracksByYear[year].push(track)
-        })
-
-        // loop over years, create TrackCollections and push to reactive property
-        const yearList = Object.keys(tracksByYear)
-        yearList.sort().reverse()
-        this.yearList = yearList
-
-        yearList.forEach(y => {
-          const tc = new TrackCollection(tracksByYear[y])
-          this.trackCollections.push({
-            year: y,
-            collection: tc
-          })
-        })
+    yearList.forEach(y => {
+      const tc = new TrackCollection(tracksByYear[y])
+      this.trackCollections.push({
+        year: y,
+        collection: tc
       })
+    })
   },
   methods: {
     isYearCollapsed: function (thisYear) {

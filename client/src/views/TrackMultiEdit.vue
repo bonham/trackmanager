@@ -3,32 +3,38 @@
     <h1 class="mt-4 mb-4">
       Edit Tracks
     </h1>
-    <b-table
+    <b-button
+      class="mb-3"
+      @click="cleanAll"
+    >
+      Clean all
+    </b-button>
+    <b-table-lite
       striped
       hover
       :items="niceItems"
       :fields="trackTableFields"
+      primary-key="id"
     >
       <template #cell(cbutton)="row">
         <b-button
-          @click="cleanUpText(row)"
+          @click="cleanUpText(row.item)"
         >
           <b-icon-arrow-left />
         </b-button>
       </template>
-    </b-table>
+    </b-table-lite>
   </div>
 </template>
 
 <script>
-import { BTable, BButton, BIconArrowLeft } from 'bootstrap-vue'
+import { BTableLite, BButton, BIconArrowLeft } from 'bootstrap-vue'
 import { getAllTracks } from '@/lib/trackServices.js'
 
 const trackTableFields = [
   {
     key: 'name',
     label: 'Name',
-    sortable: 'true',
     tdClass: 'align-middle'
   },
   {
@@ -39,29 +45,24 @@ const trackTableFields = [
   {
     key: 'src',
     label: 'File Name',
-    sortable: 'true',
     tdClass: 'align-middle'
 
   },
   {
     key: 'time',
     label: 'Date',
-    sortable: 'true',
     tdClass: 'align-middle'
   },
   {
     key: 'length',
     label: 'Length',
-    sortable: 'true',
     tdClass: 'align-middle'
-
   }
-
 ]
 export default {
   name: 'TrackMultiEdit',
   components: {
-    BTable,
+    BTableLite,
     BButton,
     BIconArrowLeft
   },
@@ -89,10 +90,23 @@ export default {
     this.trackFlatList = await getAllTracks()
   },
   methods: {
-    cleanUpText: function (row) {
-      const idx = row.index
-      console.log(idx)
-      row.item.name = 'ooo'
+    cleanUpText: function (item) {
+      let converted = item.src
+      const datePattern = /\d{8}/
+      const match = converted.match(datePattern)
+      if (match) {
+        // const date = match[0]
+        converted = converted.replace(datePattern, '')
+      }
+      converted = converted.replace(/[ \-_]+/g, ' ') // convert to space
+      converted = converted.replace(/\.gpx$/i, '') // strip file suffix
+      converted = converted.trim() // Trim space at begin or end
+      item.name = converted
+    },
+    cleanAll: function () {
+      this.trackFlatList.forEach(item => {
+        this.cleanUpText(item)
+      })
     }
   }
 

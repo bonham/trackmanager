@@ -28,26 +28,33 @@ const trackTableFields = [
   {
     key: 'name',
     label: 'Name',
-    sortable: 'true'
+    sortable: 'true',
+    tdClass: 'align-middle'
   },
   {
     key: 'cbutton',
-    label: 'Clean'
+    label: 'Clean',
+    tdClass: 'align-middle'
   },
   {
     key: 'src',
     label: 'File Name',
-    sortable: 'true'
+    sortable: 'true',
+    tdClass: 'align-middle'
+
   },
   {
     key: 'time',
     label: 'Date',
-    sortable: 'true'
+    sortable: 'true',
+    tdClass: 'align-middle'
   },
   {
     key: 'length',
     label: 'Length',
-    sortable: 'true'
+    sortable: 'true',
+    tdClass: 'align-middle'
+
   }
 
 ]

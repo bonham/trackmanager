@@ -9,18 +9,19 @@
       :items="niceItems"
       :fields="trackTableFields"
     >
-      <template #cell(name)="data">
-        <b-form-input
-          type="text"
-          :value="data.value"
-        />
+      <template #cell(cbutton)="row">
+        <b-button
+          @click="cleanUpText(row)"
+        >
+          <b-icon-arrow-left />
+        </b-button>
       </template>
     </b-table>
   </div>
 </template>
 
 <script>
-import { BTable, BFormInput } from 'bootstrap-vue'
+import { BTable, BButton, BIconArrowLeft } from 'bootstrap-vue'
 import { getAllTracks } from '@/lib/trackServices.js'
 
 const trackTableFields = [
@@ -28,6 +29,10 @@ const trackTableFields = [
     key: 'name',
     label: 'Name',
     sortable: 'true'
+  },
+  {
+    key: 'cbutton',
+    label: 'Clean'
   },
   {
     key: 'src',
@@ -50,7 +55,8 @@ export default {
   name: 'TrackMultiEdit',
   components: {
     BTable,
-    BFormInput
+    BButton,
+    BIconArrowLeft
   },
   data () {
     return {
@@ -74,6 +80,13 @@ export default {
   },
   created: async function () {
     this.trackFlatList = await getAllTracks()
+  },
+  methods: {
+    cleanUpText: function (row) {
+      const idx = row.index
+      console.log(idx)
+      row.item.name = 'ooo'
+    }
   }
 
 }

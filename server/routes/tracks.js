@@ -59,8 +59,33 @@ router.get('/:trackId', async (req, res) => {
 
 /// // Update single track
 router.put('/:trackId', async (req, res) => {
-  console.log(req.params.trackId)
-  console.log(req.body)
+  const updateAttributes = req.body.updateAttributes
+  const data = req.body.data
+
+  // filter out attributes not in data object
+  const existingAttributes = updateAttributes.filter(x => (!(data[x] === undefined)))
+
+  // compose query
+  const halfCoalesced = existingAttributes.map(x => `${x} = '${data[x]}'`)
+  const setExpression = halfCoalesced.join(',')
+
+  const query = `update tracks set ${setExpression} where id = ${req.params.trackId}`
+  console.log(query)
+
+  try {
+    const queryResult = await pool.query(query)
+    const rowC = queryResult.rowCount
+    if (rowC !== 1) {
+      const msg = `Row count was not 1 after update statement, instead it was ${rowC}`
+      console.err(msg)
+      res.status(500).send(msg)
+    }
+  } catch (err) {
+    console.err('Can not update tracks table')
+    console.error(err)
+    res.status(500).send(err)
+  }
+
   res.end()
 })
 

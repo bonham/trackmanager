@@ -6,32 +6,36 @@ const fsprom = require('fs/promises')
 const path = require('path')
 
 const router = express.Router()
+router.use(express.json()) // use builtin json body parser
+
 const { Pool } = require('pg')
 const { execFileSync } = require('child_process')
 
-// config
+// configuration for data upload
 const config = require('../config')
 const { tracks: { database, uploadDir, python, gpx2dbScript } } = config
 const uploadDirPrefix = 'trackmanager-upload-'
 
+// sql query pool
 const pool = new Pool({
   user: 'postgres',
   host: 'localhost',
   database: database
 })
 
-router.get('/', function (req, res, next) {
-  pool.query('select id, name, length, src, time, timelength, ascent from tracks order by time')
-    .then((result) => {
-      res.json(result.rows)
-    })
-    .catch(err => {
-      console.log(err)
-      res.status(500).send(err.message)
-    })
+/// // Get all tracks
+router.get('/', async (req, res) => {
+  try {
+    const queryResult = await pool.query('select id, name, length, src, time, timelength, ascent from tracks order by time')
+    res.json(queryResult.rows)
+  } catch (err) {
+    console.log(err)
+    res.status(500).send(err.message)
+  }
 })
 
-router.get('/:trackId', function (req, res, next) {
+/// // Get single track id
+router.get('/:trackId', async (req, res) => {
   const trackId = req.params.trackId
 
   const query = 'select id, name, length, src,' +
@@ -40,24 +44,31 @@ router.get('/:trackId', function (req, res, next) {
     "from tracks where id = '" + trackId + "'"
   console.log(query)
 
-  pool.query(query)
-    .then((result) => {
-      const row = result.rows[0]
-      const jsonString = row.geojson
-      const geoJson = JSON.parse(jsonString)
-      row.geojson = geoJson
-
-      res.json(row)
-    })
-    .catch(err => {
-      console.log(err)
-      res.status(500).send(err.message)
-    })
+  try {
+    const queryResult = await pool.query(query)
+    const row = queryResult.rows[0]
+    const jsonString = row.geojson
+    const geoJson = JSON.parse(jsonString)
+    row.geojson = geoJson
+    res.json(row)
+  } catch (err) {
+    console.error(err)
+    res.status(500).send(err.message)
+  }
 })
 
+/// // Update single track
+router.put('/:trackId', async (req, res) => {
+  console.log(req.params.trackId)
+  console.log(req.body)
+  res.end()
+})
+
+/// // Create new track from file upload
 // initialization - multer - it is a middleware for uploading files
 
-// multer storage engine
+// Initializing a multer storage engine which will create unique
+// upload directory for each file - to support multiple files with same name
 const storage = multer.diskStorage({
 
   destination: function (req, file, cb) {
@@ -83,7 +94,7 @@ const upload = multer(
   }
 )
 
-// route
+// POST route for obtaining the contents of the file
 router.post('/addtrack', upload.single('newtrack'), function (req, res, next) {
   console.log(req.file, req.file.size)
   const filePath = req.file.path
@@ -97,7 +108,7 @@ router.post('/addtrack', upload.single('newtrack'), function (req, res, next) {
     database
   ]
 
-  // run child process
+  // run child process - execute python executable to process the upload
   try {
     const out = execFileSync(python, args)
     console.log('Stdout ', out)

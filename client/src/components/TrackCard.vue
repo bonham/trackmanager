@@ -8,7 +8,7 @@
           cols="9"
         >
           <h4>
-            {{ track.src }}
+            {{ track.name || track.src }}
           </h4>
           <div>
             {{ track.monthAndDay() }}

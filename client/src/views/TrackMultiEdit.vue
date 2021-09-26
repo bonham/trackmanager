@@ -29,7 +29,7 @@
 
 <script>
 import { BTableLite, BButton, BIconArrowLeft } from 'bootstrap-vue'
-import { getAllTracks } from '@/lib/trackServices.js'
+import { getAllTracks, updateTrack } from '@/lib/trackServices.js'
 
 const trackTableFields = [
   {
@@ -69,10 +69,11 @@ export default {
   data () {
     return {
       trackFlatList: [],
+      trackMap: {},
       trackTableFields: trackTableFields
     }
   },
-  computed: {
+  computed: { // TODO: computed makes not much sense here
     niceItems: function () {
       return this.trackFlatList.map(t => {
         const o = {}
@@ -88,20 +89,41 @@ export default {
   },
   created: async function () {
     this.trackFlatList = await getAllTracks()
+    // sort items into object
+    const o = {}
+    this.trackFlatList.forEach(ele => {
+      o[ele.id] = ele
+    })
+    this.trackMap = o
   },
   methods: {
-    cleanUpText: function (item) {
-      let converted = item.src
+    cleanUpText: async function (item) {
+      let convertedName = item.src
       const datePattern = /\d{8}/
-      const match = converted.match(datePattern)
+      const match = convertedName.match(datePattern)
       if (match) {
         // const date = match[0]
-        converted = converted.replace(datePattern, '')
+        convertedName = convertedName.replace(datePattern, '')
       }
-      converted = converted.replace(/[ \-_]+/g, ' ') // convert to space
-      converted = converted.replace(/\.gpx$/i, '') // strip file suffix
-      converted = converted.trim() // Trim space at begin or end
-      item.name = converted
+      convertedName = convertedName.replace(/[ \-_]+/g, ' ') // convert to space
+      convertedName = convertedName.replace(/\.gpx$/i, '') // strip file suffix
+      convertedName = convertedName.trim() // Trim space at begin or end
+
+      // Update track on server
+      const thisTrack = this.trackMap[item.id]
+      thisTrack.name = convertedName
+
+      try {
+        const success = await updateTrack(thisTrack, ['name'])
+        if (success) {
+          // display on page
+          item.name = convertedName
+        } else {
+          console.error(`Could not update track ${item.id}`)
+        }
+      } catch (err) {
+        console.error(err)
+      }
     },
     cleanAll: function () {
       this.trackFlatList.forEach(item => {

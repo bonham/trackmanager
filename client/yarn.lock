@@ -12454,6 +12454,7 @@ fsevents@~2.3.1:
     vue-cli-plugin-bootstrap-vue: ~0
     vue-router: ~3
     vue-template-compiler: ~2
+    vuex: ^3.6.2
   languageName: unknown
   linkType: soft
 
@@ -13016,6 +13017,15 @@ fsevents@~2.3.1:
   version: 2.6.12
   resolution: "vue@npm:2.6.12"
   checksum: a8959e30990c5464131e451d3f9c2a6e6964c2d1137a30fbcd2bc66174a6c2d6f63e4dcec9c17fa0f236580953ff1ad44c25437c5e02ee1cf74b588bbac1a0bf
+  languageName: node
+  linkType: hard
+
+"vuex@npm:^3.6.2":
+  version: 3.6.2
+  resolution: "vuex@npm:3.6.2"
+  peerDependencies:
+    vue: ^2.0.0
+  checksum: 37915741ba9557024ea42579e2c8d81847ec699d07d8ea3aa673929f26fceba8c59e7e1e6a875fd3962e50018bc30f782f5ace34d83307ef228ad46a4df343da
   languageName: node
   linkType: hard
 

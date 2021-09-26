@@ -8,7 +8,8 @@ export default new Vuex.Store(
   {
     state: {
       loadedTracks: {},
-      visibleTrackIds: []
+      visibleTrackIds: [],
+      trackLoadStatus: 'not_loaded'
     },
     mutations: {
       addToLoadedTracks (state, trackList) {
@@ -19,6 +20,19 @@ export default new Vuex.Store(
       },
       setVisibleTracks (state, idList) {
         state.visibleTrackIds = idList
+      },
+      setTrackLoadStatus (state, status) {
+        state.trackLoadStatus = status
+      }
+    },
+    actions: {
+      async loadTracks ({ commit, state, loadFunction }) {
+        if (state.trackLoadStatus === 'not_loaded') {
+          commit('setTrackLoadStatus', 'loading')
+          const trackList = await loadFunction()
+          commit('addToLoadedTracks', trackList)
+          commit('setTrackLoadStatus', 'loaded')
+        }
       }
     },
     getters: {

@@ -1,12 +1,17 @@
 <template>
   <div>
-    <TrackSection
-      v-for="trCol in trackCollections"
-      :key="trCol.year"
-      :coll="trCol.collection"
-      :label="trCol.year"
-      :collapsed="isYearCollapsed(trCol.year)"
-    />
+    <div>
+      Load status: {{ trackLoadStatus }}
+    </div>
+    <div>
+      <TrackSection
+        v-for="trCol in trackCollections"
+        :key="trCol.year"
+        :coll="trCol.collection"
+        :label="trCol.year"
+        :collapsed="isYearCollapsed(trCol.year)"
+      />
+    </div>
   </div>
 </template>
 
@@ -14,7 +19,8 @@
 import { TrackCollection } from '@/lib/Track.js'
 import { getAllTracks } from '@/lib/trackServices.js'
 import TrackSection from '@/components/TrackSection.vue'
-const collection = require('lodash/collection')
+import { mapActions, mapState } from 'vuex'
+const _ = require('lodash')
 
 export default {
   name: 'TrackOverview',
@@ -22,31 +28,44 @@ export default {
     TrackSection
     // TrackSection: () => import(/* webpackChunkName: "TrackSection" */ '@/components/TrackSection.vue')
   },
-  data () {
-    return {
-      trackCollections: []
+  computed: {
+    ...mapState([
+      'loadedTracks',
+      'trackLoadStatus'
+    ]),
+    tracksByYear () {
+      // object to array:
+      const trackFlatList = _.values(this.loadedTracks)
+      return _.groupBy(trackFlatList, x => x.year())
+    },
+    yearList () {
+      const yearList = _.keys(this.tracksByYear)
+      yearList.sort().reverse()
+      return yearList
+    },
+    trackCollections () {
+      const r = []
+      this.yearList.forEach(y => {
+        const tc = new TrackCollection(this.tracksByYear[y])
+        r.push({
+          year: y,
+          collection: tc
+        })
+      })
+      return r
     }
   },
   created: async function () {
-    const allTracks = await getAllTracks()
-    const tracksByYear = collection.groupBy(allTracks, x => x.year())
-    const yearList = Object.keys(tracksByYear)
-    yearList.sort().reverse()
-    this.yearList = yearList
-
-    yearList.forEach(y => {
-      const tc = new TrackCollection(tracksByYear[y])
-      this.trackCollections.push({
-        year: y,
-        collection: tc
-      })
-    })
+    await this.loadTracks(getAllTracks)
   },
   methods: {
-    isYearCollapsed: function (thisYear) {
+    isYearCollapsed (thisYear) {
       const firstYearInCollection = this.trackCollections[0].year
       return thisYear !== firstYearInCollection
-    }
+    },
+    ...mapActions([
+      'loadTracks'
+    ])
   }
 }
 </script>

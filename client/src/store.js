@@ -26,7 +26,7 @@ export default new Vuex.Store(
       }
     },
     actions: {
-      async loadTracks ({ commit, state, loadFunction }) {
+      async loadTracks ({ commit, state }, loadFunction) {
         if (state.trackLoadStatus === 'not_loaded') {
           commit('setTrackLoadStatus', 'loading')
           const trackList = await loadFunction()

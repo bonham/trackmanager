@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+
 const _ = require('lodash')
 
 Vue.use(Vuex)
@@ -12,11 +13,13 @@ export default new Vuex.Store(
       trackLoadStatus: 'not_loaded'
     },
     mutations: {
-      addToLoadedTracks (state, trackList) {
+      setLoadedTracks (state, trackList) {
+        const o = {}
         trackList.forEach(track => {
           const id = track.id
-          state.loadedTracks[id] = track
+          o[id] = track
         })
+        state.loadedTracks = o
       },
       setVisibleTracks (state, idList) {
         state.visibleTrackIds = idList
@@ -30,7 +33,7 @@ export default new Vuex.Store(
         if (state.trackLoadStatus === 'not_loaded') {
           commit('setTrackLoadStatus', 'loading')
           const trackList = await loadFunction()
-          commit('addToLoadedTracks', trackList)
+          commit('setLoadedTracks', trackList)
           commit('setTrackLoadStatus', 'loaded')
         }
       }

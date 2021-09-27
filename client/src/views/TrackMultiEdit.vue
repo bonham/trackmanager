@@ -30,6 +30,7 @@
 <script>
 import { BTableLite, BButton, BIconArrowLeft } from 'bootstrap-vue'
 import { getAllTracks, updateTrack } from '@/lib/trackServices.js'
+import { mapActions, mapState } from 'vuex'
 
 const trackTableFields = [
   {
@@ -68,13 +69,23 @@ export default {
   },
   data () {
     return {
-      trackFlatList: [],
-      trackMap: {},
       trackTableFields: trackTableFields
     }
   },
   computed: { // TODO: computed makes not much sense here
-    niceItems: function () {
+    ...mapState([
+      'loadedTracks',
+      'trackLoadStatus'
+    ]),
+    trackFlatList () {
+      const keys = Object.keys(this.loadedTracks).sort()
+      const r = []
+      keys.forEach(key => {
+        r.push(this.loadedTracks[key])
+      })
+      return r
+    },
+    niceItems () {
       return this.trackFlatList.map(t => {
         const o = {}
         o.id = t.id
@@ -88,15 +99,13 @@ export default {
     }
   },
   created: async function () {
-    this.trackFlatList = await getAllTracks()
-    // sort items into object
-    const o = {}
-    this.trackFlatList.forEach(ele => {
-      o[ele.id] = ele
-    })
-    this.trackMap = o
+    // load data into store
+    await this.loadTracks(getAllTracks)
   },
   methods: {
+    ...mapActions([
+      'loadTracks'
+    ]),
     cleanUpText: async function (item) {
       let convertedName = item.src
       const datePattern = /\d{8}/
@@ -110,7 +119,7 @@ export default {
       convertedName = convertedName.trim() // Trim space at begin or end
 
       // Update track on server
-      const thisTrack = this.trackMap[item.id]
+      const thisTrack = this.loadedTracks[item.id]
       thisTrack.name = convertedName
 
       try {

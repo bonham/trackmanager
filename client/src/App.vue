@@ -8,7 +8,13 @@
           to="/"
           class="p-2 text-dark"
         >
-          Tracks
+          Select
+        </b-nav-item>
+        <b-nav-item
+          to="/toverview"
+          class="p-2 text-dark"
+        >
+          By Year
         </b-nav-item>
         <b-nav-item
           to="/track_multi_edit"

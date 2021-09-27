@@ -6,7 +6,12 @@ Vue.use(VueRouter)
 const routes = [
   {
     path: '/',
-    alias: '/toverview',
+    alias: '/select_tracks',
+    name: 'SelectTracksPage',
+    component: () => import(/* webpackChunkName: "SelectTracksPage" */ '../views/SelectTracksPage.vue')
+  },
+  {
+    path: '/toverview',
     name: 'TrackOverviewPage',
     component: () => import(/* webpackChunkName: "TrackOverViewPage" */ '../views/TrackOverviewPage.vue')
   },

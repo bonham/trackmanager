@@ -1,5 +1,6 @@
 <template>
   <div>
+    <track-manager-nav-bar />
     <h1 class="mt-4 mb-4">
       Edit Tracks
     </h1>
@@ -31,6 +32,7 @@
 import { BTableLite, BButton, BIconArrowLeft } from 'bootstrap-vue'
 import { getAllTracks, updateTrack } from '@/lib/trackServices.js'
 import { mapActions, mapState } from 'vuex'
+import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'
 
 const trackTableFields = [
   {
@@ -65,7 +67,8 @@ export default {
   components: {
     BTableLite,
     BButton,
-    BIconArrowLeft
+    BIconArrowLeft,
+    TrackManagerNavBar
   },
   data () {
     return {

@@ -1,38 +1,6 @@
 <template>
   <div id="app">
-    <b-navbar
-      class="shadow-sm bg-white border-bottom"
-    >
-      <b-navbar-nav class="my-2 my-md-0 mr-md-3">
-        <b-nav-item
-          to="/"
-          class="p-2 text-dark"
-        >
-          Select
-        </b-nav-item>
-        <b-nav-item
-          to="/toverview"
-          class="p-2 text-dark"
-        >
-          By Year
-        </b-nav-item>
-        <b-nav-item
-          to="/track_multi_edit"
-          class="p-2 text-dark"
-        >
-          Edit
-        </b-nav-item>
-        <b-nav-item
-          to="/upload"
-          class="p-2 text-dark"
-        >
-          Upload
-        </b-nav-item>
-      </b-navbar-nav>
-    </b-navbar>
-    <b-container>
-      <router-view />
-    </b-container>
+    <router-view />
   </div>
 </template>
 

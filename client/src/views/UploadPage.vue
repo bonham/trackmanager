@@ -1,5 +1,6 @@
 <template>
   <div>
+    <track-manager-nav-bar />
     <h1 class="mt-4 mb-4">
       Upload new Tracks
     </h1>
@@ -36,6 +37,7 @@
 import { BFormFile } from 'bootstrap-vue'
 import queue from 'async/queue'
 import UploadItem from '@/components/UploadItem.vue'
+import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'
 
 const FORMPARAM = 'newtrack'
 const WORKERS = 4
@@ -89,7 +91,8 @@ export default {
   name: 'UploadPage',
   components: {
     BFormFile,
-    UploadItem
+    UploadItem,
+    TrackManagerNavBar
   },
 
   data () {

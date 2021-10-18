@@ -4,7 +4,11 @@
     class="position-absolute h-100 w-100 d-flex flex-column"
   >
     <track-manager-nav-bar />
-    <div class="d-flex flex-row flex-grow-1">
+    <div
+      id="enclosing"
+      ref="enclosing"
+      class="d-flex flex-row flex-grow-1"
+    >
       <div
         id="left"
         ref="left"
@@ -17,6 +21,7 @@
         id="middle"
         ref="middle"
         class="overflow-hidden"
+        :style="middleBoxStyleObject"
         @mousedown="dragMouseDown"
       />
       <div
@@ -31,6 +36,8 @@
 
 <script>
 import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'
+
+const MIDDLE_BAR_WIDTH = '10'
 
 export default {
   name: 'SelectTracksPage',
@@ -49,9 +56,16 @@ export default {
         movementY: 0
       },
       leftBoxStyleObject: {
-        'flex-basis': '60px'
+        'flex-basis': '49%' // inaccurate but will be set after 'mounted'
+      },
+      middleBoxStyleObject: {
+        'flex-basis': MIDDLE_BAR_WIDTH + 'px',
+        'background-color': 'lightgrey'
       }
     }
+  },
+  mounted: function () {
+    this.leftBoxStyleObject['flex-basis'] = this.initialLeftBoxSize() + 'px'
   },
   methods: {
     dragMouseDown: function (event) {
@@ -69,14 +83,14 @@ export default {
     closeDragElement: function () {
       document.onmouseup = null
       document.onmousemove = null
+    },
+    initialLeftBoxSize: function () {
+      const parWidth = this.$refs.enclosing.offsetWidth
+      const leftBoxWidth = (parWidth - MIDDLE_BAR_WIDTH) / 2
+      return leftBoxWidth
     }
   }
 }
 </script>
 <style scoped>
-
-#middle {
-  background-color: lightgrey;
-  flex-basis: 10px;
-}
 </style>

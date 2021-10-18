@@ -15,7 +15,7 @@
         class="overflow-hidden"
         :style="leftBoxStyleObject"
       >
-        left
+        <filtered-track-list />
       </div>
       <div
         id="middle"
@@ -28,7 +28,7 @@
         id="right"
         class="flex-grow-1 overflow-hidden"
       >
-        right
+        <filtered-map />
       </div>
     </div>
   </div>
@@ -36,13 +36,19 @@
 
 <script>
 import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'
+import FilteredTrackList from '../components/FilteredTrackList.vue'
+import FilteredMap from '../components/FilteredMap.vue'
+import { getAllTracks } from '@/lib/trackServices.js'
+import { mapActions, mapState } from 'vuex'
 
 const MIDDLE_BAR_WIDTH = '10'
 
 export default {
   name: 'SelectTracksPage',
   components: {
-    TrackManagerNavBar
+    TrackManagerNavBar,
+    FilteredTrackList,
+    FilteredMap
   },
   data () {
     return {
@@ -64,8 +70,16 @@ export default {
       }
     }
   },
+  computed: {
+    ...mapState([
+      'loadedTracks'
+    ])
+  },
   mounted: function () {
     this.leftBoxStyleObject['flex-basis'] = this.initialLeftBoxSize() + 'px'
+  },
+  created: async function () {
+    await this.loadTracks(getAllTracks)
   },
   methods: {
     dragMouseDown: function (event) {
@@ -88,7 +102,11 @@ export default {
       const parWidth = this.$refs.enclosing.offsetWidth
       const leftBoxWidth = (parWidth - MIDDLE_BAR_WIDTH) / 2
       return leftBoxWidth
-    }
+    },
+    ...mapActions([
+      'loadTracks'
+    ])
+
   }
 }
 </script>

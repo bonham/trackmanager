@@ -1,40 +1,42 @@
 <template>
-  <div
-    id="root"
-    class="position-absolute h-100 w-100 d-flex flex-column"
-  >
-    <track-manager-nav-bar />
-    <div
-      id="enclosing"
-      ref="enclosing"
-      class="d-flex flex-row flex-grow-1"
+  <div>
+    <b-container
+      id="root"
+      class="d-flex flex-column"
     >
+      <track-manager-nav-bar />
       <div
-        id="left"
-        ref="left"
-        class="overflow-hidden"
-        :style="leftBoxStyleObject"
+        id="enclosing"
+        ref="enclosing"
+        class="d-flex flex-row flex-grow-1"
       >
-        <filtered-track-list />
+        <div
+          id="left"
+          ref="left"
+          :style="leftBoxStyleObject"
+        >
+          <filtered-track-list />
+        </div>
+        <div
+          id="middle"
+          ref="middle"
+          class="overflow-hidden"
+          :style="middleBoxStyleObject"
+          @mousedown="dragMouseDown"
+        />
+        <div
+          id="right"
+          class="flex-grow-1 overflow-hidden"
+        >
+          <filtered-map />
+        </div>
       </div>
-      <div
-        id="middle"
-        ref="middle"
-        class="overflow-hidden"
-        :style="middleBoxStyleObject"
-        @mousedown="dragMouseDown"
-      />
-      <div
-        id="right"
-        class="flex-grow-1 overflow-hidden"
-      >
-        <filtered-map />
-      </div>
-    </div>
+    </b-container>
   </div>
 </template>
 
 <script>
+import { BContainer } from 'bootstrap-vue'
 import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'
 import FilteredTrackList from '../components/FilteredTrackList.vue'
 import FilteredMap from '../components/FilteredMap.vue'
@@ -48,7 +50,8 @@ export default {
   components: {
     TrackManagerNavBar,
     FilteredTrackList,
-    FilteredMap
+    FilteredMap,
+    BContainer
   },
   data () {
     return {

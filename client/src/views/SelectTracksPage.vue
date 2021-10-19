@@ -1,38 +1,37 @@
 <template>
-  <div>
-    <b-container
-      id="root"
-      class="d-flex flex-column"
+  <b-container
+    id="root"
+    class="d-flex flex-column vh-100"
+  >
+    <track-manager-nav-bar />
+    <div
+      id="enclosing"
+      ref="enclosing"
+      class="flex-grow1 d-flex flex-row minheight-0"
     >
-      <track-manager-nav-bar />
       <div
-        id="enclosing"
-        ref="enclosing"
-        class="d-flex flex-row flex-grow-1"
+        id="left"
+        ref="left"
+        :style="leftBoxStyleObject"
+        class="overflow-auto minheight-0"
       >
-        <div
-          id="left"
-          ref="left"
-          :style="leftBoxStyleObject"
-        >
-          <filtered-track-list />
-        </div>
-        <div
-          id="middle"
-          ref="middle"
-          class="overflow-hidden"
-          :style="middleBoxStyleObject"
-          @mousedown="dragMouseDown"
-        />
-        <div
-          id="right"
-          class="flex-grow-1 overflow-hidden"
-        >
-          <filtered-map />
-        </div>
+        <filtered-track-list />
       </div>
-    </b-container>
-  </div>
+      <div
+        id="middle"
+        ref="middle"
+        class="overflow-hidden"
+        :style="middleBoxStyleObject"
+        @mousedown="dragMouseDown"
+      />
+      <div
+        id="right"
+        class="flex-grow-1 overflow-hidden"
+      >
+        <filtered-map />
+      </div>
+    </div>
+  </b-container>
 </template>
 
 <script>
@@ -114,4 +113,7 @@ export default {
 }
 </script>
 <style scoped>
+.minheight-0 {
+  min-height: 0;
+}
 </style>

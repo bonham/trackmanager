@@ -4,18 +4,16 @@
     class="d-flex flex-column vh-100 border border-primary"
   >
     <track-manager-nav-bar />
-    <div class="flex-grow1 d-flex flex-row minheight-0 border border-warning">
-      <div class="flex-grow1 split minheight-0 border border-info">
-        <div
-          id="leftpanel"
-          class="overflow-auto minheight-0"
-        >
-          <filtered-track-list />
-        </div>
+    <div class="split flex-grow-1 d-flex flex-row minheight-0 border border-warning">
+      <div
+        id="leftpanel"
+        class="overflow-auto minheight-0"
+      >
+        <filtered-track-list />
+      </div>
 
-        <div id="rightpanel">
-          something
-        </div>
+      <div id="rightpanel">
+        <filtered-map />
       </div>
     </div>
   </b-container>
@@ -25,7 +23,7 @@
 import { BContainer } from 'bootstrap-vue'
 import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'
 import FilteredTrackList from '../components/FilteredTrackList.vue'
-// import FilteredMap from '../components/FilteredMap.vue'
+import FilteredMap from '../components/FilteredMap.vue'
 import { getAllTracks } from '@/lib/trackServices.js'
 import { mapActions, mapState } from 'vuex'
 import Split from 'split.js'
@@ -35,7 +33,7 @@ export default {
   components: {
     TrackManagerNavBar,
     FilteredTrackList,
-    // FilteredMap,
+    FilteredMap,
     BContainer
   },
   data () {

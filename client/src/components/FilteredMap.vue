@@ -1,6 +1,6 @@
 <template>
   <div class="position-absolute">
-    <map-component />
+    <map-component :track-id="2" />
   </div>
 </template>
 <script>

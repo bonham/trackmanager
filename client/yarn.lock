@@ -11741,6 +11741,13 @@ fsevents@~2.3.1:
   languageName: node
   linkType: hard
 
+"split.js@npm:^1.6.4":
+  version: 1.6.4
+  resolution: "split.js@npm:1.6.4"
+  checksum: acfa00637af8777e358651717da17deaedcac17def053a925bd9ccbeaf6fd57eb62f3b3e7f8bd3df0948d30f7faa4498e224c22a95b8deda558fadd1e0058971
+  languageName: node
+  linkType: hard
+
 "sprintf-js@npm:~1":
   version: 1.1.2
   resolution: "sprintf-js@npm:1.1.2"
@@ -12449,6 +12456,7 @@ fsevents@~2.3.1:
     portal-vue: ~2
     sass: ~1
     sass-loader: ~10
+    split.js: ^1.6.4
     sprintf-js: ~1
     vue: ~2
     vue-cli-plugin-bootstrap-vue: ~0

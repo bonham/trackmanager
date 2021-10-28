@@ -1,34 +1,21 @@
 <template>
   <b-container
     id="root"
-    class="d-flex flex-column vh-100"
+    class="d-flex flex-column vh-100 border border-primary"
   >
     <track-manager-nav-bar />
-    <div
-      id="enclosing"
-      ref="enclosing"
-      class="flex-grow1 d-flex flex-row minheight-0"
-    >
-      <div
-        id="left"
-        ref="left"
-        :style="leftBoxStyleObject"
-        class="overflow-auto minheight-0"
-      >
-        <filtered-track-list />
-      </div>
-      <div
-        id="middle"
-        ref="middle"
-        class="overflow-hidden"
-        :style="middleBoxStyleObject"
-        @mousedown="dragMouseDown"
-      />
-      <div
-        id="right"
-        class="flex-grow-1 overflow-hidden"
-      >
-        <filtered-map />
+    <div class="flex-grow1 d-flex flex-row minheight-0 border border-warning">
+      <div class="flex-grow1 split minheight-0 border border-info">
+        <div
+          id="leftpanel"
+          class="overflow-auto minheight-0"
+        >
+          <filtered-track-list />
+        </div>
+
+        <div id="rightpanel">
+          something
+        </div>
       </div>
     </div>
   </b-container>
@@ -38,38 +25,24 @@
 import { BContainer } from 'bootstrap-vue'
 import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'
 import FilteredTrackList from '../components/FilteredTrackList.vue'
-import FilteredMap from '../components/FilteredMap.vue'
+// import FilteredMap from '../components/FilteredMap.vue'
 import { getAllTracks } from '@/lib/trackServices.js'
 import { mapActions, mapState } from 'vuex'
-
-const MIDDLE_BAR_WIDTH = '10'
+import Split from 'split.js'
 
 export default {
   name: 'SelectTracksPage',
   components: {
     TrackManagerNavBar,
     FilteredTrackList,
-    FilteredMap,
+    // FilteredMap,
     BContainer
   },
   data () {
     return {
       text: `
           Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry
-        `,
-      positions: {
-        clientX: undefined,
-        clientY: undefined,
-        movementX: 0,
-        movementY: 0
-      },
-      leftBoxStyleObject: {
-        'flex-basis': '49%' // inaccurate but will be set after 'mounted'
-      },
-      middleBoxStyleObject: {
-        'flex-basis': MIDDLE_BAR_WIDTH + 'px',
-        'background-color': 'lightgrey'
-      }
+        `
     }
   },
   computed: {
@@ -77,34 +50,13 @@ export default {
       'loadedTracks'
     ])
   },
-  mounted: function () {
-    this.leftBoxStyleObject['flex-basis'] = this.initialLeftBoxSize() + 'px'
-  },
   created: async function () {
     await this.loadTracks(getAllTracks)
   },
+  mounted: function () {
+    Split(['#leftpanel', '#rightpanel'])
+  },
   methods: {
-    dragMouseDown: function (event) {
-      event.preventDefault()
-      this.positions.clientX = event.clientX
-      document.onmousemove = this.borderDrag
-      document.onmouseup = this.closeDragElement
-    },
-    borderDrag: function (event) {
-      event.preventDefault()
-      this.positions.movementX = this.positions.clientX - event.clientX
-      this.positions.clientX = event.clientX
-      this.leftBoxStyleObject['flex-basis'] = (this.$refs.left.offsetWidth - this.positions.movementX) + 'px'
-    },
-    closeDragElement: function () {
-      document.onmouseup = null
-      document.onmousemove = null
-    },
-    initialLeftBoxSize: function () {
-      const parWidth = this.$refs.enclosing.offsetWidth
-      const leftBoxWidth = (parWidth - MIDDLE_BAR_WIDTH) / 2
-      return leftBoxWidth
-    },
     ...mapActions([
       'loadTracks'
     ])
@@ -115,5 +67,21 @@ export default {
 <style scoped>
 .minheight-0 {
   min-height: 0;
+}
+
+.split {
+    display: flex;
+    flex-direction: row;
+}
+
+.gutter {
+    background-color: #eee;
+    background-repeat: no-repeat;
+    background-position: 50%;
+}
+
+.gutter.gutter-horizontal {
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAIklEQVQoU2M4c+bMfxAGAgYYmwGrIIiDjrELjpo5aiZeMwF+yNnOs5KSvgAAAABJRU5ErkJggg==');
+    cursor: col-resize;
 }
 </style>

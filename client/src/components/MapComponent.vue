@@ -7,9 +7,7 @@
       <div
         id="mapdiv"
         class="border border-warning"
-      >
-        abc
-      </div>
+      />
     </div>
   </div>
 </template>
@@ -22,28 +20,6 @@ import { OSM, Vector as VectorSource } from 'ol/source'
 import { Stroke, Style } from 'ol/style'
 import GeoJSON from 'ol/format/GeoJSON'
 import { Track } from '@/lib/Track.js'
-
-function initMap () {
-// eslint-disable-next-line no-unused-vars
-  const map = new Map({
-    layers: [
-      new TileLayer({
-        source: new OSM()
-      })
-    ],
-    view: new View({
-      center: [0, 0],
-      zoom: 0
-    })
-  })
-  this.map = map
-
-  setMapViewAndDrawTrack(this.trackId, map)
-}
-
-function setTarget () {
-  this.map.setTarget('mapdiv')
-}
 
 // function zoomBoundingBox() {
 
@@ -117,8 +93,31 @@ export default {
       map: null
     }
   },
-  created: initMap,
-  mounted: setTarget
+  mounted: function () {
+    this.initMap()
+    this.setTarget()
+  },
+  methods: {
+    initMap: function () {
+      const map = new Map({
+        layers: [
+          new TileLayer({
+            source: new OSM()
+          })
+        ],
+        view: new View({
+          center: [0, 0],
+          zoom: 0
+        })
+      })
+      this.map = map
+
+      setMapViewAndDrawTrack(this.trackId, map)
+    },
+    setTarget: function () {
+      this.map.setTarget('mapdiv')
+    }
+  }
 }
 
 </script>

@@ -1,7 +1,16 @@
 <template>
-  <div>
+  <div class="flex-grow-1 d-flex flex-column">
     <div>Map with parameter {{ trackId }}</div>
-    <div id="mapdiv" />
+    <div
+      class="flex-grow-1 border border-danger"
+    >
+      <div
+        id="mapdiv"
+        class="border border-warning"
+      >
+        abc
+      </div>
+    </div>
   </div>
 </template>
 
@@ -115,10 +124,10 @@ export default {
 </script>
 
 <style>
-  #mapdiv {
-    width: 700px;
-    height: 650px;
-  }
+#mapdiv {
+  width: 100%;
+  height: 100%;
+}
   @import '../../node_modules/ol/ol.css'
 
 </style>

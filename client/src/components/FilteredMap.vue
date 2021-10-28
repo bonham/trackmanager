@@ -1,5 +1,5 @@
 <template>
-  <div class="position-absolute">
+  <div class="flex-grow-1 d-flex">
     <map-component :track-id="2" />
   </div>
 </template>

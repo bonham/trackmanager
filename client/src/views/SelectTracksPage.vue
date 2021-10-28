@@ -12,7 +12,10 @@
         <filtered-track-list />
       </div>
 
-      <div id="rightpanel">
+      <div
+        id="rightpanel"
+        class="border border-info d-flex"
+      >
         <filtered-map />
       </div>
     </div>
@@ -65,11 +68,6 @@ export default {
 <style scoped>
 .minheight-0 {
   min-height: 0;
-}
-
-.split {
-    display: flex;
-    flex-direction: row;
 }
 
 .gutter {

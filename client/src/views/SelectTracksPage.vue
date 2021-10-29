@@ -77,9 +77,10 @@ export default {
 .minheight-0 {
   min-height: 0;
 }
-
+</style>
+<style>
 .gutter {
-    background-color: #eee;
+    background-color: rgb(255, 255, 255);
     background-repeat: no-repeat;
     background-position: 50%;
 }
@@ -88,4 +89,5 @@ export default {
     background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAIklEQVQoU2M4c+bMfxAGAgYYmwGrIIiDjrELjpo5aiZeMwF+yNnOs5KSvgAAAABJRU5ErkJggg==');
     cursor: col-resize;
 }
+
 </style>

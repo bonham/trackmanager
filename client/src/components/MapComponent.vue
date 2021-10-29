@@ -20,6 +20,7 @@ import { OSM, Vector as VectorSource } from 'ol/source'
 import { Stroke, Style } from 'ol/style'
 import GeoJSON from 'ol/format/GeoJSON'
 import { Track } from '@/lib/Track.js'
+import { mapMutations } from 'vuex'
 
 // function zoomBoundingBox() {
 
@@ -93,9 +94,25 @@ export default {
       map: null
     }
   },
-  mounted: function () {
-    this.initMap()
-    this.setTarget()
+  created () {
+    // watch if the viewport is resized and resize the map
+    this.$store.watch(
+      (state) => {
+        return this.$store.state.resizeMap
+      },
+      (newValue, oldValue) => {
+        if (newValue === true) {
+          this.map.updateSize()
+          this.resizeMapClear()
+        }
+      }
+    )
+  },
+  mounted () {
+    this.$nextTick(() => {
+      this.initMap()
+      this.setTarget()
+    })
   },
   methods: {
     initMap: function () {
@@ -116,7 +133,10 @@ export default {
     },
     setTarget: function () {
       this.map.setTarget('mapdiv')
-    }
+    },
+    ...mapMutations([
+      'resizeMapClear'
+    ])
   }
 }
 

@@ -10,7 +10,8 @@ export default new Vuex.Store(
     state: {
       loadedTracks: {},
       visibleTrackIds: [],
-      trackLoadStatus: 'not_loaded'
+      trackLoadStatus: 'not_loaded',
+      resizeMap: false
     },
     mutations: {
       setLoadedTracks (state, trackList) {
@@ -26,6 +27,13 @@ export default new Vuex.Store(
       },
       setTrackLoadStatus (state, status) {
         state.trackLoadStatus = status
+      },
+      // used as events to indicate that the map needs a resize
+      resizeMapFlag (state) {
+        state.resizeMap = true
+      },
+      resizeMapClear (state) {
+        state.resizeMap = false
       }
     },
     actions: {

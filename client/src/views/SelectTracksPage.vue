@@ -28,7 +28,7 @@ import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'
 import FilteredTrackList from '../components/FilteredTrackList.vue'
 import FilteredMap from '../components/FilteredMap.vue'
 import { getAllTracks } from '@/lib/trackServices.js'
-import { mapActions, mapState } from 'vuex'
+import { mapActions, mapState, mapMutations } from 'vuex'
 import Split from 'split.js'
 
 export default {
@@ -55,13 +55,21 @@ export default {
     await this.loadTracks(getAllTracks)
   },
   mounted: function () {
-    Split(['#leftpanel', '#rightpanel'])
+    // split should definitely run before the map is attached to the div
+    // so when map is run through nextTick - then let's not run split in nexttick - otherwise
+    // it runs to early and map is not correctly rendered
+    Split(['#leftpanel', '#rightpanel'], {
+      onDragEnd: this.resizeMapFlag
+    })
   },
   methods: {
     ...mapActions([
       'loadTracks'
+    ]),
+    ...mapMutations([
+      // indicate the map that it needs a resize
+      'resizeMapFlag'
     ])
-
   }
 }
 </script>

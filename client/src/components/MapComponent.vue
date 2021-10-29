@@ -1,14 +1,8 @@
 <template>
   <div class="flex-grow-1 d-flex flex-column">
-    <div>Map with parameter {{ trackId }}</div>
     <div
-      class="flex-grow-1 border border-danger"
-    >
-      <div
-        id="mapdiv"
-        class="border border-warning"
-      />
-    </div>
+      id="mapdiv"
+    />
   </div>
 </template>
 

@@ -1,10 +1,10 @@
 <template>
   <b-container
     id="root"
-    class="d-flex flex-column vh-100 border border-primary"
+    class="d-flex flex-column vh-100"
   >
     <track-manager-nav-bar />
-    <div class="split flex-grow-1 d-flex flex-row minheight-0 border border-warning">
+    <div class="split flex-grow-1 d-flex flex-row minheight-0">
       <div
         id="leftpanel"
         class="overflow-auto minheight-0"
@@ -14,7 +14,7 @@
 
       <div
         id="rightpanel"
-        class="border border-info d-flex"
+        class="d-flex"
       >
         <filtered-map />
       </div>

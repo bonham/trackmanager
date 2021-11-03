@@ -43,6 +43,7 @@ router.get('/getall', async (req, res) => {
 
     res.json(rows)
   } catch (err) {
+    console.trace('Exception handling trace')
     console.log(err)
     res.status(500).send(err.message)
   }
@@ -77,6 +78,7 @@ router.post('/geojson/', async (req, res) => {
 
     res.json(rowsWGeoJson)
   } catch (err) {
+    console.trace('Exception handling trace')
     console.log(err)
     res.status(500).send(err.message)
   }
@@ -87,19 +89,33 @@ router.get('/byid/:trackId', async (req, res) => {
   const trackId = req.params.trackId
 
   const query = 'select id, name, length, src,' +
-    'time, timelength, ascent, ' +
-    'ST_AsGeoJSON(wkb_geometry,6,3) as geojson ' +
+    'time, timelength, ascent ' +
     "from tracks where id = '" + trackId + "'"
-  console.log(query)
 
   try {
     const queryResult = await pool.query(query)
     const row = queryResult.rows[0]
-    const jsonString = row.geojson
-    const geoJson = JSON.parse(jsonString)
-    row.geojson = geoJson
     res.json(row)
   } catch (err) {
+    console.trace('Exception handling trace')
+    console.error(err)
+    res.status(500).send(err.message)
+  }
+})
+
+/// // Get list of tracks by year
+router.get('/byyear/:year', async (req, res) => {
+  const year = req.params.year
+
+  const query = 'select id, name, length, src,' +
+    'time, timelength, ascent ' +
+    'from tracks where extract(YEAR from time) = ' + year
+
+  try {
+    const queryResult = await pool.query(query)
+    res.json(queryResult.rows)
+  } catch (err) {
+    console.trace('Exception handling trace')
     console.error(err)
     res.status(500).send(err.message)
   }
@@ -129,6 +145,7 @@ router.put('/byid/:trackId', async (req, res) => {
       res.status(500).send(msg)
     }
   } catch (err) {
+    console.trace('Exception handling trace')
     console.err('Can not update tracks table')
     console.error(err)
     res.status(500).send(err)

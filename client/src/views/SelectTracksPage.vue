@@ -27,7 +27,7 @@ import { BContainer } from 'bootstrap-vue'
 import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'
 import FilteredTrackList from '../components/FilteredTrackList.vue'
 import FilteredMap from '../components/FilteredMap.vue'
-import { getAllTracks } from '@/lib/trackServices.js'
+import { getTracksByYear } from '@/lib/trackServices.js'
 import { mapActions, mapState, mapMutations } from 'vuex'
 import Split from 'split.js'
 
@@ -39,13 +39,6 @@ export default {
     FilteredMap,
     BContainer
   },
-  data () {
-    return {
-      text: `
-          Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry
-        `
-    }
-  },
   computed: {
     ...mapState([
       'loadedTracks'
@@ -53,7 +46,7 @@ export default {
   },
   created: async function () {
     // call loadTracks action from store while injecting the load function
-    await this.loadTracks(getAllTracks)
+    await this.loadTracks(() => { return getTracksByYear(2020) })
   },
   mounted: function () {
     // split should definitely run before the map is attached to the div
@@ -75,11 +68,15 @@ export default {
 }
 </script>
 <style scoped>
+
+/* Needed for vertical overflow: scroll in flexbox container */
 .minheight-0 {
   min-height: 0;
 }
 </style>
 <style>
+
+/* Split.js css entries can not reside in scoped style section */
 .gutter {
     background-color: rgb(255, 255, 255);
     background-repeat: no-repeat;

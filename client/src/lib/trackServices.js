@@ -10,6 +10,17 @@ async function getAllTracks () {
   return trackArray
 }
 
+// /// Get tracks by year
+async function getTracksByYear (year) {
+  if (!_.isInteger(year)) throw Error('Year is not integer: ' + year)
+  const url = '/api/tracks/byyear/' + year
+  const response = await fetch(url)
+  const responseJson = await response.json()
+
+  const trackArray = responseJson.map(t => new Track(t))
+  return trackArray
+}
+
 // /// Get geojson by id
 async function getGeoJson (idList) {
   const payload = { ids: idList }
@@ -75,4 +86,4 @@ async function updateTrack (track, attributes) {
   }
 }
 
-export { getAllTracks, getGeoJson, updateTrack }
+export { getAllTracks, getTracksByYear, getGeoJson, updateTrack }

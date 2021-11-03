@@ -21,7 +21,7 @@ import { mapMutations } from 'vuex'
 // }
 
 function setMapViewAndDrawTrack (tid, map) {
-  const url = '/api/tracks/' + tid
+  const url = '/api/tracks/byid/' + tid
   fetch(url)
     .then(response => response.json())
     .then(data => {
@@ -90,6 +90,7 @@ export default {
   },
   created () {
     // watch if the viewport is resized and resize the map
+    this.initMap()
     this.$store.watch(
       (state) => {
         return this.$store.state.resizeMap
@@ -104,7 +105,6 @@ export default {
   },
   mounted () {
     this.$nextTick(() => {
-      this.initMap()
       this.setTarget()
     })
   },

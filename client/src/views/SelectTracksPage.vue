@@ -52,6 +52,7 @@ export default {
     ])
   },
   created: async function () {
+    // call loadTracks action from store while injecting the load function
     await this.loadTracks(getAllTracks)
   },
   mounted: function () {

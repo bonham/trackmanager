@@ -48,7 +48,7 @@ async function updateTrack (track, attributes) {
   }
 
   const req = new Request(
-    `/api/tracks/${id}`,
+    `/api/tracks/byid/${id}`,
     {
       method: 'PUT',
       headers: {

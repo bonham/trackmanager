@@ -4,6 +4,7 @@ const multer = require('multer')
 const fs = require('fs')
 const fsprom = require('fs/promises')
 const path = require('path')
+const _ = require('lodash')
 
 const router = express.Router()
 router.use(express.json()) // use builtin json body parser
@@ -24,10 +25,57 @@ const pool = new Pool({
 })
 
 /// // Get all tracks
-router.get('/', async (req, res) => {
+router.get('/getall', async (req, res) => {
   try {
-    const queryResult = await pool.query('select id, name, length, src, time, timelength, ascent from tracks order by time')
-    res.json(queryResult.rows)
+    const queryResult = await pool.query(
+      'select id, name, length, src, ' +
+      'time, timelength, ascent ' +
+      'from tracks order by time')
+
+    const rows = queryResult.rows
+    // convert geojson string to object
+
+    // for (let i = 0; i < rows.length; i++) {
+    //   const jsonString = rows[i].geojson
+    //   const geoJson = JSON.parse(jsonString)
+    //   rows[i].geojson = geoJson
+    // }
+
+    res.json(rows)
+  } catch (err) {
+    console.log(err)
+    res.status(500).send(err.message)
+  }
+})
+
+/// // Get Geojson for a list of ids. Payload { ids: [..] }
+router.post('/geojson/', async (req, res) => {
+  try {
+    // validate expected property
+    if (!(_.has(req.body, 'ids'))) {
+      throw new Error('Request does not contain expected property')
+    }
+    const ids = req.body.ids
+
+    // validate if value is a list
+    if (!(_.isArray(ids))) {
+      throw new Error('Ids does not contain array')
+    }
+
+    // validate integer
+    const notIntegerList = _.reject(ids, (x) => (_.isInteger(x)))
+    if (notIntegerList.length) throw Error('Found non integer elements in payload')
+
+    const inClause = '(' + ids.join() + ')'
+    const query = 'select id, ST_AsGeoJSON(wkb_geometry,6,3) as geojson ' +
+      'from tracks where id in ' + inClause
+
+    const queryResult = await pool.query(query)
+    const rows = queryResult.rows
+
+    const rowsWGeoJson = _.map(rows, (x) => ({ id: x.id, geojson: JSON.parse(x.geojson) }))
+
+    res.json(rowsWGeoJson)
   } catch (err) {
     console.log(err)
     res.status(500).send(err.message)
@@ -35,7 +83,7 @@ router.get('/', async (req, res) => {
 })
 
 /// // Get single track id
-router.get('/:trackId', async (req, res) => {
+router.get('/byid/:trackId', async (req, res) => {
   const trackId = req.params.trackId
 
   const query = 'select id, name, length, src,' +
@@ -58,7 +106,7 @@ router.get('/:trackId', async (req, res) => {
 })
 
 /// // Update single track
-router.put('/:trackId', async (req, res) => {
+router.put('/byid/:trackId', async (req, res) => {
   const updateAttributes = req.body.updateAttributes
   const data = req.body.data
 

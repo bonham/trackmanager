@@ -20,20 +20,8 @@ function createMap (center = [0, 0], zoom = 0) {
   return map
 }
 
-function setMapViewAndDrawTrack (geoJson, map) {
-  const extent = transformExtent(
-    geoJson.bbox,
-    'EPSG:4326',
-    'EPSG:3857'
-  )
-  const mapSize = map.getSize()
-  const view = map.getView()
-
-  view.fit(
-    extent,
-    mapSize
-  )
-
+// create a layer from a geojson
+function createLayer (geoJson) {
   // load track
   const style = new Style({
     stroke: new Stroke({
@@ -56,13 +44,35 @@ function setMapViewAndDrawTrack (geoJson, map) {
     source: vectorSource,
     style: style
   })
+  return vectorLayer
+}
+
+// set map view from bounding box
+function setMapView (bbox, map) {
+  const extent = transformExtent(
+    bbox,
+    'EPSG:4326',
+    'EPSG:3857'
+  )
+  const mapSize = map.getSize()
+  const view = map.getView()
+
+  view.fit(
+    extent,
+    mapSize
+  )
+}
+
+function drawTrack (geoJson, map) {
+  const vectorLayer = createLayer(geoJson)
 
   map.addLayer(vectorLayer)
 
   // zoom a bit out
   const scale = 0.97
+  const view = map.getView()
   view.animate(
     { zoom: view.getZoom() * scale })
 }
 
-export { createMap, setMapViewAndDrawTrack }
+export { createMap, setMapView, drawTrack }

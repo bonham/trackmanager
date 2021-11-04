@@ -30,6 +30,7 @@ import FilteredMap from '../components/FilteredMap.vue'
 import { getTracksByYear } from '@/lib/trackServices.js'
 import { mapActions, mapState, mapMutations } from 'vuex'
 import Split from 'split.js'
+const _ = require('lodash')
 
 export default {
   name: 'SelectTracksPage',
@@ -47,6 +48,9 @@ export default {
   created: async function () {
     // call loadTracks action from store while injecting the load function
     await this.loadTracks(() => { return getTracksByYear(2020) })
+    // set loaded tracks as visible tracks
+    const visibleTrackIds = _.map(this.loadedTracks, (x) => { return x.id })
+    this.setVisibleTracks(visibleTrackIds)
   },
   mounted: function () {
     // split should definitely run before the map is attached to the div
@@ -62,7 +66,8 @@ export default {
     ]),
     ...mapMutations([
       // indicate the map that it needs a resize
-      'resizeMapFlag'
+      'resizeMapFlag',
+      'setVisibleTracks'
     ])
   }
 }

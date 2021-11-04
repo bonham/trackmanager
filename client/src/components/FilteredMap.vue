@@ -6,15 +6,17 @@
   </div>
 </template>
 <script>
-import { createMap, setMapViewAndDrawTrack } from '@/lib/mapServices.js'
+import { createMap, setMapView, drawTrack } from '@/lib/mapServices.js'
 import { getGeoJson } from '@/lib/trackServices.js'
 import { mapMutations } from 'vuex'
 
 export default {
   name: 'FilteredMap',
   created () {
-    // watch if the viewport is resized and resize the map
+    // initialize map object
     this.initMap()
+
+    // watch if the viewport is resized and resize the map
     this.$store.watch(
       (state) => {
         return this.$store.state.resizeMap
@@ -35,9 +37,13 @@ export default {
   methods: {
     initMap: async function () {
       this.map = createMap()
-      const resultSet = await getGeoJson([2])
-      const gj = resultSet[0].geojson
-      setMapViewAndDrawTrack(gj, this.map)
+      const resultSet = await getGeoJson([2, 3])
+
+      resultSet.forEach(result => {
+        const gj = result.geojson
+        setMapView(gj.bbox, this.map)
+        drawTrack(gj, this.map)
+      })
     },
     setTarget: function () {
       this.map.setTarget('mapdiv')

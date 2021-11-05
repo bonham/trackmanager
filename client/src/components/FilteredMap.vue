@@ -6,7 +6,7 @@
   </div>
 </template>
 <script>
-import { createMap, setMapView, drawTrack } from '@/lib/mapServices.js'
+import { ManagedMap } from '@/lib/mapServices.js'
 import { getGeoJson } from '@/lib/trackServices.js'
 import { mapMutations } from 'vuex'
 
@@ -23,7 +23,7 @@ export default {
       },
       (newValue, oldValue) => {
         if (newValue === true) {
-          this.map.updateSize()
+          this.mmap.map.updateSize()
           this.resizeMapClear()
         }
       }
@@ -36,17 +36,19 @@ export default {
   },
   methods: {
     initMap: async function () {
-      this.map = createMap()
+      const mmap = new ManagedMap()
+      this.mmap = mmap
       const resultSet = await getGeoJson([2, 3])
 
       resultSet.forEach(result => {
         const gj = result.geojson
-        setMapView(gj.bbox, this.map)
-        drawTrack(gj, this.map)
+        mmap.setMapView(gj.bbox)
+        mmap.drawTrack(gj)
       })
     },
     setTarget: function () {
-      this.map.setTarget('mapdiv')
+      this.mmap.map.setTarget('mapdiv')
+      this.mmap.zoomOut()
     },
     ...mapMutations([
       'resizeMapClear'

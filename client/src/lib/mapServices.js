@@ -5,19 +5,54 @@ import { OSM, Vector as VectorSource } from 'ol/source'
 import { Stroke, Style } from 'ol/style'
 import GeoJSON from 'ol/format/GeoJSON'
 
-function createMap (center = [0, 0], zoom = 0) {
-  const map = new Map({
-    layers: [
-      new TileLayer({
-        source: new OSM()
+class ManagedMap {
+  constructor () {
+    this.map = this._createMap()
+  }
+
+  _createMap (center = [0, 0], zoom = 0) {
+    const map = new Map({
+      layers: [
+        new TileLayer({
+          source: new OSM()
+        })
+      ],
+      view: new View({
+        center: center,
+        zoom: zoom
       })
-    ],
-    view: new View({
-      center: center,
-      zoom: zoom
     })
-  })
-  return map
+    return map
+  }
+
+  // set map view from bounding box
+  setMapView (bbox) {
+    const extent = transformExtent(
+      bbox,
+      'EPSG:4326',
+      'EPSG:3857'
+    )
+    const mapSize = this.map.getSize()
+    const view = this.map.getView()
+
+    view.fit(
+      extent,
+      mapSize
+    )
+  }
+
+  drawTrack (geoJson) {
+    const vectorLayer = createLayer(geoJson)
+    this.map.addLayer(vectorLayer)
+  }
+
+  zoomOut (scale = 0.97) {
+    // zoom a bit out
+    const view = this.map.getView()
+    view.animate(
+      { zoom: view.getZoom() * scale }
+    )
+  }
 }
 
 // create a layer from a geojson
@@ -47,32 +82,4 @@ function createLayer (geoJson) {
   return vectorLayer
 }
 
-// set map view from bounding box
-function setMapView (bbox, map) {
-  const extent = transformExtent(
-    bbox,
-    'EPSG:4326',
-    'EPSG:3857'
-  )
-  const mapSize = map.getSize()
-  const view = map.getView()
-
-  view.fit(
-    extent,
-    mapSize
-  )
-}
-
-function drawTrack (geoJson, map) {
-  const vectorLayer = createLayer(geoJson)
-
-  map.addLayer(vectorLayer)
-
-  // zoom a bit out
-  const scale = 0.97
-  const view = map.getView()
-  view.animate(
-    { zoom: view.getZoom() * scale })
-}
-
-export { createMap, setMapView, drawTrack }
+export { ManagedMap }

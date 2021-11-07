@@ -4,6 +4,7 @@ import { Tile as TileLayer, Vector as VectorLayer } from 'ol/layer'
 import { OSM, Vector as VectorSource } from 'ol/source'
 import { Stroke, Style } from 'ol/style'
 import GeoJSON from 'ol/format/GeoJSON'
+const _ = require('lodash')
 
 class ManagedMap {
   constructor () {
@@ -82,4 +83,20 @@ function createLayer (geoJson) {
   return vectorLayer
 }
 
-export { ManagedMap }
+class GeoJsonCollection {
+  constructor (geoJsonList) {
+    this.geoJsonList = geoJsonList
+  }
+
+  // calculate maximum bounding box for all geojson objects
+  boundingBox () {
+    const l = this.geoJsonList
+    const left = _.min(_.map(l, (x) => { return x.geojson.bbox[0] }))
+    const bottom = _.min(_.map(l, (x) => { return x.geojson.bbox[1] }))
+    const right = _.max(_.map(l, (x) => { return x.geojson.bbox[2] }))
+    const top = _.max(_.map(l, (x) => { return x.geojson.bbox[3] }))
+    return [left, bottom, right, top]
+  }
+}
+
+export { ManagedMap, GeoJsonCollection }

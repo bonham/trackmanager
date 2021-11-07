@@ -6,7 +6,7 @@
   </div>
 </template>
 <script>
-import { ManagedMap } from '@/lib/mapServices.js'
+import { ManagedMap, GeoJsonCollection } from '@/lib/mapServices.js'
 import { getGeoJson } from '@/lib/trackServices.js'
 import { mapMutations, mapState } from 'vuex'
 const _ = require('lodash')
@@ -14,6 +14,9 @@ const _ = require('lodash')
 export default {
   name: 'FilteredMap',
   created () {
+    // create map object
+    this.initMap()
+
     // watch if the viewport is resized and resize the map
     this.$store.watch(
       (state) => {
@@ -36,14 +39,10 @@ export default {
       },
       function (newValue, oldValue) {
         if (newValue === true) {
-          console.log('redraw please')
-          console.log(this)
           boundRedrawTracks()
         }
       }
     )
-    // create map object
-    this.initMap()
   },
   mounted () {
     this.$nextTick(() => {
@@ -57,11 +56,15 @@ export default {
     redrawTracks: async function () {
       const ids = _.map(this.loadedTracks(), (x) => { return x.id })
       const resultSet = await getGeoJson(ids)
-      this.mmap.setMapView(resultSet[0].geojson.bbox)
+      const geoJColl = new GeoJsonCollection(resultSet)
+      const overallBbox = geoJColl.boundingBox()
+      this.mmap.setMapView(overallBbox)
+      this.mmap.zoomOut()
       resultSet.forEach(result => {
         const gj = result.geojson
         this.mmap.drawTrack(gj)
       })
+      this.redrawTracksOnMapFlag(false)
     },
     setTarget: function () {
       this.mmap.map.setTarget('mapdiv')
@@ -69,7 +72,7 @@ export default {
     },
     ...mapMutations([
       'resizeMapClear',
-      'redrawTracksOnMapClear'
+      'redrawTracksOnMapFlag'
     ]),
     ...mapState([
       'loadedTracks'

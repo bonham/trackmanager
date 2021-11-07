@@ -5,8 +5,11 @@
   >
     <track-manager-nav-bar />
     <div>
-      <b-button @click="load2021Complete">
+      <b-button @click="loadComplete(2021)">
         2021
+      </b-button>
+      <b-button @click="loadComplete(2020)">
+        2020
       </b-button>
     </div>
     <div class="split flex-grow-1 d-flex flex-row minheight-0">
@@ -67,9 +70,9 @@ export default {
       'resizeMapFlag'
     ]),
 
-    load2021Complete: function () {
+    loadComplete: function (year) {
     // call loadTracks action from store while injecting the load function
-      const loadFunction = function () { return getTracksByYear(2020) }
+      const loadFunction = function () { return getTracksByYear(year) }
       this.loadTracks(loadFunction).catch(e => console.log(e))
     }
 

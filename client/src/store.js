@@ -1,29 +1,19 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 
-const _ = require('lodash')
-
 Vue.use(Vuex)
 
 export default new Vuex.Store(
   {
     state: {
-      loadedTracks: {},
-      visibleTrackIds: [],
+      loadedTracks: [],
       trackLoadStatus: 'not_loaded',
-      resizeMap: false
+      resizeMap: false,
+      redrawTracksOnMap: false
     },
     mutations: {
       setLoadedTracks (state, trackList) {
-        const o = {}
-        trackList.forEach(track => {
-          const id = track.id
-          o[id] = track
-        })
-        state.loadedTracks = o
-      },
-      setVisibleTracks (state, idList) {
-        state.visibleTrackIds = idList
+        state.loadedTracks = trackList
       },
       setTrackLoadStatus (state, status) {
         state.trackLoadStatus = status
@@ -34,21 +24,19 @@ export default new Vuex.Store(
       },
       resizeMapClear (state) {
         state.resizeMap = false
+      },
+      // used as event to indicate that the map needs redraw layers
+      redrawTracksOnMapFlag (state, status) {
+        state.redrawTracksOnMap = status
       }
     },
     actions: {
       async loadTracks ({ commit, state }, loadFunction) {
-        if (state.trackLoadStatus === 'not_loaded') {
-          commit('setTrackLoadStatus', 'loading')
-          const trackList = await loadFunction()
-          commit('setLoadedTracks', trackList)
-          commit('setTrackLoadStatus', 'loaded')
-        }
-      }
-    },
-    getters: {
-      visibleTracks: state => {
-        return _.pick(state.loadedTracks, state.visibleTrackIds)
+        commit('setTrackLoadStatus', 'loading')
+        const trackList = await loadFunction()
+        commit('setLoadedTracks', trackList)
+        commit('setTrackLoadStatus', 'loaded')
+        commit('redrawTracksOnMapFlag', true)
       }
     }
   }

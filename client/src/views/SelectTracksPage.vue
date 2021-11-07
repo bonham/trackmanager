@@ -4,6 +4,11 @@
     class="d-flex flex-column vh-100"
   >
     <track-manager-nav-bar />
+    <div>
+      <b-button @click="load2021Complete">
+        2021
+      </b-button>
+    </div>
     <div class="split flex-grow-1 d-flex flex-row minheight-0">
       <div
         id="leftpanel"
@@ -23,14 +28,13 @@
 </template>
 
 <script>
-import { BContainer } from 'bootstrap-vue'
+import { BContainer, BButton } from 'bootstrap-vue'
 import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'
 import FilteredTrackList from '../components/FilteredTrackList.vue'
 import FilteredMap from '../components/FilteredMap.vue'
 import { getTracksByYear } from '@/lib/trackServices.js'
 import { mapActions, mapState, mapMutations } from 'vuex'
 import Split from 'split.js'
-const _ = require('lodash')
 
 export default {
   name: 'SelectTracksPage',
@@ -38,19 +42,13 @@ export default {
     TrackManagerNavBar,
     FilteredTrackList,
     FilteredMap,
-    BContainer
+    BContainer,
+    BButton
   },
   computed: {
     ...mapState([
       'loadedTracks'
     ])
-  },
-  created: async function () {
-    // call loadTracks action from store while injecting the load function
-    await this.loadTracks(() => { return getTracksByYear(2020) })
-    // set loaded tracks as visible tracks
-    const visibleTrackIds = _.map(this.loadedTracks, (x) => { return x.id })
-    this.setVisibleTracks(visibleTrackIds)
   },
   mounted: function () {
     // split should definitely run before the map is attached to the div
@@ -66,9 +64,15 @@ export default {
     ]),
     ...mapMutations([
       // indicate the map that it needs a resize
-      'resizeMapFlag',
-      'setVisibleTracks'
-    ])
+      'resizeMapFlag'
+    ]),
+
+    load2021Complete: function () {
+    // call loadTracks action from store while injecting the load function
+      const loadFunction = function () { return getTracksByYear(2020) }
+      this.loadTracks(loadFunction).catch(e => console.log(e))
+    }
+
   }
 }
 </script>

@@ -32,11 +32,6 @@ export default {
     BListGroupItem,
     BCard
   },
-  data () {
-    return {
-      testprop: 'nix'
-    }
-  },
   computed: {
     ...mapState([
       'loadedTracks',

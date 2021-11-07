@@ -8,14 +8,12 @@
 <script>
 import { ManagedMap } from '@/lib/mapServices.js'
 import { getGeoJson } from '@/lib/trackServices.js'
-import { mapMutations } from 'vuex'
+import { mapMutations, mapState } from 'vuex'
+const _ = require('lodash')
 
 export default {
   name: 'FilteredMap',
   created () {
-    // initialize map object
-    this.initMap()
-
     // watch if the viewport is resized and resize the map
     this.$store.watch(
       (state) => {
@@ -28,6 +26,24 @@ export default {
         }
       }
     )
+    // watch if tracks are loaded and should be drawn
+    // const f = this.redrawTracks
+    const unboundRedrawTracks = this.redrawTracks
+    const boundRedrawTracks = unboundRedrawTracks.bind(this)
+    this.$store.watch(
+      (state) => {
+        return this.$store.state.redrawTracksOnMap
+      },
+      function (newValue, oldValue) {
+        if (newValue === true) {
+          console.log('redraw please')
+          console.log(this)
+          boundRedrawTracks()
+        }
+      }
+    )
+    // create map object
+    this.initMap()
   },
   mounted () {
     this.$nextTick(() => {
@@ -35,15 +51,16 @@ export default {
     })
   },
   methods: {
-    initMap: async function () {
-      const mmap = new ManagedMap()
-      this.mmap = mmap
-      const resultSet = await getGeoJson([2, 3])
-
+    initMap: function () {
+      this.mmap = new ManagedMap()
+    },
+    redrawTracks: async function () {
+      const ids = _.map(this.loadedTracks(), (x) => { return x.id })
+      const resultSet = await getGeoJson(ids)
+      this.mmap.setMapView(resultSet[0].geojson.bbox)
       resultSet.forEach(result => {
         const gj = result.geojson
-        mmap.setMapView(gj.bbox)
-        mmap.drawTrack(gj)
+        this.mmap.drawTrack(gj)
       })
     },
     setTarget: function () {
@@ -51,7 +68,11 @@ export default {
       this.mmap.zoomOut()
     },
     ...mapMutations([
-      'resizeMapClear'
+      'resizeMapClear',
+      'redrawTracksOnMapClear'
+    ]),
+    ...mapState([
+      'loadedTracks'
     ])
   }
 }

@@ -9,6 +9,8 @@ const _ = require('lodash')
 class ManagedMap {
   constructor () {
     this.map = this._createMap()
+    // should be defined outside map and passed to map
+    this.standardStyle = this._createStandardStyle()
   }
 
   _createMap (center = [0, 0], zoom = 0) {
@@ -24,6 +26,15 @@ class ManagedMap {
       })
     })
     return map
+  }
+
+  _createStandardStyle () {
+    return new Style({
+      stroke: new Stroke({
+        color: 'brown',
+        width: 2
+      })
+    })
   }
 
   // set map view from bounding box
@@ -43,7 +54,7 @@ class ManagedMap {
   }
 
   drawTrack (geoJson) {
-    const vectorLayer = createLayer(geoJson)
+    const vectorLayer = createLayer(geoJson, this.standardStyle)
     this.map.addLayer(vectorLayer)
   }
 
@@ -57,14 +68,8 @@ class ManagedMap {
 }
 
 // create a layer from a geojson
-function createLayer (geoJson) {
+function createLayer (geoJson, style) {
   // load track
-  const style = new Style({
-    stroke: new Stroke({
-      color: 'brown',
-      width: 2
-    })
-  })
 
   const vectorSource = new VectorSource({
     features: new GeoJSON().readFeatures(

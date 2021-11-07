@@ -5,11 +5,23 @@
   >
     <track-manager-nav-bar />
     <div>
-      <b-button @click="loadComplete(2021)">
+      <b-button
+        class="m-2"
+        @click="loadComplete(2021)"
+      >
         2021
       </b-button>
-      <b-button @click="loadComplete(2020)">
+      <b-button
+        class="m-2"
+        @click="loadComplete(2020)"
+      >
         2020
+      </b-button>
+      <b-button
+        class="m-2"
+        @click="loadAllTracks()"
+      >
+        All
       </b-button>
     </div>
     <div class="split flex-grow-1 d-flex flex-row minheight-0">
@@ -35,7 +47,7 @@ import { BContainer, BButton } from 'bootstrap-vue'
 import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'
 import FilteredTrackList from '../components/FilteredTrackList.vue'
 import FilteredMap from '../components/FilteredMap.vue'
-import { getTracksByYear } from '@/lib/trackServices.js'
+import { getTracksByYear, getAllTracks } from '@/lib/trackServices.js'
 import { mapActions, mapState, mapMutations } from 'vuex'
 import Split from 'split.js'
 
@@ -73,7 +85,10 @@ export default {
     loadComplete: function (year) {
     // call loadTracks action from store while injecting the load function
       const loadFunction = function () { return getTracksByYear(year) }
-      this.loadTracks(loadFunction).catch(e => console.log(e))
+      this.loadTracks(loadFunction).catch(e => console.error(e))
+    },
+    loadAllTracks: function () {
+      this.loadTracks(getAllTracks).catch(e => console.error(e))
     }
 
   }

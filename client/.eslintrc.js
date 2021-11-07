@@ -2,7 +2,8 @@
 module.exports = {
   root: true,
   env: {
-    node: true
+    browser: true,
+    jest: true
   },
   extends: [
     'eslint:recommended',
@@ -12,7 +13,7 @@ module.exports = {
   parserOptions: {
     parser: '@babel/eslint-parser'
   },
-  'plugins': [
+  plugins: [
     'vue'
   ],
   rules: {

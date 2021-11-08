@@ -1,10 +1,7 @@
 class TrackVisibilityManager {
   constructor (currentVisibleIdList, toBeVisibleInTotalIdList) {
-    console.log(currentVisibleIdList)
-    console.log(toBeVisibleInTotalIdList)
     this.currentVisibleIdList = new Set(currentVisibleIdList)
     this.toBeVisibleInTotalIdList = new Set(toBeVisibleInTotalIdList)
-    console.log(this.toBeVisibleInTotalIdList)
     // calculated values
     this.alreadyVisibleIdList = undefined
     this.toBeHiddenIdList = undefined

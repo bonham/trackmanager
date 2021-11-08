@@ -70,26 +70,23 @@ export default {
 
       // A1: set existing visible
       const existingInvisible = this.mmap.getLayerIdsInVisible()
-      // eslint-disable-next-line no-unused-vars
-      const flipToVisible = _.intersect(Array.from(toMakeVisible), existingInvisible)
+      const flipToVisible = _.intersection(Array.from(toMakeVisible), existingInvisible)
+      _.forEach(flipToVisible, (id) => { this.mmap.setVisible(id) })
 
       // A2: load missing and add vector layer
       // eslint-disable-next-line no-unused-vars
       const toBeLoaded = _.difference(Array.from(toMakeVisible), existingInvisible)
+      const resultSet = await getGeoJson(toBeLoaded)
+      const overallBbox = new GeoJsonCollection(resultSet).boundingBox()
+      resultSet.forEach(result => { this.mmap.addTrackLayer(result) })
+      this.mmap.setMapView(overallBbox)
+      this.mmap.zoomOut()
 
       // B: tracks to hide
       // eslint-disable-next-line no-unused-vars
       const toHide = tvm.toBeHiddenIdList
+      _.forEach(toHide, (id) => { this.mmap.setInvisible(id) })
 
-      const resultSet = await getGeoJson(toMakeVisible)
-      const geoJColl = new GeoJsonCollection(resultSet)
-      const overallBbox = geoJColl.boundingBox()
-      this.mmap.setMapView(overallBbox)
-      this.mmap.zoomOut()
-      resultSet.forEach(result => {
-        const gj = result.geojson
-        this.mmap.drawTrack(gj)
-      })
       this.redrawTracksOnMapFlag(false)
     },
     setTarget: function () {

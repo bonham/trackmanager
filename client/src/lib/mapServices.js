@@ -1,4 +1,4 @@
-import { Map, View } from 'ol'
+import { Map as OlMap, View } from 'ol' // rename needed not to conflict with javascript native Map()
 import { transformExtent } from 'ol/proj'
 import { Tile as TileLayer, Vector as VectorLayer } from 'ol/layer'
 import { OSM, Vector as VectorSource } from 'ol/source'
@@ -15,7 +15,7 @@ class ManagedMap {
   }
 
   _createMap (center = [0, 0], zoom = 0) {
-    const map = new Map({
+    const map = new OlMap({
       layers: [
         new TileLayer({
           source: new OSM()
@@ -68,6 +68,10 @@ class ManagedMap {
     this.layerMap.set(id, vectorLayer)
   }
 
+  getTrackLayer (id) {
+    return this.layerMap.get(id)
+  }
+
   setVisible (id) {
     const layer = this.layerMap.get(id)
     if (layer === undefined) throw new Error(`Attempt to look up nonexisting layer with id ${id}`)
@@ -86,12 +90,12 @@ class ManagedMap {
 
   getLayerIdsVisible () {
     const allIds = this.getLayerIds()
-    return _.filter(allIds, el => { return el.getVisible() })
+    return _.filter(allIds, id => { return this.getTrackLayer(id).getVisible() })
   }
 
   getLayerIdsInVisible () {
     const allIds = this.getLayerIds()
-    return _.reject(allIds, el => { return el.getVisible() })
+    return _.reject(allIds, id => { return this.getTrackLayer(id).getVisible() })
   }
 
   zoomOut (scale = 0.97) {

@@ -23,6 +23,12 @@
       >
         All
       </b-button>
+      <b-button
+        class="m-2"
+        @click="clearTracks()"
+      >
+        None
+      </b-button>
     </div>
     <div class="split flex-grow-1 d-flex flex-row minheight-0">
       <div
@@ -75,7 +81,8 @@ export default {
   },
   methods: {
     ...mapActions([
-      'loadTracks'
+      'loadTracks',
+      'clearTracks'
     ]),
     ...mapMutations([
       // indicate the map that it needs a resize
@@ -90,7 +97,6 @@ export default {
     loadAllTracks: function () {
       this.loadTracks(getAllTracks).catch(e => console.error(e))
     }
-
   }
 }
 </script>

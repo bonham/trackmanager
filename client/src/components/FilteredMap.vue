@@ -7,12 +7,18 @@
 </template>
 <script>
 import { ManagedMap, GeoJsonCollection } from '@/lib/mapServices.js'
+import { TrackVisibilityManager } from '@/lib/mapStateHelpers.js'
 import { getGeoJson } from '@/lib/trackServices.js'
-import { mapMutations, mapState } from 'vuex'
+import { mapMutations, mapState, mapGetters } from 'vuex'
 const _ = require('lodash')
 
 export default {
   name: 'FilteredMap',
+  computed: {
+    ...mapGetters({
+      shouldBeVisibleIds: 'getLoadedTrackIds'
+    })
+  },
   created () {
     // create map object
     this.initMap()
@@ -54,8 +60,28 @@ export default {
       this.mmap = new ManagedMap()
     },
     redrawTracks: async function () {
-      const ids = _.map(this.loadedTracks(), (x) => { return x.id })
-      const resultSet = await getGeoJson(ids)
+      const tvm = new TrackVisibilityManager(
+        this.mmap.getLayerIdsVisible(),
+        this.shouldBeVisibleIds
+      )
+
+      // A: tracks to make visible
+      const toMakeVisible = tvm.deltaToBeEnabledIdList
+
+      // A1: set existing visible
+      const existingInvisible = this.mmap.getLayerIdsInVisible()
+      // eslint-disable-next-line no-unused-vars
+      const flipToVisible = _.intersect(Array.from(toMakeVisible), existingInvisible)
+
+      // A2: load missing and add vector layer
+      // eslint-disable-next-line no-unused-vars
+      const toBeLoaded = _.difference(Array.from(toMakeVisible), existingInvisible)
+
+      // B: tracks to hide
+      // eslint-disable-next-line no-unused-vars
+      const toHide = tvm.toBeHiddenIdList
+
+      const resultSet = await getGeoJson(toMakeVisible)
       const geoJColl = new GeoJsonCollection(resultSet)
       const overallBbox = geoJColl.boundingBox()
       this.mmap.setMapView(overallBbox)

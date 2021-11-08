@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+const _ = require('lodash')
 
 Vue.use(Vuex)
 
@@ -12,9 +13,11 @@ export default new Vuex.Store(
       redrawTracksOnMap: false
     },
     mutations: {
+      // for track metadata only
       setLoadedTracks (state, trackList) {
         state.loadedTracks = trackList
       },
+      // for track metadata only
       setTrackLoadStatus (state, status) {
         state.trackLoadStatus = status
       },
@@ -37,7 +40,20 @@ export default new Vuex.Store(
         commit('setLoadedTracks', trackList)
         commit('setTrackLoadStatus', 'loaded')
         commit('redrawTracksOnMapFlag', true)
+      },
+      async clearTracks ({ commit, state }, loadFunction) {
+        commit('setTrackLoadStatus', 'loading')
+        commit('setLoadedTracks', [])
+        commit('setTrackLoadStatus', 'loaded')
+        commit('redrawTracksOnMapFlag', true)
       }
+
+    },
+    getters: {
+      getLoadedTrackIds: state => {
+        return _.map(state.loadedTracks, (x) => { return x.id })
+      }
+
     }
   }
 )

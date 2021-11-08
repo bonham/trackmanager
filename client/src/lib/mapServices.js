@@ -11,6 +11,7 @@ class ManagedMap {
     this.map = this._createMap()
     // should be defined outside map and passed to map
     this.standardStyle = this._createStandardStyle()
+    this.layerMap = new Map() // ids are keys, values are layers
   }
 
   _createMap (center = [0, 0], zoom = 0) {
@@ -53,9 +54,44 @@ class ManagedMap {
     )
   }
 
-  drawTrack (geoJson) {
-    const vectorLayer = createLayer(geoJson, this.standardStyle)
+  addTrackLayer (geoJsonWithId) { // geojsonwithid: { id: id, geojson: geojson }
+    const geojson = geoJsonWithId.geojson
+    const id = geoJsonWithId.id
+
+    if (this.layerMap.has(id)) {
+      console.log(`An attempt was made to add layer with ${id}, but a layer with this id already exists in map`)
+      return
+    }
+    const vectorLayer = createLayer(geojson, this.standardStyle)
     this.map.addLayer(vectorLayer)
+    // add to map
+    this.layerMap.set(id, vectorLayer)
+  }
+
+  setVisible (id) {
+    const layer = this.layerMap.get(id)
+    if (layer === undefined) throw new Error(`Attempt to look up nonexisting layer with id ${id}`)
+    layer.setVisible(true)
+  }
+
+  setInvisible (id) {
+    const layer = this.layerMap.get(id)
+    if (layer === undefined) throw new Error(`Attempt to look up nonexisting layer with id ${id}`)
+    layer.setVisible(false)
+  }
+
+  getLayerIds () {
+    return Array.from(this.layerMap.keys())
+  }
+
+  getLayerIdsVisible () {
+    const allIds = this.getLayerIds()
+    return _.filter(allIds, el => { return el.getVisible() })
+  }
+
+  getLayerIdsInVisible () {
+    const allIds = this.getLayerIds()
+    return _.reject(allIds, el => { return el.getVisible() })
   }
 
   zoomOut (scale = 0.97) {

@@ -63,6 +63,11 @@ router.post('/geojson/', async (req, res) => {
       throw new Error('Ids does not contain array')
     }
 
+    // zero payload
+    if (ids.length === 0) {
+      res.json([])
+    }
+
     // validate integer
     const notIntegerList = _.reject(ids, (x) => (_.isInteger(x)))
     if (notIntegerList.length) throw Error('Found non integer elements in payload')

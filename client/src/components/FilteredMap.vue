@@ -76,7 +76,12 @@ export default {
       // A2: load missing and add vector layer
       // eslint-disable-next-line no-unused-vars
       const toBeLoaded = _.difference(Array.from(toMakeVisible), existingInvisible)
-      const resultSet = await getGeoJson(toBeLoaded)
+      let resultSet
+      if (toBeLoaded.length > 0) {
+        resultSet = await getGeoJson(toBeLoaded)
+      } else {
+        resultSet = []
+      }
       const overallBbox = new GeoJsonCollection(resultSet).boundingBox()
       resultSet.forEach(result => { this.mmap.addTrackLayer(result) })
       this.mmap.setMapView(overallBbox)

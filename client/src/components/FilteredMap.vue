@@ -6,7 +6,7 @@
   </div>
 </template>
 <script>
-import { ManagedMap, GeoJsonCollection } from '@/lib/mapServices.js'
+import { ManagedMap, ExtentCollection } from '@/lib/mapServices.js'
 import { TrackVisibilityManager } from '@/lib/mapStateHelpers.js'
 import { getGeoJson } from '@/lib/trackServices.js'
 import { mapMutations, mapState, mapGetters } from 'vuex'
@@ -82,15 +82,22 @@ export default {
       } else {
         resultSet = []
       }
-      const overallBbox = new GeoJsonCollection(resultSet).boundingBox()
       resultSet.forEach(result => { this.mmap.addTrackLayer(result) })
-      this.mmap.setMapView(overallBbox)
-      this.mmap.zoomOut()
 
       // B: tracks to hide
       // eslint-disable-next-line no-unused-vars
       const toHide = tvm.toBeHiddenIdList
       _.forEach(toHide, (id) => { this.mmap.setInvisible(id) })
+
+      // set extent and zoom out
+      const visibleIds = this.mmap.getLayerIdsVisible()
+      const extentList = _.map(visibleIds, (id) => {
+        return this.mmap.getTrackLayer(id).getSource().getExtent()
+      })
+      const overallBbox = new ExtentCollection(extentList).boundingBox()
+      console.log(overallBbox)
+      this.mmap.setMapView(overallBbox)
+      this.mmap.zoomOut()
 
       this.redrawTracksOnMapFlag(false)
     },

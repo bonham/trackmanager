@@ -38,13 +38,24 @@ class ManagedMap {
     })
   }
 
-  // set map view from bounding box
-  setMapView (bbox) {
+  // set map view from bounding box in EPSG:4326
+  setMapViewBbox (bbox) {
     const extent = transformExtent(
       bbox,
       'EPSG:4326',
       'EPSG:3857'
     )
+    const mapSize = this.map.getSize()
+    const view = this.map.getView()
+
+    view.fit(
+      extent,
+      mapSize
+    )
+  }
+
+  // set map view from extent in map projection EPSG:3857
+  setMapView (extent) {
     const mapSize = this.map.getSize()
     const view = this.map.getView()
 
@@ -128,6 +139,20 @@ function createLayer (geoJson, style) {
   return vectorLayer
 }
 
+class ExtentCollection {
+  constructor (extentList) { // one extent is: [minx, miny, maxx, maxy]
+    this.extentList = extentList
+  }
+
+  boundingBox () {
+    const l = this.extentList
+    const left = _.min(_.map(l, (x) => { return x[0] }))
+    const bottom = _.min(_.map(l, (x) => { return x[1] }))
+    const right = _.max(_.map(l, (x) => { return x[2] }))
+    const top = _.max(_.map(l, (x) => { return x[3] }))
+    return [left, bottom, right, top]
+  }
+}
 class GeoJsonCollection {
   constructor (geoJsonList) {
     this.geoJsonList = geoJsonList
@@ -144,4 +169,4 @@ class GeoJsonCollection {
   }
 }
 
-export { ManagedMap, GeoJsonCollection }
+export { ManagedMap, GeoJsonCollection, ExtentCollection }

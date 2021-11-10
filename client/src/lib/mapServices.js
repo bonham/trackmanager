@@ -116,6 +116,21 @@ class ManagedMap {
       { zoom: view.getZoom() * scale }
     )
   }
+
+  setExtentAndZoomOut () {
+    const visibleIds = this.getLayerIdsVisible()
+    const extentList = []
+    for (const id of visibleIds) {
+      extentList.push(
+        this.getTrackLayer(id).getSource().getExtent()
+      )
+    }
+    const overallBbox = new ExtentCollection(extentList).boundingBox()
+    if (overallBbox != null) {
+      this.setMapView(overallBbox)
+      this.zoomOut()
+    }
+  }
 }
 
 // create a layer from a geojson

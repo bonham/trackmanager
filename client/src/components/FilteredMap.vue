@@ -6,7 +6,7 @@
   </div>
 </template>
 <script>
-import { ManagedMap, ExtentCollection } from '@/lib/mapServices.js'
+import { ManagedMap } from '@/lib/mapServices.js'
 import { TrackVisibilityManager } from '@/lib/mapStateHelpers.js'
 import { getGeoJson } from '@/lib/trackServices.js'
 import { mapMutations, mapState, mapGetters } from 'vuex'
@@ -14,6 +14,11 @@ const _ = require('lodash')
 
 export default {
   name: 'FilteredMap',
+  data: function () {
+    return {
+      drawnOnce: false
+    }
+  },
   computed: {
     ...mapGetters({
       shouldBeVisibleIds: 'getLoadedTrackIds'
@@ -88,16 +93,9 @@ export default {
       console.log('To be hidden: ', toHide)
       _.forEach(toHide, function (id) { mmap.setInvisible(id) })
 
-      // set extent and zoom out
-      const visibleIds = mmap.getLayerIdsVisible()
-      const extentList = _.map(visibleIds, (id) => {
-        return mmap.getTrackLayer(id).getSource().getExtent()
-      })
-      const overallBbox = new ExtentCollection(extentList).boundingBox()
-      console.log('overallbox', overallBbox)
-      if (overallBbox != null) {
-        mmap.setMapView(overallBbox)
-        mmap.zoomOut()
+      if (!this.drawnOnce) {
+        mmap.setExtentAndZoomOut()
+        this.drawnOnce = true
       }
 
       this.redrawTracksOnMapFlag(false)

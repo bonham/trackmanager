@@ -85,6 +85,10 @@ describe('geojson collection and bounding box', () => {
     const ec = new ExtentCollection([bbox1, bbox3])
     expect(ec.boundingBox()).toEqual(bboxexpectedg1g3)
   })
+  test('extent collection empty lilst', () => {
+    const ec = new ExtentCollection([])
+    expect(ec.boundingBox()).toBeNull()
+  })
   test('geojson collection 1 2', () => {
     const gjc = new GeoJsonCollection([gList1, gList2])
     expect(gjc.boundingBox()).toEqual(bboxexpectedg1g2)

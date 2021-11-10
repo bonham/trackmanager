@@ -146,6 +146,7 @@ class ExtentCollection {
 
   boundingBox () {
     const l = this.extentList
+    if (l.length === 0) return null
     const left = _.min(_.map(l, (x) => { return x[0] }))
     const bottom = _.min(_.map(l, (x) => { return x[1] }))
     const right = _.max(_.map(l, (x) => { return x[2] }))

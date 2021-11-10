@@ -60,44 +60,45 @@ export default {
       this.mmap = new ManagedMap()
     },
     redrawTracks: async function () {
+      const mmap = this.mmap
       const tvm = new TrackVisibilityManager(
-        this.mmap.getLayerIdsVisible(),
-        this.shouldBeVisibleIds
+        mmap.getLayerIdsVisible(),
+        this.shouldBeVisibleIds,
+        mmap.getLayerIds()
       )
 
-      // A: tracks to make visible
-      const toMakeVisible = tvm.deltaToBeEnabledIdList
-
       // A1: set existing visible
-      const existingInvisible = this.mmap.getLayerIdsInVisible()
-      const flipToVisible = _.intersection(Array.from(toMakeVisible), existingInvisible)
-      _.forEach(flipToVisible, (id) => { this.mmap.setVisible(id) })
+      const toggleIds = tvm.toggleToVisible()
+      console.log('Toggle: ', toggleIds)
+      _.forEach(toggleIds, function (id) { mmap.setVisible(id) })
 
-      // A2: load missing and add vector layer
-      // eslint-disable-next-line no-unused-vars
-      const toBeLoaded = _.difference(Array.from(toMakeVisible), existingInvisible)
+      // A2: load missing and add vector layer to map
+      const toBeLoaded = tvm.toBeLoaded()
+      console.log('To be loaded: ', toBeLoaded)
       let resultSet
       if (toBeLoaded.length > 0) {
         resultSet = await getGeoJson(toBeLoaded)
       } else {
         resultSet = []
       }
-      resultSet.forEach(result => { this.mmap.addTrackLayer(result) })
+      resultSet.forEach(result => { mmap.addTrackLayer(result) })
 
       // B: tracks to hide
-      // eslint-disable-next-line no-unused-vars
-      const toHide = tvm.toBeHiddenIdList
-      _.forEach(toHide, (id) => { this.mmap.setInvisible(id) })
+      const toHide = tvm.toBeHidden()
+      console.log('To be hidden: ', toHide)
+      _.forEach(toHide, function (id) { mmap.setInvisible(id) })
 
       // set extent and zoom out
-      const visibleIds = this.mmap.getLayerIdsVisible()
+      const visibleIds = mmap.getLayerIdsVisible()
       const extentList = _.map(visibleIds, (id) => {
-        return this.mmap.getTrackLayer(id).getSource().getExtent()
+        return mmap.getTrackLayer(id).getSource().getExtent()
       })
       const overallBbox = new ExtentCollection(extentList).boundingBox()
-      console.log(overallBbox)
-      this.mmap.setMapView(overallBbox)
-      this.mmap.zoomOut()
+      console.log('overallbox', overallBbox)
+      if (overallBbox != null) {
+        mmap.setMapView(overallBbox)
+        mmap.zoomOut()
+      }
 
       this.redrawTracksOnMapFlag(false)
     },

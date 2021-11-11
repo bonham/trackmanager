@@ -8,7 +8,9 @@ on:
     branches: [ master ]
   pull_request:
     branches: [ master ]
-
+defaults:
+  run:
+    working-directory: client
 jobs:
   build:
 

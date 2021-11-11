@@ -8,11 +8,11 @@ on:
     branches: [ master ]
   pull_request:
     branches: [ master ]
-defaults:
-  run:
-    working-directory: client
 jobs:
   build:
+    defaults:
+      run:
+        working-directory: dart_project
 
     runs-on: ubuntu-latest
 

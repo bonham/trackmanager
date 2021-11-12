@@ -17,6 +17,16 @@
       :fields="trackTableFields"
       primary-key="id"
     >
+      <template #cell(name)="row">
+        <span
+          v-if="loadingStateById[row.item.id]"
+        >
+          <b-skeleton />
+        </span>
+        <span v-else>
+          {{ row.item.name }}
+        </span>
+      </template>
       <template #cell(cbutton)="row">
         <b-button
           @click="cleanUpText(row.item)"
@@ -29,10 +39,11 @@
 </template>
 
 <script>
-import { BTableLite, BButton, BIconArrowLeft } from 'bootstrap-vue'
+import { BTableLite, BButton, BIconArrowLeft, BSkeleton } from 'bootstrap-vue'
 import { getAllTracks, updateTrack } from '@/lib/trackServices.js'
 import { mapActions, mapGetters, mapState } from 'vuex'
 import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'
+const _ = require('lodash')
 
 const trackTableFields = [
   {
@@ -73,11 +84,13 @@ export default {
     BTableLite,
     BButton,
     BIconArrowLeft,
+    BSkeleton,
     TrackManagerNavBar
   },
   data () {
     return {
-      trackTableFields: trackTableFields
+      trackTableFields: trackTableFields,
+      loadingStateById: {}
     }
   },
   computed: { // TODO: computed makes not much sense here
@@ -101,6 +114,16 @@ export default {
   created: async function () {
     // load data into store
     await this.loadTracks(getAllTracks).catch(e => console.error(e))
+    const loadingStateById = _.reduce(
+      this.niceItems,
+      function (result, value) {
+        const id = value.id
+        result[id] = false
+        return result
+      },
+      {}
+    )
+    this.loadingStateById = loadingStateById
   },
   methods: {
     ...mapActions([
@@ -111,6 +134,8 @@ export default {
       'getTrackById'
     ]),
     cleanUpText: async function (item) {
+      const id = item.id
+      this.loadingStateById[id] = true
       let convertedName = item.src
       const datePattern = /\d{8}/
       const match = convertedName.match(datePattern)
@@ -124,10 +149,11 @@ export default {
 
       // Update track in store and on server
       this.modifyTrack({
-        id: item.id,
+        id: id,
         props: { name: convertedName },
         updateFunction: updateTrack
       })
+      this.loadingStateById[id] = false
     },
     cleanAll: function () {
       this.niceItems.forEach(item => {

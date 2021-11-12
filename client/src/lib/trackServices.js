@@ -51,6 +51,7 @@ async function getGeoJson (idList) {
 // /// Update Track
 async function updateTrack (track, attributes) {
   const id = track.id
+  console.log('track id in trackServices/updateTrack', id)
   const data = _.pick(track, attributes)
 
   const mybody = {

@@ -31,10 +31,15 @@
 <script>
 import { BTableLite, BButton, BIconArrowLeft } from 'bootstrap-vue'
 import { getAllTracks, updateTrack } from '@/lib/trackServices.js'
-import { mapActions, mapState } from 'vuex'
+import { mapActions, mapGetters, mapState } from 'vuex'
 import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'
 
 const trackTableFields = [
+  {
+    key: 'id',
+    label: 'Id',
+    tdClass: 'align-middle'
+  },
   {
     key: 'name',
     label: 'Name',
@@ -80,16 +85,8 @@ export default {
       'loadedTracks',
       'trackLoadStatus'
     ]),
-    trackFlatList () {
-      const keys = Object.keys(this.loadedTracks).sort()
-      const r = []
-      keys.forEach(key => {
-        r.push(this.loadedTracks[key])
-      })
-      return r
-    },
     niceItems () {
-      return this.trackFlatList.map(t => {
+      return this.loadedTracks.map(t => {
         const o = {}
         o.id = t.id
         o.name = t.name
@@ -103,11 +100,15 @@ export default {
   },
   created: async function () {
     // load data into store
-    await this.loadTracks(getAllTracks)
+    await this.loadTracks(getAllTracks).catch(e => console.error(e))
   },
   methods: {
     ...mapActions([
-      'loadTracks'
+      'loadTracks',
+      'modifyTrack'
+    ]),
+    ...mapGetters([
+      'getTrackById'
     ]),
     cleanUpText: async function (item) {
       let convertedName = item.src
@@ -121,24 +122,15 @@ export default {
       convertedName = convertedName.replace(/\.gpx$/i, '') // strip file suffix
       convertedName = convertedName.trim() // Trim space at begin or end
 
-      // Update track on server
-      const thisTrack = this.loadedTracks[item.id]
-      thisTrack.name = convertedName
-
-      try {
-        const success = await updateTrack(thisTrack, ['name'])
-        if (success) {
-          // display on page
-          item.name = convertedName
-        } else {
-          console.error(`Could not update track ${item.id}`)
-        }
-      } catch (err) {
-        console.error(err)
-      }
+      // Update track in store and on server
+      this.modifyTrack({
+        id: item.id,
+        props: { name: convertedName },
+        updateFunction: updateTrack
+      })
     },
     cleanAll: function () {
-      this.trackFlatList.forEach(item => {
+      this.niceItems.forEach(item => {
         this.cleanUpText(item)
       })
     }

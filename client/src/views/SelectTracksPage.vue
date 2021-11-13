@@ -29,8 +29,16 @@
       >
         None
       </b-button>
+      <b-button
+        class="m-2"
+      >
+        Dummy
+      </b-button>
     </div>
-    <div class="split flex-grow-1 d-flex flex-row minheight-0">
+    <div
+      class="split flex-grow-1 d-flex  minheight-0"
+      :class="[flexBoxFlowClass]"
+    >
       <div
         id="leftpanel"
         class="overflow-auto minheight-0"
@@ -66,17 +74,38 @@ export default {
     BContainer,
     BButton
   },
+  data: function () {
+    return {
+      flexBoxFlowClass: 'flex-row',
+      splitDirectionOption: 'horizontal'
+    }
+  },
   computed: {
     ...mapState([
       'loadedTracks'
     ])
   },
+  created () {
+    const mediaQueryString = '(orientation: portrait)'
+    const mqList = window.matchMedia(mediaQueryString)
+    const orientation = mqList.matches ? 'portrait' : 'landscape'
+
+    if (orientation === 'portrait') {
+      this.flexBoxFlowClass = 'flex-column'
+      this.splitDirectionOption = 'vertical'
+    } else {
+      this.flexBoxFlowClass = 'flex-row'
+      this.splitDirectionOption = 'horizontal'
+    }
+  },
   mounted: function () {
     // split should definitely run before the map is attached to the div
     // so when map is run through nextTick - then let's not run split in nexttick - otherwise
     // it runs to early and map is not correctly rendered
-    Split(['#leftpanel', '#rightpanel'], {
-      onDragEnd: this.resizeMapFlag
+    this.split = Split(['#leftpanel', '#rightpanel'], {
+      onDragEnd: this.resizeMapFlag,
+      direction: this.splitDirectionOption
+
     })
   },
   methods: {
@@ -119,6 +148,11 @@ export default {
 .gutter.gutter-horizontal {
     background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAIklEQVQoU2M4c+bMfxAGAgYYmwGrIIiDjrELjpo5aiZeMwF+yNnOs5KSvgAAAABJRU5ErkJggg==');
     cursor: col-resize;
+}
+
+.gutter.gutter-vertical {
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAFAQMAAABo7865AAAABlBMVEVHcEzMzMzyAv2sAAAAAXRSTlMAQObYZgAAABBJREFUeF5jOAMEEAIEEFwAn3kMwcB6I2AAAAAASUVORK5CYII=');
+    cursor: row-resize;
 }
 
 </style>

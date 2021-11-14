@@ -1,5 +1,5 @@
 import './mockJsdom'
-import { mount, createLocalVue } from '@vue/test-utils'
+import { shallowMount, createLocalVue } from '@vue/test-utils'
 import Vuex from 'vuex'
 import SelectTracksPage from '@/views/SelectTracksPage.vue'
 
@@ -23,7 +23,7 @@ describe('SelectTracksPage', () => {
       const mockMatchMedia = jest.fn(() => { return { matches: false } })
       global.window.matchMedia = mockMatchMedia
 
-      const wrapper = mount(SelectTracksPage, { store, localVue, attachTo: elem })
+      const wrapper = shallowMount(SelectTracksPage, { store, localVue, attachTo: elem })
       expect(wrapper.vm.currentLayout).toEqual('landscape')
     })
   })

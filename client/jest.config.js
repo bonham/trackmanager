@@ -2,7 +2,19 @@
 /** @type {import('@jest/types').Config.InitialOptions} */
 const config = {
   verbose: true,
-  transformIgnorePatterns: ['/node_modules/(?!ol.*)']
+  transformIgnorePatterns: ['/node_modules/(?!ol.*)'],
+  transform: {
+    '^.+\\.js$': 'babel-jest',
+    '^.+\\.vue$': 'vue-jest'
+  },
+  moduleNameMapper: {
+    '@/(.*)$': '<rootDir>/src/$1'
+  },
+  moduleFileExtensions: [
+    'js',
+    'json',
+    'vue'
+  ]
 
 }
 

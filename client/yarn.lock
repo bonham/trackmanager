@@ -2818,6 +2818,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@vue/test-utils@npm:^1.2.2":
+  version: 1.2.2
+  resolution: "@vue/test-utils@npm:1.2.2"
+  dependencies:
+    dom-event-types: ^1.0.0
+    lodash: ^4.17.15
+    pretty: ^2.0.0
+  peerDependencies:
+    vue: 2.x
+    vue-template-compiler: ^2.x
+  checksum: a373ffe4fa35f6d7d64eb5547ba656f8445b23923a5735d64b378061b378515139044fe73d931de1130fd310ad692e575f4826db03a4289737eaa4ff5a45dc98
+  languageName: node
+  linkType: hard
+
 "@vue/web-component-wrapper@npm:^1.2.0":
   version: 1.3.0
   resolution: "@vue/web-component-wrapper@npm:1.3.0"
@@ -6009,6 +6023,13 @@ __metadata:
   dependencies:
     utila: ~0.4
   checksum: ea52fe303f5392e48dea563abef0e6fb3a478b8dbe3c599e99bb5d53981c6c38fc4944e56bb92a8ead6bb989d10b7914722ae11febbd2fd0910e33b9fc4aaa77
+  languageName: node
+  linkType: hard
+
+"dom-event-types@npm:^1.0.0":
+  version: 1.0.0
+  resolution: "dom-event-types@npm:1.0.0"
+  checksum: 2178593e0991525e6450ff525427e64ae987fa7fa847f28977750ec73fe6fae4dda04660c2ba224f94dc9384a8dba6b99c6a513a4ab7104322e67e6d806f94db
   languageName: node
   linkType: hard
 
@@ -12502,7 +12523,7 @@ fsevents@~2.3.1:
   languageName: node
   linkType: hard
 
-"pretty@npm:2.0.0":
+"pretty@npm:2.0.0, pretty@npm:^2.0.0":
   version: 2.0.0
   resolution: "pretty@npm:2.0.0"
   dependencies:
@@ -14875,6 +14896,7 @@ resolve@1.1.7:
     "@vue/cli-plugin-unit-jest": ^4.5.15
     "@vue/cli-service": ~4
     "@vue/eslint-config-standard": "*"
+    "@vue/test-utils": ^1.2.2
     async: ^3.2.1
     babel-eslint: ^10
     bootstrap: ^4.6.0

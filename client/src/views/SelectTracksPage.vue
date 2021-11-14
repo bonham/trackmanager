@@ -59,8 +59,8 @@
 <script>
 import { BContainer, BButton } from 'bootstrap-vue'
 import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'
-import FilteredTrackList from '../components/FilteredTrackList.vue'
-import FilteredMap from '../components/FilteredMap.vue'
+import FilteredTrackList from '@/components/FilteredTrackList.vue'
+import FilteredMap from '@/components/FilteredMap.vue'
 import { getTracksByYear, getAllTracks } from '@/lib/trackServices.js'
 import { mapActions, mapState, mapMutations } from 'vuex'
 import Split from 'split.js'

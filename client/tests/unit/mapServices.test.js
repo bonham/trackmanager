@@ -1,6 +1,6 @@
 
 import './mockJsdom'
-import { ManagedMap, GeoJsonCollection, ExtentCollection } from '../../src/lib/mapServices'
+import { ManagedMap, GeoJsonCollection, ExtentCollection } from '@/lib/mapServices'
 const _ = require('lodash')
 
 let mm

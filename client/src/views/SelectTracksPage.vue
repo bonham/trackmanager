@@ -31,6 +31,7 @@
       </b-button>
       <b-button
         class="m-2"
+        @click="toggleLayout()"
       >
         Dummy
       </b-button>
@@ -65,6 +66,12 @@ import { getTracksByYear, getAllTracks } from '@/lib/trackServices.js'
 import { mapActions, mapState, mapMutations } from 'vuex'
 import Split from 'split.js'
 
+function getViewPortOrientation () {
+  const mediaQueryString = '(orientation: portrait)'
+  const mqList = window.matchMedia(mediaQueryString)
+  const orientation = mqList.matches ? 'portrait' : 'landscape'
+  return orientation
+}
 export default {
   name: 'SelectTracksPage',
   components: {
@@ -76,27 +83,24 @@ export default {
   },
   data: function () {
     return {
-      flexBoxFlowClass: 'flex-row',
-      splitDirectionOption: 'horizontal'
+      currentLayout: 'landscape'
     }
   },
   computed: {
     ...mapState([
       'loadedTracks'
-    ])
+    ]),
+    flexBoxFlowClass () {
+      return this.currentLayout === 'portrait' ? 'flex-column' : 'flex-row'
+    },
+    splitDirectionOption () {
+      return this.currentLayout === 'portrait' ? 'vertical' : 'horizontal'
+    }
+
   },
   created () {
-    const mediaQueryString = '(orientation: portrait)'
-    const mqList = window.matchMedia(mediaQueryString)
-    const orientation = mqList.matches ? 'portrait' : 'landscape'
-
-    if (orientation === 'portrait') {
-      this.flexBoxFlowClass = 'flex-column'
-      this.splitDirectionOption = 'vertical'
-    } else {
-      this.flexBoxFlowClass = 'flex-row'
-      this.splitDirectionOption = 'horizontal'
-    }
+    const orientation = getViewPortOrientation()
+    this.currentLayout = orientation
   },
   mounted: function () {
     // split should definitely run before the map is attached to the div
@@ -125,6 +129,9 @@ export default {
     },
     loadAllTracks: function () {
       this.loadTracks(getAllTracks).catch(e => console.error(e))
+    },
+    toggleLayout () {
+      return this.currentLayout === 'portrait' ? 'landscape' : 'portrait'
     }
   }
 }

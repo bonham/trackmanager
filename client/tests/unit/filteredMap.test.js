@@ -7,7 +7,7 @@ const localVue = createLocalVue()
 
 localVue.use(Vuex)
 
-describe('Hmm', () => {
+describe('FilteredMap', () => {
   test('Trivial mount', () => {
     return import('../../src/store.js').then((module) => {
       const store = module.default

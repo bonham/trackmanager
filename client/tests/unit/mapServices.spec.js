@@ -1,5 +1,5 @@
-
 import './mockJsdom'
+import { expect } from 'chai'
 import { ManagedMap, GeoJsonCollection, ExtentCollection } from '@/lib/mapServices'
 const _ = require('lodash')
 
@@ -52,49 +52,49 @@ beforeEach(() => {
   bboxexpectedg1g3 = [-30, -10.1, 40, 80]
 })
 
-test('Simple', () => {
-  expect(mm.map).toBeDefined()
+it('Simple', () => {
+  expect(mm.map).exist
 })
 
-test('Add layer', () => {
+it('Add layer', () => {
   mm = new ManagedMap()
   mm.addTrackLayer({ id: 8, geojson: geojson })
   mm.addTrackLayer({ id: 9, geojson: geojson })
-  expect(mm.getLayerIds()).toEqual([8, 9])
+  expect(mm.getLayerIds()).to.deep.equal([8, 9])
   // eslint-disable-next-line no-unused-vars
   const l9 = mm.getTrackLayer(9)
   mm.setInvisible(9)
-  expect(mm.getLayerIdsVisible()).toEqual([8])
-  expect(mm.getLayerIdsInVisible()).toEqual([9])
+  expect(mm.getLayerIdsVisible()).to.deep.equal([8])
+  expect(mm.getLayerIdsInVisible()).to.deep.equal([9])
 })
 
-test('createLayer-getextent', () => {
+it('createLayer-getextent', () => {
   mm = new ManagedMap()
   mm.addTrackLayer({ id: 8, geojson: geojson })
   const layer = mm.getTrackLayer(8)
   const source = layer.getSource()
-  expect(source).not.toBeNull()
+  expect(source).not.to.be.null
 })
 
 describe('geojson collection and bounding box', () => {
-  test('extent collection 1 2', () => {
+  it('extent collection 1 2', () => {
     const ec = new ExtentCollection([bbox1, bbox2])
-    expect(ec.boundingBox()).toEqual(bboxexpectedg1g2)
+    expect(ec.boundingBox()).to.deep.equal(bboxexpectedg1g2)
   })
-  test('extent collection 1 3', () => {
+  it('extent collection 1 3', () => {
     const ec = new ExtentCollection([bbox1, bbox3])
-    expect(ec.boundingBox()).toEqual(bboxexpectedg1g3)
+    expect(ec.boundingBox()).to.deep.equal(bboxexpectedg1g3)
   })
-  test('extent collection empty lilst', () => {
+  it('extent collection empty lilst', () => {
     const ec = new ExtentCollection([])
-    expect(ec.boundingBox()).toBeNull()
+    expect(ec.boundingBox()).to.be.null
   })
-  test('geojson collection 1 2', () => {
+  it('geojson collection 1 2', () => {
     const gjc = new GeoJsonCollection([gList1, gList2])
-    expect(gjc.boundingBox()).toEqual(bboxexpectedg1g2)
+    expect(gjc.boundingBox()).to.deep.equal(bboxexpectedg1g2)
   })
-  test('geojson collection 1 3', () => {
+  it('geojson collection 1 3', () => {
     const gjc = new GeoJsonCollection([gList1, gList3])
-    expect(gjc.boundingBox()).toEqual(bboxexpectedg1g3)
+    expect(gjc.boundingBox()).to.deep.equal(bboxexpectedg1g3)
   })
 })

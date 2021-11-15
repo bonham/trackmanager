@@ -1,6 +1,6 @@
 Object.defineProperty(URL, 'createObjectURL', {
   writable: true,
-  value: jest.fn()
+  value: () => {}
 })
 
-HTMLCanvasElement.prototype.getContext = jest.fn()
+HTMLCanvasElement.prototype.getContext = () => {}

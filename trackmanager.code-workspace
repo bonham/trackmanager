@@ -12,6 +12,8 @@
 		"javascript.format.enable": false,
 		"npm.packageManager": "yarn",
 		"eslint.format.enable": true,
-		"eslint.packageManager": "yarn"
+		"eslint.packageManager": "yarn",
+		"mocha.files.glob": "tests/**/*.js",
+		"mocha.path": "./node_modules/.bin/vue-cli-service"
 	}
 }

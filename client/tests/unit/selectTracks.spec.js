@@ -1,4 +1,5 @@
 import './mockJsdom'
+import { expect } from 'chai'
 import { shallowMount, createLocalVue } from '@vue/test-utils'
 import Vuex from 'vuex'
 import SelectTracksPage from '@/views/SelectTracksPage.vue'
@@ -24,21 +25,20 @@ function mountAndRunTest (testFunction) {
 describe('SelectTracksPage', () => {
   beforeEach(() => {
     // mock window.matchMedia
-    const mockMatchMedia = jest.fn(() => { return { matches: false } })
+    const mockMatchMedia = () => { return { matches: false } }
     global.window.matchMedia = mockMatchMedia
   })
-  afterEach(() => {
-    jest.restoreAllMocks()
-  })
-  test('Initial layout', () => {
-    mountAndRunTest((wrapper) => {
-      expect(wrapper.vm.currentLayout).toEqual('landscape')
+  it('Initial layout', () => {
+    return mountAndRunTest((wrapper) => {
+      expect(wrapper.vm.currentOrientation).to.deep.equal('landscape')
+      wrapper.vm.setLayout('landscape')
+      expect(wrapper.vm.currentOrientation).to.deep.equal('landscape')
     })
   })
-  test('Layout after toggle', () => {
-    mountAndRunTest((wrapper) => {
-      wrapper.vm.toggleLayout()
-      expect(wrapper.vm.currentLayout).toEqual('portrait')
+  it('Layout after toggle', () => {
+    return mountAndRunTest((wrapper) => {
+      wrapper.vm.setLayout('portrait')
+      expect(wrapper.vm.currentOrientation).to.deep.equal('portrait')
     })
   })
 })

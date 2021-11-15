@@ -1,6 +1,7 @@
 import { TrackVisibilityManager } from '../../src/lib/mapStateHelpers.js'
+import { expect } from 'chai'
 
-test('TrackVisibilityManager', () => {
+it('TrackVisibilityManager', () => {
   const currentlyVisible = [3, 5, 6, 7, 10]
   const toBeVisible = [1, 2, 3, 4, 10]
   const alreadyLoaded = [1, 3, 4, 5, 6, 7, 10, 12]
@@ -16,10 +17,10 @@ test('TrackVisibilityManager', () => {
   // eslint-disable-next-line no-unused-vars
   const tvm = new TrackVisibilityManager(currentlyVisible, toBeVisible, alreadyLoaded)
 
-  expect(tvm.deltaToBeEnabled()).toEqual(deltaToBeEnabled)
-  expect(tvm.alreadyVisible()).toEqual(alreadyVisible)
-  expect(tvm.toBeHidden()).toEqual(toBeHidden)
-  expect(tvm.toggleToVisible()).toEqual(toggleToVisible)
-  expect(tvm.toBeLoaded()).toEqual(toBeLoaded)
-  expect(tvm.loadedButDoNotToggle()).toEqual(loadedButDoNotToggle)
+  expect(tvm.deltaToBeEnabled()).to.deep.equal(deltaToBeEnabled)
+  expect(tvm.alreadyVisible()).to.deep.equal(alreadyVisible)
+  expect(tvm.toBeHidden()).to.deep.equal(toBeHidden)
+  expect(tvm.toggleToVisible()).to.deep.equal(toggleToVisible)
+  expect(tvm.toBeLoaded()).to.deep.equal(toBeLoaded)
+  expect(tvm.loadedButDoNotToggle()).to.deep.equal(loadedButDoNotToggle)
 })

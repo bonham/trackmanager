@@ -31,9 +31,9 @@
       </b-button>
       <b-button
         class="m-2"
-        @click="toggleLayout()"
+        @click="setLayout(currentOrientation === 'portrait' ? 'landscape' : 'portrait')"
       >
-        Dummy
+        Orientation
       </b-button>
     </div>
     <div
@@ -83,7 +83,7 @@ export default {
   },
   data: function () {
     return {
-      currentLayout: 'landscape'
+      currentOrientation: 'landscape'
     }
   },
   computed: {
@@ -91,16 +91,15 @@ export default {
       'loadedTracks'
     ]),
     flexBoxFlowClass () {
-      return this.currentLayout === 'portrait' ? 'flex-column' : 'flex-row'
+      return this.currentOrientation === 'portrait' ? 'flex-column' : 'flex-row'
     },
     splitDirectionOption () {
-      return this.currentLayout === 'portrait' ? 'vertical' : 'horizontal'
+      return this.currentOrientation === 'portrait' ? 'vertical' : 'horizontal'
     }
 
   },
   created () {
-    const orientation = getViewPortOrientation()
-    this.currentLayout = orientation
+    this.currentOrientation = getViewPortOrientation()
   },
   mounted: function () {
     // split should definitely run before the map is attached to the div
@@ -109,7 +108,6 @@ export default {
     this.split = Split(['#leftpanel', '#rightpanel'], {
       onDragEnd: this.resizeMapFlag,
       direction: this.splitDirectionOption
-
     })
   },
   methods: {
@@ -130,8 +128,21 @@ export default {
     loadAllTracks: function () {
       this.loadTracks(getAllTracks).catch(e => console.error(e))
     },
-    toggleLayout () {
-      return this.currentLayout === 'portrait' ? 'landscape' : 'portrait'
+    setLayout (wantedOrientation) {
+      if (wantedOrientation === this.currentOrientation) {
+        return
+      }
+      // destroy the managed split
+      this.split.destroy()
+      // change flex layout
+      this.currentOrientation = wantedOrientation
+      // create new split
+      this.split = Split(['#leftpanel', '#rightpanel'], {
+        onDragEnd: this.resizeMapFlag,
+        direction: this.splitDirectionOption
+      })
+      // resize map
+      this.resizeMapFlag()
     }
   }
 }

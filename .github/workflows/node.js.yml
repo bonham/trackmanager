@@ -31,5 +31,5 @@ jobs:
       working-directory: ./client
     - run: yarn build
       working-directory: ./client
-    - run: yarn test
+    - run: yarn test:unit
       working-directory: ./client

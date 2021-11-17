@@ -3,7 +3,8 @@ module.exports = {
   root: true,
 
   env: {
-    browser: true
+    browser: true,
+    jest: true
   },
 
   extends: [
@@ -32,10 +33,16 @@ module.exports = {
         '**/tests/unit/**/*.spec.{j,t}s?(x)'
       ],
       env: {
-        mocha: true
-      },
-      rules: {
-        'no-unused-expressions': 'off'
+        jest: true
+      }
+    },
+    {
+      files: [
+        '**/__tests__/*.{j,t}s?(x)',
+        '**/tests/unit/**/*.spec.{j,t}s?(x)'
+      ],
+      env: {
+        jest: true
       }
     }
   ]

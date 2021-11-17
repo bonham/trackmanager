@@ -122,7 +122,7 @@ export default {
       300
     )
     this.resizeObserver = new ResizeObserver(debouncedOnResize)
-      .observe(this.$refs.outerSplitFrame)
+    this.resizeObserver.observe(this.$refs.outerSplitFrame)
   },
   methods: {
     ...mapActions([

@@ -26,6 +26,8 @@ describe('SelectTracksPage', () => {
     // mock window.matchMedia
     const mockMatchMedia = jest.fn(() => { return { matches: false } })
     global.window.matchMedia = mockMatchMedia
+    const ResizeObserverMock = jest.fn(() => { return { observe: () => {}, unobserve: () => {} } })
+    global.window.ResizeObserver = ResizeObserverMock
   })
   afterEach(() => {
     jest.restoreAllMocks()

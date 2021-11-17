@@ -37,6 +37,7 @@
       </b-button>
     </div>
     <div
+      ref="outerSplitFrame"
       class="split flex-grow-1 d-flex  minheight-0"
       :class="[flexBoxFlowClass]"
     >
@@ -65,6 +66,7 @@ import FilteredMap from '@/components/FilteredMap.vue'
 import { getTracksByYear, getAllTracks } from '@/lib/trackServices.js'
 import { mapActions, mapState, mapMutations } from 'vuex'
 import Split from 'split.js'
+const _ = require('lodash')
 
 function getViewPortOrientation () {
   const mediaQueryString = '(orientation: portrait)'
@@ -72,6 +74,7 @@ function getViewPortOrientation () {
   const orientation = mqList.matches ? 'portrait' : 'landscape'
   return orientation
 }
+
 export default {
   name: 'SelectTracksPage',
   components: {
@@ -83,7 +86,8 @@ export default {
   },
   data: function () {
     return {
-      currentOrientation: 'landscape'
+      currentOrientation: 'landscape',
+      resizeObserver: null
     }
   },
   computed: {
@@ -101,6 +105,9 @@ export default {
   created () {
     this.currentOrientation = getViewPortOrientation()
   },
+  beforeDestroy () {
+    this.resizeObserver.unobserve(this.$refs.outerSplitFrame)
+  },
   mounted: function () {
     // split should definitely run before the map is attached to the div
     // so when map is run through nextTick - then let's not run split in nexttick - otherwise
@@ -109,6 +116,13 @@ export default {
       onDragEnd: this.resizeMapFlag,
       direction: this.splitDirectionOption
     })
+    // observe if window aspect is changing, then call setLayout
+    const debouncedOnResize = _.debounce(
+      this.onResize,
+      300
+    )
+    this.resizeObserver = new ResizeObserver(debouncedOnResize)
+      .observe(this.$refs.outerSplitFrame)
   },
   methods: {
     ...mapActions([
@@ -143,6 +157,10 @@ export default {
       })
       // resize map
       this.resizeMapFlag()
+    },
+    onResize () {
+      console.log('resize1')
+      this.setLayout(getViewPortOrientation())
     }
   }
 }

@@ -64,6 +64,9 @@ export default {
     initMap: function () {
       this.mmap = new ManagedMap()
     },
+    setExtentAndZoomOut: function () {
+      this.mmap.setExtentAndZoomOut()
+    },
     redrawTracks: async function () {
       const mmap = this.mmap
       const tvm = new TrackVisibilityManager(
@@ -94,7 +97,7 @@ export default {
       _.forEach(toHide, function (id) { mmap.setInvisible(id) })
 
       if (!this.drawnOnce) {
-        mmap.setExtentAndZoomOut()
+        this.setExtentAndZoomOut()
         this.drawnOnce = true
       }
 
@@ -121,6 +124,11 @@ export default {
   width: 100%;
   height: 100%;
 }
+.map-control-expand {
+  top: 4em;
+  left: .5em;
+}
+
   @import '../../node_modules/ol/ol.css'
 
 </style>

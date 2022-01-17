@@ -1,4 +1,6 @@
 import { DateTime } from 'luxon'
+const _ = require('lodash')
+
 const sprintf = require('sprintf-js').sprintf
 /**
  * Track class is representing a gpx track.
@@ -62,11 +64,18 @@ class Track {
     const thms = this.timeLengthHms()
     return sprintf('%d:%02d', thms.hours, thms.minutes)
   }
+
+  secondsSinceEpoch () {
+    return (this.time ? this.time.toSeconds() : 0)
+  }
 }
 
 class TrackCollection {
   constructor (listOfTracks) {
-    this.tlist = listOfTracks
+    this.tlist = []
+    for (const track of listOfTracks) {
+      this.add(track)
+    }
   }
 
   add (track) {
@@ -80,6 +89,11 @@ class TrackCollection {
   distance () {
     const sum = this.members().reduce((s, tr) => s + tr.distance(), 0)
     return sum
+  }
+
+  yearList () {
+    const yList = this.members().map(x => x.year())
+    return _.uniq(yList)
   }
 }
 

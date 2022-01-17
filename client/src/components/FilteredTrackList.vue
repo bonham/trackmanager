@@ -10,7 +10,7 @@
           flush
         >
           <b-list-group-item
-            v-for="track in loadedTracks"
+            v-for="track in loadedTracksSorted"
             :key="track.id"
           >
             <span class="text-body">{{ track.name }}, </span>
@@ -36,7 +36,12 @@ export default {
     ...mapState([
       'loadedTracks',
       'trackLoadStatus'
-    ])
+    ]),
+    loadedTracksSorted () {
+      const l = this.loadedTracks
+      l.sort((a, b) => (a.secondsSinceEpoch() - b.secondsSinceEpoch()))
+      return l
+    }
   }
 }
 </script>

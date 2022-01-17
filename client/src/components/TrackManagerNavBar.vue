@@ -5,25 +5,27 @@
     >
       <b-navbar-nav class="my-2 my-md-0 mr-md-3">
         <b-nav-item
-          to="/"
-          class="p-2 text-dark"
+          :to="navPath('/')"
+          class="
+          p-2
+          text-dark"
         >
           Select
         </b-nav-item>
         <b-nav-item
-          to="/toverview"
+          :to="navPath('toverview')"
           class="p-2 text-dark"
         >
           By Year
         </b-nav-item>
         <b-nav-item
-          to="/track_multi_edit"
+          :to="navPath('track_multi_edit')"
           class="p-2 text-dark"
         >
           Edit
         </b-nav-item>
         <b-nav-item
-          to="/upload"
+          :to="navPath('upload')"
           class="p-2 text-dark"
         >
           Upload
@@ -42,6 +44,16 @@ export default {
     BNavbar,
     BNavbarNav,
     BNavItem
+  },
+  methods: {
+    navPath (path) {
+      return {
+        path,
+        query: {
+          id: 'randomstring'
+        }
+      }
+    }
   }
 }
 </script>

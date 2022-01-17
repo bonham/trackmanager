@@ -6,10 +6,12 @@
     <track-manager-nav-bar />
     <div>
       <b-button
+        v-for="year in years"
+        :key="year"
         class="m-2"
-        @click="loadComplete(2021)"
+        @click="loadComplete(year)"
       >
-        2021
+        {{ year }}
       </b-button>
       <b-button
         class="m-2"
@@ -63,6 +65,7 @@ import { BContainer, BButton } from 'bootstrap-vue'
 import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'
 import FilteredTrackList from '@/components/FilteredTrackList.vue'
 import FilteredMap from '@/components/FilteredMap.vue'
+import { TrackCollection } from '@/lib/Track'
 import { getTracksByYear, getAllTracks } from '@/lib/trackServices.js'
 import { mapActions, mapState, mapMutations } from 'vuex'
 import Split from 'split.js'
@@ -87,7 +90,8 @@ export default {
   data: function () {
     return {
       currentOrientation: 'landscape',
-      resizeObserver: null
+      resizeObserver: null,
+      years: []
     }
   },
   computed: {
@@ -104,6 +108,7 @@ export default {
   },
   created () {
     this.currentOrientation = getViewPortOrientation()
+    this.getYears()
   },
   beforeDestroy () {
     this.resizeObserver.unobserve(this.$refs.outerSplitFrame)
@@ -133,6 +138,13 @@ export default {
       // indicate the map that it needs a resize
       'resizeMapFlag'
     ]),
+
+    getYears () {
+      getAllTracks().then((trackList) => {
+        const tColl = new TrackCollection(trackList)
+        this.years = tColl.yearList().sort((a, b) => b - a)
+      })
+    },
 
     loadComplete: function (year) {
     // call loadTracks action from store while injecting the load function

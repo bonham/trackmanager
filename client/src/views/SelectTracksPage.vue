@@ -87,6 +87,12 @@ export default {
     BContainer,
     BButton
   },
+  props: {
+    sid: {
+      type: String,
+      default: ''
+    }
+  },
   data: function () {
     return {
       currentOrientation: 'landscape',

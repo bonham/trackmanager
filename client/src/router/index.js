@@ -3,12 +3,17 @@ import VueRouter from 'vue-router'
 
 Vue.use(VueRouter)
 
+const DEFAULT_SID = '8pz22a'
 const routes = [
   {
     path: '/',
-    alias: '/select_tracks',
+    redirect: `/select_tracks/sid/${DEFAULT_SID}`
+  },
+  {
+    path: '/select_tracks/sid/:sid',
     name: 'SelectTracksPage',
-    component: () => import(/* webpackChunkName: "SelectTracksPage" */ '../views/SelectTracksPage.vue')
+    component: () => import(/* webpackChunkName: "SelectTracksPage" */ '../views/SelectTracksPage.vue'),
+    props: true
   },
   {
     path: '/toverview',

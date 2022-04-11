@@ -1,0 +1,4 @@
+{
+  "jest.jestCommandLine": "node ./node_modules/@vue/cli-service/bin/vue-cli-service.js test:unit",
+  "jest.debugMode": true,
+}

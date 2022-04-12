@@ -11,14 +11,29 @@ async function getAllTracks () {
 }
 
 // /// Get tracks by year
-async function getTracksByYear (year) {
+async function getTracksByYear (year, sid) {
   if (!_.isInteger(year)) throw Error('Year is not integer: ' + year)
-  const url = '/api/tracks/byyear/' + year
-  const response = await fetch(url)
-  const responseJson = await response.json()
+  const url = `/api/tracks/byyear/${year}/sid/${sid}`
+  let response
+  try {
+    response = await fetch(url)
+  } catch (error) {
+    console.error('Error when fetching tracks by year', error)
+    return []
+  }
+  if (!response.ok) {
+    console.error('Response not ok when fetching tracks by year', response)
+    return []
+  }
 
-  const trackArray = responseJson.map(t => new Track(t))
-  return trackArray
+  try {
+    const responseJson = await response.json()
+    const trackArray = responseJson.map(t => new Track(t))
+    return trackArray
+  } catch (error) {
+    console.error('Error when processing result from http call', error)
+    return []
+  }
 }
 
 // /// Get geojson by id

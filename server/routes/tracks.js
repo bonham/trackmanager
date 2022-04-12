@@ -109,7 +109,7 @@ router.get('/byid/:trackId', async (req, res) => {
 })
 
 /// // Get list of tracks by year
-router.get('/byyear/:year', async (req, res) => {
+router.get('/byyear/:year/sid/:sid', async (req, res) => {
   const year = req.params.year
 
   const query = 'select id, name, length, src,' +

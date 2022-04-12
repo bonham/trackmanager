@@ -154,11 +154,12 @@ export default {
 
     loadComplete: function (year) {
     // call loadTracks action from store while injecting the load function
-      const loadFunction = function () { return getTracksByYear(year) }
-      this.loadTracks(loadFunction).catch(e => console.error(e))
+      const sid = this.sid
+      const loadFunction = function () { return getTracksByYear(year, sid) }
+      this.loadTracks(loadFunction).catch(e => console.error('Error loading tracks by year', e))
     },
     loadAllTracks: function () {
-      this.loadTracks(getAllTracks).catch(e => console.error(e))
+      this.loadTracks(getAllTracks).catch(e => console.error('Error loading all tracks', e))
     },
     setLayout (wantedOrientation) {
       if (wantedOrientation === this.currentOrientation) {

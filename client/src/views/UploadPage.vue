@@ -1,6 +1,6 @@
 <template>
   <div>
-    <track-manager-nav-bar />
+    <track-manager-nav-bar :sid="sid" />
     <h1 class="mt-4 mb-4">
       Upload new Tracks
     </h1>
@@ -93,6 +93,13 @@ export default {
     BFormFile,
     UploadItem,
     TrackManagerNavBar
+  },
+
+  props: {
+    sid: {
+      type: String,
+      default: ''
+    }
   },
 
   data () {

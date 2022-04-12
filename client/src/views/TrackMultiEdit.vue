@@ -1,6 +1,6 @@
 <template>
   <div>
-    <track-manager-nav-bar />
+    <track-manager-nav-bar :sid="sid" />
     <h1 class="mt-4 mb-4">
       Edit Tracks
     </h1>
@@ -86,6 +86,12 @@ export default {
     BIconArrowLeft,
     BSkeleton,
     TrackManagerNavBar
+  },
+  props: {
+    sid: {
+      type: String,
+      default: ''
+    }
   },
   data () {
     return {

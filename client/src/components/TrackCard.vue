@@ -22,7 +22,7 @@
           class="d-flex align-items-center justify-content-end"
         >
           <b-link
-            :to="'/track/'+track.id"
+            :to="'/track/'+track.id+'/sid/'+sid"
           >
             <b-icon
               icon="chevron-right"
@@ -54,7 +54,12 @@ export default {
     track: {
       type: Track,
       default: null
+    },
+    sid: {
+      type: String,
+      default: ''
     }
+
   }
 }
 </script>

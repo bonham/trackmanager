@@ -3,7 +3,7 @@
     id="root"
     class="d-flex flex-column vh-100"
   >
-    <track-manager-nav-bar />
+    <track-manager-nav-bar :sid="sid" />
     <div>
       <b-button
         v-for="year in years"

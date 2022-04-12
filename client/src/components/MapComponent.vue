@@ -81,6 +81,10 @@ export default {
     trackId: {
       type: Number,
       required: true
+    },
+    sid: {
+      type: String,
+      default: ''
     }
   },
   data () {

@@ -10,6 +10,7 @@
         :coll="trCol.collection"
         :label="trCol.year"
         :collapsed="isYearCollapsed(trCol.year)"
+        :sid="sid"
       />
     </div>
   </div>
@@ -27,6 +28,12 @@ export default {
   components: {
     TrackSection
     // TrackSection: () => import(/* webpackChunkName: "TrackSection" */ '@/components/TrackSection.vue')
+  },
+  props: {
+    sid: {
+      type: String,
+      default: ''
+    }
   },
   computed: {
     ...mapState([

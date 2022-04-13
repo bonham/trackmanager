@@ -90,7 +90,7 @@ router.post('/geojson/', async (req, res) => {
 })
 
 /// // Get single track id
-router.get('/byid/:trackId', async (req, res) => {
+router.get('/byid/:trackId/sid/:sid', async (req, res) => {
   const trackId = req.params.trackId
 
   const query = 'select id, name, length, src,' +

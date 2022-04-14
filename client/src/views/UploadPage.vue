@@ -41,9 +41,9 @@ import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'
 
 const FORMPARAM = 'newtrack'
 const WORKERS = 4
-const UP_URL = '/api/tracks/addtrack'
-// const UP_URL = 'https://httpbin.org/status/500'
-// const UP_URL = 'https://httpbin.org/delay/3'
+const UP_BASE_URL = '/api/tracks/addtrack'
+// const UP_BASE_URL = 'https://httpbin.org/status/500'
+// const UP_BASE_URL = 'https://httpbin.org/delay/3'
 
 async function uploadFile (fileIdObject, uploadUrl, formParameter) {
   // construct body
@@ -73,7 +73,8 @@ const workerQueue = queue(function (fileIdObject, callback) {
   fileIdObject.status = 'Processing'
 
   // do the work in async way
-  uploadFile(fileIdObject, UP_URL, FORMPARAM)
+  const url = `${UP_BASE_URL}/sid/${fileIdObject.sid}`
+  uploadFile(fileIdObject, url, FORMPARAM)
     .then(json => {
       console.log(`Finished uploading key ${fileIdObject.key}, Message: ${json.message}`)
       fileIdObject.status = 'Completed'
@@ -131,6 +132,7 @@ export default {
       // take files from input
       this.files.forEach(thisFile => {
         const fileIdObject = this.makeFileIdObject(thisFile)
+        fileIdObject.sid = this.sid
         this.addItemToQueue(fileIdObject)
       })
     },
@@ -144,7 +146,8 @@ export default {
         fileBlob: file,
         error: null,
         details: null,
-        status: 'Queued'
+        status: 'Queued',
+        sid: null
       }
     },
 

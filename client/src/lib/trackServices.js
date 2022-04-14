@@ -2,8 +2,8 @@ import { Track } from '@/lib/Track.js'
 const _ = require('lodash')
 
 // /// Get all tracks
-async function getAllTracks () {
-  const response = await fetch('/api/tracks/getall')
+async function getAllTracks (sid) {
+  const response = await fetch(`/api/tracks/getall/sid/${sid}`)
   const responseJson = await response.json()
 
   const trackArray = responseJson.map(t => new Track(t))
@@ -37,10 +37,10 @@ async function getTracksByYear (year, sid) {
 }
 
 // /// Get geojson by id
-async function getGeoJson (idList) {
+async function getGeoJson (idList, sid) {
   const payload = { ids: idList }
 
-  const url = '/api/tracks/geojson/'
+  const url = `/api/tracks/geojson/sid/${sid}`
   const req = new Request(
     url,
     {
@@ -64,7 +64,7 @@ async function getGeoJson (idList) {
 }
 
 // /// Update Track
-async function updateTrack (track, attributes) {
+async function updateTrack (track, attributes, sid) {
   const id = track.id
   console.log('track id in trackServices/updateTrack', id)
   const data = _.pick(track, attributes)
@@ -75,7 +75,7 @@ async function updateTrack (track, attributes) {
   }
 
   const req = new Request(
-    `/api/tracks/byid/${id}`,
+    `/api/tracks/byid/${id}/sid/${sid}`,
     {
       method: 'PUT',
       headers: {

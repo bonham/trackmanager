@@ -63,7 +63,9 @@ export default {
     }
   },
   created: async function () {
-    await this.loadTracks(getAllTracks)
+    const sid = this.sid
+    const loadFunc = () => getAllTracks(sid)
+    await this.loadTracks(loadFunc)
   },
   methods: {
     isYearCollapsed (thisYear) {

@@ -119,7 +119,9 @@ export default {
   },
   created: async function () {
     // load data into store
-    await this.loadTracks(getAllTracks).catch(e => console.error(e))
+    const sid = this.sid
+    const loadFunc = () => getAllTracks(sid)
+    await this.loadTracks(loadFunc).catch(e => console.error(e))
     const loadingStateById = _.reduce(
       this.niceItems,
       function (result, value) {
@@ -154,10 +156,12 @@ export default {
       convertedName = convertedName.trim() // Trim space at begin or end
 
       // Update track in store and on server
+      const sid = this.sid
+      const updFunc = (track, attributes) => updateTrack(track, attributes, sid)
       this.modifyTrack({
         id: id,
         props: { name: convertedName },
-        updateFunction: updateTrack
+        updateFunction: updFunc
       })
       this.loadingStateById[id] = false
     },

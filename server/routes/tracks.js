@@ -25,7 +25,7 @@ const pool = new Pool({
 })
 
 /// // Get all tracks
-router.get('/getall', async (req, res) => {
+router.get('/getall/sid/:sid', async (req, res) => {
   try {
     const queryResult = await pool.query(
       'select id, name, length, src, ' +
@@ -50,7 +50,7 @@ router.get('/getall', async (req, res) => {
 })
 
 /// // Get Geojson for a list of ids. Payload { ids: [..] }
-router.post('/geojson/', async (req, res) => {
+router.post('/geojson/sid/:sid', async (req, res) => {
   try {
     // validate expected property
     if (!(_.has(req.body, 'ids'))) {
@@ -127,7 +127,7 @@ router.get('/byyear/:year/sid/:sid', async (req, res) => {
 })
 
 /// // Update single track
-router.put('/byid/:trackId', async (req, res) => {
+router.put('/byid/:trackId/sid/:sid', async (req, res) => {
   const updateAttributes = req.body.updateAttributes
   const data = req.body.data
 
@@ -190,7 +190,7 @@ const upload = multer(
 )
 
 // POST route for obtaining the contents of the file
-router.post('/addtrack', upload.single('newtrack'), function (req, res, next) {
+router.post('/addtrack/sid/:sid', upload.single('newtrack'), function (req, res, next) {
   console.log(req.file, req.file.size)
   const filePath = req.file.path
   const uploadDir = req.file.destination

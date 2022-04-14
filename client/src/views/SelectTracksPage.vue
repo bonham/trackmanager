@@ -54,7 +54,7 @@
         id="rightpanel"
         class="d-flex"
       >
-        <filtered-map />
+        <filtered-map :sid="sid" />
       </div>
     </div>
   </b-container>
@@ -146,7 +146,7 @@ export default {
     ]),
 
     getYears () {
-      getAllTracks().then((trackList) => {
+      getAllTracks(this.sid).then((trackList) => {
         const tColl = new TrackCollection(trackList)
         this.years = tColl.yearList().sort((a, b) => b - a)
       })
@@ -159,7 +159,9 @@ export default {
       this.loadTracks(loadFunction).catch(e => console.error('Error loading tracks by year', e))
     },
     loadAllTracks: function () {
-      this.loadTracks(getAllTracks).catch(e => console.error('Error loading all tracks', e))
+      const sid = this.sid
+      const loadFunc = () => getAllTracks(sid)
+      this.loadTracks(loadFunc).catch(e => console.error('Error loading all tracks', e))
     },
     setLayout (wantedOrientation) {
       if (wantedOrientation === this.currentOrientation) {

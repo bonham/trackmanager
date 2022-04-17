@@ -24,13 +24,35 @@ const pool = new Pool({
   database: database
 })
 
+async function getSchema (sid) {
+  const sql = `select schema from tm_meta.schema_sid where sid = '${sid}'`
+  let queryResult
+  try {
+    queryResult = await pool.query(sql)
+  } catch (err) {
+    console.error('Could not get schema from sid', err)
+  }
+  const rows = queryResult.rows
+  if (rows.length !== 1) {
+    console.error(`Sid ${sid} not found in DB`)
+    return null
+  }
+  return rows[0].schema
+}
+
 /// // Get all tracks
 router.get('/getall/sid/:sid', async (req, res) => {
+  const sid = req.params.sid
+  const schema = await getSchema(sid)
+  if (schema === null) {
+    res.status(404).send('HTTP 404 - Invalid')
+    return
+  }
   try {
     const queryResult = await pool.query(
       'select id, name, length, src, ' +
       'time, timelength, ascent ' +
-      'from tracks order by time')
+      `from ${schema}.tracks order by time`)
 
     const rows = queryResult.rows
     // convert geojson string to object
@@ -190,7 +212,14 @@ const upload = multer(
 )
 
 // POST route for obtaining the contents of the file
-router.post('/addtrack/sid/:sid', upload.single('newtrack'), function (req, res, next) {
+router.post('/addtrack/sid/:sid', upload.single('newtrack'), async function (req, res, next) {
+  const sid = req.params.sid
+  const schema = await getSchema(sid)
+  if (schema === null) {
+    res.status(404).send('HTTP 404 - Invalid')
+    return
+  }
+
   console.log(req.file, req.file.size)
   const filePath = req.file.path
   const uploadDir = req.file.destination
@@ -200,7 +229,8 @@ router.post('/addtrack/sid/:sid', upload.single('newtrack'), function (req, res,
     gpx2dbScript,
     // '--createdb',
     filePath,
-    database
+    database,
+    schema
   ]
 
   // run child process - execute python executable to process the upload

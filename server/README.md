@@ -1,0 +1,1 @@
+Copy config_dist.js to config.js and modify according to your python and postgres installation

@@ -15,12 +15,6 @@
       </b-button>
       <b-button
         class="m-2"
-        @click="loadComplete(2020)"
-      >
-        2020
-      </b-button>
-      <b-button
-        class="m-2"
         @click="loadAllTracks()"
       >
         All

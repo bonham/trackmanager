@@ -10,7 +10,7 @@ on:
     branches: [ master ]
 
 jobs:
-  build:
+  build_client:
 
     runs-on: ubuntu-latest
 
@@ -33,3 +33,27 @@ jobs:
       working-directory: ./client
     - run: yarn test:unit
       working-directory: ./client
+
+  build_server:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [14.x]
+        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v2
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'yarn'
+        cache-dependency-path: ./server/yarn.lock
+    - run: yarn install --immutable
+      working-directory: ./server
+    - run: yarn build
+      working-directory: ./server
+    - run: yarn test:unit
+      working-directory: ./server

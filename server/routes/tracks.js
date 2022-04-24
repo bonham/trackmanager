@@ -11,7 +11,6 @@ router.use(express.json()) // use builtin json body parser
 
 const { Pool } = require('pg')
 const { execFileSync } = require('child_process')
-const getSchema = require('../lib/getSchema')
 const createSidValidationChain = require('../lib/sidResolverMiddleware')
 const trackIdValidationMiddleware = require('../lib/trackIdValidationMiddleware')
 const yearValidation = require('../lib/yearValidation')
@@ -150,37 +149,42 @@ router.get(
   })
 
 /// // Update single track
-router.put('/byid/:trackId/sid/:sid', async (req, res) => {
-  const updateAttributes = req.body.updateAttributes
-  const data = req.body.data
+router.put(
+  '/byid/:trackId/sid/:sid',
+  sidValidationChain,
+  trackIdValidationMiddleware,
+  async (req, res) => {
+    const schema = req.schema
+    const updateAttributes = req.body.updateAttributes
+    const data = req.body.data
 
-  // filter out attributes not in data object
-  const existingAttributes = updateAttributes.filter(x => (!(data[x] === undefined)))
+    // filter out attributes not in data object
+    const existingAttributes = updateAttributes.filter(x => (!(data[x] === undefined)))
 
-  // compose query
-  const halfCoalesced = existingAttributes.map(x => `${x} = '${data[x]}'`)
-  const setExpression = halfCoalesced.join(',')
+    // compose query
+    const halfCoalesced = existingAttributes.map(x => `${x} = '${data[x]}'`)
+    const setExpression = halfCoalesced.join(',')
 
-  const query = `update tracks set ${setExpression} where id = ${req.params.trackId}`
-  console.log(query)
+    const query = `update ${schema}.tracks set ${setExpression} where id = ${req.params.trackId}`
+    console.log(query)
 
-  try {
-    const queryResult = await pool.query(query)
-    const rowC = queryResult.rowCount
-    if (rowC !== 1) {
-      const msg = `Row count was not 1 after update statement, instead it was ${rowC}`
-      console.err(msg)
-      res.status(500).send(msg)
+    try {
+      const queryResult = await pool.query(query)
+      const rowC = queryResult.rowCount
+      if (rowC !== 1) {
+        const msg = `Row count was not 1 after update statement, instead it was ${rowC}`
+        console.err(msg)
+        res.status(500).send(msg)
+      }
+    } catch (err) {
+      console.trace('Exception handling trace')
+      console.err('Can not update tracks table')
+      console.error(err)
+      res.status(500).send(err)
     }
-  } catch (err) {
-    console.trace('Exception handling trace')
-    console.err('Can not update tracks table')
-    console.error(err)
-    res.status(500).send(err)
-  }
 
-  res.end()
-})
+    res.end()
+  })
 
 /// // Create new track from file upload
 // initialization - multer - it is a middleware for uploading files
@@ -213,44 +217,43 @@ const upload = multer(
 )
 
 // POST route for obtaining the contents of the file
-router.post('/addtrack/sid/:sid', upload.single('newtrack'), async function (req, res, next) {
-  const sid = req.params.sid
-  const schema = await getSchema(sid, pool)
-  if (schema === null) {
-    res.status(404).send('HTTP 404 - Invalid')
-    return
-  }
+router.post(
+  '/addtrack/sid/:sid',
+  sidValidationChain,
+  upload.single('newtrack'),
+  async function (req, res, next) {
+    const schema = req.schema
 
-  console.log(req.file, req.file.size)
-  const filePath = req.file.path
-  const uploadDir = req.file.destination
+    console.log(req.file, req.file.size)
+    const filePath = req.file.path
+    const uploadDir = req.file.destination
 
-  // build arguments
-  const args = [
-    gpx2dbScript,
-    // '--createdb',
-    filePath,
-    database,
-    schema
-  ]
+    // build arguments
+    const args = [
+      gpx2dbScript,
+      // '--createdb',
+      filePath,
+      database,
+      schema
+    ]
 
-  // run child process - execute python executable to process the upload
-  try {
-    const out = execFileSync(python, args)
-    console.log('Stdout ', out)
-  } catch (err) {
-    console.log('Child error', err.message)
-    res.status(422).json({ message: err.message })
-    return
-  } finally {
+    // run child process - execute python executable to process the upload
+    try {
+      const out = execFileSync(python, args)
+      console.log('Stdout ', out)
+    } catch (err) {
+      console.log('Child error', err.message)
+      res.status(422).json({ message: err.message })
+      return
+    } finally {
     // cleanup of file and directory
-    fsprom.rmdir(uploadDir, { recursive: true }).then(
-      (result) => console.log('Success'),
-      (err) => { console.log('Error, could not remove directory', err) }
-    )
-  }
+      fsprom.rmdir(uploadDir, { recursive: true }).then(
+        (result) => console.log('Success'),
+        (err) => { console.log('Error, could not remove directory', err) }
+      )
+    }
 
-  res.json({ message: 'ok' })
-})
+    res.json({ message: 'ok' })
+  })
 
 module.exports = router

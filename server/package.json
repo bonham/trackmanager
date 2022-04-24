@@ -5,7 +5,8 @@
   "scripts": {
     "develop": "nodemon ./bin/www",
     "start": "node ./bin/www",
-    "test": "jest"
+    "test": "jest",
+    "copyconfig": "node ./bin/copyconfig.js"
   },
   "dependencies": {
     "cookie-parser": "^1.4.6",

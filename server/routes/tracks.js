@@ -16,7 +16,13 @@ const trackIdValidationMiddleware = require('../lib/trackIdValidationMiddleware'
 const yearValidation = require('../lib/yearValidation')
 
 // configuration for data upload
-const config = require('../config')
+let config
+try {
+  config = require('../config')
+} catch (e) {
+  console.log('config.js was not found. Please copy config_dist.js to config.js and adjust according to your needs')
+  console.log(e)
+}
 const { tracks: { database, uploadDir, python, gpx2dbScript } } = config
 const uploadDirPrefix = 'trackmanager-upload-'
 

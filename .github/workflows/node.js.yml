@@ -53,5 +53,7 @@ jobs:
         cache-dependency-path: ./server/yarn.lock
     - run: yarn install --immutable
       working-directory: ./server
+    - run: yarn run copyconfig
+      working-directory: ./server
     - run: yarn test
       working-directory: ./server

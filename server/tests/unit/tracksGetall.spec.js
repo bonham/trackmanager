@@ -1,9 +1,9 @@
 const request = require('supertest')
 const app = require('../../app')
-const { Pool } = require('pg')
 jest.mock('pg')
-jest.mock('../../lib/getSchema', () => jest.fn())
-const getSchema = require('../../lib/getSchema')
+const { Pool } = require('pg')
+jest.mock('../../lib/getSchema')
+const mockGetSchema = require('../../lib/getSchema')
 
 const mockTrack1 = {
   id: '2',
@@ -22,22 +22,25 @@ const queryMock = jest
   })
 
 describe('tracks - getall', () => {
+  beforeEach(
+    mockGetSchema.mockReset()
+  )
   test('correctsid', async () => {
-    getSchema.mockResolvedValue('myschema')
+    mockGetSchema.mockResolvedValue('myschema')
     const response = await request(app)
       .get('/api/tracks/getall/sid/correct')
       .expect(200)
 
     expect(response.body).toHaveLength(1)
     expect(response.body).toEqual(expect.arrayContaining([mockTrack1]))
-    expect(getSchema).toHaveBeenCalled()
+    expect(mockGetSchema).toHaveBeenCalled()
   })
   test('wrongsid', async () => {
-    getSchema.mockResolvedValue(null)
+    mockGetSchema.mockResolvedValue(null)
     await request(app)
       .get('/api/tracks/getall/sid/wrong')
       .expect(401)
-    expect(getSchema).toHaveBeenCalled()
+    expect(mockGetSchema).toHaveBeenCalled()
   })
   test('getall nosid', async () => {
     await request(app)

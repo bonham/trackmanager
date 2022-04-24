@@ -29,6 +29,8 @@ jobs:
         cache-dependency-path: ./client/yarn.lock
     - run: yarn install --immutable
       working-directory: ./client
+    - run: yarn build
+      working-directory: ./client
     - run: yarn test:unit
       working-directory: ./client
 
@@ -50,8 +52,6 @@ jobs:
         cache: 'yarn'
         cache-dependency-path: ./server/yarn.lock
     - run: yarn install --immutable
-      working-directory: ./server
-    - run: yarn build
       working-directory: ./server
     - run: yarn test:unit
       working-directory: ./server

@@ -1,50 +1,35 @@
 const getSchema = require('../lib/getSchema')
+const { param, validationResult } = require('express-validator')
 
-function validateSidFormat (req, res, next) {
-  if (!('sid' in req.params)) {
-    console.log('Missing sid')
-    res.status(401).end()
-    return
-  }
-  const sid = req.params.sid
-  const alphanum = /^[a-z0-9]+$/
-  if (!alphanum.test(sid)) {
-    console.log(`Sid value is not alphanumeric: ${sid}`)
-    res.status(401).end()
-    return
-  }
-  next()
-}
-
-async function validateSidExistsGenerator (req, res, next, pool) {
-  const sid = req.params.sid
-  const schema = await getSchema(sid, pool)
-  if (schema === null) {
-    console.log(`Sid ${sid} could not be resolved to schema`)
-    res.status(401).end()
+const handleErrors = (req, res, next) => {
+  const errors = validationResult(req)
+  if (!errors.isEmpty()) {
+    console.log('Sid validation failed', errors.array())
+    return res.status(401).end()
   } else {
-    req.schema = schema
     next()
   }
 }
 
 function createSidValidationChain (pool) {
   return [
-    validateSidFormat,
-    (req, res, next) => validateSidExistsGenerator(req, res, next, pool)
+    param('sid')
+      .exists()
+      .withMessage('Sid does not exist')
+      .isAlphanumeric()
+      .withMessage('Sid is not alphanum')
+      .bail()
+      .custom(async (value, { req }) => {
+        const sid = value
+        const schema = await getSchema(sid, pool)
+        if (schema === null) {
+          throw new Error('Could not resolve schema')
+        } else {
+          req.schema = schema
+        }
+      }),
+    handleErrors
   ]
 }
 
 module.exports = createSidValidationChain
-
-// const { isAlpha, validationResult } = require('express-validator')
-
-// const sidResolver = function (req, res, next) {
-//   // checks if sid present and contains alphanumeric chars only
-//   // if not -> 401
-//   // check if sid can be resolved to schema
-//   // if not -> 401
-//   // schema is passed to next handler
-
-//   const schema = getSchema(sid)
-// }

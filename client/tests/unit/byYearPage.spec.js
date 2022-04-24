@@ -66,11 +66,22 @@ describe('By Year page', () => {
         }
       }
     )
-    const rresult = render(
+    const { findByText, findAllByRole, debug } = render(
       TrackOverviewPage, {
         props: { sid: 'xxxsidxxx' },
         store: store
       })
-    await rresult.findByText('2021')
+    await findByText('2021')
+    const allLinks = await findAllByRole('link')
+    const found = allLinks.find(element => {
+      const c = element.firstElementChild
+      if (c === null) { return false }
+      const a = c.getAttribute('aria-label')
+      if (a === 'chevron right') {
+        return true
+      }
+      return false
+    })
+    debug(found)
   })
 })

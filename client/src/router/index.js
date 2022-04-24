@@ -3,32 +3,41 @@ import VueRouter from 'vue-router'
 
 Vue.use(VueRouter)
 
+const DEFAULT_SID = '8pz22a'
 const routes = [
   {
     path: '/',
-    alias: '/select_tracks',
+    redirect: `/select_tracks/sid/${DEFAULT_SID}`
+  },
+  {
+    path: '/select_tracks/sid/:sid',
     name: 'SelectTracksPage',
-    component: () => import(/* webpackChunkName: "SelectTracksPage" */ '../views/SelectTracksPage.vue')
+    component: () => import(/* webpackChunkName: "SelectTracksPage" */ '../views/SelectTracksPage.vue'),
+    props: true
   },
   {
-    path: '/toverview',
+    path: '/toverview/sid/:sid',
     name: 'TrackOverviewPage',
-    component: () => import(/* webpackChunkName: "TrackOverViewPage" */ '../views/TrackOverviewPage.vue')
+    component: () => import(/* webpackChunkName: "TrackOverViewPage" */ '../views/TrackOverviewPage.vue'),
+    props: true
   },
   {
-    path: '/upload',
+    path: '/upload/sid/:sid',
     name: 'UploadPage',
-    component: () => import(/* webpackChunkName: "UploadPage" */ '../views/UploadPage.vue')
+    component: () => import(/* webpackChunkName: "UploadPage" */ '../views/UploadPage.vue'),
+    props: true
   },
   {
-    path: '/track_multi_edit',
+    path: '/track_multi_edit/sid/:sid',
     name: 'TrackMultiEdit',
-    component: () => import(/* webpackChunkName: "TrackMultiEdit" */ '../views/TrackMultiEdit.vue')
+    component: () => import(/* webpackChunkName: "TrackMultiEdit" */ '../views/TrackMultiEdit.vue'),
+    props: true
   },
   {
-    path: '/track/:id',
+    path: '/track/:id/sid/:sid',
     name: 'TrackDetail',
-    component: () => import(/* webpackChunkName: "TrackDetail" */ '../views/TrackDetail.vue')
+    component: () => import(/* webpackChunkName: "TrackDetail" */ '../views/TrackDetail.vue'),
+    props: true
   }
 ]
 

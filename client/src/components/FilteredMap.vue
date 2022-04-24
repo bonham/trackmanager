@@ -14,6 +14,12 @@ const _ = require('lodash')
 
 export default {
   name: 'FilteredMap',
+  props: {
+    sid: {
+      type: String,
+      default: ''
+    }
+  },
   data: function () {
     return {
       drawnOnce: false
@@ -85,7 +91,7 @@ export default {
       console.log('To be loaded: ', toBeLoaded)
       let resultSet
       if (toBeLoaded.length > 0) {
-        resultSet = await getGeoJson(toBeLoaded)
+        resultSet = await getGeoJson(toBeLoaded, this.sid)
       } else {
         resultSet = []
       }

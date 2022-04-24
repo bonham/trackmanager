@@ -3,7 +3,7 @@
     id="root"
     class="d-flex flex-column vh-100"
   >
-    <track-manager-nav-bar />
+    <track-manager-nav-bar :sid="sid" />
     <div>
       <b-button
         v-for="year in years"
@@ -12,12 +12,6 @@
         @click="loadComplete(year)"
       >
         {{ year }}
-      </b-button>
-      <b-button
-        class="m-2"
-        @click="loadComplete(2020)"
-      >
-        2020
       </b-button>
       <b-button
         class="m-2"
@@ -54,7 +48,7 @@
         id="rightpanel"
         class="d-flex"
       >
-        <filtered-map />
+        <filtered-map :sid="sid" />
       </div>
     </div>
   </b-container>
@@ -86,6 +80,12 @@ export default {
     FilteredMap,
     BContainer,
     BButton
+  },
+  props: {
+    sid: {
+      type: String,
+      default: ''
+    }
   },
   data: function () {
     return {
@@ -140,7 +140,7 @@ export default {
     ]),
 
     getYears () {
-      getAllTracks().then((trackList) => {
+      getAllTracks(this.sid).then((trackList) => {
         const tColl = new TrackCollection(trackList)
         this.years = tColl.yearList().sort((a, b) => b - a)
       })
@@ -148,11 +148,14 @@ export default {
 
     loadComplete: function (year) {
     // call loadTracks action from store while injecting the load function
-      const loadFunction = function () { return getTracksByYear(year) }
-      this.loadTracks(loadFunction).catch(e => console.error(e))
+      const sid = this.sid
+      const loadFunction = function () { return getTracksByYear(year, sid) }
+      this.loadTracks(loadFunction).catch(e => console.error('Error loading tracks by year', e))
     },
     loadAllTracks: function () {
-      this.loadTracks(getAllTracks).catch(e => console.error(e))
+      const sid = this.sid
+      const loadFunc = () => getAllTracks(sid)
+      this.loadTracks(loadFunc).catch(e => console.error('Error loading all tracks', e))
     },
     setLayout (wantedOrientation) {
       if (wantedOrientation === this.currentOrientation) {

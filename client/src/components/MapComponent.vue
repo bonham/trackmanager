@@ -20,10 +20,16 @@ import { mapMutations } from 'vuex'
 
 // }
 
-function setMapViewAndDrawTrack (tid, map) {
-  const url = '/api/tracks/byid/' + tid
+function setMapViewAndDrawTrack (tid, map, sid) {
+  const url = `/api/tracks/byid/${tid}/sid/${sid}`
   fetch(url)
-    .then(response => response.json())
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP error from url ${url}`, response)
+      } else {
+        return response.json()
+      }
+    })
     .then(data => {
       const track = new Track(data)
 
@@ -81,6 +87,10 @@ export default {
     trackId: {
       type: Number,
       required: true
+    },
+    sid: {
+      type: String,
+      default: ''
     }
   },
   data () {
@@ -123,7 +133,7 @@ export default {
       })
       this.map = map
 
-      setMapViewAndDrawTrack(this.trackId, map)
+      setMapViewAndDrawTrack(this.trackId, map, this.sid)
     },
     setTarget: function () {
       this.map.setTarget('mapdiv')

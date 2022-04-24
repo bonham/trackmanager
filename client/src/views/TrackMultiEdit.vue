@@ -1,6 +1,6 @@
 <template>
   <div>
-    <track-manager-nav-bar />
+    <track-manager-nav-bar :sid="sid" />
     <h1 class="mt-4 mb-4">
       Edit Tracks
     </h1>
@@ -87,6 +87,12 @@ export default {
     BSkeleton,
     TrackManagerNavBar
   },
+  props: {
+    sid: {
+      type: String,
+      default: ''
+    }
+  },
   data () {
     return {
       trackTableFields: trackTableFields,
@@ -113,7 +119,9 @@ export default {
   },
   created: async function () {
     // load data into store
-    await this.loadTracks(getAllTracks).catch(e => console.error(e))
+    const sid = this.sid
+    const loadFunc = () => getAllTracks(sid)
+    await this.loadTracks(loadFunc).catch(e => console.error(e))
     const loadingStateById = _.reduce(
       this.niceItems,
       function (result, value) {
@@ -148,10 +156,12 @@ export default {
       convertedName = convertedName.trim() // Trim space at begin or end
 
       // Update track in store and on server
+      const sid = this.sid
+      const updFunc = (track, attributes) => updateTrack(track, attributes, sid)
       this.modifyTrack({
         id: id,
         props: { name: convertedName },
-        updateFunction: updateTrack
+        updateFunction: updFunc
       })
       this.loadingStateById[id] = false
     },

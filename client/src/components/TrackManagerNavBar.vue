@@ -5,7 +5,7 @@
     >
       <b-navbar-nav class="my-2 my-md-0 mr-md-3">
         <b-nav-item
-          :to="navPath('/')"
+          :to="navPath('/select_tracks')"
           class="
           p-2
           text-dark"
@@ -13,19 +13,19 @@
           Select
         </b-nav-item>
         <b-nav-item
-          :to="navPath('toverview')"
+          :to="navPath('/toverview')"
           class="p-2 text-dark"
         >
           By Year
         </b-nav-item>
         <b-nav-item
-          :to="navPath('track_multi_edit')"
+          :to="navPath('/track_multi_edit')"
           class="p-2 text-dark"
         >
           Edit
         </b-nav-item>
         <b-nav-item
-          :to="navPath('upload')"
+          :to="navPath('/upload')"
           class="p-2 text-dark"
         >
           Upload
@@ -45,13 +45,17 @@ export default {
     BNavbarNav,
     BNavItem
   },
+  props: {
+    sid: {
+      type: String,
+      default: ''
+    }
+  },
   methods: {
     navPath (path) {
+      const pathSid = `${path}/sid/${this.sid}`
       return {
-        path,
-        query: {
-          id: 'randomstring'
-        }
+        path: pathSid
       }
     }
   }

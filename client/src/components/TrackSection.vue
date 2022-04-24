@@ -44,6 +44,7 @@
           v-for="item in myDataList"
           :key="item.id"
           :track="item"
+          :sid="sid"
         />
       </div>
     </b-collapse>
@@ -81,6 +82,10 @@ export default {
     collapsed: {
       type: Boolean,
       default: false
+    },
+    sid: {
+      type: String,
+      default: ''
     }
   },
   data () {

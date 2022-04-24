@@ -2,8 +2,8 @@ import { Track } from '@/lib/Track.js'
 const _ = require('lodash')
 
 // /// Get all tracks
-async function getAllTracks () {
-  const response = await fetch('/api/tracks/getall')
+async function getAllTracks (sid) {
+  const response = await fetch(`/api/tracks/getall/sid/${sid}`)
   const responseJson = await response.json()
 
   const trackArray = responseJson.map(t => new Track(t))
@@ -11,21 +11,36 @@ async function getAllTracks () {
 }
 
 // /// Get tracks by year
-async function getTracksByYear (year) {
+async function getTracksByYear (year, sid) {
   if (!_.isInteger(year)) throw Error('Year is not integer: ' + year)
-  const url = '/api/tracks/byyear/' + year
-  const response = await fetch(url)
-  const responseJson = await response.json()
+  const url = `/api/tracks/byyear/${year}/sid/${sid}`
+  let response
+  try {
+    response = await fetch(url)
+  } catch (error) {
+    console.error('Error when fetching tracks by year', error)
+    return []
+  }
+  if (!response.ok) {
+    console.error('Response not ok when fetching tracks by year', response)
+    return []
+  }
 
-  const trackArray = responseJson.map(t => new Track(t))
-  return trackArray
+  try {
+    const responseJson = await response.json()
+    const trackArray = responseJson.map(t => new Track(t))
+    return trackArray
+  } catch (error) {
+    console.error('Error when processing result from http call', error)
+    return []
+  }
 }
 
 // /// Get geojson by id
-async function getGeoJson (idList) {
+async function getGeoJson (idList, sid) {
   const payload = { ids: idList }
 
-  const url = '/api/tracks/geojson/'
+  const url = `/api/tracks/geojson/sid/${sid}`
   const req = new Request(
     url,
     {
@@ -49,7 +64,7 @@ async function getGeoJson (idList) {
 }
 
 // /// Update Track
-async function updateTrack (track, attributes) {
+async function updateTrack (track, attributes, sid) {
   const id = track.id
   console.log('track id in trackServices/updateTrack', id)
   const data = _.pick(track, attributes)
@@ -60,7 +75,7 @@ async function updateTrack (track, attributes) {
   }
 
   const req = new Request(
-    `/api/tracks/byid/${id}`,
+    `/api/tracks/byid/${id}/sid/${sid}`,
     {
       method: 'PUT',
       headers: {

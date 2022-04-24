@@ -11,6 +11,8 @@ router.use(express.json()) // use builtin json body parser
 
 const { Pool } = require('pg')
 const { execFileSync } = require('child_process')
+const getSchema = require('../lib/getSchema')
+const createSidValidationChain = require('../lib/sidResolverMiddleware')
 
 // configuration for data upload
 const config = require('../config')
@@ -18,32 +20,18 @@ const { tracks: { database, uploadDir, python, gpx2dbScript } } = config
 const uploadDirPrefix = 'trackmanager-upload-'
 
 // sql query pool
-const pool = new Pool({
+const poolOptions = {
   user: 'postgres',
   host: 'localhost',
   database: database
-})
-
-async function getSchema (sid) {
-  const sql = `select schema from tm_meta.schema_sid where sid = '${sid}'`
-  let queryResult
-  try {
-    queryResult = await pool.query(sql)
-  } catch (err) {
-    console.error('Could not get schema from sid', err)
-  }
-  const rows = queryResult.rows
-  if (rows.length !== 1) {
-    console.error(`Sid ${sid} not found in DB`)
-    return null
-  }
-  return rows[0].schema
 }
+const pool = new Pool(poolOptions)
+const sidValidationChain = createSidValidationChain(pool)
 
 /// // Get all tracks
-router.get('/getall/sid/:sid', async (req, res) => {
+router.get('/getall/sid/:sid', sidValidationChain, async (req, res) => {
   const sid = req.params.sid
-  const schema = await getSchema(sid)
+  const schema = await getSchema(sid, pool)
   if (schema === null) {
     res.status(404).send('HTTP 404 - Invalid')
     return
@@ -214,7 +202,7 @@ const upload = multer(
 // POST route for obtaining the contents of the file
 router.post('/addtrack/sid/:sid', upload.single('newtrack'), async function (req, res, next) {
   const sid = req.params.sid
-  const schema = await getSchema(sid)
+  const schema = await getSchema(sid, pool)
   if (schema === null) {
     res.status(404).send('HTTP 404 - Invalid')
     return

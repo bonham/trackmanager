@@ -13,6 +13,8 @@ const { Pool } = require('pg')
 const { execFileSync } = require('child_process')
 const getSchema = require('../lib/getSchema')
 const createSidValidationChain = require('../lib/sidResolverMiddleware')
+const trackIdValidationMiddleware = require('../lib/trackIdValidationMiddleware')
+const yearValidation = require('../lib/yearValidation')
 
 // configuration for data upload
 const config = require('../config')
@@ -28,113 +30,124 @@ const poolOptions = {
 const pool = new Pool(poolOptions)
 const sidValidationChain = createSidValidationChain(pool)
 
-/// // Get all tracks
-router.get('/getall/sid/:sid', sidValidationChain, async (req, res) => {
-  const sid = req.params.sid
-  const schema = await getSchema(sid, pool)
-  if (schema === null) {
-    res.status(404).send('HTTP 404 - Invalid')
-    return
-  }
-  try {
-    const queryResult = await pool.query(
-      'select id, name, length, src, ' +
+router.get(
+  '/getall/sid/:sid',
+  sidValidationChain,
+  async (req, res) => {
+    const schema = req.schema
+    try {
+      const queryResult = await pool.query(
+        'select id, name, length, src, ' +
       'time, timelength, ascent ' +
       `from ${schema}.tracks order by time`)
 
-    const rows = queryResult.rows
-    // convert geojson string to object
+      const rows = queryResult.rows
+      // convert geojson string to object
 
-    // for (let i = 0; i < rows.length; i++) {
-    //   const jsonString = rows[i].geojson
-    //   const geoJson = JSON.parse(jsonString)
-    //   rows[i].geojson = geoJson
-    // }
+      // for (let i = 0; i < rows.length; i++) {
+      //   const jsonString = rows[i].geojson
+      //   const geoJson = JSON.parse(jsonString)
+      //   rows[i].geojson = geoJson
+      // }
 
-    res.json(rows)
-  } catch (err) {
-    console.trace('Exception handling trace')
-    console.log(err)
-    res.status(500).send(err.message)
-  }
-})
+      res.json(rows)
+    } catch (err) {
+      console.trace('Exception handling trace')
+      console.log(err)
+      res.status(500).send(err.message)
+    }
+  })
 
 /// // Get Geojson for a list of ids. Payload { ids: [..] }
-router.post('/geojson/sid/:sid', async (req, res) => {
-  try {
+router.post(
+  '/geojson/sid/:sid',
+  sidValidationChain,
+  async (req, res) => {
+    const schema = req.schema
+    try {
     // validate expected property
-    if (!(_.has(req.body, 'ids'))) {
-      throw new Error('Request does not contain expected property')
+      if (!(_.has(req.body, 'ids'))) {
+        throw new Error('Request does not contain expected property')
+      }
+      const ids = req.body.ids
+
+      // validate if value is a list
+      if (!(_.isArray(ids))) {
+        throw new Error('Ids does not contain array')
+      }
+
+      // zero payload
+      if (ids.length === 0) {
+        res.json([])
+      }
+
+      // validate integer
+      const notIntegerList = _.reject(ids, (x) => (_.isInteger(x)))
+      if (notIntegerList.length) throw Error('Found non integer elements in payload')
+
+      const inClause = '(' + ids.join() + ')'
+      const query = 'select id, ST_AsGeoJSON(wkb_geometry,6,3) as geojson ' +
+        `from ${schema}.tracks where id in ${inClause}`
+
+      const queryResult = await pool.query(query)
+      const rows = queryResult.rows
+
+      const rowsWGeoJson = _.map(rows, (x) => ({ id: x.id, geojson: JSON.parse(x.geojson) }))
+
+      res.json(rowsWGeoJson)
+    } catch (err) {
+      console.trace('Exception handling trace')
+      console.log(err)
+      res.status(500).send(err.message)
     }
-    const ids = req.body.ids
-
-    // validate if value is a list
-    if (!(_.isArray(ids))) {
-      throw new Error('Ids does not contain array')
-    }
-
-    // zero payload
-    if (ids.length === 0) {
-      res.json([])
-    }
-
-    // validate integer
-    const notIntegerList = _.reject(ids, (x) => (_.isInteger(x)))
-    if (notIntegerList.length) throw Error('Found non integer elements in payload')
-
-    const inClause = '(' + ids.join() + ')'
-    const query = 'select id, ST_AsGeoJSON(wkb_geometry,6,3) as geojson ' +
-      'from tracks where id in ' + inClause
-
-    const queryResult = await pool.query(query)
-    const rows = queryResult.rows
-
-    const rowsWGeoJson = _.map(rows, (x) => ({ id: x.id, geojson: JSON.parse(x.geojson) }))
-
-    res.json(rowsWGeoJson)
-  } catch (err) {
-    console.trace('Exception handling trace')
-    console.log(err)
-    res.status(500).send(err.message)
-  }
-})
+  })
 
 /// // Get single track id
-router.get('/byid/:trackId/sid/:sid', async (req, res) => {
-  const trackId = req.params.trackId
+router.get(
+  '/byid/:trackId/sid/:sid',
+  sidValidationChain,
+  trackIdValidationMiddleware,
+  async (req, res) => {
+    const schema = req.schema
+    const trackId = req.params.trackId
 
-  const query = 'select id, name, length, src,' +
+    const query = 'select id, name, length, src,' +
     'time, timelength, ascent ' +
-    "from tracks where id = '" + trackId + "'"
+    `from ${schema}.tracks where id = '${trackId}'`
 
-  try {
-    const queryResult = await pool.query(query)
-    const row = queryResult.rows[0]
-    res.json(row)
-  } catch (err) {
-    console.trace('Exception handling trace')
-    console.error(err)
-    res.status(500).send(err.message)
-  }
-})
+    try {
+      const queryResult = await pool.query(query)
+      const row = queryResult.rows[0]
+      res.json(row)
+    } catch (err) {
+      console.trace('Exception handling trace')
+      console.error(err)
+      res.status(500).send(err.message)
+    }
+  })
 
 /// // Get list of tracks by year
-router.get('/byyear/:year/sid/:sid', async (req, res) => {
-  const year = req.params.year
+router.get(
+  '/byyear/:year/sid/:sid',
+  sidValidationChain,
+  yearValidation,
+  async (req, res) => {
+    const schema = req.schema
+    const year = req.params.year
 
-  const query = 'select id, name, length, src,' +
-    'time, timelength, ascent ' +
-    'from tracks where extract(YEAR from time) = ' + year
+    const query = 'select id, name, length, src,' +
+      'time, timelength, ascent ' +
+      `from ${schema}.tracks where extract(YEAR from time) = ${year}`
 
-  try {
-    const queryResult = await pool.query(query)
-    res.json(queryResult.rows)
-  } catch (err) {
-    console.trace('Exception handling trace')
-    console.error(err)
-    res.status(500).send(err.message)
-  }
-})
+    try {
+      const queryResult = await pool.query(query)
+      res.json(queryResult.rows)
+    } catch (err) {
+      console.trace('Exception handling trace')
+      console.error(err)
+      res.status(500).send(err.message)
+    }
+  })
 
 /// // Update single track
 router.put('/byid/:trackId/sid/:sid', async (req, res) => {

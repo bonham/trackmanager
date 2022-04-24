@@ -39,7 +39,11 @@
 <script>
 
 import { Track } from '@/lib/Track.js'
-import { BCard, BCardText, BIcon, BIconChevronRight } from 'bootstrap-vue'
+import {
+  BCard, BCardText,
+  BIcon, BIconChevronRight,
+  BRow, BCol, BLink
+} from 'bootstrap-vue'
 
 export default {
   name: 'TrackCard',
@@ -48,7 +52,10 @@ export default {
     // eslint-disable-next-line vue/no-unused-components
     BIconChevronRight,
     BCard,
-    BCardText
+    BCardText,
+    BRow,
+    BCol,
+    BLink
   },
   props: {
     track: {

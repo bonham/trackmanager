@@ -55,7 +55,11 @@
 // import TrackHeader from '@/components/TrackHeader.vue'
 import TrackCard from '@/components/TrackCard.vue'
 import { TrackCollection } from '@/lib/Track.js'
-import { BCard, BCardText, BIcon, BIconArrowDownCircleFill, BIconArrowRightCircleFill } from 'bootstrap-vue'
+import {
+  BCard, BCardText, BIcon,
+  BIconArrowDownCircleFill, BIconArrowRightCircleFill,
+  BRow, BCol, BButton, BCollapse
+} from 'bootstrap-vue'
 
 export default {
   name: 'TrackSection',
@@ -68,7 +72,11 @@ export default {
     // eslint-disable-next-line vue/no-unused-components
     BIconArrowRightCircleFill,
     BCard,
-    BCardText
+    BCardText,
+    BRow,
+    BCol,
+    BButton,
+    BCollapse
   },
   props: {
     label: {

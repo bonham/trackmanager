@@ -41,13 +41,16 @@ const mockGeoJson = {
 const responseMockFunction = (req) => {
   const mockTrackListResponse = JSON.stringify([mockTrack])
   const mockGeoJsonListResponse = JSON.stringify([mockGeoJson])
+  const mockSingleTrackResponse = JSON.stringify(mockTrack)
 
-  if (req.url.includes('getall')) {
+  if (req.url.match('^/api/tracks/getall/sid/[A-Za-z0-9]+')) {
     return new Promise(resolve => resolve(mockTrackListResponse))
-  } else if (req.url.includes('byyear')) {
+  } else if (req.url.match('^/api/tracks/byyear/\\d+/sid/[A-Za-z0-9]+')) {
     return new Promise(resolve => resolve(mockTrackListResponse))
-  } else if (req.url.includes('geojson')) {
+  } else if (req.url.match('^/api/tracks/geojson/sid/[A-Za-z0-9]+')) {
     return new Promise(resolve => resolve(mockGeoJsonListResponse))
+  } else if (req.url.match('^/api/tracks/byid/404/sid/[A-Za-z0-9]+')) {
+    return new Promise(resolve => resolve(mockSingleTrackResponse))
   } else {
     throw new Error(`Url ${req.url} is not mocked`)
   }

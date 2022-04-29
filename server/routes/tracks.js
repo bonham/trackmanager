@@ -120,14 +120,21 @@ router.get(
     'time, timelength, ascent ' +
     `from ${schema}.tracks where id = '${trackId}'`
 
+    let rows
     try {
       const queryResult = await pool.query(query)
-      const row = queryResult.rows[0]
-      res.json(row)
+      rows = queryResult.rows
     } catch (err) {
       console.trace('Exception handling trace')
       console.error(err)
       res.status(500).send(err.message)
+    }
+
+    if (rows.length === 0) {
+      res.status(404).end()
+    } else {
+      const row = rows[0]
+      res.json(row)
     }
   })
 

@@ -6,7 +6,7 @@
 </template>
 
 <script>
-// import { getGeoJson } from '@/lib/trackServices.js'
+import { getGeoJson } from '@/lib/trackServices.js'
 import { ManagedMap } from '@/lib/mapServices.js'
 
 export default {
@@ -25,34 +25,22 @@ export default {
     return {
     }
   },
-  created () {
-    // watch if the viewport is resized and resize the map
-    this.initMap()
+  created: async function () {
+    this.mmap = new ManagedMap()
+    await this.drawTrack()
   },
   mounted () {
     this.$nextTick(() => {
-      this.setTarget()
+      this.mmap.map.setTarget('mapdiv')
     })
   },
   methods: {
-    initMap: function () {
-      this.mmap = new ManagedMap()
-      // this.drawTrack()
 
-      // setMapViewAndDrawTrack(this.trackId, map, this.sid)
-    },
-    setExtentAndZoomOut: function () {
+    drawTrack: async function () {
+      const resultSet = await getGeoJson([this.trackId], this.sid)
+      const result = resultSet[0]
+      this.mmap.addTrackLayer(result)
       this.mmap.setExtentAndZoomOut()
-    },
-    // drawTrack: async function () {
-    //   const resultSet = await getGeoJson([this.trackId], this.sid)
-    //   const result = resultSet[0]
-    //   this.mmap.addTrackLayer(result)
-    //   this.setExtentAndZoomOut()
-    // },
-    setTarget: function () {
-      this.mmap.map.setTarget('mapdiv')
-      this.mmap.zoomOut()
     }
   }
 }

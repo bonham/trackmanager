@@ -1,85 +1,13 @@
 <template>
-  <div class="flex-grow-1 d-flex flex-column">
-    <div
-      id="mapdiv"
-    />
-  </div>
+  <div
+    id="mapdiv"
+    label="Map"
+  />
 </template>
 
 <script>
-import { Map, View } from 'ol'
-import { transformExtent } from 'ol/proj'
-import { Tile as TileLayer, Vector as VectorLayer } from 'ol/layer'
-import { OSM, Vector as VectorSource } from 'ol/source'
-import { Stroke, Style } from 'ol/style'
-import GeoJSON from 'ol/format/GeoJSON'
-import { Track } from '@/lib/Track.js'
-import { mapMutations } from 'vuex'
-
-// function zoomBoundingBox() {
-
-// }
-
-function setMapViewAndDrawTrack (tid, map, sid) {
-  const url = `/api/tracks/byid/${tid}/sid/${sid}`
-  fetch(url)
-    .then(response => {
-      if (!response.ok) {
-        throw new Error(`HTTP error from url ${url}`, response)
-      } else {
-        return response.json()
-      }
-    })
-    .then(data => {
-      const track = new Track(data)
-
-      // zoom to bbox
-      const extent = transformExtent(
-        track.geojson.bbox,
-        'EPSG:4326',
-        'EPSG:3857'
-      )
-
-      const mapSize = map.getSize()
-      const view = map.getView()
-
-      view.fit(
-        extent,
-        mapSize
-      )
-
-      // load track
-      const style = new Style({
-        stroke: new Stroke({
-          color: 'brown',
-          width: 2
-        })
-      })
-
-      const vectorSource = new VectorSource({
-        features: new GeoJSON().readFeatures(
-          track.geojson,
-          {
-            dataProjection: 'EPSG:4326',
-            featureProjection: 'EPSG:3857'
-          }
-        )
-      })
-      // console.log('vsource: ' + vectorSource.getExtent())
-
-      const vectorLayer = new VectorLayer({
-        source: vectorSource,
-        style: style
-      })
-
-      map.addLayer(vectorLayer)
-
-      // zoom a bit out
-      const scale = 0.97
-      view.animate(
-        { zoom: view.getZoom() * scale })
-    })
-}
+import { getGeoJson } from '@/lib/trackServices.js'
+import { ManagedMap } from '@/lib/mapServices.js'
 
 export default {
   name: 'MapComponent',
@@ -95,52 +23,25 @@ export default {
   },
   data () {
     return {
-      map: null
     }
   },
-  created () {
-    // watch if the viewport is resized and resize the map
-    this.initMap()
-    this.$store.watch(
-      (state) => {
-        return this.$store.state.resizeMap
-      },
-      (newValue, oldValue) => {
-        if (newValue === true) {
-          this.map.updateSize()
-          this.resizeMapClear()
-        }
-      }
-    )
+  created: async function () {
+    this.mmap = new ManagedMap()
+    await this.drawTrack()
   },
   mounted () {
     this.$nextTick(() => {
-      this.setTarget()
+      this.mmap.map.setTarget('mapdiv')
     })
   },
   methods: {
-    initMap: function () {
-      const map = new Map({
-        layers: [
-          new TileLayer({
-            source: new OSM()
-          })
-        ],
-        view: new View({
-          center: [0, 0],
-          zoom: 0
-        })
-      })
-      this.map = map
 
-      setMapViewAndDrawTrack(this.trackId, map, this.sid)
-    },
-    setTarget: function () {
-      this.map.setTarget('mapdiv')
-    },
-    ...mapMutations([
-      'resizeMapClear'
-    ])
+    drawTrack: async function () {
+      const resultSet = await getGeoJson([this.trackId], this.sid)
+      const result = resultSet[0]
+      this.mmap.addTrackLayer(result)
+      this.mmap.setExtentAndZoomOut()
+    }
   }
 }
 
@@ -151,6 +52,11 @@ export default {
   width: 100%;
   height: 100%;
 }
+.map-control-expand {
+  top: 4em;
+  left: .5em;
+}
+
   @import '../../node_modules/ol/ol.css'
 
 </style>

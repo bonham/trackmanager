@@ -32,7 +32,7 @@ export default {
   },
   created () {
     // create map object
-    this.initMap()
+    this.mmap = new ManagedMap()
 
     // watch if the viewport is resized and resize the map
     this.$store.watch(
@@ -63,16 +63,11 @@ export default {
   },
   mounted () {
     this.$nextTick(() => {
-      this.setTarget()
+      this.mmap.map.setTarget('mapdiv')
+      this.mmap.zoomOut()
     })
   },
   methods: {
-    initMap: function () {
-      this.mmap = new ManagedMap()
-    },
-    setExtentAndZoomOut: function () {
-      this.mmap.setExtentAndZoomOut()
-    },
     redrawTracks: async function () {
       const mmap = this.mmap
       const tvm = new TrackVisibilityManager(
@@ -103,15 +98,11 @@ export default {
       _.forEach(toHide, function (id) { mmap.setInvisible(id) })
 
       if (!this.drawnOnce) {
-        this.setExtentAndZoomOut()
+        this.mmap.setExtentAndZoomOut()
         this.drawnOnce = true
       }
 
       this.redrawTracksOnMapFlag(false)
-    },
-    setTarget: function () {
-      this.mmap.map.setTarget('mapdiv')
-      this.mmap.zoomOut()
     },
     ...mapMutations([
       'resizeMapClear',

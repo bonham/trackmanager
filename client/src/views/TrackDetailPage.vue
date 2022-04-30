@@ -15,10 +15,13 @@
 
 <script>
 import MapComponent from '@/components/MapComponent.vue'
+import { BContainer } from 'bootstrap-vue'
+
 export default {
   name: 'MapC',
   components: {
-    MapComponent
+    MapComponent,
+    BContainer
   },
   props: {
     sid: {

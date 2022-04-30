@@ -8,17 +8,6 @@ import TrackDetailPage from '@/views/TrackDetailPage'
 import fetchMock from 'jest-fetch-mock'
 import { responseMockFunction } from './mockResponse'
 
-/// / vue
-import Vue from 'vue'
-
-// import { BootstrapVue } from 'bootstrap-vue'
-import { LayoutPlugin, NavbarPlugin, ButtonPlugin, LinkPlugin } from 'bootstrap-vue'
-Vue.use(LayoutPlugin)
-Vue.use(NavbarPlugin)
-Vue.use(ButtonPlugin)
-Vue.use(LinkPlugin)
-/// / vue end
-
 fetchMock.enableMocks()
 
 const fakeSid = 'abcd1234'
@@ -34,27 +23,23 @@ describe('TrackOverview 2', () => {
   })
   test('Render overview page', async () => {
     fetch.mockResponse(responseMockFunction)
-    const vue = new Vue()
-    const { findByText } = render(App, { routes, store, vue }, (vue, store, router) => {
+    const { findByText } = render(App, { routes, store }, (vue, store, router) => {
       router.push(`/toverview/sid/${fakeSid}`)
     })
     await findByText('Track Overview')
     await findByText('2021')
     await findByText('Saupferchweg')
-    // debug()
   })
 
   test('Navigate to detail page', async () => {
     fetch.mockResponse(responseMockFunction)
-    const vue = new Vue()
-    const { findAllByRole, findByText, findByTitle } = render(App, { routes, store, vue }, (vue, store, router) => {
+    const { findAllByRole, findByText, findByTitle } = render(App, { routes, store }, (vue, store, router) => {
       router.push(`/toverview/sid/${fakeSid}`)
     })
     await findByText('Saupferchweg')
 
     // find all hyperlinks
     const allLinks = await findAllByRole('link')
-    // const selectLink = allLinks[0]
 
     // find <a href ...> tag with a chevron arrow as child
     const found = allLinks.find(element => {
@@ -70,6 +55,7 @@ describe('TrackOverview 2', () => {
     // click on detail
     await fireEvent.click(found)
     await findByText('Track 404 Details')
+    // check if map is rendered
     await findByTitle('Zoom in')
   })
 })

@@ -3,7 +3,7 @@ import VueRouter from 'vue-router'
 
 Vue.use(VueRouter)
 
-const DEFAULT_SID = '8pz22a'
+const DEFAULT_SID = Vue.config.devtools ? '8pz22a' : ''
 const routes = [
   {
     path: '/',

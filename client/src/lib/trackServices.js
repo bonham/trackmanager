@@ -36,6 +36,31 @@ async function getTracksByYear (year, sid) {
   }
 }
 
+async function getTrackById (id, sid) {
+  const url = `/api/tracks/byid/${id}/sid/${sid}`
+  let response
+  try {
+    response = await fetch(url)
+  } catch (error) {
+    console.error('Error when fetching tracks by year', error)
+    return null
+  }
+  if (!response.ok) {
+    const errText = await response.text()
+    console.error(`Response code ${response.status} after fetching to ${url}, error: ${errText}`)
+    return null
+  }
+
+  try {
+    const responseJson = await response.json()
+    const track = new Track(responseJson)
+    return track
+  } catch (error) {
+    console.error('Error when processing result from http call', error)
+    return null
+  }
+}
+
 // /// Get geojson by id
 async function getGeoJson (idList, sid) {
   const payload = { ids: idList }
@@ -102,4 +127,4 @@ async function updateTrack (track, attributes, sid) {
   }
 }
 
-export { getAllTracks, getTracksByYear, getGeoJson, updateTrack }
+export { getAllTracks, getTracksByYear, getGeoJson, updateTrack, getTrackById }

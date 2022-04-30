@@ -35,8 +35,8 @@ const routes = [
   },
   {
     path: '/track/:id/sid/:sid',
-    name: 'TrackDetail',
-    component: () => import(/* webpackChunkName: "TrackDetail" */ '../views/TrackDetail.vue'),
+    name: 'TrackDetailPage',
+    component: () => import(/* webpackChunkName: "TrackDetail" */ '../views/TrackDetailPage.vue'),
     props: true
   }
 ]

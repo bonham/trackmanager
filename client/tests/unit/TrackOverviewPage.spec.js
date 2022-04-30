@@ -4,7 +4,7 @@ import App from '@/App'
 import store from '@/store'
 import '@testing-library/jest-dom'
 import TrackOverviewPage from '@/views/TrackOverviewPage'
-import TrackDetail from '@/views/TrackDetail'
+import TrackDetailPage from '@/views/TrackDetailPage'
 import fetchMock from 'jest-fetch-mock'
 import { responseMockFunction } from './mockResponse'
 
@@ -24,7 +24,7 @@ fetchMock.enableMocks()
 const fakeSid = 'abcd1234'
 const routes = [
   { path: '/toverview/sid/:sid', component: TrackOverviewPage, props: true },
-  { path: '/track/:id/sid/:sid', component: TrackDetail, props: true }
+  { path: '/track/:id/sid/:sid', component: TrackDetailPage, props: true }
 
 ]
 
@@ -35,7 +35,7 @@ describe('TrackOverview 2', () => {
   test('Render overview page', async () => {
     fetch.mockResponse(responseMockFunction)
     const vue = new Vue()
-    const { findByText, debug } = render(App, { routes, store, vue }, (vue, store, router) => {
+    const { findByText } = render(App, { routes, store, vue }, (vue, store, router) => {
       router.push(`/toverview/sid/${fakeSid}`)
     })
     await findByText('Track Overview')
@@ -47,7 +47,7 @@ describe('TrackOverview 2', () => {
   test('Navigate to detail page', async () => {
     fetch.mockResponse(responseMockFunction)
     const vue = new Vue()
-    const { findAllByRole, findByText, debug } = render(App, { routes, store, vue }, (vue, store, router) => {
+    const { findAllByRole, findByText, findByTitle } = render(App, { routes, store, vue }, (vue, store, router) => {
       router.push(`/toverview/sid/${fakeSid}`)
     })
     await findByText('Saupferchweg')
@@ -70,6 +70,6 @@ describe('TrackOverview 2', () => {
     // click on detail
     await fireEvent.click(found)
     await findByText('Track 404 Details')
-    debug()
+    await findByTitle('Zoom in')
   })
 })

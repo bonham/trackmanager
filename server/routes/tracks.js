@@ -64,6 +64,7 @@ router.get(
   })
 
 /// // Get Geojson for a list of ids. Payload { ids: [..] }
+// result: { id: x.id, geojson: { .. } }
 router.post(
   '/geojson/sid/:sid',
   sidValidationChain,

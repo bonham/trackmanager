@@ -7,6 +7,30 @@ import { Stroke, Style } from 'ol/style'
 import GeoJSON from 'ol/format/GeoJSON'
 const _ = require('lodash')
 
+/*
+How to use:
+
+  created: async function () {
+    this.mmap = new ManagedMap()
+    await this.drawTrack()
+  },
+  mounted () {
+    this.$nextTick(() => {
+      this.mmap.map.setTarget()
+    })
+  },
+  methods: {
+
+    drawTrack: async function () {
+      const resultSet = await getGeoJson([this.trackId], this.sid)
+      const result = resultSet[0]
+      this.mmap.addTrackLayer(result)
+      this.mmap.setExtentAndZoomOut()
+    },
+  }
+}
+
+ */
 class ManagedMap {
   constructor () {
     this.map = this._createMap()

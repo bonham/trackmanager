@@ -17,7 +17,7 @@ const routes = [
 
 ]
 
-describe('TrackOverview 2', () => {
+describe('TrackOverview and TrackDetail', () => {
   beforeEach(() => {
     fetchMock.resetMocks()
   })

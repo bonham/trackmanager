@@ -1,5 +1,8 @@
 <template>
-  <div>
+  <b-container
+    id="root"
+    class="d-flex flex-column vh-100"
+  >
     <track-manager-nav-bar :sid="sid" />
     <h1 class="mt-4 mb-4">
       Upload new Tracks
@@ -30,7 +33,7 @@
         />
       </b-col>
     </b-row>
-  </div>
+  </b-container>
 </template>
 
 <script>

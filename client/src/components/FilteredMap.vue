@@ -35,7 +35,7 @@ export default {
     this.mmap = new ManagedMap()
 
     // watch if the viewport is resized and resize the map
-    this.$store.watch(
+    this.$watch(
       (state) => {
         return this.$store.state.resizeMap
       },
@@ -50,7 +50,7 @@ export default {
     // const f = this.redrawTracks
     const unboundRedrawTracks = this.redrawTracks
     const boundRedrawTracks = unboundRedrawTracks.bind(this)
-    this.$store.watch(
+    this.$watch(
       (state) => {
         return this.$store.state.redrawTracksOnMap
       },

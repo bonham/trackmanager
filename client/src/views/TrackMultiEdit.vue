@@ -44,9 +44,7 @@
 <script>
 import { BTableLite, BButton, BIconArrowLeft, BSkeleton } from 'bootstrap-vue'
 import { getAllTracks, updateTrack } from '@/lib/trackServices.js'
-import { mapActions, mapGetters, mapState } from 'vuex'
 import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'
-const _ = require('lodash')
 
 const trackTableFields = [
   {
@@ -99,14 +97,12 @@ export default {
   data () {
     return {
       trackTableFields: trackTableFields,
-      loadingStateById: {}
+      loadingStateById: {},
+      loadedTracks: [],
+      tracksByTrackId: {}
     }
   },
-  computed: { // TODO: computed makes not much sense here
-    ...mapState([
-      'loadedTracks',
-      'trackLoadStatus'
-    ]),
+  computed: {
     niceItems () {
       return this.loadedTracks.map(t => {
         const o = {}
@@ -123,27 +119,16 @@ export default {
   created: async function () {
     // load data into store
     const sid = this.sid
-    const loadFunc = () => getAllTracks(sid)
-    await this.loadTracks(loadFunc).catch(e => console.error(e))
-    const loadingStateById = _.reduce(
-      this.niceItems,
-      function (result, value) {
-        const id = value.id
-        result[id] = false
-        return result
-      },
-      {}
-    )
-    this.loadingStateById = loadingStateById
+    this.loadedTracks = await getAllTracks(sid)
+
+    this.loadedTracks.forEach((t) => {
+      // initialize loadingStateById
+      this.loadingStateById[t.id] = false
+      // sort by track id
+      this.tracksByTrackId[t.id] = t
+    })
   },
   methods: {
-    ...mapActions([
-      'loadTracks',
-      'modifyTrack'
-    ]),
-    ...mapGetters([
-      'getTrackById'
-    ]),
     cleanUpText: async function (item) {
       const id = item.id
       this.loadingStateById[id] = true
@@ -160,12 +145,9 @@ export default {
 
       // Update track in store and on server
       const sid = this.sid
-      const updFunc = (track, attributes) => updateTrack(track, attributes, sid)
-      this.modifyTrack({
-        id: id,
-        props: { name: convertedName },
-        updateFunction: updFunc
-      })
+      const track = this.tracksByTrackId[id]
+      const updateAttributes = ['name']
+      await updateTrack(track, updateAttributes, sid)
       this.loadingStateById[id] = false
     },
     cleanAll: function () {

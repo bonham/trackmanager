@@ -21,18 +21,24 @@
         />
       </b-col>
     </b-row>
-    <b-row
-      v-for="item in uploadList"
-      :key="item.key"
+    <transition-group
+      name="list"
+      tag="span"
     >
-      <b-col>
-        <UploadItem
-          :fname="item.fname"
-          :status="item.status"
-          :error="item.error"
-        />
-      </b-col>
-    </b-row>
+      <b-row
+        v-for="item in visibleUploadItems"
+        :key="item.key"
+        class="list-item"
+      >
+        <b-col>
+          <UploadItem
+            :fname="item.fname"
+            :status="item.status"
+            :error="item.error"
+          />
+        </b-col>
+      </b-row>
+    </transition-group>
   </b-container>
 </template>
 
@@ -114,6 +120,11 @@ export default {
       maxKey: 0
     }
   },
+  computed: {
+    visibleUploadItems: function () {
+      return this.uploadList.filter(item => item.visible)
+    }
+  },
   // watch: {
   //   files: function (newVal, oldVal) {
   //     // avoid firing if files variable is reset to null
@@ -150,7 +161,8 @@ export default {
         error: null,
         details: null,
         status: 'Queued',
-        sid: null
+        sid: null,
+        visible: true
       }
     },
 
@@ -161,6 +173,11 @@ export default {
         // callback on completion
         if (err) console.log(err)
         console.log(`Finished processing ${fileIdObject.key}`)
+        setTimeout(() => {
+          fileIdObject.visible = false
+          console.log(`Removed ${fileIdObject}`)
+        },
+        1000)
       })
     },
 
@@ -171,3 +188,18 @@ export default {
   }
 }
 </script>
+<style scoped>
+/* .list-item {
+  display: inline-block;
+  margin-right: 10px;
+} */
+.list-leave-active {
+  transition: all 1s;
+}
+.list-enter, .list-leave-to /* .list-leave-active below version 2.1.8 */ {
+  opacity: 0;
+}
+/* .list-move {
+  transition: transform 1s;
+} */
+</style>

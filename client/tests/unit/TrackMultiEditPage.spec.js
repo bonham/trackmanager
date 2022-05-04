@@ -29,7 +29,8 @@ describe('MultiEditPage', () => {
     const secondCallRequest = fetch.mock.calls[1][0]
     expect(secondCallRequest.method).toEqual('PUT')
     secondCallRequest.json().then(body => {
-      expect(body).toHaveProperty('data.name', 'Saupferchweg')
+      expect(body).toHaveProperty('data.name', 'Muellerweg')
+      expect(body).toHaveProperty('updateAttributes.0', 'name')
     })
   })
 })

@@ -147,6 +147,10 @@ export default {
       // Update track in store and on server
       const sid = this.sid
       const track = this.tracksByTrackId[id]
+      // Update property in track item
+      track.name = convertedName
+
+      // Perform update in backend
       const updateAttributes = ['name']
       await updateTrack(track, updateAttributes, sid)
       this.loadingStateById[id] = false

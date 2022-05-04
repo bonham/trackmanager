@@ -2,7 +2,7 @@ const mockTrack = {
   id: 404,
   name: 'Saupferchweg',
   length: 46238.20565667874,
-  src: '20210919_Saupferchweg.gpx',
+  src: '20210919_Muellerweg.gpx',
   time: '2021-09-19T14:35:14.000Z',
   timelength: 8470,
   ascent: 866.7277609999995

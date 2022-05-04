@@ -29,8 +29,8 @@ const routes = [
   },
   {
     path: '/track_multi_edit/sid/:sid',
-    name: 'TrackMultiEdit',
-    component: () => import(/* webpackChunkName: "TrackMultiEdit" */ '../views/TrackMultiEdit.vue'),
+    name: 'TrackMultiEditPage',
+    component: () => import(/* webpackChunkName: "TrackMultiEdit" */ '../views/TrackMultiEditPage.vue'),
     props: true
   },
   {

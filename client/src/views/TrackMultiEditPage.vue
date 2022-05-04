@@ -42,7 +42,7 @@
 </template>
 
 <script>
-import { BTableLite, BButton, BIconArrowLeft, BSkeleton } from 'bootstrap-vue'
+import { BTableLite, BButton, BIconArrowLeft, BSkeleton, BContainer } from 'bootstrap-vue'
 import { getAllTracks, updateTrack } from '@/lib/trackServices.js'
 import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'
 
@@ -86,6 +86,7 @@ export default {
     BButton,
     BIconArrowLeft,
     BSkeleton,
+    BContainer,
     TrackManagerNavBar
   },
   props: {

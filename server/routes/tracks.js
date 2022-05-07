@@ -185,19 +185,64 @@ router.put(
     try {
       const queryResult = await pool.query(query)
       const rowC = queryResult.rowCount
-      if (rowC !== 1) {
+      if (rowC === 0) {
+        res.status(404).send('HTTP 404')
+      } else if (rowC !== 1) {
         const msg = `Row count was not 1 after update statement, instead it was ${rowC}`
-        console.err(msg)
+        console.error(msg)
         res.status(500).send(msg)
+      } else {
+        res.status(200).send('OK')
       }
     } catch (err) {
       console.trace('Exception handling trace')
-      console.err('Can not update tracks table')
+      console.error('Can not update tracks table')
       console.error(err)
       res.status(500).send(err)
     }
+  })
 
-    res.end()
+/// // Delete single track
+router.delete(
+  '/byid/:trackId/sid/:sid',
+  sidValidationChain,
+  trackIdValidationMiddleware,
+  async (req, res) => {
+    const schema = req.schema
+    const trackId = req.params.trackId
+
+    const query1 =
+      `delete from ${schema}.track_points ` +
+      `where track_id = ${trackId}`
+
+    const query2 =
+    `delete from ${schema}.segments ` +
+    `where track_id = ${trackId}`
+
+    const query3 =
+    `delete from ${schema}.tracks ` +
+    `where id = ${trackId}`
+
+    try {
+      await pool.query(query1)
+      await pool.query(query2)
+      const queryResult = await pool.query(query3)
+      const rowC = queryResult.rowCount
+      if (rowC === 0) {
+        res.status(404).send('HTTP 404')
+      } else if (rowC !== 1) {
+        const msg = `Row count was not 1 after update statement, instead it was ${rowC}`
+        console.error(msg)
+        res.status(500).send(msg)
+      } else {
+        res.status(200).send('OK')
+      }
+    } catch (err) {
+      console.trace('Exception handling trace')
+      console.error('Can not delete track from table')
+      console.error(err)
+      res.status(500).send(err)
+    }
   })
 
 /// // Create new track from file upload

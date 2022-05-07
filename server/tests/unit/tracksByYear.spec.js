@@ -54,34 +54,3 @@ describe('tracks - byYear', () => {
       .expect(400)
   })
 })
-
-describe('Update track byid', () => {
-  let mockPool
-  beforeEach(() => {
-    mockPool = new Pool()
-  })
-  afterEach(() => {
-    jest.clearAllMocks()
-  })
-  test('simple', async () => {
-    mockPool.query.mockResolvedValue({ rowCount: 1 })
-    mockGetSchema.mockResolvedValue('myschema')
-
-    await request(app)
-      .put('/api/tracks/byid/88/sid/abcsid')
-      .send(
-        {
-          data: { name: 'newname' },
-          updateAttributes: ['name']
-        })
-      .expect(200)
-  })
-})
-
-// describe('Delete track byid', () => {
-//   test('simple', async () => {
-//     await request(app)
-//       .delete('/api/tracks/byid/88/sid/abcsid')
-//       .expect(200)
-//   })
-// })

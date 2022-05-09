@@ -16,13 +16,13 @@
     <b-table-lite
       striped
       hover
-      :items="niceItems"
+      :items="tableIems"
       :fields="trackTableFields"
       primary-key="id"
     >
       <template #cell(name)="row">
         <span
-          v-if="loadingStateById[row.item.id]"
+          v-if="row.item.loading"
         >
           <b-skeleton />
         </span>
@@ -98,41 +98,35 @@ export default {
   data () {
     return {
       trackTableFields: trackTableFields,
-      loadingStateById: {},
-      loadedTracks: [],
+      tableIems: [],
       tracksByTrackId: {}
-    }
-  },
-  computed: {
-    niceItems () {
-      return this.loadedTracks.map(t => {
-        const o = {}
-        o.id = t.id
-        o.name = t.name
-        o.src = t.src
-        o.length = (t.distance() / 1000).toFixed(0)
-        o.time = t.localeDateShort()
-
-        return o
-      })
     }
   },
   created: async function () {
     // load data into store
-    const sid = this.sid
-    this.loadedTracks = await getAllTracks(sid)
-
-    this.loadedTracks.forEach((t) => {
-      // initialize loadingStateById
-      this.loadingStateById[t.id] = false
-      // sort by track id
-      this.tracksByTrackId[t.id] = t
-    })
+    await this.loadTracks()
   },
   methods: {
+    loadTracks: async function () {
+      const tracks = await getAllTracks(this.sid)
+      tracks.forEach((t) => {
+        // sort by track id
+        this.tracksByTrackId[t.id] = t
+
+        const item = {}
+        item.id = t.id
+        item.name = t.name
+        item.src = t.src
+        item.length = (t.distance() / 1000).toFixed(0)
+        item.time = t.localeDateShort()
+        item.loading = false
+
+        this.tableIems.push(item)
+      })
+    },
     cleanUpText: async function (item) {
       const id = item.id
-      this.loadingStateById[id] = true
+      item.loading = true
       let convertedName = item.src
       const datePattern = /\d{8}/
       const match = convertedName.match(datePattern)
@@ -153,7 +147,8 @@ export default {
       // Perform update in backend
       const updateAttributes = ['name']
       await updateTrack(track, updateAttributes, sid)
-      this.loadingStateById[id] = false
+      item.name = convertedName
+      item.loading = false
     },
     cleanAll: function () {
       this.niceItems.forEach(item => {

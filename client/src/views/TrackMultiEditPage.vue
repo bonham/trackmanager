@@ -16,7 +16,7 @@
     <b-table-lite
       striped
       hover
-      :items="tableIems"
+      :items="tableItems"
       :fields="trackTableFields"
       primary-key="id"
     >
@@ -98,7 +98,7 @@ export default {
   data () {
     return {
       trackTableFields: trackTableFields,
-      tableIems: [],
+      tableItems: [],
       tracksByTrackId: {}
     }
   },
@@ -121,7 +121,7 @@ export default {
         item.time = t.localeDateShort()
         item.loading = false
 
-        this.tableIems.push(item)
+        this.tableItems.push(item)
       })
     },
     cleanUpText: async function (item) {
@@ -151,7 +151,7 @@ export default {
       item.loading = false
     },
     cleanAll: function () {
-      this.niceItems.forEach(item => {
+      this.tableItems.forEach(item => {
         this.cleanUpText(item)
       })
     }

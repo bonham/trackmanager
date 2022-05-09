@@ -25,6 +25,7 @@ describe('MultiEditPage', () => {
     expect(fetch.mock.calls.length).toEqual(1)
     expect(fetch.mock.calls[0][0]).toEqual('/api/tracks/getall/sid/abcd1234')
     await fireEvent.click(button)
+    await rresult.findByText('Muellerweg')
     expect(fetch.mock.calls.length).toEqual(2)
     const secondCallRequest = fetch.mock.calls[1][0]
     expect(secondCallRequest.method).toEqual('PUT')

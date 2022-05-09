@@ -1,5 +1,5 @@
 import fetchMock from 'jest-fetch-mock'
-import { render, fireEvent } from '@testing-library/vue'
+import { render, fireEvent, waitForElementToBeRemoved } from '@testing-library/vue'
 import TrackMultiEditPage from '@/views/TrackMultiEditPage.vue'
 import ResizeObserver from './__mocks__/ResizeObserver'
 import { responseMockFunction } from './mockResponse'
@@ -13,7 +13,7 @@ describe('MultiEditPage', () => {
   })
   afterEach(() => {
   })
-  test('Simple', async () => {
+  test('Clean Button', async () => {
     fetch.mockResponse(responseMockFunction)
 
     const rresult = render(
@@ -33,5 +33,22 @@ describe('MultiEditPage', () => {
       expect(body).toHaveProperty('data.name', 'Muellerweg')
       expect(body).toHaveProperty('updateAttributes.0', 'name')
     })
+  })
+  test('Clean Button', async () => {
+    fetch.mockResponse(responseMockFunction)
+
+    const rresult = render(
+      TrackMultiEditPage, {
+        props: { sid: 'abcd1234' }
+      })
+    await rresult.findByText('Saupferchweg')
+    const deleteButton = await rresult.findByLabelText('trash')
+    expect(fetch.mock.calls.length).toEqual(1)
+    await fireEvent.click(deleteButton)
+    await waitForElementToBeRemoved(
+      () => rresult.queryByText('Saupferchweg'))
+    expect(fetch.mock.calls.length).toEqual(2)
+    const secondCallRequest = fetch.mock.calls[1][0]
+    expect(secondCallRequest.method).toEqual('DELETE')
   })
 })

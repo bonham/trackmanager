@@ -13,12 +13,14 @@
     >
       Clean all
     </b-button>
-    <b-table-lite
+    <b-table
+      id="tracktable"
       striped
       hover
       :items="tableItems"
       :fields="trackTableFields"
       primary-key="id"
+      :tbody-transition-props="transProps"
     >
       <template #cell(name)="row">
         <span
@@ -37,25 +39,38 @@
           <b-icon-arrow-left />
         </b-button>
       </template>
-    </b-table-lite>
+      <template #cell(dbutton)="row">
+        <b-button
+          @click="deleteTrackFromTable(row.item)"
+        >
+          <b-icon-trash />
+        </b-button>
+      </template>
+    </b-table>
   </b-container>
 </template>
 
 <script>
-import { BTableLite, BButton, BIconArrowLeft, BSkeleton, BContainer } from 'bootstrap-vue'
-import { getAllTracks, updateTrack } from '@/lib/trackServices.js'
+import {
+  BTable, BButton,
+  BIconArrowLeft, BIconTrash,
+  BSkeleton, BContainer
+} from 'bootstrap-vue'
+import { getAllTracks, updateTrack, deleteTrack } from '@/lib/trackServices.js'
 import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'
 
 const trackTableFields = [
   {
     key: 'id',
     label: 'Id',
-    tdClass: 'align-middle'
+    tdClass: 'align-middle',
+    sortable: true
   },
   {
     key: 'name',
     label: 'Name',
-    tdClass: 'align-middle'
+    tdClass: 'align-middle',
+    sortable: true
   },
   {
     key: 'cbutton',
@@ -77,14 +92,20 @@ const trackTableFields = [
     key: 'length',
     label: 'Length',
     tdClass: 'align-middle'
+  },
+  {
+    key: 'dbutton',
+    label: 'Delete',
+    tdClass: 'align-middle'
   }
 ]
 export default {
   name: 'TrackMultiEdit',
   components: {
-    BTableLite,
+    BTable,
     BButton,
     BIconArrowLeft,
+    BIconTrash,
     BSkeleton,
     BContainer,
     TrackManagerNavBar
@@ -99,7 +120,11 @@ export default {
     return {
       trackTableFields: trackTableFields,
       tableItems: [],
-      tracksByTrackId: {}
+      tracksByTrackId: {},
+      transProps: {
+        // Transition name
+        name: 'flip-list'
+      }
     }
   },
   created: async function () {
@@ -139,14 +164,13 @@ export default {
       convertedName = convertedName.trim() // Trim space at begin or end
 
       // Update track in store and on server
-      const sid = this.sid
       const track = this.tracksByTrackId[id]
       // Update property in track item
       track.name = convertedName
 
       // Perform update in backend
       const updateAttributes = ['name']
-      await updateTrack(track, updateAttributes, sid)
+      await updateTrack(track, updateAttributes, this.sid)
       item.name = convertedName
       item.loading = false
     },
@@ -154,8 +178,29 @@ export default {
       this.tableItems.forEach(item => {
         this.cleanUpText(item)
       })
+    },
+    deleteTrackFromTable: async function (item) {
+      const success = await deleteTrack(item.id, this.sid)
+      if (success) {
+        delete this.tracksByTrackId[item.id]
+        // delete element
+        const idx = this.tableItems.findIndex((e) => e.id === item.id)
+        this.tableItems.splice(idx, 1)
+      }
     }
   }
 
 }
 </script>
+<style>
+.flip-list-move {
+  transition: all 1s;
+}
+.flip-list-leave-active {
+  display: none;
+}
+.flip-list-leave-to {
+  opacity: 0;
+}
+
+</style>

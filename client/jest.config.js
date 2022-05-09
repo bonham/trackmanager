@@ -19,7 +19,14 @@ const config = {
     'vue'
   ],
 
-  preset: '@vue/cli-plugin-unit-jest'
+  preset: '@vue/cli-plugin-unit-jest',
+
+  collectCoverage: true,
+  collectCoverageFrom: [
+    'src/**/*.{js,vue}',
+    '!src/main.js' // No need to cover bootstrap file
+  ],
+  coverageReporters: ['clover', 'json', 'lcov', 'text']
 }
 
 module.exports = config

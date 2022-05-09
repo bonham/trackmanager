@@ -35,7 +35,20 @@
   "jest": {
     "testEnvironment": "node",
     "coveragePathIgnorePatterns": [
-      "/node_modules/"
+      "/node_modules/",
+      "/coverage/"
+    ],
+    "verbose": true,
+    "collectCoverage": true,
+    "collectCoverageFrom": [
+      "**/*.{js,vue}",
+      "!.eslintrc.js"
+    ],
+    "coverageReporters": [
+      "clover",
+      "json",
+      "lcov",
+      "text-summary"
     ]
   }
 }

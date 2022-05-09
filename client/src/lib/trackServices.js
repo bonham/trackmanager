@@ -127,4 +127,30 @@ async function updateTrack (track, attributes, sid) {
   }
 }
 
-export { getAllTracks, getTracksByYear, getGeoJson, updateTrack, getTrackById }
+// /// Update Track
+async function deleteTrack (id, sid) {
+  const req = new Request(
+    `/api/tracks/byid/${id}/sid/${sid}`,
+    {
+      method: 'DELETE'
+    }
+
+  )
+
+  try {
+    const response = await fetch(req)
+    if (response.ok) {
+      return true
+    } else {
+      console.error(`Unable to delete track ${id}`)
+      console.error(response)
+      console.error(await response.text())
+      return false
+    }
+  } catch (err) {
+    console.error(err)
+    return false
+  }
+}
+
+export { getAllTracks, getTracksByYear, getGeoJson, updateTrack, deleteTrack, getTrackById }

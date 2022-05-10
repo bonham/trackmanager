@@ -5,7 +5,10 @@
   >
     <track-manager-nav-bar :sid="sid" />
     <h1 class="mt-4 mb-4">
-      <editable-text text="Edit Tracks" />
+      <editable-text
+        initialtext="Edit Tracks"
+        :update-function="updateTitle"
+      />
     </h1>
     <b-button
       class="mb-3"
@@ -55,7 +58,6 @@ import {
   BTable, BButton,
   BIconArrowLeft, BIconTrash,
   BSkeleton, BContainer
-
 } from 'bootstrap-vue'
 import { getAllTracks, updateTrack, deleteTrack } from '@/lib/trackServices.js'
 import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'
@@ -190,6 +192,9 @@ export default {
         const idx = this.tableItems.findIndex((e) => e.id === item.id)
         this.tableItems.splice(idx, 1)
       }
+    },
+    updateTitle (e) {
+      console.log('in upper component:', e)
     }
   }
 

@@ -5,7 +5,7 @@
   >
     <track-manager-nav-bar :sid="sid" />
     <h1 class="mt-4 mb-4">
-      Edit Tracks
+      <editable-text text="Edit Tracks" />
     </h1>
     <b-button
       class="mb-3"
@@ -55,9 +55,11 @@ import {
   BTable, BButton,
   BIconArrowLeft, BIconTrash,
   BSkeleton, BContainer
+
 } from 'bootstrap-vue'
 import { getAllTracks, updateTrack, deleteTrack } from '@/lib/trackServices.js'
 import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'
+import EditableText from '@/components/EditableText.vue'
 
 const trackTableFields = [
   {
@@ -108,7 +110,8 @@ export default {
     BIconTrash,
     BSkeleton,
     BContainer,
-    TrackManagerNavBar
+    TrackManagerNavBar,
+    EditableText
   },
   props: {
     sid: {

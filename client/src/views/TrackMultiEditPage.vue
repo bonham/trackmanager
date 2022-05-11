@@ -31,6 +31,7 @@
         <div v-else>
           <editable-text
             :initialtext="data.value"
+            :update-function="(value) => processUpdate(data.item.id, value)"
           />
         </div>
       </template>
@@ -58,7 +59,7 @@ import {
   BIconArrowLeft, BIconTrash,
   BSkeleton, BContainer
 } from 'bootstrap-vue'
-import { getAllTracks, updateTrack, deleteTrack } from '@/lib/trackServices.js'
+import { getAllTracks, updateTrack, updateTrackById, deleteTrack } from '@/lib/trackServices.js'
 import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'
 import EditableText from '@/components/EditableText.vue'
 
@@ -192,8 +193,9 @@ export default {
         this.tableItems.splice(idx, 1)
       }
     },
-    updateTitle (e) {
-      console.log('in upper component:', e)
+    processUpdate (trackId, value) {
+      console.log('in upper component:', trackId, value)
+      updateTrackById(trackId, { name: value }, this.sid)
     }
   }
 

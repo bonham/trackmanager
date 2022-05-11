@@ -17,7 +17,7 @@
         type="textarea"
         class="form-control overflow-hidden"
         @change="processValueChange"
-        @blur="editing=false"
+        @blur="processBlur"
         @keydown.enter="processEnter"
       />
     </div>
@@ -44,6 +44,9 @@ export default {
         required: false
       }
     },
+  emits: {
+    blur
+  },
   data () {
     return {
       editing: false,
@@ -70,6 +73,10 @@ export default {
       const value = event.target.value
       this.processValueChange(value)
       this.editing = false
+    },
+    processBlur (event) {
+      this.editing = false
+      this.$emit('blur')
     }
   }
 }

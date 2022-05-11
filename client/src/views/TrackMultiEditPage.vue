@@ -22,15 +22,17 @@
       primary-key="id"
       :tbody-transition-props="transProps"
     >
-      <template #cell(name)="row">
-        <span
-          v-if="row.item.loading"
+      <template #cell(name)="data">
+        <div
+          v-if="data.item.loading"
         >
           <b-skeleton />
-        </span>
-        <span v-else>
-          {{ row.item.name }}
-        </span>
+        </div>
+        <div v-else>
+          <editable-text
+            :initialtext="data.value"
+          />
+        </div>
       </template>
       <template #cell(cbutton)="row">
         <b-button
@@ -58,6 +60,7 @@ import {
 } from 'bootstrap-vue'
 import { getAllTracks, updateTrack, deleteTrack } from '@/lib/trackServices.js'
 import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'
+import EditableText from '@/components/EditableText.vue'
 
 const trackTableFields = [
   {
@@ -108,7 +111,8 @@ export default {
     BIconTrash,
     BSkeleton,
     BContainer,
-    TrackManagerNavBar
+    TrackManagerNavBar,
+    EditableText
   },
   props: {
     sid: {
@@ -187,6 +191,9 @@ export default {
         const idx = this.tableItems.findIndex((e) => e.id === item.id)
         this.tableItems.splice(idx, 1)
       }
+    },
+    updateTitle (e) {
+      console.log('in upper component:', e)
     }
   }
 

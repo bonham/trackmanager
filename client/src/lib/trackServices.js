@@ -88,15 +88,18 @@ async function getGeoJson (idList, sid) {
   }
 }
 
-// /// Update Track
 async function updateTrack (track, attributes, sid) {
   const id = track.id
-  console.log('track id in trackServices/updateTrack', id)
-  const data = _.pick(track, attributes)
+  const keyValuePairs = _.pick(track, attributes)
+  await updateTrackById(id, keyValuePairs, sid)
+}
 
+async function updateTrackById (trackId, keyValuePairs, sid) {
+  const id = trackId
+  const attributes = _.keys(keyValuePairs) // hopefully we can deprecate this from the api soon
   const mybody = {
     updateAttributes: attributes,
-    data: data
+    data: keyValuePairs
   }
 
   const req = new Request(
@@ -127,7 +130,6 @@ async function updateTrack (track, attributes, sid) {
   }
 }
 
-// /// Update Track
 async function deleteTrack (id, sid) {
   const req = new Request(
     `/api/tracks/byid/${id}/sid/${sid}`,
@@ -153,4 +155,8 @@ async function deleteTrack (id, sid) {
   }
 }
 
-export { getAllTracks, getTracksByYear, getGeoJson, updateTrack, deleteTrack, getTrackById }
+export {
+  getAllTracks, getTracksByYear, getGeoJson,
+  updateTrack, updateTrackById,
+  deleteTrack, getTrackById
+}

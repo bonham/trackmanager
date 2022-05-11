@@ -5,10 +5,7 @@
   >
     <track-manager-nav-bar :sid="sid" />
     <h1 class="mt-4 mb-4">
-      <editable-text
-        initialtext="Edit Tracks"
-        :update-function="updateTitle"
-      />
+      Edit Tracks
     </h1>
     <b-button
       class="mb-3"
@@ -25,15 +22,17 @@
       primary-key="id"
       :tbody-transition-props="transProps"
     >
-      <template #cell(name)="row">
-        <span
-          v-if="row.item.loading"
+      <template #cell(name)="data">
+        <div
+          v-if="data.item.loading"
         >
           <b-skeleton />
-        </span>
-        <span v-else>
-          {{ row.item.name }}
-        </span>
+        </div>
+        <div v-else>
+          <editable-text
+            :initialtext="data.value"
+          />
+        </div>
       </template>
       <template #cell(cbutton)="row">
         <b-button

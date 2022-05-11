@@ -1,26 +1,36 @@
 <template>
-  <span>
-    <span
+  <div>
+    <div
       v-show="!editing"
       @click="makeEditable"
     >
       {{ value }}
-    </span>
-    <span v-show="editing">
-      <input
-        id="xyz"
+    </div>
+    <div v-show="editing">
+      <b-form-textarea
+        id="textarea-auto-height"
         ref="inputref"
         v-model="value"
-        type="text"
-        class="form-control"
+        placeholder="Track Name"
+        rows="2"
+        max-rows="20"
+        type="textarea"
+        class="form-control overflow-hidden"
         @change="processValueChange"
-      >
-    </span>
-  </span>
+        @blur="editing=false"
+        @keydown.enter="processEnter"
+      />
+    </div>
+  </div>
 </template>
 <script>
-
+import {
+  BFormTextarea
+} from 'bootstrap-vue'
 export default {
+  components: {
+    BFormTextarea
+  },
   props:
     {
       initialtext: {
@@ -51,9 +61,14 @@ export default {
       })
     },
     processValueChange (event) {
-      const inputValue = event.target.value // same as this.value
+      // const inputValue = event.target.value // same as this.value
+      const inputValue = event
       console.log('change', inputValue)
       this.updateFunction(inputValue)
+    },
+    processEnter (event) {
+      const value = event.target.value
+      this.processValueChange(value)
       this.editing = false
     }
   }

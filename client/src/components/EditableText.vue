@@ -4,7 +4,7 @@
       v-show="!editing"
       @click="makeEditable"
     >
-      {{ value }}
+      {{ value === '' ? "&lt;empty&gt;" : value }}
     </div>
     <div v-show="editing">
       <b-form-textarea

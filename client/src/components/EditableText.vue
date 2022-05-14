@@ -26,6 +26,7 @@
         ref="inputref"
         v-model="value"
         type="text"
+        @blur="processBlur"
         @change="processValueChange"
         @keydown.enter="processEnter"
       />

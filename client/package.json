@@ -29,6 +29,7 @@
     "@babel/polyfill": "~7",
     "@popperjs/core": "~2",
     "@testing-library/jest-dom": "^5.16.4",
+    "@testing-library/user-event": "13",
     "@testing-library/vue": "5",
     "@vue/cli-plugin-babel": "~4",
     "@vue/cli-plugin-eslint": ">=5.0.0-beta.1",

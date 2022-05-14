@@ -1,17 +1,18 @@
+/* eslint-disable vue/no-v-html */
 <template>
   <div>
     <div
       v-show="!editing"
+      :class="{ 'editable-empty' : valueIsEmptyOrWhitespace }"
       @click="makeEditable"
     >
-      {{ value === '' ? "&lt;empty&gt;" : value }}
+      {{ valueOrEmptyPlaceholder }}
     </div>
     <div v-show="editing">
       <b-form-textarea
-        id="textarea-auto-height"
+        v-if="textarea"
         ref="inputref"
         v-model="value"
-        placeholder="Track Name"
         rows="2"
         max-rows="20"
         type="textarea"
@@ -20,16 +21,25 @@
         @blur="processBlur"
         @keydown.enter="processEnter"
       />
+      <b-form-input
+        v-else
+        ref="inputref"
+        v-model="value"
+        type="text"
+        @change="processValueChange"
+        @keydown.enter="processEnter"
+      />
     </div>
   </div>
 </template>
 <script>
 import {
-  BFormTextarea
+  BFormTextarea, BFormInput
 } from 'bootstrap-vue'
 export default {
   components: {
-    BFormTextarea
+    BFormTextarea,
+    BFormInput
   },
   props:
     {
@@ -42,6 +52,11 @@ export default {
         type: Function,
         default: function () {},
         required: false
+      },
+      textarea: {
+        type: Boolean,
+        default: false,
+        required: false
       }
     },
   emits: {
@@ -51,6 +66,21 @@ export default {
     return {
       editing: false,
       value: ''
+    }
+  },
+  computed: {
+    valueOrEmptyPlaceholder () {
+      if (this.valueIsEmptyOrWhitespace) {
+        return 'No Name'
+      } else {
+        return this.value
+      }
+    },
+    valueIsEmptyOrWhitespace () {
+      const isEmptyString = (this.value === '')
+      const wsRegex = /^\s+$/
+      const isWhitespace = wsRegex.test(this.value)
+      return (isEmptyString || isWhitespace)
     }
   },
   created () {
@@ -63,15 +93,16 @@ export default {
         this.$refs.inputref.focus()
       })
     },
-    processValueChange (event) {
-      // const inputValue = event.target.value // same as this.value
-      const inputValue = event
+
+    processValueChange (value) {
+      const inputValue = value
       console.log('change', inputValue)
       this.updateFunction(inputValue)
     },
     processEnter (event) {
       const value = event.target.value
-      this.processValueChange(value)
+      const valueNoWhiteSpace = value.trim()
+      this.processValueChange(valueNoWhiteSpace)
       this.editing = false
     },
     processBlur (event) {
@@ -81,3 +112,9 @@ export default {
   }
 }
 </script>
+<style scoped>
+.editable-empty {
+  opacity: 0.5;
+  font-style: italic;
+}
+</style>

@@ -32,6 +32,7 @@
           <editable-text
             :initialtext="data.value"
             :update-function="(value) => processUpdate(data.item.id, value)"
+            :textarea="false"
           />
         </div>
       </template>

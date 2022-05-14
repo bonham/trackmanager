@@ -18,4 +18,18 @@ describe('EditableText', () => {
     expect(mockUpdateFunc.mock.calls.length).toBe(1)
     expect(mockUpdateFunc.mock.calls[0][0]).toEqual('newvalue')
   })
+  test('Emtpy', async () => {
+    const mockUpdateFunc = jest.fn()
+    render(
+      EditableText, {
+        props: {
+          updateFunction: mockUpdateFunc
+        }
+      })
+    const editableField = await screen.findByText('No Name')
+    await userEvent.click(editableField)
+    await userEvent.keyboard('newvalue{Enter}')
+    expect(mockUpdateFunc.mock.calls.length).toBe(1)
+    expect(mockUpdateFunc.mock.calls[0][0]).toEqual('newvalue')
+  })
 })

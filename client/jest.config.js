@@ -2,26 +2,26 @@
 /** @type {import('@jest/types').Config.InitialOptions} */
 const config = {
   verbose: false,
-  transformIgnorePatterns: ['/node_modules/(?!ol.*)'],
+  transformIgnorePatterns: ['/node_modules/(?!(ol.*|quick-lru)/)'],
 
-  // transform: {
-  //   '^.+\\.js$': 'babel-jest'
-  //   // '^.+\\.vue$': 'vue-jest'
-  // },
+  transform: {
+    '^.+\\.js$': 'babel-jest',
+    '^.+\\.vue$': "@vue/vue2-jest" 
+  },
 
   moduleNameMapper: {
     '@/(.*)$': '<rootDir>/src/$1'
   },
 
-  // moduleFileExtensions: [
-  //   'js',
-  //   'json',
-  //   'vue'
-  // ],
+  moduleFileExtensions: [
+    'js',
+    'json',
+    'vue'
+  ],
 
   preset: '@vue/cli-plugin-unit-jest',
 
-  collectCoverage: false,
+  collectCoverage: true,
   collectCoverageFrom: [
     'src/**/*.{js,vue}',
     '!src/main.js' // No need to cover bootstrap file

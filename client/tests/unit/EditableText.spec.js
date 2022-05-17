@@ -4,6 +4,7 @@ import EditableText from '@/components/EditableText.vue'
 
 describe('EditableText', () => {
   test('Simple', async () => {
+    const user = userEvent.setup()
     const mockUpdateFunc = jest.fn()
     render(
       EditableText, {
@@ -13,12 +14,13 @@ describe('EditableText', () => {
         }
       })
     const editableField = await screen.findByText('hello text')
-    await userEvent.click(editableField)
-    await userEvent.keyboard('{selectall}newvalue{Enter}')
+    await user.click(editableField)
+    await user.keyboard('{Control>}a{/Control}newvalue{Enter}')
     expect(mockUpdateFunc.mock.calls.length).toBe(1)
     expect(mockUpdateFunc.mock.calls[0][0]).toEqual('newvalue')
   })
   test('Emtpy', async () => {
+    const user = userEvent.setup()
     const mockUpdateFunc = jest.fn()
     render(
       EditableText, {
@@ -27,8 +29,8 @@ describe('EditableText', () => {
         }
       })
     const editableField = await screen.findByText('No Name')
-    await userEvent.click(editableField)
-    await userEvent.keyboard('newvalue{Enter}')
+    await user.click(editableField)
+    await user.keyboard('newvalue{Enter}')
     expect(mockUpdateFunc.mock.calls.length).toBe(1)
     expect(mockUpdateFunc.mock.calls[0][0]).toEqual('newvalue')
   })

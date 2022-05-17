@@ -1,11 +1,10 @@
 // vue.config.js
 module.exports = {
+  transpileDependencies: true,
   publicPath:
     process.env.NODE_ENV === 'production'
       ? '/tm/'
       : '/',
-  configureWebpack: {
-  },
 
   devServer: {
     host: 'localhost',

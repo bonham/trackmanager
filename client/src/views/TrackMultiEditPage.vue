@@ -124,7 +124,7 @@ export default {
   },
   data () {
     return {
-      trackTableFields,
+      trackTableFields: trackTableFields,
       tableItems: [],
       tracksByTrackId: {},
       transProps: {

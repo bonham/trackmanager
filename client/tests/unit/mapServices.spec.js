@@ -58,8 +58,8 @@ test('Simple', () => {
 
 test('Add layer', () => {
   mm = new ManagedMap()
-  mm.addTrackLayer({ id: 8, geojson })
-  mm.addTrackLayer({ id: 9, geojson })
+  mm.addTrackLayer({ id: 8, geojson: geojson })
+  mm.addTrackLayer({ id: 9, geojson: geojson })
   expect(mm.getLayerIds()).toEqual([8, 9])
   // eslint-disable-next-line no-unused-vars
   const l9 = mm.getTrackLayer(9)
@@ -70,7 +70,7 @@ test('Add layer', () => {
 
 test('createLayer-getextent', () => {
   mm = new ManagedMap()
-  mm.addTrackLayer({ id: 8, geojson })
+  mm.addTrackLayer({ id: 8, geojson: geojson })
   const layer = mm.getTrackLayer(8)
   const source = layer.getSource()
   expect(source).not.toBeNull()

@@ -29,7 +29,7 @@ describe('SelectTracksPage - DOM testing', () => {
     const rresult = render(
       SelectTracksPage, {
         props: { sid: 'abcd1234' },
-        store
+        store: store
       })
     const button = await rresult.findByText('2021')
     await fireEvent.click(button)

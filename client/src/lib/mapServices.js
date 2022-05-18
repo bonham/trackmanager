@@ -52,8 +52,8 @@ class ManagedMap {
         })
       ],
       view: new View({
-        center: center,
-        zoom: zoom
+        center,
+        zoom
       })
     })
     return map
@@ -182,7 +182,7 @@ class ZoomToTracksControl extends Control {
     element.appendChild(button)
 
     super({
-      element: element,
+      element,
       target: options.target
     })
 
@@ -206,7 +206,7 @@ function createLayer (geoJson, style) {
 
   const vectorLayer = new VectorLayer({
     source: vectorSource,
-    style: style
+    style
   })
   return vectorLayer
 }

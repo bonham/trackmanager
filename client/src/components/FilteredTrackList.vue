@@ -37,7 +37,7 @@ export default {
   },
   data: function () {
     return {
-      activeItems: [45]
+      activeItems: []
     }
   },
   computed: {

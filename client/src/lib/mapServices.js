@@ -34,7 +34,8 @@ How to use:
 
  */
 class ManagedMap {
-  constructor () {
+  constructor (opts) {
+    opts = opts || {}
     this.map = this._createMap()
     // should be defined outside map and passed to map
     this.standardStyle = this._createStandardStyle()
@@ -42,14 +43,8 @@ class ManagedMap {
     this.featureIdMap = new Map()
     const select = new Select()
     this.map.addInteraction(select)
-    const selectHandler = (e) => {
-      const selectedFeatures = e.selected
-      selectedFeatures.forEach((feature) => {
-        const fid = getUid(feature)
-        console.log('Feature Id', fid)
-        console.log('mapresult', this.featureIdMap.get(fid))
-      })
-    }
+    const selectCallBackFn = opts.selectCallBackFn || (() => {})
+    const selectHandler = this._createSelectHandler(selectCallBackFn)
     const boundSelectHandler = selectHandler.bind(this)
     select.on('select', boundSelectHandler)
   }
@@ -81,6 +76,16 @@ class ManagedMap {
         width: 2
       })
     })
+  }
+
+  _createSelectHandler (callBackFn) {
+    return (e) => {
+      const selectedFeatures = e.selected
+      selectedFeatures.forEach((feature) => {
+        const fid = getUid(feature)
+        callBackFn(this.getTrackIdByFeatureId(fid))
+      })
+    }
   }
 
   // set map view from bounding box in EPSG:4326
@@ -128,8 +133,12 @@ class ManagedMap {
     })
   }
 
-  getTrackIdByLayerId (layerId) {
-    return this.featureIdMap.get(layerId)
+  getTrackIdByFeatureId (featureId) {
+    return this.featureIdMap.get(featureId).trackId
+  }
+
+  getLayerIdByFeatureId (featureId) {
+    return this.featureIdMap.get(featureId).vectorLayerId
   }
 
   getTrackLayer (trackId) {

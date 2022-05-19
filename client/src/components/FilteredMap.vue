@@ -32,7 +32,7 @@ export default {
   },
   created () {
     // create map object
-    this.mmap = new ManagedMap()
+    this.mmap = new ManagedMap({ selectCallBackFn: this.setSelectedTrack })
 
     // watch if the viewport is resized and resize the map
     this.$watch(
@@ -71,9 +71,9 @@ export default {
     redrawTracks: async function () {
       const mmap = this.mmap
       const tvm = new TrackVisibilityManager(
-        mmap.getLayerIdsVisible(),
+        mmap.getTrackIdsVisible(),
         this.shouldBeVisibleIds,
-        mmap.getLayerIds()
+        mmap.getTrackIds()
       )
 
       // A1: set existing visible
@@ -106,7 +106,8 @@ export default {
     },
     ...mapMutations([
       'resizeMapClear',
-      'redrawTracksOnMapFlag'
+      'redrawTracksOnMapFlag',
+      'setSelectedTrack'
     ]),
     ...mapState([
       'loadedTracks'

@@ -6,7 +6,7 @@ const config = {
 
   transform: {
     '^.+\\.js$': 'babel-jest',
-    '^.+\\.vue$': "@vue/vue2-jest" 
+    '^.+\\.vue$': '@vue/vue2-jest'
   },
 
   moduleNameMapper: {

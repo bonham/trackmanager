@@ -3,7 +3,9 @@ import { transformExtent } from 'ol/proj'
 import { Tile as TileLayer, Vector as VectorLayer } from 'ol/layer'
 import { OSM, Vector as VectorSource } from 'ol/source'
 import { Control, defaults as defaultControls } from 'ol/control'
+import Select from 'ol/interaction/Select'
 import { Stroke, Style } from 'ol/style'
+import { getUid } from 'ol/util'
 import GeoJSON from 'ol/format/GeoJSON'
 const _ = require('lodash')
 
@@ -32,11 +34,19 @@ How to use:
 
  */
 class ManagedMap {
-  constructor () {
+  constructor (opts) {
+    opts = opts || {}
     this.map = this._createMap()
     // should be defined outside map and passed to map
     this.standardStyle = this._createStandardStyle()
-    this.layerMap = new Map() // ids are keys, values are layers
+    this.trackIdToLayerMap = new Map() // ids are keys, values are layers
+    this.featureIdMap = new Map()
+    const select = new Select()
+    this.map.addInteraction(select)
+    const selectCallBackFn = opts.selectCallBackFn || (() => {})
+    const selectHandler = this._createSelectHandler(selectCallBackFn)
+    const boundSelectHandler = selectHandler.bind(this)
+    select.on('select', boundSelectHandler)
   }
 
   _createMap (center = [0, 0], zoom = 0) {
@@ -52,8 +62,8 @@ class ManagedMap {
         })
       ],
       view: new View({
-        center: center,
-        zoom: zoom
+        center,
+        zoom
       })
     })
     return map
@@ -66,6 +76,16 @@ class ManagedMap {
         width: 2
       })
     })
+  }
+
+  _createSelectHandler (callBackFn) {
+    return (e) => {
+      const selectedFeatures = e.selected
+      selectedFeatures.forEach((feature) => {
+        const fid = getUid(feature)
+        callBackFn(this.getTrackIdByFeatureId(fid))
+      })
+    }
   }
 
   // set map view from bounding box in EPSG:4326
@@ -97,45 +117,57 @@ class ManagedMap {
 
   addTrackLayer (geoJsonWithId) { // geojsonwithid: { id: id, geojson: geojson }
     const geojson = geoJsonWithId.geojson
-    const id = geoJsonWithId.id
+    const trackId = geoJsonWithId.id
 
-    if (this.layerMap.has(id)) {
-      console.log(`An attempt was made to add layer with ${id}, but a layer with this id already exists in map`)
+    if (this.trackIdToLayerMap.has(trackId)) {
+      console.log(`An attempt was made to add layer with track id ${trackId}, but a track with this id already exists in map layers`)
       return
     }
-    const vectorLayer = createLayer(geojson, this.standardStyle)
+    const { featureIdList, vectorLayer } = createLayer(geojson, this.standardStyle)
+    const vectorLayerId = getUid(vectorLayer)
     this.map.addLayer(vectorLayer)
-    // add to map
-    this.layerMap.set(id, vectorLayer)
+    // add to maps
+    this.trackIdToLayerMap.set(trackId, vectorLayer)
+    featureIdList.forEach((fid) => {
+      this.featureIdMap.set(fid, { vectorLayerId, trackId })
+    })
   }
 
-  getTrackLayer (id) {
-    return this.layerMap.get(id)
+  getTrackIdByFeatureId (featureId) {
+    return this.featureIdMap.get(featureId).trackId
   }
 
-  setVisible (id) {
-    const layer = this.layerMap.get(id)
-    if (layer === undefined) throw new Error(`Attempt to look up nonexisting layer with id ${id}`)
+  getLayerIdByFeatureId (featureId) {
+    return this.featureIdMap.get(featureId).vectorLayerId
+  }
+
+  getTrackLayer (trackId) {
+    return this.trackIdToLayerMap.get(trackId)
+  }
+
+  setVisible (trackId) {
+    const layer = this.trackIdToLayerMap.get(trackId)
+    if (layer === undefined) throw new Error(`Attempt to look up nonexisting layer with id ${trackId}`)
     layer.setVisible(true)
   }
 
-  setInvisible (id) {
-    const layer = this.layerMap.get(id)
-    if (layer === undefined) throw new Error(`Attempt to look up nonexisting layer with id ${id}`)
+  setInvisible (trackId) {
+    const layer = this.trackIdToLayerMap.get(trackId)
+    if (layer === undefined) throw new Error(`Attempt to look up nonexisting layer with id ${trackId}`)
     layer.setVisible(false)
   }
 
-  getLayerIds () {
-    return Array.from(this.layerMap.keys())
+  getTrackIds () {
+    return Array.from(this.trackIdToLayerMap.keys())
   }
 
-  getLayerIdsVisible () {
-    const allIds = this.getLayerIds()
+  getTrackIdsVisible () {
+    const allIds = this.getTrackIds()
     return _.filter(allIds, id => { return this.getTrackLayer(id).getVisible() })
   }
 
-  getLayerIdsInVisible () {
-    const allIds = this.getLayerIds()
+  getTrackIdsInVisible () {
+    const allIds = this.getTrackIds()
     return _.reject(allIds, id => { return this.getTrackLayer(id).getVisible() })
   }
 
@@ -148,7 +180,7 @@ class ManagedMap {
   }
 
   setExtentAndZoomOut () {
-    const visibleIds = this.getLayerIdsVisible()
+    const visibleIds = this.getTrackIdsVisible()
     const extentList = []
     for (const id of visibleIds) {
       extentList.push(
@@ -182,7 +214,7 @@ class ZoomToTracksControl extends Control {
     element.appendChild(button)
 
     super({
-      element: element,
+      element,
       target: options.target
     })
 
@@ -194,21 +226,24 @@ class ZoomToTracksControl extends Control {
 function createLayer (geoJson, style) {
   // load track
 
+  const features = new GeoJSON().readFeatures(
+    geoJson,
+    {
+      dataProjection: 'EPSG:4326',
+      featureProjection: 'EPSG:3857'
+    }
+  )
+  const featureIdList = features.map((f) => getUid(f))
+
   const vectorSource = new VectorSource({
-    features: new GeoJSON().readFeatures(
-      geoJson,
-      {
-        dataProjection: 'EPSG:4326',
-        featureProjection: 'EPSG:3857'
-      }
-    )
+    features
   })
 
   const vectorLayer = new VectorLayer({
     source: vectorSource,
-    style: style
+    style
   })
-  return vectorLayer
+  return { featureIdList, vectorLayer }
 }
 
 class ExtentCollection {

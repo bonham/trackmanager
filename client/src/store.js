@@ -11,7 +11,8 @@ export default new Vuex.Store(
       tracksById: {},
       trackLoadStatus: 'not_loaded',
       resizeMap: false,
-      redrawTracksOnMap: false
+      redrawTracksOnMap: false,
+      selectedTrack: null
     },
     mutations: {
       // for track metadata only
@@ -42,6 +43,9 @@ export default new Vuex.Store(
       // used as event to indicate that the map needs redraw layers
       redrawTracksOnMapFlag (state, status) {
         state.redrawTracksOnMap = status
+      },
+      setSelectedTrack (state, trackId) {
+        state.selectedTrack = trackId
       }
     },
     actions: {

@@ -42,6 +42,18 @@ export default {
       l.sort((a, b) => (a.secondsSinceEpoch() - b.secondsSinceEpoch()))
       return l
     }
+  },
+  created () {
+    this.$watch(
+      (state) => {
+        return this.$store.state.selectedTrack
+      },
+      (newValue, oldValue) => {
+        if (newValue) {
+          console.log('in tracklist', newValue)
+        }
+      }
+    )
   }
 }
 </script>

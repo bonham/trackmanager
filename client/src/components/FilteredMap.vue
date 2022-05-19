@@ -32,7 +32,7 @@ export default {
   },
   created () {
     // create map object
-    this.mmap = new ManagedMap()
+    this.mmap = new ManagedMap({ selectCallBackFn: this.setSelectedTrack })
 
     // watch if the viewport is resized and resize the map
     this.$watch(
@@ -106,7 +106,8 @@ export default {
     },
     ...mapMutations([
       'resizeMapClear',
-      'redrawTracksOnMapFlag'
+      'redrawTracksOnMapFlag',
+      'setSelectedTrack'
     ]),
     ...mapState([
       'loadedTracks'

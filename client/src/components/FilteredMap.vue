@@ -20,11 +20,6 @@ export default {
       default: ''
     }
   },
-  data: function () {
-    return {
-      drawnOnce: false
-    }
-  },
   computed: {
     ...mapGetters({
       shouldBeVisibleIds: 'getLoadedTrackIds'
@@ -71,7 +66,6 @@ export default {
   mounted () {
     this.$nextTick(() => {
       this.mmap.map.setTarget('mapdiv')
-      this.mmap.zoomOut()
     })
   },
   methods: {
@@ -104,10 +98,7 @@ export default {
       console.log('To be hidden: ', toHide)
       _.forEach(toHide, function (id) { mmap.setInvisible(id) })
 
-      if (!this.drawnOnce) {
-        this.mmap.setExtentAndZoomOut()
-        this.drawnOnce = true
-      }
+      this.mmap.setExtentAndZoomOut()
     },
     ...mapMutations([
       'resizeMapClear',

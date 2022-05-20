@@ -20,7 +20,6 @@
 import { TrackCollection } from '@/lib/Track.js'
 import { getAllTracks } from '@/lib/trackServices.js'
 import TrackSection from '@/components/TrackSection.vue'
-import { mapActions, mapState } from 'vuex'
 const _ = require('lodash')
 
 export default {
@@ -35,11 +34,13 @@ export default {
       default: ''
     }
   },
+  data: function () {
+    return {
+      loadedTracks: [],
+      trackLoadStatus: 'Not loaded'
+    }
+  },
   computed: {
-    ...mapState([
-      'loadedTracks',
-      'trackLoadStatus'
-    ]),
     tracksByYear () {
       // object to array:
       const trackFlatList = _.values(this.loadedTracks)
@@ -63,18 +64,15 @@ export default {
     }
   },
   created: async function () {
-    const sid = this.sid
-    const loadFunc = () => getAllTracks(sid)
-    await this.loadTracks(loadFunc)
+    this.trackLoadStatus = 'Loading ...'
+    this.loadedTracks = await getAllTracks(this.sid)
+    this.trackLoadStatus = 'Loaded ...'
   },
   methods: {
     isYearCollapsed (thisYear) {
       const firstYearInCollection = this.trackCollections[0].year
       return thisYear !== firstYearInCollection
-    },
-    ...mapActions([
-      'loadTracks'
-    ])
+    }
   }
 }
 </script>

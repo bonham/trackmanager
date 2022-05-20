@@ -9,7 +9,7 @@
 import { ManagedMap } from '@/lib/mapServices.js'
 import { TrackVisibilityManager } from '@/lib/mapStateHelpers.js'
 import { getGeoJson } from '@/lib/trackServices.js'
-import { mapMutations, mapState, mapGetters } from 'vuex'
+import { mapMutations, mapState, mapGetters, mapActions } from 'vuex'
 const _ = require('lodash')
 
 export default {
@@ -28,15 +28,18 @@ export default {
   computed: {
     ...mapGetters({
       shouldBeVisibleIds: 'getLoadedTrackIds'
-    })
+    }),
+    ...mapState([
+      'loadedTracks'
+    ])
   },
   created () {
     // create map object
-    this.mmap = new ManagedMap({ selectCallBackFn: this.setSelectedTrack })
+    this.mmap = new ManagedMap({ selectCallBackFn: this.selectTrackAndScroll })
 
     // watch if the viewport is resized and resize the map
     this.$watch(
-      (state) => {
+      function (state) {
         return this.$store.state.resizeMap
       },
       (newValue, oldValue) => {
@@ -51,13 +54,22 @@ export default {
     const unboundRedrawTracks = this.redrawTracks
     const boundRedrawTracks = unboundRedrawTracks.bind(this)
     this.$watch(
-      (state) => {
+      function (state) {
         return this.$store.state.redrawTracksOnMap
       },
       function (newValue, oldValue) {
         if (newValue === true) {
           boundRedrawTracks()
         }
+      }
+    )
+    // watch for selected tracks
+    this.$watch(
+      function (state) {
+        return this.$store.state.selectedTrack
+      },
+      function (trackIdNew) {
+        this.mmap.setSelectedTrack(trackIdNew)
       }
     )
   },
@@ -106,11 +118,10 @@ export default {
     },
     ...mapMutations([
       'resizeMapClear',
-      'redrawTracksOnMapFlag',
-      'setSelectedTrack'
+      'redrawTracksOnMapFlag'
     ]),
-    ...mapState([
-      'loadedTracks'
+    ...mapActions([
+      'selectTrackAndScroll'
     ])
   }
 }

@@ -12,7 +12,8 @@ export default new Vuex.Store(
       trackLoadStatus: 'not_loaded',
       resizeMap: false,
       redrawTracksOnMap: false,
-      selectedTrack: null
+      selectedTrack: null,
+      scrollToTrack: null
     },
     mutations: {
       // for track metadata only
@@ -46,6 +47,9 @@ export default new Vuex.Store(
       },
       setSelectedTrack (state, trackId) {
         state.selectedTrack = trackId
+      },
+      setScrollToTrack (state, trackId) {
+        state.scrollToTrack = trackId
       }
     },
     actions: {
@@ -69,6 +73,10 @@ export default new Vuex.Store(
         commit('modifyTrack', { id, props })
         await updateFunction(state.tracksById[id], _.keys(props))
         commit('setTrackLoadStatus', 'loaded')
+      },
+      async selectTrackAndScroll ({ commit }, trackId) {
+        commit('setSelectedTrack', trackId)
+        commit('setScrollToTrack', trackId)
       }
 
     },

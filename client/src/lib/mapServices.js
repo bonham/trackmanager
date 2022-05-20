@@ -41,12 +41,14 @@ class ManagedMap {
     this.standardStyle = this._createStandardStyle()
     this.trackIdToLayerMap = new Map() // ids are keys, values are layers
     this.featureIdMap = new Map()
-    const select = new Select()
-    this.map.addInteraction(select)
+
+    // setup for track select interaction
+    this.select = new Select()
+    this.map.addInteraction(this.select)
     const selectCallBackFn = opts.selectCallBackFn || (() => {})
     const selectHandler = this._createSelectHandler(selectCallBackFn)
     const boundSelectHandler = selectHandler.bind(this)
-    select.on('select', boundSelectHandler)
+    this.select.on('select', boundSelectHandler)
   }
 
   _createMap (center = [0, 0], zoom = 0) {
@@ -130,6 +132,16 @@ class ManagedMap {
     this.trackIdToLayerMap.set(trackId, vectorLayer)
     featureIdList.forEach((fid) => {
       this.featureIdMap.set(fid, { vectorLayerId, trackId })
+    })
+  }
+
+  setSelectedTrack (trackId) {
+    const selectedFeatures = this.select.getFeatures()
+    selectedFeatures.clear()
+    const layer = this.getTrackLayer(trackId)
+    const features = layer.getSource().getFeatures()
+    features.forEach((f) => {
+      selectedFeatures.push(f)
     })
   }
 

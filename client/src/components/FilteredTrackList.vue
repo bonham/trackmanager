@@ -15,6 +15,7 @@
             :key="track.id"
             :ref="'track_'+track.id"
             :active="itemActiveStatus(track.id)"
+            @click="setActive(track.id)"
           >
             <span>{{ track.name }}, </span>
             <span>{{ (track.distance() / 1000).toFixed(0) }} km, {{ track.localeDateShort() }}</span>
@@ -25,7 +26,7 @@
   </div>
 </template>
 <script>
-import { mapState } from 'vuex'
+import { mapState, mapMutations } from 'vuex'
 import { BListGroup, BListGroupItem, BCard } from 'bootstrap-vue'
 
 export default {
@@ -35,15 +36,11 @@ export default {
     BListGroupItem,
     BCard
   },
-  data: function () {
-    return {
-      activeItems: []
-    }
-  },
   computed: {
     ...mapState([
       'loadedTracks',
-      'trackLoadStatus'
+      'trackLoadStatus',
+      'selectedTrack'
     ]),
     loadedTracksSorted () {
       const l = this.loadedTracks
@@ -53,12 +50,12 @@ export default {
   },
   created () {
     this.$watch(
-      (state) => {
-        return this.$store.state.selectedTrack
+      // watch for scroll trigger
+      function (state) {
+        return this.$store.state.scrollToTrack
       },
       (trackId) => {
         if (trackId) {
-          this.activeItems = [trackId]
           const itemRef = `track_${trackId}`
           this.$refs[itemRef][0].scrollIntoView({
             behavior: 'smooth',
@@ -70,8 +67,14 @@ export default {
   },
   methods: {
     itemActiveStatus (trackId) {
-      return (this.activeItems.includes(trackId))
-    }
+      return (this.selectedTrack === trackId)
+    },
+    setActive (trackId) {
+      this.setSelectedTrack(trackId)
+    },
+    ...mapMutations([
+      'setSelectedTrack'
+    ])
   }
 }
 </script>

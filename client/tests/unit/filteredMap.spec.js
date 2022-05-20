@@ -12,7 +12,7 @@ describe('FilteredMap', () => {
     return import('../../src/store.js').then((module) => {
       const store = module.default
       const wrapper = shallowMount(FilteredMap, { store, localVue })
-      expect(wrapper.vm.loadedTracks()).toEqual([])
+      expect(wrapper.vm.shouldBeVisibleIds).toEqual([])
     })
   })
 })

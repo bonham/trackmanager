@@ -9,7 +9,7 @@
 import { ManagedMap } from '@/lib/mapServices.js'
 import { TrackVisibilityManager } from '@/lib/mapStateHelpers.js'
 import { getGeoJson } from '@/lib/trackServices.js'
-import { mapMutations, mapState, mapGetters, mapActions } from 'vuex'
+import { mapMutations, mapGetters, mapActions } from 'vuex'
 const _ = require('lodash')
 
 export default {
@@ -28,10 +28,7 @@ export default {
   computed: {
     ...mapGetters({
       shouldBeVisibleIds: 'getLoadedTrackIds'
-    }),
-    ...mapState([
-      'loadedTracks'
-    ])
+    })
   },
   created () {
     // create map object

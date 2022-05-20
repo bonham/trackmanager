@@ -9,7 +9,7 @@
         v-for="year in years"
         :key="year"
         class="m-2"
-        @click="loadComplete(year)"
+        @click="loadTracksOfYear(year)"
       >
         {{ year }}
       </b-button>
@@ -131,7 +131,7 @@ export default {
   },
   methods: {
     ...mapActions([
-      'loadTracks',
+      'loadTracksAndRedraw',
       'clearTracks'
     ]),
     ...mapMutations([
@@ -146,16 +146,16 @@ export default {
       })
     },
 
-    loadComplete: function (year) {
-    // call loadTracks action from store while injecting the load function
+    loadTracksOfYear: function (year) {
+    // call loadTracksAndRedraw action from store while injecting the load function
       const sid = this.sid
       const loadFunction = function () { return getTracksByYear(year, sid) }
-      this.loadTracks(loadFunction).catch(e => console.error('Error loading tracks by year', e))
+      this.loadTracksAndRedraw(loadFunction).catch(e => console.error('Error loading tracks by year', e))
     },
     loadAllTracks: function () {
       const sid = this.sid
       const loadFunc = () => getAllTracks(sid)
-      this.loadTracks(loadFunc).catch(e => console.error('Error loading all tracks', e))
+      this.loadTracksAndRedraw(loadFunc).catch(e => console.error('Error loading all tracks', e))
     },
     setLayout (wantedOrientation) {
       if (wantedOrientation === this.currentOrientation) {

@@ -54,10 +54,8 @@ export default {
       function (state) {
         return this.$store.state.redrawTracksOnMap
       },
-      function (newValue, oldValue) {
-        if (newValue === true) {
-          boundRedrawTracks()
-        }
+      function () {
+        boundRedrawTracks()
       }
     )
     // watch for selected tracks
@@ -110,8 +108,6 @@ export default {
         this.mmap.setExtentAndZoomOut()
         this.drawnOnce = true
       }
-
-      this.redrawTracksOnMapFlag(false)
     },
     ...mapMutations([
       'resizeMapClear',

@@ -11,7 +11,7 @@ export default new Vuex.Store(
       tracksById: {},
       trackLoadStatus: 'not_loaded',
       resizeMap: false,
-      redrawTracksOnMap: false,
+      redrawTracksOnMap: 0,
       selectedTrack: null,
       scrollToTrack: null
     },
@@ -42,8 +42,8 @@ export default new Vuex.Store(
         state.resizeMap = false
       },
       // used as event to indicate that the map needs redraw layers
-      redrawTracksOnMapFlag (state, status) {
-        state.redrawTracksOnMap = status
+      redrawTracksOnMapFlag (state) {
+        ++state.redrawTracksOnMap
       },
       setSelectedTrack (state, trackId) {
         state.selectedTrack = trackId
@@ -58,13 +58,16 @@ export default new Vuex.Store(
         const trackList = await loadFunction() // [ Track1, Track2, Track3 ] oder auch [ { id: 403, name: "Hammerau", .}, { id: x, ... }]
         commit('setLoadedTracks', trackList)
         commit('setTrackLoadStatus', 'loaded')
-        commit('redrawTracksOnMapFlag', true)
+      },
+      async loadTracksAndRedraw ({ commit, dispatch }, loadFunction) {
+        await dispatch('loadTracks', loadFunction)
+        commit('redrawTracksOnMapFlag')
       },
       async clearTracks ({ commit }) {
         commit('setTrackLoadStatus', 'loading')
         commit('setLoadedTracks', [])
         commit('setTrackLoadStatus', 'loaded')
-        commit('redrawTracksOnMapFlag', true)
+        commit('redrawTracksOnMapFlag')
       },
       async modifyTrack ({ commit, state }, { id, props, updateFunction }) { // props is object with attributes and values
         // updates only properties from source to target track and updates backend

@@ -20,11 +20,6 @@ export default {
       default: ''
     }
   },
-  data: function () {
-    return {
-      drawnOnce: false
-    }
-  },
   computed: {
     ...mapGetters({
       shouldBeVisibleIds: 'getLoadedTrackIds'
@@ -54,10 +49,8 @@ export default {
       function (state) {
         return this.$store.state.redrawTracksOnMap
       },
-      function (newValue, oldValue) {
-        if (newValue === true) {
-          boundRedrawTracks()
-        }
+      function () {
+        boundRedrawTracks()
       }
     )
     // watch for selected tracks
@@ -73,7 +66,6 @@ export default {
   mounted () {
     this.$nextTick(() => {
       this.mmap.map.setTarget('mapdiv')
-      this.mmap.zoomOut()
     })
   },
   methods: {
@@ -106,12 +98,7 @@ export default {
       console.log('To be hidden: ', toHide)
       _.forEach(toHide, function (id) { mmap.setInvisible(id) })
 
-      if (!this.drawnOnce) {
-        this.mmap.setExtentAndZoomOut()
-        this.drawnOnce = true
-      }
-
-      this.redrawTracksOnMapFlag(false)
+      this.mmap.setExtentAndZoomOut()
     },
     ...mapMutations([
       'resizeMapClear',

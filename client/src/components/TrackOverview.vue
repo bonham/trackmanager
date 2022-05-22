@@ -1,7 +1,8 @@
 <template>
   <div>
     <div>
-      Load status: {{ trackLoadStatus }}
+      <span v-if="loading">Loading <b-spinner small />
+      </span>
     </div>
     <div>
       <TrackSection
@@ -20,11 +21,13 @@
 import { TrackCollection } from '@/lib/Track.js'
 import { getAllTracks } from '@/lib/trackServices.js'
 import TrackSection from '@/components/TrackSection.vue'
+import { BSpinner } from 'bootstrap-vue'
 const _ = require('lodash')
 
 export default {
   name: 'TrackOverview',
   components: {
+    BSpinner,
     TrackSection
     // TrackSection: () => import(/* webpackChunkName: "TrackSection" */ '@/components/TrackSection.vue')
   },
@@ -37,7 +40,7 @@ export default {
   data: function () {
     return {
       loadedTracks: [],
-      trackLoadStatus: 'Not loaded'
+      loading: false
     }
   },
   computed: {
@@ -64,9 +67,9 @@ export default {
     }
   },
   created: async function () {
-    this.trackLoadStatus = 'Loading ...'
+    this.loading = true
     this.loadedTracks = await getAllTracks(this.sid)
-    this.trackLoadStatus = 'Loaded ...'
+    this.loading = false
   },
   methods: {
     isYearCollapsed (thisYear) {

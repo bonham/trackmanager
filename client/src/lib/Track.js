@@ -25,7 +25,7 @@ class Track {
 
   year () {
     if (this.time === null) {
-      return '0 Unknown Year'
+      return 0
     } else {
       return this.time.year
     }

@@ -4,9 +4,15 @@
     class="d-flex flex-column vh-100"
   >
     <track-manager-nav-bar :sid="sid" />
-    <h1 class="mt-4 mb-4">
-      Edit Tracks
-    </h1>
+    <div class="mt-4 mb-4">
+      <h1 style="display: inline-block;">
+        Edit Tracks
+      </h1>
+      <b-spinner
+        v-if="loading"
+      />
+    </div>
+
     <b-button
       class="mb-3"
       @click="cleanAll"
@@ -58,7 +64,7 @@
 import {
   BTable, BButton,
   BIconArrowLeft, BIconTrash,
-  BSkeleton, BContainer
+  BSkeleton, BContainer, BSpinner
 } from 'bootstrap-vue'
 import { getAllTracks, updateTrack, updateTrackById, deleteTrack } from '@/lib/trackServices.js'
 import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'
@@ -113,6 +119,7 @@ export default {
     BIconTrash,
     BSkeleton,
     BContainer,
+    BSpinner,
     TrackManagerNavBar,
     EditableText
   },
@@ -130,7 +137,8 @@ export default {
       transProps: {
         // Transition name
         name: 'flip-list'
-      }
+      },
+      loading: false
     }
   },
   created: async function () {
@@ -139,6 +147,7 @@ export default {
   },
   methods: {
     loadTracks: async function () {
+      this.loading = true
       const tracks = await getAllTracks(this.sid)
       tracks.sort((a, b) => a.time < b.time)
       tracks.forEach((t) => {
@@ -155,6 +164,7 @@ export default {
 
         this.tableItems.push(item)
       })
+      this.loading = false
     },
     cleanUpText: async function (item) {
       const id = item.id

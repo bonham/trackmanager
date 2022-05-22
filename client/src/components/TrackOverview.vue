@@ -9,7 +9,7 @@
         v-for="trCol in trackCollections"
         :key="trCol.year"
         :coll="trCol.collection"
-        :label="trCol.year"
+        :label="trCol.year === '0' ? 'No date' : trCol.year"
         :collapsed="isYearCollapsed(trCol.year)"
         :sid="sid"
       />

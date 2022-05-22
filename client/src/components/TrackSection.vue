@@ -29,9 +29,7 @@
           </b-col>
           <b-col
             cols="3"
-          >
-            x
-          </b-col>
+          />
         </b-row>
       </b-card-text>
     </b-card>

@@ -1,11 +1,18 @@
 <template>
-  <div class="flex-grow-1 d-flex flex-column">
+  <div class="flex-grow-1 d-flex flex-column justify-content-center align-items-center">
     <div
       id="mapdiv"
     />
+    <div
+      v-if="loading"
+      class="mapspinner"
+    >
+      <b-spinner />
+    </div>
   </div>
 </template>
 <script>
+import { BSpinner } from 'bootstrap-vue'
 import { ManagedMap } from '@/lib/mapServices.js'
 import { TrackVisibilityManager } from '@/lib/mapStateHelpers.js'
 import { getGeoJson } from '@/lib/trackServices.js'
@@ -14,10 +21,18 @@ const _ = require('lodash')
 
 export default {
   name: 'FilteredMap',
+  components: {
+    BSpinner
+  },
   props: {
     sid: {
       type: String,
       default: ''
+    }
+  },
+  data () {
+    return {
+      loading: false
     }
   },
   computed: {
@@ -70,6 +85,7 @@ export default {
   },
   methods: {
     redrawTracks: async function () {
+      this.loading = true
       const mmap = this.mmap
       const tvm = new TrackVisibilityManager(
         mmap.getTrackIdsVisible(),
@@ -98,6 +114,7 @@ export default {
       console.log('To be hidden: ', toHide)
       _.forEach(toHide, function (id) { mmap.setInvisible(id) })
 
+      this.loading = false
       this.mmap.setExtentAndZoomOut()
     },
     ...mapMutations([
@@ -120,6 +137,9 @@ export default {
 .map-control-expand {
   top: 4em;
   left: .5em;
+}
+.mapspinner {
+  position: absolute;
 }
 
   @import '../../node_modules/ol/ol.css'

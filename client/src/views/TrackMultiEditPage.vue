@@ -140,6 +140,7 @@ export default {
   methods: {
     loadTracks: async function () {
       const tracks = await getAllTracks(this.sid)
+      tracks.sort((a, b) => a.time < b.time)
       tracks.forEach((t) => {
         // sort by track id
         this.tracksByTrackId[t.id] = t

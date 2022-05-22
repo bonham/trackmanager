@@ -3,11 +3,11 @@ import VueRouter from 'vue-router'
 
 Vue.use(VueRouter)
 
-const DEFAULT_SID = Vue.config.devtools ? '8pz22a' : ''
 const routes = [
   {
     path: '/',
-    redirect: `/select_tracks/sid/${DEFAULT_SID}`
+    name: 'NoSidPage',
+    component: () => import(/* webpackChunkName: "NoSidPage" */ '../views/NoSidPage.vue')
   },
   {
     path: '/select_tracks/sid/:sid',

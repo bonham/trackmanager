@@ -125,6 +125,9 @@ export default {
     this.buttonsLoading = true
     await this.getYears()
     this.buttonsLoading = false
+    if (this.years.length > 0) {
+      await this.loadTracksOfYear(this.years[0])
+    }
   },
   beforeDestroy () {
     this.resizeObserver.unobserve(this.$refs.outerSplitFrame)

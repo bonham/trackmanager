@@ -4,14 +4,31 @@
     class="d-flex flex-column vh-100"
   >
     <track-manager-nav-bar :sid="sid" />
-    <div>
+    <div v-if="buttonsLoading">
+      <b-button
+        class="m-2"
+      >
+        <b-skeleton width="3rem" />
+      </b-button>
+      <b-button
+        class="m-2"
+      >
+        <b-skeleton width="3rem" />
+      </b-button>
+      <b-button
+        class="m-2"
+      >
+        <b-skeleton width="3rem" />
+      </b-button>
+    </div>
+    <div v-else>
       <b-button
         v-for="year in years"
         :key="year"
         class="m-2"
         @click="loadTracksOfYear(year)"
       >
-        {{ year }}
+        {{ year === 0 ? "No date" : year }}
       </b-button>
       <b-button
         class="m-2"
@@ -21,12 +38,7 @@
       </b-button>
       <b-button
         class="m-2"
-        @click="clearTracks()"
-      >
-        None
-      </b-button>
-      <b-button
-        class="m-2"
+        variant="outline-primary"
         @click="setLayout(currentOrientation === 'portrait' ? 'landscape' : 'portrait')"
       >
         Orientation
@@ -55,7 +67,7 @@
 </template>
 
 <script>
-import { BContainer, BButton } from 'bootstrap-vue'
+import { BContainer, BButton, BSkeleton } from 'bootstrap-vue'
 import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'
 import FilteredTrackList from '@/components/FilteredTrackList.vue'
 import FilteredMap from '@/components/FilteredMap.vue'
@@ -79,7 +91,8 @@ export default {
     FilteredTrackList,
     FilteredMap,
     BContainer,
-    BButton
+    BButton,
+    BSkeleton
   },
   props: {
     sid: {
@@ -91,7 +104,8 @@ export default {
     return {
       currentOrientation: 'landscape',
       resizeObserver: null,
-      years: []
+      years: [],
+      buttonsLoading: false
     }
   },
   computed: {
@@ -106,9 +120,14 @@ export default {
     }
 
   },
-  created () {
+  async created () {
     this.currentOrientation = getViewPortOrientation()
-    this.getYears()
+    this.buttonsLoading = true
+    await this.getYears()
+    this.buttonsLoading = false
+    if (this.years.length > 0) {
+      await this.loadTracksOfYear(this.years[0])
+    }
   },
   beforeDestroy () {
     this.resizeObserver.unobserve(this.$refs.outerSplitFrame)
@@ -141,8 +160,8 @@ export default {
       'redrawTracksOnMapFlag'
     ]),
 
-    getYears () {
-      getAllTracks(this.sid).then((trackList) => {
+    async getYears () {
+      await getAllTracks(this.sid).then((trackList) => {
         const tColl = new TrackCollection(trackList)
         this.years = tColl.yearList().sort((a, b) => b - a)
       })

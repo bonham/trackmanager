@@ -148,10 +148,17 @@ router.get(
     const schema = req.schema
     const year = req.params.year
 
+    let whereClause
+    if (year === '0') {
+      whereClause = 'time is null'
+    } else {
+      whereClause = `extract(YEAR from time) = ${year}`
+    }
+
     const query = 'select id, name, length, src,' +
       'time, timelength, ascent ' +
-      `from ${schema}.tracks where extract(YEAR from time) = ${year}`
-
+      `from ${schema}.tracks where ${whereClause}`
+    console.log(query)
     try {
       const queryResult = await pool.query(query)
       res.json(queryResult.rows)

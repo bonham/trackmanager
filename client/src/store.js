@@ -9,7 +9,7 @@ export default new Vuex.Store(
     state: {
       loadedTracks: [],
       tracksById: {},
-      trackLoadStatus: 'not_loaded',
+      trackLoadStatus: 0, // 0:not loaded, 1:loading, 2:loaded
       resizeMap: false,
       redrawTracksOnMap: 0,
       selectedTrack: null,
@@ -54,28 +54,20 @@ export default new Vuex.Store(
     },
     actions: {
       async loadTracks ({ commit }, loadFunction) {
-        commit('setTrackLoadStatus', 'loading')
+        commit('setTrackLoadStatus', 1)
         const trackList = await loadFunction() // [ Track1, Track2, Track3 ] oder auch [ { id: 403, name: "Hammerau", .}, { id: x, ... }]
         commit('setLoadedTracks', trackList)
-        commit('setTrackLoadStatus', 'loaded')
+        commit('setTrackLoadStatus', 2)
       },
       async loadTracksAndRedraw ({ commit, dispatch }, loadFunction) {
         await dispatch('loadTracks', loadFunction)
         commit('redrawTracksOnMapFlag')
       },
       async clearTracks ({ commit }) {
-        commit('setTrackLoadStatus', 'loading')
+        commit('setTrackLoadStatus', 1)
         commit('setLoadedTracks', [])
-        commit('setTrackLoadStatus', 'loaded')
+        commit('setTrackLoadStatus', 0)
         commit('redrawTracksOnMapFlag')
-      },
-      async modifyTrack ({ commit, state }, { id, props, updateFunction }) { // props is object with attributes and values
-        // updates only properties from source to target track and updates backend
-        commit('setTrackLoadStatus', 'updating')
-
-        commit('modifyTrack', { id, props })
-        await updateFunction(state.tracksById[id], _.keys(props))
-        commit('setTrackLoadStatus', 'loaded')
       },
       async selectTrackAndScroll ({ commit }, trackId) {
         commit('setSelectedTrack', trackId)

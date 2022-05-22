@@ -10,7 +10,7 @@ module.exports = {
     host: 'localhost',
     hot: true,
     port: 8080,
-    open: 'Chrome',
+    open: '/',
     proxy: { // https://cli.vuejs.org/guide/html-and-static-assets.html#disable-index-generation
       '/api/tracks*': {
         target: 'http://localhost:3000',

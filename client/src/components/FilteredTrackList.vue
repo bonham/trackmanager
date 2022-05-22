@@ -1,10 +1,20 @@
 <template>
   <div>
     <div class="p-2">
+      <div class="bg-light fs-2 listheader border-top border-left border-right rounded">
+        <span v-if="trackLoadStatus === 0">Not loaded</span>
+        <span v-else-if="trackLoadStatus === 1">
+          Loading
+          <b-spinner
+            small
+            label="Spinning"
+          />
+        </span>
+        <span v-else>Loaded</span>
+      </div>
       <b-card
         ref="testref"
         no-body
-        :header="'List of Tracks - '+trackLoadStatus"
         class="fs-2"
       >
         <b-list-group
@@ -27,14 +37,15 @@
 </template>
 <script>
 import { mapState, mapMutations } from 'vuex'
-import { BListGroup, BListGroupItem, BCard } from 'bootstrap-vue'
+import { BListGroup, BListGroupItem, BCard, BSpinner } from 'bootstrap-vue'
 
 export default {
   name: 'FilteredTrackList',
   components: {
     BListGroup,
     BListGroupItem,
-    BCard
+    BCard,
+    BSpinner
   },
   computed: {
     ...mapState([
@@ -81,5 +92,10 @@ export default {
 <style scoped>
 .fs-2 {
   font-size: .8rem;
+}
+
+.listheader {
+  padding: 0.75rem 1.25rem;
+  margin-bottom: 0;
 }
 </style>

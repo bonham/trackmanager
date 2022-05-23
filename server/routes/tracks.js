@@ -15,6 +15,8 @@ const createSidValidationChain = require('../lib/sidResolverMiddleware')
 const trackIdValidationMiddleware = require('../lib/trackIdValidationMiddleware')
 const yearValidation = require('../lib/yearValidation')
 
+const SIMPLIFY_DISTANCE = 2
+
 // configuration for data upload
 let config
 try {
@@ -297,7 +299,8 @@ router.post(
     // build arguments
     const args = [
       gpx2dbScript,
-      // '--createdb',
+      '-s',
+      SIMPLIFY_DISTANCE,
       filePath,
       database,
       schema

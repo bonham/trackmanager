@@ -10,7 +10,7 @@
             label="Spinning"
           />
         </span>
-        <span v-else>Loaded</span>
+        <span v-else>{{ headline }}</span>
       </div>
       <b-card
         ref="testref"
@@ -38,6 +38,7 @@
 <script>
 import { mapState, mapMutations } from 'vuex'
 import { BListGroup, BListGroupItem, BCard, BSpinner } from 'bootstrap-vue'
+import { TrackCollection } from '@/lib/Track.js'
 
 export default {
   name: 'FilteredTrackList',
@@ -57,6 +58,14 @@ export default {
       const l = this.loadedTracks
       l.sort((a, b) => (a.secondsSinceEpoch() - b.secondsSinceEpoch()))
       return l
+    },
+    sumDistance () {
+      const tc = new TrackCollection(this.loadedTracks)
+      return tc.distance()
+    },
+    headline () {
+      const dist = Math.round(this.sumDistance / 1000)
+      return `${this.loadedTracks.length} Tracks, ${dist} km`
     }
   },
   created () {

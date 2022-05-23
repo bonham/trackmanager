@@ -31,6 +31,7 @@
         {{ year === 0 ? "No date" : year }}
       </b-button>
       <b-button
+        v-if="showAllButton"
         class="m-2"
         @click="loadAllTracks()"
       >
@@ -105,7 +106,8 @@ export default {
       currentOrientation: 'landscape',
       resizeObserver: null,
       years: [],
-      buttonsLoading: false
+      buttonsLoading: false,
+      showAllButton: false
     }
   },
   computed: {

@@ -14,11 +14,21 @@
     </div>
 
     <b-button
+      v-b-modal.my-modal
       class="mb-3"
-      @click="cleanAll"
     >
       Clean all
     </b-button>
+    <!-- The modal -->
+    <b-modal
+      id="my-modal"
+      ok-title="Proceed"
+      ok-variant="danger"
+      cancel-title="Abort"
+      @ok="cleanAll"
+    >
+      This can take very long and may have unpredicted results. Better try line by line first.
+    </b-modal>
     <b-table
       id="tracktable"
       striped
@@ -32,7 +42,7 @@
         <div
           v-if="data.item.loading"
         >
-          <b-skeleton />
+          <span class="cell-updating">Updating ..</span>
         </div>
         <div v-else>
           <editable-text
@@ -64,7 +74,8 @@
 import {
   BTable, BButton,
   BIconArrowLeft, BIconTrash,
-  BSkeleton, BContainer, BSpinner
+  BContainer, BSpinner,
+  BModal
 } from 'bootstrap-vue'
 import { getAllTracks, updateTrack, updateTrackById, deleteTrack } from '@/lib/trackServices.js'
 import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'
@@ -117,9 +128,9 @@ export default {
     BButton,
     BIconArrowLeft,
     BIconTrash,
-    BSkeleton,
     BContainer,
     BSpinner,
+    BModal,
     TrackManagerNavBar,
     EditableText
   },
@@ -222,6 +233,10 @@ export default {
 }
 .flip-list-leave-to {
   opacity: 0;
+}
+.cell-updating {
+  opacity: 0.5;
+  font-style: italic;
 }
 
 </style>

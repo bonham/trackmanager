@@ -43,7 +43,7 @@ class ManagedMap {
     this.featureIdMap = new Map()
 
     // setup for track select interaction
-    this.select = new Select()
+    this.select = new Select({ hitTolerance: 5 })
     this.map.addInteraction(this.select)
     const selectCallBackFn = opts.selectCallBackFn || (() => {})
     const selectHandler = this._createSelectHandler(selectCallBackFn)

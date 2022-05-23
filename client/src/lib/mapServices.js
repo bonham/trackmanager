@@ -4,9 +4,9 @@ import { Tile as TileLayer, Vector as VectorLayer } from 'ol/layer'
 import { OSM, Vector as VectorSource } from 'ol/source'
 import { Control, defaults as defaultControls } from 'ol/control'
 import Select from 'ol/interaction/Select'
-import { Stroke, Style } from 'ol/style'
 import { getUid } from 'ol/util'
 import GeoJSON from 'ol/format/GeoJSON'
+import { StyleFactory } from './mapStyles.js'
 const _ = require('lodash')
 
 /*
@@ -38,7 +38,7 @@ class ManagedMap {
     opts = opts || {}
     this.map = this._createMap()
     // should be defined outside map and passed to map
-    this.standardStyle = this._createStandardStyle()
+    this.styleFactory = new StyleFactory()
     this.trackIdToLayerMap = new Map() // ids are keys, values are layers
     this.featureIdMap = new Map()
 
@@ -69,15 +69,6 @@ class ManagedMap {
       })
     })
     return map
-  }
-
-  _createStandardStyle () {
-    return new Style({
-      stroke: new Stroke({
-        color: 'brown',
-        width: 2
-      })
-    })
   }
 
   _createSelectHandler (callBackFn) {
@@ -125,7 +116,8 @@ class ManagedMap {
       console.log(`An attempt was made to add layer with track id ${trackId}, but a track with this id already exists in map layers`)
       return
     }
-    const { featureIdList, vectorLayer } = createLayer(geojson, this.standardStyle)
+    const style = this.styleFactory.getNext()
+    const { featureIdList, vectorLayer } = createLayer(geojson, style)
     const vectorLayerId = getUid(vectorLayer)
     this.map.addLayer(vectorLayer)
     // add to maps

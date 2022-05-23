@@ -3,6 +3,7 @@ import { render, fireEvent, waitForElementToBeRemoved } from '@testing-library/v
 import TrackMultiEditPage from '@/views/TrackMultiEditPage.vue'
 import ResizeObserver from './__mocks__/ResizeObserver'
 import { responseMockFunction } from './mockResponse'
+import { ModalPlugin, BModal } from 'bootstrap-vue'
 
 fetchMock.enableMocks()
 
@@ -17,14 +18,22 @@ describe('MultiEditPage', () => {
     fetch.mockResponse(responseMockFunction)
 
     const rresult = render(
-      TrackMultiEditPage, {
-        props: { sid: 'abcd1234' }
-      })
+      TrackMultiEditPage,
+      {
+        props: { sid: 'abcd1234' },
+        components: {
+          BModal
+        }
+      },
+      vue => vue.use(ModalPlugin)
+    )
     await rresult.findByText('Saupferchweg')
-    const button = await rresult.findByText('Clean all')
+    const button1 = await rresult.findByText('Clean all')
     expect(fetch.mock.calls.length).toEqual(1)
     expect(fetch.mock.calls[0][0]).toEqual('/api/tracks/getall/sid/abcd1234')
-    await fireEvent.click(button)
+    await fireEvent.click(button1)
+    const button2 = await rresult.findByText('Proceed')
+    await fireEvent.click(button2)
     await rresult.findByText('Muellerweg')
     expect(fetch.mock.calls.length).toEqual(2)
     const secondCallRequest = fetch.mock.calls[1][0]
@@ -38,9 +47,15 @@ describe('MultiEditPage', () => {
     fetch.mockResponse(responseMockFunction)
 
     const rresult = render(
-      TrackMultiEditPage, {
-        props: { sid: 'abcd1234' }
-      })
+      TrackMultiEditPage,
+      {
+        props: { sid: 'abcd1234' },
+        components: {
+          BModal
+        }
+      },
+      vue => vue.use(ModalPlugin)
+    )
     await rresult.findByText('Saupferchweg')
     const deleteButton = await rresult.findByLabelText('trash')
     expect(fetch.mock.calls.length).toEqual(1)

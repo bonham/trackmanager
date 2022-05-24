@@ -11,6 +11,7 @@ const routes = [
   },
   {
     path: '/select_tracks/sid/:sid',
+    alias: '/:sid',
     name: 'SelectTracksPage',
     component: () => import(/* webpackChunkName: "SelectTracksPage" */ '../views/SelectTracksPage.vue'),
     props: true

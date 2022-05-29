@@ -149,7 +149,7 @@ export default {
     )
     this.resizeObserver = new ResizeObserver(debouncedOnResize)
     this.resizeObserver.observe(this.$refs.outerSplitFrame)
-    this.redrawTracksOnMapFlag({ zoom: true })
+    //  this.redrawTracksOnMapFlag({ zoom: true })
   },
   methods: {
     ...mapActions([

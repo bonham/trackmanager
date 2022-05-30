@@ -51,6 +51,9 @@ export default {
       },
       (newValue, oldValue) => {
         if (newValue === true) {
+          if (oldValue === true) {
+            console.log('Triggered watch of updateSize while update was running')
+          }
           this.mmap.map.updateSize()
           this.resizeMapClear()
         }

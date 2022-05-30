@@ -11,7 +11,7 @@ export default new Vuex.Store(
       tracksById: {},
       trackLoadStatus: 0, // 0:not loaded, 1:loading, 2:loaded
       resizeMap: false,
-      redrawTracksOnMap: 0,
+      redrawTracksOnMap: false,
       selectedTrack: null,
       scrollToTrack: null
     },
@@ -42,8 +42,8 @@ export default new Vuex.Store(
         state.resizeMap = false
       },
       // used as event to indicate that the map needs redraw layers
-      redrawTracksOnMapFlag (state) {
-        ++state.redrawTracksOnMap
+      redrawTracksOnMapFlag (state, status) {
+        state.redrawTracksOnMap = status
       },
       setSelectedTrack (state, trackId) {
         state.selectedTrack = trackId
@@ -61,13 +61,13 @@ export default new Vuex.Store(
       },
       async loadTracksAndRedraw ({ commit, dispatch }, loadFunction) {
         await dispatch('loadTracks', loadFunction)
-        commit('redrawTracksOnMapFlag')
+        commit('redrawTracksOnMapFlag', true)
       },
       async clearTracks ({ commit }) {
         commit('setTrackLoadStatus', 1)
         commit('setLoadedTracks', [])
         commit('setTrackLoadStatus', 0)
-        commit('redrawTracksOnMapFlag')
+        commit('redrawTracksOnMapFlag', true)
       },
       async selectTrackAndScroll ({ commit }, trackId) {
         commit('setSelectedTrack', trackId)

@@ -64,8 +64,14 @@ export default {
       function (state) {
         return this.$store.state.redrawTracksOnMap
       },
-      function () {
-        boundRedrawTracks()
+      async function (newValue, oldValue) {
+        if (newValue === true) {
+          if (oldValue === true) {
+            console.log('Warn: Triggering redrawTracks watch while a redraw is running')
+          }
+          await boundRedrawTracks()
+          this.redrawTracksOnMapFlag(false)
+        }
       }
     )
     // watch for selected tracks

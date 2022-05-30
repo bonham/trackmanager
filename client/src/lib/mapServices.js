@@ -3,6 +3,7 @@ import { transformExtent } from 'ol/proj'
 import { Tile as TileLayer, Vector as VectorLayer } from 'ol/layer'
 import { OSM, Vector as VectorSource } from 'ol/source'
 import { Control, defaults as defaultControls } from 'ol/control'
+import Collection from 'ol/Collection'
 import Select from 'ol/interaction/Select'
 import { getUid } from 'ol/util'
 import GeoJSON from 'ol/format/GeoJSON'
@@ -43,7 +44,11 @@ class ManagedMap {
     this.featureIdMap = new Map()
 
     // setup for track select interaction
-    this.select = new Select({ hitTolerance: 5 })
+    this.selectCollection = new Collection()
+    this.select = new Select({
+      hitTolerance: 5,
+      features: this.selectCollection
+    })
     this.map.addInteraction(this.select)
     const selectCallBackFn = opts.selectCallBackFn || (() => {})
     const selectHandler = this._createSelectHandler(selectCallBackFn)

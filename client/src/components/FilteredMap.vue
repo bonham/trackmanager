@@ -60,7 +60,6 @@ export default {
       }
     )
     // watch if tracks are loaded and should be drawn
-    // const f = this.redrawTracks
     const unboundRedrawTracks = this.redrawTracks
     const boundRedrawTracks = unboundRedrawTracks.bind(this)
     this.$watch(

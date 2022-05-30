@@ -133,13 +133,27 @@ class ManagedMap {
   }
 
   setSelectedTrack (trackId) {
-    const selectedFeatures = this.select.getFeatures()
-    selectedFeatures.clear()
+    const selectCollection = this.selectCollection
+    selectCollection.clear()
     const layer = this.getTrackLayer(trackId)
     const features = layer.getSource().getFeatures()
-    features.forEach((f) => {
-      selectedFeatures.push(f)
+    if (features.length < 1) {
+      console.error('No feature in layer', layer)
+    } else if (features.length > 1) {
+      console.log(`Not exactly 1 feature in layer, but: ${features.length}`)
+    } else {
+      selectCollection.push(features[0])
+    }
+  }
+
+  getSelectedTrackIds () {
+    const trackIds = []
+    this.selectCollection.forEach((feature) => {
+      const fid = getUid(feature)
+      const trackId = this.getTrackIdByFeatureId(fid)
+      trackIds.push(trackId)
     })
+    return trackIds
   }
 
   getTrackIdByFeatureId (featureId) {
@@ -189,9 +203,16 @@ class ManagedMap {
   }
 
   setExtentAndZoomOut () {
-    const visibleIds = this.getTrackIdsVisible()
+    let zoomTrackids
+    // if there is a selection zoom on selected tracks
+    if (this.selectCollection.getLength() > 0) {
+      zoomTrackids = this.getSelectedTrackIds()
+    // else zoom on whole visible ids
+    } else {
+      zoomTrackids = this.getTrackIdsVisible()
+    }
     const extentList = []
-    for (const id of visibleIds) {
+    for (const id of zoomTrackids) {
       extentList.push(
         this.getTrackLayer(id).getSource().getExtent()
       )

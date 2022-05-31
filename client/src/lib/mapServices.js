@@ -44,17 +44,29 @@ class ManagedMap {
     this.featureIdMap = new Map()
 
     // setup for track select interaction
+    //
+    // Two ways how to select tracks:
+    // Option A: push something to selectCollection. See setSelectedTrack(id)
+    // Option B: interactive klick on track in map
+
     this.selectCollection = new Collection()
     this.select = new Select({
       hitTolerance: 5,
-      features: this.selectCollection
+      features: this.selectCollection // For Option A
     })
-    this.map.addInteraction(this.select)
+    this.map.addInteraction(this.select) // For Option B
+
+    // A callback function can be provided to trigger actions outside this object when user
+    // is using select through klick on map ( Option B )
     const selectCallBackFn = opts.selectCallBackFn || (() => {})
     const selectHandler = this._createSelectHandler(selectCallBackFn)
     const boundSelectHandler = selectHandler.bind(this)
     this.select.on('select', boundSelectHandler)
+    this.select.on('select', (this.manageZIndexOnSelect).bind(this))
   }
+
+  ZINDEX_DEFAULT = 0
+  ZINDEX_SELECTED = 5
 
   _createMap (center = [0, 0], zoom = 0) {
     const map = new OlMap({
@@ -78,8 +90,8 @@ class ManagedMap {
 
   _createSelectHandler (callBackFn) {
     return (e) => {
-      const selectedFeatures = e.selected
-      selectedFeatures.forEach((feature) => {
+      const newSelectedFeatures = e.selected
+      newSelectedFeatures.forEach((feature) => {
         const fid = getUid(feature)
         callBackFn(this.getTrackIdByFeatureId(fid))
       })
@@ -134,6 +146,9 @@ class ManagedMap {
 
   setSelectedTrack (trackId) {
     const selectCollection = this.selectCollection
+    selectCollection.forEach((feature) => {
+      this.setZIndex(feature, this.ZINDEX_DEFAULT)
+    })
     selectCollection.clear()
     const layer = this.getTrackLayer(trackId)
     const features = layer.getSource().getFeatures()
@@ -142,6 +157,7 @@ class ManagedMap {
     } else if (features.length > 1) {
       console.log(`Not exactly 1 feature in layer, but: ${features.length}`)
     } else {
+      this.setZIndex(features[0], this.ZINDEX_SELECTED)
       selectCollection.push(features[0])
     }
   }
@@ -154,6 +170,22 @@ class ManagedMap {
       trackIds.push(trackId)
     })
     return trackIds
+  }
+
+  manageZIndexOnSelect (selectEvent) {
+    selectEvent.selected.forEach((feature) => {
+      this.setZIndex(feature, this.ZINDEX_SELECTED)
+    })
+    selectEvent.deselected.forEach((feature) => {
+      this.setZIndex(feature, this.ZINDEX_DEFAULT)
+    })
+  }
+
+  setZIndex (feature, index) {
+    const fid = getUid(feature)
+    const trackId = this.getTrackIdByFeatureId(fid)
+    const layer = this.getTrackLayer(trackId)
+    layer.setZIndex(index)
   }
 
   getTrackIdByFeatureId (featureId) {

@@ -149,17 +149,14 @@ export default {
     )
     this.resizeObserver = new ResizeObserver(debouncedOnResize)
     this.resizeObserver.observe(this.$refs.outerSplitFrame)
-    //  this.redrawTracksOnMapFlag({ zoom: true })
   },
   methods: {
     ...mapActions([
-      'loadTracksAndRedraw',
-      'clearTracks'
+      'loadTracksAndRedraw'
     ]),
     ...mapMutations([
       // indicate the map that it needs a resize
-      'resizeMapFlag',
-      'redrawTracksOnMapFlag'
+      'resizeMapFlag'
     ]),
 
     async getYears () {

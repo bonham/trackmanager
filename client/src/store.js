@@ -13,7 +13,8 @@ export default new Vuex.Store(
       resizeMap: false,
       redrawTracksOnMap: false,
       selectedTrack: null,
-      scrollToTrack: null
+      scrollToTrack: null,
+      doZoomToExtent: false
     },
     mutations: {
       // for track metadata only
@@ -50,6 +51,9 @@ export default new Vuex.Store(
       },
       setScrollToTrack (state, trackId) {
         state.scrollToTrack = trackId
+      },
+      doZoomToExtent (state, boolStatus) {
+        state.doZoomToExtent = boolStatus
       }
     },
     actions: {

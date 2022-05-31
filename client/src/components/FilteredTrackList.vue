@@ -91,9 +91,12 @@ export default {
     },
     setActive (trackId) {
       this.setSelectedTrack(trackId)
+      // need setTimeout, otherwise selection is not switched on map before zoom ??
+      setTimeout(() => this.doZoomToExtent(true), 1)
     },
     ...mapMutations([
-      'setSelectedTrack'
+      'setSelectedTrack',
+      'doZoomToExtent'
     ])
   }
 }

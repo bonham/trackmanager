@@ -60,7 +60,6 @@ export default {
       }
     )
     // watch if tracks are loaded and should be drawn
-    // const f = this.redrawTracks
     const unboundRedrawTracks = this.redrawTracks
     const boundRedrawTracks = unboundRedrawTracks.bind(this)
     this.$watch(
@@ -82,8 +81,20 @@ export default {
       function (state) {
         return this.$store.state.selectedTrack
       },
-      function (trackIdNew) {
+      async function (trackIdNew) {
         this.mmap.setSelectedTrack(trackIdNew)
+      }
+    )
+    this.$watch(
+      function (state) {
+        return this.$store.state.doZoomToExtent
+      },
+      function (newValue, oldValue) {
+        if (newValue) {
+          if (oldValue) { console.log('Watch function for zoomToExtent was triggered while running') }
+          this.mmap.setExtentAndZoomOut()
+          this.doZoomToExtent(false)
+        }
       }
     )
   },
@@ -128,7 +139,8 @@ export default {
     },
     ...mapMutations([
       'resizeMapClear',
-      'redrawTracksOnMapFlag'
+      'redrawTracksOnMapFlag',
+      'doZoomToExtent'
     ]),
     ...mapActions([
       'selectTrackAndScroll'

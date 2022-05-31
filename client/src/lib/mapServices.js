@@ -3,6 +3,7 @@ import { transformExtent } from 'ol/proj'
 import { Tile as TileLayer, Vector as VectorLayer } from 'ol/layer'
 import { OSM, Vector as VectorSource } from 'ol/source'
 import { Control, defaults as defaultControls } from 'ol/control'
+import Collection from 'ol/Collection'
 import Select from 'ol/interaction/Select'
 import { getUid } from 'ol/util'
 import GeoJSON from 'ol/format/GeoJSON'
@@ -43,13 +44,29 @@ class ManagedMap {
     this.featureIdMap = new Map()
 
     // setup for track select interaction
-    this.select = new Select({ hitTolerance: 5 })
-    this.map.addInteraction(this.select)
+    //
+    // Two ways how to select tracks:
+    // Option A: push something to selectCollection. See setSelectedTrack(id)
+    // Option B: interactive klick on track in map
+
+    this.selectCollection = new Collection()
+    this.select = new Select({
+      hitTolerance: 5,
+      features: this.selectCollection // For Option A
+    })
+    this.map.addInteraction(this.select) // For Option B
+
+    // A callback function can be provided to trigger actions outside this object when user
+    // is using select through klick on map ( Option B )
     const selectCallBackFn = opts.selectCallBackFn || (() => {})
     const selectHandler = this._createSelectHandler(selectCallBackFn)
     const boundSelectHandler = selectHandler.bind(this)
     this.select.on('select', boundSelectHandler)
+    this.select.on('select', (this.manageZIndexOnSelect).bind(this))
   }
+
+  ZINDEX_DEFAULT = 0
+  ZINDEX_SELECTED = 5
 
   _createMap (center = [0, 0], zoom = 0) {
     const map = new OlMap({
@@ -73,8 +90,8 @@ class ManagedMap {
 
   _createSelectHandler (callBackFn) {
     return (e) => {
-      const selectedFeatures = e.selected
-      selectedFeatures.forEach((feature) => {
+      const newSelectedFeatures = e.selected
+      newSelectedFeatures.forEach((feature) => {
         const fid = getUid(feature)
         callBackFn(this.getTrackIdByFeatureId(fid))
       })
@@ -128,13 +145,47 @@ class ManagedMap {
   }
 
   setSelectedTrack (trackId) {
-    const selectedFeatures = this.select.getFeatures()
-    selectedFeatures.clear()
+    const selectCollection = this.selectCollection
+    selectCollection.forEach((feature) => {
+      this.setZIndex(feature, this.ZINDEX_DEFAULT)
+    })
+    selectCollection.clear()
     const layer = this.getTrackLayer(trackId)
     const features = layer.getSource().getFeatures()
-    features.forEach((f) => {
-      selectedFeatures.push(f)
+    if (features.length < 1) {
+      console.error('No feature in layer', layer)
+    } else if (features.length > 1) {
+      console.log(`Not exactly 1 feature in layer, but: ${features.length}`)
+    } else {
+      this.setZIndex(features[0], this.ZINDEX_SELECTED)
+      selectCollection.push(features[0])
+    }
+  }
+
+  getSelectedTrackIds () {
+    const trackIds = []
+    this.selectCollection.forEach((feature) => {
+      const fid = getUid(feature)
+      const trackId = this.getTrackIdByFeatureId(fid)
+      trackIds.push(trackId)
     })
+    return trackIds
+  }
+
+  manageZIndexOnSelect (selectEvent) {
+    selectEvent.selected.forEach((feature) => {
+      this.setZIndex(feature, this.ZINDEX_SELECTED)
+    })
+    selectEvent.deselected.forEach((feature) => {
+      this.setZIndex(feature, this.ZINDEX_DEFAULT)
+    })
+  }
+
+  setZIndex (feature, index) {
+    const fid = getUid(feature)
+    const trackId = this.getTrackIdByFeatureId(fid)
+    const layer = this.getTrackLayer(trackId)
+    layer.setZIndex(index)
   }
 
   getTrackIdByFeatureId (featureId) {
@@ -184,9 +235,16 @@ class ManagedMap {
   }
 
   setExtentAndZoomOut () {
-    const visibleIds = this.getTrackIdsVisible()
+    let zoomTrackids
+    // if there is a selection zoom on selected tracks
+    if (this.selectCollection.getLength() > 0) {
+      zoomTrackids = this.getSelectedTrackIds()
+    // else zoom on whole visible ids
+    } else {
+      zoomTrackids = this.getTrackIdsVisible()
+    }
     const extentList = []
-    for (const id of visibleIds) {
+    for (const id of zoomTrackids) {
       extentList.push(
         this.getTrackLayer(id).getSource().getExtent()
       )

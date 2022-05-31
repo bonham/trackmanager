@@ -90,11 +90,19 @@ class ManagedMap {
 
   _createSelectHandler (callBackFn) {
     return (e) => {
-      const newSelectedFeatures = e.selected
-      newSelectedFeatures.forEach((feature) => {
-        const fid = getUid(feature)
-        callBackFn(this.getTrackIdByFeatureId(fid))
+      const trackIdSelectObject = {
+        selected: [],
+        deselected: []
+      }
+      e.selected.forEach((feature) => {
+        const tid = this.getTrackIdByFeature(feature)
+        trackIdSelectObject.selected.push(tid)
       })
+      e.deselected.forEach((feature) => {
+        const tid = this.getTrackIdByFeature(feature)
+        trackIdSelectObject.deselected.push(tid)
+      })
+      callBackFn(trackIdSelectObject)
     }
   }
 
@@ -144,12 +152,23 @@ class ManagedMap {
     })
   }
 
-  setSelectedTrack (trackId) {
+  setSelectedTracks (obj) {
+    const selected = obj.selected
+    // const deselected = obj.deselected
+
+    console.log('Warning: can only select first track of list')
+
+    // reset current selection
     const selectCollection = this.selectCollection
     selectCollection.forEach((feature) => {
       this.setZIndex(feature, this.ZINDEX_DEFAULT)
     })
     selectCollection.clear()
+
+    // do nothing
+    if (selected.length === 0) return
+
+    const trackId = selected[0]
     const layer = this.getTrackLayer(trackId)
     const features = layer.getSource().getFeatures()
     if (features.length < 1) {
@@ -186,6 +205,11 @@ class ManagedMap {
     const trackId = this.getTrackIdByFeatureId(fid)
     const layer = this.getTrackLayer(trackId)
     layer.setZIndex(index)
+  }
+
+  getTrackIdByFeature (feature) {
+    const featureId = getUid(feature)
+    return this.featureIdMap.get(featureId).trackId
   }
 
   getTrackIdByFeatureId (featureId) {

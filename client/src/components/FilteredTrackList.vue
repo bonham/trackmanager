@@ -25,7 +25,7 @@
             :key="track.id"
             :ref="'track_'+track.id"
             :active="itemActiveStatus(track.id)"
-            @click="setActive(track.id)"
+            @click="toggleActive(track.id)"
           >
             <span>{{ track.name }}, </span>
             <span>{{ (track.distance() / 1000).toFixed(0) }} km, {{ track.localeDateShort() }}</span>
@@ -48,11 +48,16 @@ export default {
     BCard,
     BSpinner
   },
+  data () {
+    return {
+      selectedTrackMap: {},
+      selectedTrackList: []
+    }
+  },
   computed: {
     ...mapState([
       'loadedTracks',
-      'trackLoadStatus',
-      'selectedTrack'
+      'trackLoadStatus'
     ]),
     loadedTracksSorted () {
       const l = this.loadedTracks
@@ -69,34 +74,71 @@ export default {
     }
   },
   created () {
+    // (Re- Initialize) map for selected tracks when loaded tracks are changing
     this.$watch(
-      // watch for scroll trigger
       function (state) {
-        return this.$store.state.scrollToTrack
+        return this.loadedTracks
       },
-      (trackId) => {
-        if (trackId) {
-          const itemRef = `track_${trackId}`
-          this.$refs[itemRef][0].scrollIntoView({
-            behavior: 'smooth',
-            block: 'center'
-          })
-        }
+      (tracks) => {
+        const allDeselected = {}
+        tracks.forEach((track) => {
+          allDeselected[track.id] = false
+        })
+        this.selectedTrackMap = allDeselected
       }
+    )
+    this.$watch(
+      function (state) {
+        return this.$store.state.selectionForList
+      },
+      async (selectionUpdateObj) => {
+        if (selectionUpdateObj !== null) {
+          await this.updateSelectedTracksData(
+            selectionUpdateObj.selected,
+            selectionUpdateObj.deselected
+          )
+          if (selectionUpdateObj.selected.length > 0) {
+            const scrollId = selectionUpdateObj.selected[0]
+            const itemRef = `track_${scrollId}`
+            this.$refs[itemRef][0].scrollIntoView({
+              behavior: 'smooth',
+              block: 'center'
+            })
+          }
+        }
+      },
+      this.clearSelectionForList()
     )
   },
   methods: {
     itemActiveStatus (trackId) {
-      return (this.selectedTrack === trackId)
+      return this.selectedTrackMap[trackId]
     },
-    setActive (trackId) {
-      this.setSelectedTrack(trackId)
-      // need setTimeout, otherwise selection is not switched on map before zoom ??
-      setTimeout(() => this.doZoomToExtent(true), 1)
+    toggleActive (newTrackId) {
+      // currently - shift select abd deselect is not implemented
+      const deselected = this.selectedTrackList
+      const selected = [newTrackId]
+
+      this.updateSelectedTracksData(selected, deselected)
+      this.updateSelectionForMap(
+        {
+          selected: [newTrackId],
+          deselected
+        }
+      )
+    },
+    updateSelectedTracksData (toSelectList, toDeselectList) {
+      toDeselectList.forEach(tid => {
+        this.selectedTrackMap[tid] = false
+      })
+      toSelectList.forEach(tid => {
+        this.selectedTrackMap[tid] = true
+      })
+      this.selectedTrackList = toSelectList
     },
     ...mapMutations([
-      'setSelectedTrack',
-      'doZoomToExtent'
+      'updateSelectionForMap',
+      'clearSelectionForList'
     ])
   }
 }

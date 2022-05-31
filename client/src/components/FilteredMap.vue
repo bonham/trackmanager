@@ -16,7 +16,7 @@ import { BSpinner } from 'bootstrap-vue'
 import { ManagedMap } from '@/lib/mapServices.js'
 import { TrackVisibilityManager } from '@/lib/mapStateHelpers.js'
 import { getGeoJson } from '@/lib/trackServices.js'
-import { mapMutations, mapGetters, mapActions } from 'vuex'
+import { mapMutations, mapGetters } from 'vuex'
 const _ = require('lodash')
 
 export default {
@@ -42,7 +42,7 @@ export default {
   },
   created () {
     // create map object
-    this.mmap = new ManagedMap({ selectCallBackFn: this.selectTrackAndScroll })
+    this.mmap = new ManagedMap({ selectCallBackFn: (this.updateSelectionForList).bind(this) })
 
     // watch if the viewport is resized and resize the map
     this.$watch(
@@ -79,21 +79,16 @@ export default {
     // watch for selected tracks
     this.$watch(
       function (state) {
-        return this.$store.state.selectedTrack
+        return this.$store.state.selectionForMap
       },
-      async function (trackIdNew) {
-        this.mmap.setSelectedTrack(trackIdNew)
-      }
-    )
-    this.$watch(
-      function (state) {
-        return this.$store.state.doZoomToExtent
-      },
-      function (newValue, oldValue) {
-        if (newValue) {
-          if (oldValue) { console.log('Watch function for zoomToExtent was triggered while running') }
-          this.mmap.setExtentAndZoomOut()
-          this.doZoomToExtent(false)
+      async function (selectionUpdateObj) {
+        if (selectionUpdateObj !== null) {
+          await this.mmap.setSelectedTracks(selectionUpdateObj)
+          await this.clearSelectionForMap()
+          setTimeout(
+            (this.mmap.setExtentAndZoomOut).bind(this.mmap),
+            1
+          )
         }
       }
     )
@@ -140,10 +135,9 @@ export default {
     ...mapMutations([
       'resizeMapClear',
       'redrawTracksOnMapFlag',
-      'doZoomToExtent'
-    ]),
-    ...mapActions([
-      'selectTrackAndScroll'
+      'doZoomToExtent',
+      'updateSelectionForList',
+      'clearSelectionForMap'
     ])
   }
 }

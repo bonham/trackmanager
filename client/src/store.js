@@ -4,6 +4,8 @@ const _ = require('lodash')
 
 Vue.use(Vuex)
 
+const EMPTY_SELECTION_OBJ = { selected: [], deselected: [] }
+
 export default new Vuex.Store(
   {
     state: {
@@ -12,9 +14,8 @@ export default new Vuex.Store(
       trackLoadStatus: 0, // 0:not loaded, 1:loading, 2:loaded
       resizeMap: false,
       redrawTracksOnMap: false,
-      selectedTrack: null,
-      scrollToTrack: null,
-      doZoomToExtent: false
+      selectionForList: EMPTY_SELECTION_OBJ,
+      selectionForMap: EMPTY_SELECTION_OBJ
     },
     mutations: {
       // for track metadata only
@@ -46,14 +47,17 @@ export default new Vuex.Store(
       redrawTracksOnMapFlag (state, status) {
         state.redrawTracksOnMap = status
       },
-      setSelectedTrack (state, trackId) {
-        state.selectedTrack = trackId
+      updateSelectionForList (state, selectChanges) {
+        state.selectionForList = selectChanges
       },
-      setScrollToTrack (state, trackId) {
-        state.scrollToTrack = trackId
+      updateSelectionForMap (state, selectChanges) {
+        state.selectionForMap = selectChanges
       },
-      doZoomToExtent (state, boolStatus) {
-        state.doZoomToExtent = boolStatus
+      clearSelectionForList (state) {
+        state.selectionForList = null
+      },
+      clearSelectionForMap (state) {
+        state.selectionForMap = null
       }
     },
     actions: {
@@ -64,18 +68,10 @@ export default new Vuex.Store(
         commit('setTrackLoadStatus', 2)
       },
       async loadTracksAndRedraw ({ commit, dispatch }, loadFunction) {
+        await commit('updateSelectionForList', EMPTY_SELECTION_OBJ)
+        await commit('updateSelectionForMap', EMPTY_SELECTION_OBJ)
         await dispatch('loadTracks', loadFunction)
         commit('redrawTracksOnMapFlag', true)
-      },
-      async clearTracks ({ commit }) {
-        commit('setTrackLoadStatus', 1)
-        commit('setLoadedTracks', [])
-        commit('setTrackLoadStatus', 0)
-        commit('redrawTracksOnMapFlag', true)
-      },
-      async selectTrackAndScroll ({ commit }, trackId) {
-        commit('setSelectedTrack', trackId)
-        commit('setScrollToTrack', trackId)
       }
 
     },

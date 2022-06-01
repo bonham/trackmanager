@@ -4,7 +4,10 @@
     class="d-flex flex-column vh-100"
   >
     <track-manager-nav-bar :sid="sid" />
-    <div v-if="buttonsLoading">
+    <div
+      v-if="buttonsLoading"
+      class="year-navbar"
+    >
       <b-button
         class="m-2"
       >
@@ -21,24 +24,27 @@
         <b-skeleton width="3rem" />
       </b-button>
     </div>
-    <div v-else>
+    <div
+      v-else
+      class="year-navbar"
+    >
       <b-button
         v-for="year in years"
         :key="year"
-        class="m-2"
+        class="m-2 button-year-navbar"
         @click="loadTracksOfYear(year)"
       >
         {{ year === 0 ? "No date" : year }}
       </b-button>
       <b-button
         v-if="showAllButton"
-        class="m-2"
+        class="m-2 button-year-navbar"
         @click="loadAllTracks()"
       >
         All
       </b-button>
       <b-button
-        class="m-2"
+        class="m-2 button-year-navbar"
         variant="outline-primary"
         @click="setLayout(currentOrientation === 'portrait' ? 'landscape' : 'portrait')"
       >
@@ -224,6 +230,19 @@ export default {
 .gutter.gutter-vertical {
     background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAFAQMAAABo7865AAAABlBMVEVHcEzMzMzyAv2sAAAAAXRSTlMAQObYZgAAABBJREFUeF5jOAMEEAIEEFwAn3kMwcB6I2AAAAAASUVORK5CYII=');
     cursor: row-resize;
+}
+
+.button-year-navbar {
+  height: max-content;
+  white-space: nowrap;
+}
+
+.year-navbar {
+  display: flex;
+  flex-flow: row nowrap;
+  overflow: auto;
+  flex: 0 0 auto;
+  align-content: center;
 }
 
 </style>

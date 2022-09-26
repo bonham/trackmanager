@@ -29,15 +29,17 @@
     >
       This can take very long and may have unpredicted results. Better try line by line first.
     </b-modal>
-    <b-table
+    <b-table-lite
       id="tracktable"
       striped
       hover
       :items="tableItems"
       :fields="trackTableFields"
       primary-key="id"
-      :tbody-transition-props="transProps"
     >
+      <!-- put following line into table lite tag for transitions in table -->
+      <!-- :tbody-transition-props="transProps" -->
+
       <template #cell(name)="data">
         <div
           v-if="data.item.loading"
@@ -66,13 +68,13 @@
           <b-icon-trash />
         </b-button>
       </template>
-    </b-table>
+    </b-table-lite>
   </b-container>
 </template>
 
 <script>
 import {
-  BTable, BButton,
+  BTableLite, BButton,
   BIconArrowLeft, BIconTrash,
   BContainer, BSpinner,
   BModal
@@ -124,7 +126,7 @@ const trackTableFields = [
 export default {
   name: 'TrackMultiEdit',
   components: {
-    BTable,
+    BTableLite,
     BButton,
     BIconArrowLeft,
     BIconTrash,

@@ -84,13 +84,6 @@ import { mapActions, mapState, mapMutations } from 'vuex'
 import Split from 'split.js'
 const _ = require('lodash')
 
-function getViewPortOrientation () {
-  const mediaQueryString = '(orientation: portrait)'
-  const mqList = window.matchMedia(mediaQueryString)
-  const orientation = mqList.matches ? 'portrait' : 'landscape'
-  return orientation
-}
-
 export default {
   name: 'SelectTracksPage',
   components: {
@@ -129,7 +122,7 @@ export default {
 
   },
   async created () {
-    this.currentOrientation = getViewPortOrientation()
+    this.currentOrientation = 'landscape'
     this.buttonsLoading = true
     await this.getYears()
     this.buttonsLoading = false
@@ -201,7 +194,7 @@ export default {
     },
     onResize () {
       console.log('resize1')
-      this.setLayout(getViewPortOrientation())
+      this.setLayout('landscape')
     }
   }
 }

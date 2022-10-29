@@ -1,7 +1,7 @@
 <template>
   <b-container
     id="root"
-    class="d-flex flex-column vh-100"
+    class="d-flex flex-column"
   >
     <track-manager-nav-bar :sid="sid" />
     <div
@@ -43,32 +43,18 @@
       >
         All
       </b-button>
-      <b-button
-        class="m-2 button-year-navbar"
-        variant="outline-primary"
-        @click="setLayout(currentOrientation === 'portrait' ? 'landscape' : 'portrait')"
-      >
-        Orientation
-      </b-button>
     </div>
     <div
       ref="outerSplitFrame"
-      class="split flex-grow-1 d-flex  minheight-0"
-      :class="[flexBoxFlowClass]"
+      class="flex-grow-1 flex-column d-flex"
     >
       <div
-        id="leftpanel"
-        class="overflow-auto minheight-0"
-      >
-        <filtered-track-list />
-      </div>
-
-      <div
-        id="rightpanel"
-        class="d-flex"
+        class="d-flex p-2"
+        style="height: 40vh;"
       >
         <filtered-map :sid="sid" />
       </div>
+      <filtered-track-list />
     </div>
   </b-container>
 </template>
@@ -81,15 +67,7 @@ import FilteredMap from '@/components/FilteredMap.vue'
 import { TrackCollection } from '@/lib/Track'
 import { getTracksByYear, getAllTracks } from '@/lib/trackServices.js'
 import { mapActions, mapState, mapMutations } from 'vuex'
-import Split from 'split.js'
 const _ = require('lodash')
-
-function getViewPortOrientation () {
-  const mediaQueryString = '(orientation: portrait)'
-  const mqList = window.matchMedia(mediaQueryString)
-  const orientation = mqList.matches ? 'portrait' : 'landscape'
-  return orientation
-}
 
 export default {
   name: 'SelectTracksPage',
@@ -109,7 +87,6 @@ export default {
   },
   data: function () {
     return {
-      currentOrientation: 'landscape',
       resizeObserver: null,
       years: [],
       buttonsLoading: false,
@@ -119,17 +96,10 @@ export default {
   computed: {
     ...mapState([
       'loadedTracks'
-    ]),
-    flexBoxFlowClass () {
-      return this.currentOrientation === 'portrait' ? 'flex-column' : 'flex-row'
-    },
-    splitDirectionOption () {
-      return this.currentOrientation === 'portrait' ? 'vertical' : 'horizontal'
-    }
-
+    ])
   },
   async created () {
-    this.currentOrientation = getViewPortOrientation()
+    this.currentOrientation = 'landscape'
     this.buttonsLoading = true
     await this.getYears()
     this.buttonsLoading = false
@@ -144,10 +114,6 @@ export default {
     // split should definitely run before the map is attached to the div
     // so when map is run through nextTick - then let's not run split in nexttick - otherwise
     // it runs to early and map is not correctly rendered
-    this.split = Split(['#leftpanel', '#rightpanel'], {
-      onDragEnd: this.resizeMapFlag,
-      direction: this.splitDirectionOption
-    })
     // observe if window aspect is changing, then call setLayout
     const debouncedOnResize = _.debounce(
       this.onResize,
@@ -183,54 +149,14 @@ export default {
       const loadFunc = () => getAllTracks(sid)
       this.loadTracksAndRedraw(loadFunc).catch(e => console.error('Error loading all tracks', e))
     },
-    setLayout (wantedOrientation) {
-      if (wantedOrientation === this.currentOrientation) {
-        return
-      }
-      // destroy the managed split
-      this.split.destroy()
-      // change flex layout
-      this.currentOrientation = wantedOrientation
-      // create new split
-      this.split = Split(['#leftpanel', '#rightpanel'], {
-        onDragEnd: this.resizeMapFlag,
-        direction: this.splitDirectionOption
-      })
-      // resize map
-      this.resizeMapFlag()
-    },
     onResize () {
       console.log('resize1')
-      this.setLayout(getViewPortOrientation())
+      this.resizeMapFlag()
     }
   }
 }
 </script>
-<style scoped>
-
-/* Needed for vertical overflow: scroll in flexbox container */
-.minheight-0 {
-  min-height: 0;
-}
-</style>
 <style>
-
-/* Split.js css entries can not reside in scoped style section */
-.gutter {
-    background-color: rgb(255, 255, 255);
-    background-repeat: no-repeat;
-    background-position: 50%;
-}
-
-.gutter.gutter-horizontal {
-    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAeCAYAAADkftS9AAAAIklEQVQoU2M4c+bMfxAGAgYYmwGrIIiDjrELjpo5aiZeMwF+yNnOs5KSvgAAAABJRU5ErkJggg==');
-    cursor: col-resize;
-}
-
-.gutter.gutter-vertical {
-    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAFAQMAAABo7865AAAABlBMVEVHcEzMzMzyAv2sAAAAAXRSTlMAQObYZgAAABBJREFUeF5jOAMEEAIEEFwAn3kMwcB6I2AAAAAASUVORK5CYII=');
-    cursor: row-resize;
-}
 
 .button-year-navbar {
   height: max-content;

@@ -1,5 +1,22 @@
 // vue.config.js
 module.exports = {
+  chainWebpack: (config) => {
+    config.resolve.alias.set('vue', '@vue/compat')
+
+    config.module
+      .rule('vue')
+      .use('vue-loader')
+      .tap((options) => {
+        return {
+          ...options,
+          compilerOptions: {
+            compatConfig: {
+              MODE: 2
+            }
+          }
+        }
+      })
+  },
   transpileDependencies: true,
   publicPath:
     process.env.NODE_ENV === 'production'
@@ -7,7 +24,7 @@ module.exports = {
       : '/',
 
   devServer: {
-    host: '0.0.0.0',
+    host: '127.0.0.1',
     hot: true,
     port: 8080,
     open: '/',

@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-const _ = require('lodash')
+import _ from 'lodash'
 
 Vue.use(Vuex)
 

@@ -14,6 +14,7 @@ Vue.use(NavbarPlugin)
 Vue.use(ButtonPlugin)
 Vue.use(LinkPlugin)
 Vue.use(ModalPlugin)
+Vue.use(router)
 
 new Vue({
   router,

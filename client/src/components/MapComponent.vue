@@ -48,6 +48,7 @@ export default {
 </script>
 
 <style>
+@import '../../node_modules/ol/ol.css';
 #mapdiv {
   width: 100%;
   height: 100%;
@@ -56,7 +57,5 @@ export default {
   top: 4em;
   left: .5em;
 }
-
-  @import '../../node_modules/ol/ol.css'
 
 </style>

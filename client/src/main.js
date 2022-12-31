@@ -1,23 +1,22 @@
-import Vue from 'vue'
+import { createApp } from 'vue'
+import App from './App.vue'
+import router from './router'
+import store from './store'
 
 // import { BootstrapVue } from 'bootstrap-vue'
 import { LayoutPlugin, NavbarPlugin, ButtonPlugin, LinkPlugin, ModalPlugin } from 'bootstrap-vue'
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
+// import './assets/main.css'
 
-import App from './App.vue'
-import router from './router'
-import store from './store'
+const app = createApp(App)
 
-Vue.use(LayoutPlugin)
-Vue.use(NavbarPlugin)
-Vue.use(ButtonPlugin)
-Vue.use(LinkPlugin)
-Vue.use(ModalPlugin)
-Vue.use(router)
+app.use(LayoutPlugin)
+app.use(NavbarPlugin)
+app.use(router)
+app.use(store)
+app.use(ButtonPlugin)
+app.use(LinkPlugin)
+app.use(ModalPlugin)
 
-new Vue({
-  router,
-  store,
-  render: h => h(App)
-}).$mount('#app')
+app.mount('#app')

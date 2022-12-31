@@ -67,7 +67,7 @@ import FilteredMap from '@/components/FilteredMap.vue'
 import { TrackCollection } from '@/lib/Track'
 import { getTracksByYear, getAllTracks } from '@/lib/trackServices.js'
 import { mapActions, mapState, mapMutations } from 'vuex'
-const _ = require('lodash')
+import _ from 'lodash'
 
 export default {
   name: 'SelectTracksPage',

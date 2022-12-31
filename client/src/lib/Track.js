@@ -1,7 +1,8 @@
 import { DateTime } from 'luxon'
-const _ = require('lodash')
+import _ from 'lodash'
 
-const sprintf = require('sprintf-js').sprintf
+// const sprintf = require('sprintf-js').sprintf
+import { sprintf } from 'sprintf-js'
 /**
  * Track class is representing a gpx track.
  *

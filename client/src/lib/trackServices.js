@@ -1,5 +1,5 @@
 import { Track } from '@/lib/Track.js'
-const _ = require('lodash')
+import _ from 'lodash'
 
 // /// Get all tracks
 async function getAllTracks (sid) {

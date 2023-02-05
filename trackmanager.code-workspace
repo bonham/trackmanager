@@ -8,8 +8,6 @@
 		}
 	],
 	"settings": {
-		"npm.packageManager": "yarn",
-		"eslint.packageManager": "yarn",
 		"eslint.alwaysShowStatus": true,
 		"eslint.format.enable": true,
 		"eslint.validate": [

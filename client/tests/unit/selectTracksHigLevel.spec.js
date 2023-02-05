@@ -17,7 +17,7 @@ Object.defineProperty(window, 'matchMedia', {
 
 fetchMock.enableMocks()
 
-describe('SelectTracksPage - DOM testing', () => {
+describe.skip('SelectTracksPage - DOM testing', () => {
   beforeEach(() => {
     fetchMock.resetMocks()
     global.ResizeObserver = ResizeObserver

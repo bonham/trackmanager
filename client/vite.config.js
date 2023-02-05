@@ -2,6 +2,16 @@ import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 const path = require('path')
 
+const vitestConfig = {
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    deps: {
+      inline: true
+    }
+  }
+}
+
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
@@ -17,12 +27,14 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
-      vue: '@vue/compat'
+      vue: '@vue/compat',
+      Vue: '@vue/compat'
     }
   },
   server: {
     proxy: {
       '/api': 'http://localhost:3000'
     }
-  }
+  },
+  test: vitestConfig.test
 })

@@ -1,4 +1,5 @@
-import { TrackVisibilityManager } from '../../src/lib/mapStateHelpers.js'
+import { test, expect } from 'vitest'
+import { TrackVisibilityManager } from '../../src/lib/mapStateHelpers'
 
 test('TrackVisibilityManager', () => {
   const currentlyVisible = [3, 5, 6, 7, 10]

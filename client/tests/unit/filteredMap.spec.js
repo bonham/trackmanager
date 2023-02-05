@@ -1,4 +1,3 @@
-import './mockJsdom'
 import { shallowMount, createLocalVue } from '@vue/test-utils'
 import Vuex from 'vuex'
 import FilteredMap from '@/components/FilteredMap.vue'

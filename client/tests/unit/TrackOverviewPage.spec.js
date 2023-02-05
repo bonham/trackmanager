@@ -1,10 +1,9 @@
-import './mockJsdom'
 import { render, fireEvent } from '@testing-library/vue'
-import App from '@/App'
+import App from '@/App.vue'
 import store from '@/store'
 import '@testing-library/jest-dom'
-import TrackOverviewPage from '@/views/TrackOverviewPage'
-import TrackDetailPage from '@/views/TrackDetailPage'
+import TrackOverviewPage from '@/views/TrackOverviewPage.vue'
+import TrackDetailPage from '@/views/TrackDetailPage.vue'
 import fetchMock from 'jest-fetch-mock'
 import { responseMockFunction } from './mockResponse'
 

@@ -1,3 +1,4 @@
 {
-  "vitest.enable": true
+  "vitest.enable": true,
+  "vitest.commandLine": "npx vitest"
 }

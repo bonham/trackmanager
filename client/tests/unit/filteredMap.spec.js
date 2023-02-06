@@ -1,17 +1,31 @@
-import { shallowMount, createLocalVue } from '@vue/test-utils'
-import Vuex from 'vuex'
+import '@testing-library/jest-dom'
+import { render } from '@testing-library/vue'
+import { mount } from '@vue/test-utils'
+
 import FilteredMap from '@/components/FilteredMap.vue'
 
-const localVue = createLocalVue()
+import { createStore } from 'vuex'
+import { store } from '../../src/store.js'
 
-localVue.use(Vuex)
-
-describe.skip('FilteredMap', () => {
-  test('Trivial mount', () => {
-    return import('../../src/store.js').then((module) => {
-      const store = module.default
-      const wrapper = shallowMount(FilteredMap, { store, localVue })
-      expect(wrapper.vm.shouldBeVisibleIds).toEqual([])
+describe('Basic store test with FilteredMap', () => {
+  test.skip('Trivial mount', async () => {
+    const storeInstance = createStore(store)
+    const { getByTitle } = render(FilteredMap, {
+      global: {
+        plugins: [storeInstance]
+      }
     })
+    const button = getByTitle('Zoom in')
+    expect(button).toBeTruthy()
+  })
+
+  test('Low level', () => {
+    const storeInstance = createStore(store)
+    const wrapper = mount(FilteredMap, {
+      global: {
+        plugins: [storeInstance]
+      }
+    })
+    expect(wrapper.vm.shouldBeVisibleIds).toEqual([])
   })
 })

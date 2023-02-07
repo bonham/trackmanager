@@ -3,20 +3,20 @@ import { render } from '@testing-library/vue'
 import { mount } from '@vue/test-utils'
 
 import FilteredMap from '@/components/FilteredMap.vue'
+import { ManagedMap } from '@/lib/mapServices.js'
 
 import { createStore } from 'vuex'
 import { store } from '../../src/store.js'
 
 describe('Basic store test with FilteredMap', () => {
-  test.skip('Trivial mount', async () => {
+  test('Trivial mount', async () => {
     const storeInstance = createStore(store)
-    const { getByTitle } = render(FilteredMap, {
+    render(FilteredMap, {
       global: {
         plugins: [storeInstance]
       }
     })
-    const button = getByTitle('Zoom in')
-    expect(button).toBeTruthy()
+    // it is not possible to test anything visible here as it contains of <div>  only
   })
 
   test('Low level', () => {
@@ -27,5 +27,6 @@ describe('Basic store test with FilteredMap', () => {
       }
     })
     expect(wrapper.vm.shouldBeVisibleIds).toEqual([])
+    expect(wrapper.vm.mmap).toBeInstanceOf(ManagedMap)
   })
 })

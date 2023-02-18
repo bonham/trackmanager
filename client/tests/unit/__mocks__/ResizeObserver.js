@@ -1,16 +1,27 @@
-class ResizeObserver {
-  observe () {
-    // do nothing
-  }
+import { vi } from 'vitest'
 
-  unobserve () {
-    // do nothing
+const ResizeObserverMock = vi.fn(() => {
+  return {
+    default: vi.fn(() => {
+      return {}
+    }),
+    observe: vi.fn(),
+    unobserve: vi.fn(),
+    disconnect: vi.fn()
   }
+})
 
-  disconnect () {
-    // do nothing
-  }
-}
+// class ResizeObserverMock {
+//   observe () {}
+
+//   unobserve () {
+//     // do nothing
+//   }
+
+//   disconnect () {
+//     // do nothing
+//   }
+// }
 
 // window.ResizeObserver = ResizeObserver
-export default ResizeObserver
+export default ResizeObserverMock

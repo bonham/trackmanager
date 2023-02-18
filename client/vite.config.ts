@@ -1,16 +1,7 @@
+/// <reference types="vitest" />
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 const path = require('path')
-
-const vitestConfig = {
-  test: {
-    globals: true,
-    environment: 'jsdom',
-    deps: {
-      inline: true
-    }
-  }
-}
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -36,5 +27,8 @@ export default defineConfig({
       '/api': 'http://localhost:3000'
     }
   },
-  test: vitestConfig.test
+  test: {
+    // setupFiles: ['tests/vitest-setupfiles/mockServiceWorker.js'],
+    environment: 'jsdom'
+  }
 })

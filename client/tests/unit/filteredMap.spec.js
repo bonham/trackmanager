@@ -7,6 +7,7 @@ import { ManagedMap } from '@/lib/mapServices.js'
 
 import { createStore } from 'vuex'
 import { store } from '../../src/store.js'
+import { describe, test, expect } from 'vitest'
 
 describe('Basic store test with FilteredMap', () => {
   test('Trivial mount', async () => {

@@ -1,40 +1,48 @@
 import { render, fireEvent } from '@testing-library/vue'
-import App from '@/App.vue'
-import store from '@/store'
-import '@testing-library/jest-dom'
+import { store } from '../../src/store.js'
 import TrackOverviewPage from '@/views/TrackOverviewPage.vue'
 import TrackDetailPage from '@/views/TrackDetailPage.vue'
-import fetchMock from 'jest-fetch-mock'
-import { responseMockFunction } from './mockResponse'
+import { vi, describe, test, beforeEach } from 'vitest'
+import { mockFetch } from './mockResponse.js'
+import { createStore } from 'vuex'
 
-fetchMock.enableMocks()
+// const routes = [
+//   { path: '/toverview/sid/:sid', component: TrackOverviewPage, props: true },
+//   { path: '/track/:id/sid/:sid', component: TrackDetailPage, props: true }
 
-const fakeSid = 'abcd1234'
-const routes = [
-  { path: '/toverview/sid/:sid', component: TrackOverviewPage, props: true },
-  { path: '/track/:id/sid/:sid', component: TrackDetailPage, props: true }
-
-]
+// ]
 
 describe.skip('TrackOverview and TrackDetail', () => {
   beforeEach(() => {
-    fetchMock.resetMocks()
+    vi.stubGlobal('fetch', mockFetch)
   })
   test('Render overview page', async () => {
-    fetch.mockResponse(responseMockFunction)
-    const { findByText } = render(App, { routes, store }, (vue, store, router) => {
-      router.push(`/toverview/sid/${fakeSid}`)
-    })
+    const storeInstance = createStore(store)
+    const { findByText } = render(
+      TrackOverviewPage,
+      {
+        props: { sid: 'abcd1234' },
+        global: {
+          plugins: [storeInstance]
+        }
+      }
+    )
     await findByText('Track Overview')
     await findByText('2021')
     await findByText('Saupferchweg')
   })
 
   test('Navigate to detail page', async () => {
-    fetch.mockResponse(responseMockFunction)
-    const { findAllByRole, findByText, findByTitle } = render(App, { routes, store }, (vue, store, router) => {
-      router.push(`/toverview/sid/${fakeSid}`)
-    })
+    const storeInstance = createStore(store)
+    const { findAllByRole, findByText, findByTitle } = render(
+      TrackDetailPage,
+      {
+        props: { sid: 'abcd1234' },
+        global: {
+          plugins: [storeInstance]
+        }
+      }
+    )
     await findByText('Saupferchweg')
 
     // find all hyperlinks

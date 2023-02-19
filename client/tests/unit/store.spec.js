@@ -1,4 +1,4 @@
-import { test, expect } from 'vitest'
+import { test, expect, describe } from 'vitest'
 import { store } from '../../src/store.js'
 import { createStore } from 'vuex'
 

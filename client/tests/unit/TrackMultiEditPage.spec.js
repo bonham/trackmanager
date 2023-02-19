@@ -1,22 +1,26 @@
-import fetchMock from 'jest-fetch-mock'
+import { mockFetch } from './mockResponse.js'
 import { render, fireEvent, waitForElementToBeRemoved } from '@testing-library/vue'
 import TrackMultiEditPage from '@/views/TrackMultiEditPage.vue'
-import ResizeObserver from './__mocks__/ResizeObserver'
-import { responseMockFunction } from './mockResponse'
+import ResizeObserverMock from './__mocks__/ResizeObserver'
 import { ModalPlugin, BModal } from 'bootstrap-vue'
+import { vi, beforeEach, afterEach, describe, test, expect } from 'vitest'
 
-fetchMock.enableMocks()
-
-describe.skip('MultiEditPage', () => {
+// skipped tests do not work because of https://github.com/testing-library/vue-testing-library/issues/298
+describe('MultiEditPage', () => {
   beforeEach(() => {
-    fetchMock.resetMocks()
-    global.ResizeObserver = ResizeObserver
+    vi.stubGlobal('ResizeObserver', ResizeObserverMock)
+    vi.stubGlobal('fetch', mockFetch)
   })
+
   afterEach(() => {
   })
-  test('Clean Button', async () => {
-    fetch.mockResponse(responseMockFunction)
 
+  test('Simple', () => {
+    const r = render(TrackMultiEditPage)
+    r.getByText('Edit Tracks')
+  })
+
+  test.skip('Clean Button', async () => {
     const rresult = render(
       TrackMultiEditPage,
       {
@@ -43,9 +47,7 @@ describe.skip('MultiEditPage', () => {
       expect(body).toHaveProperty('updateAttributes.0', 'name')
     })
   })
-  test('Clean Button', async () => {
-    fetch.mockResponse(responseMockFunction)
-
+  test.skip('Clean Button 2', async () => {
     const rresult = render(
       TrackMultiEditPage,
       {

@@ -1,4 +1,3 @@
-import '@testing-library/jest-dom'
 import { render } from '@testing-library/vue'
 import { mount } from '@vue/test-utils'
 

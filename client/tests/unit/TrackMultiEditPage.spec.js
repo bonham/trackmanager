@@ -2,8 +2,10 @@ import { mockFetch } from './mockResponse.js'
 import { render, fireEvent, waitForElementToBeRemoved } from '@testing-library/vue'
 import TrackMultiEditPage from '@/views/TrackMultiEditPage.vue'
 import ResizeObserverMock from './__mocks__/ResizeObserver'
-import { ModalPlugin, BModal } from 'bootstrap-vue'
+// import { ModalPlugin, BModal } from 'bootstrap-vue'
 import { vi, beforeEach, afterEach, describe, test, expect } from 'vitest'
+import { store } from '../../src/store.js'
+import { createStore } from 'vuex'
 
 // skipped tests do not work because of https://github.com/testing-library/vue-testing-library/issues/298
 describe('MultiEditPage', () => {
@@ -16,21 +18,28 @@ describe('MultiEditPage', () => {
   })
 
   test('Simple', () => {
-    const r = render(TrackMultiEditPage)
-    r.getByText('Edit Tracks')
-  })
-
-  test.skip('Clean Button', async () => {
+    const storeInstance = createStore(store)
     const rresult = render(
       TrackMultiEditPage,
       {
         props: { sid: 'abcd1234' },
-        components: {
-          BModal
+        global: {
+          plugins: [storeInstance]
         }
-      },
-      vue => vue.use(ModalPlugin)
-    )
+      })
+    rresult.getByText('Edit Tracks')
+  })
+
+  test.skip('Clean Button', async () => {
+    const storeInstance = createStore(store)
+    const rresult = render(
+      TrackMultiEditPage,
+      {
+        props: { sid: 'abcd1234' },
+        global: {
+          plugins: [storeInstance]
+        }
+      })
     await rresult.findByText('Saupferchweg')
     const button1 = await rresult.findByText('Clean all')
     expect(fetch.mock.calls.length).toEqual(1)
@@ -48,16 +57,16 @@ describe('MultiEditPage', () => {
     })
   })
   test.skip('Clean Button 2', async () => {
+    const storeInstance = createStore(store)
     const rresult = render(
       TrackMultiEditPage,
       {
         props: { sid: 'abcd1234' },
-        components: {
-          BModal
+        global: {
+          plugins: [storeInstance]
         }
-      },
-      vue => vue.use(ModalPlugin)
-    )
+      })
+
     await rresult.findByText('Saupferchweg')
     const deleteButton = await rresult.findByLabelText('trash')
     expect(fetch.mock.calls.length).toEqual(1)

@@ -18,8 +18,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
-      vue: '@vue/compat',
-      Vue: '@vue/compat'
+      vue: '@vue/compat'
     }
   },
   server: {
@@ -30,5 +29,6 @@ export default defineConfig({
   test: {
     // setupFiles: ['tests/vitest-setupfiles/mockServiceWorker.js'],
     environment: 'jsdom'
+    // globals: true
   }
 })

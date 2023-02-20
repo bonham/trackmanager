@@ -107,7 +107,7 @@ export default {
       await this.loadTracksOfYear(this.years[0])
     }
   },
-  beforeDestroy () {
+  beforeUnmount () {
     this.resizeObserver.unobserve(this.$refs.outerSplitFrame)
   },
   mounted: function () {

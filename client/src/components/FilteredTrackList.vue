@@ -42,6 +42,9 @@ import { TrackCollection } from '@/lib/Track.js'
 
 export default {
   name: 'FilteredTrackList',
+  compatConfig: {
+    WATCH_ARRAY: false
+  },
   components: {
     BListGroup,
     BListGroupItem,

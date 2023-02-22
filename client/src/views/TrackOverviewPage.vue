@@ -9,7 +9,7 @@
 </template>
 
 <script>
-import { BContainer } from 'bootstrap-vue'
+import { BContainer } from 'bootstrap-vue-next'
 import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'
 export default {
   name: 'TrackOverviewPage',

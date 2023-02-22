@@ -18,7 +18,7 @@
 
 <script>
 import MapComponent from '@/components/MapComponent.vue'
-import { BContainer } from 'bootstrap-vue'
+import { BContainer } from 'bootstrap-vue-next'
 import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'
 
 export default {

@@ -78,7 +78,7 @@ import {
   BIconArrowLeft, BIconTrash,
   BContainer, BSpinner,
   BModal
-} from 'bootstrap-vue'
+} from 'bootstrap-vue-next'
 import { getAllTracks, updateTrack, updateTrackById, deleteTrack } from '@/lib/trackServices.js'
 import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'
 import EditableText from '@/components/EditableText.vue'

@@ -37,7 +37,7 @@
 </template>
 <script>
 import { mapState, mapMutations } from 'vuex'
-import { BListGroup, BListGroupItem, BCard, BSpinner } from 'bootstrap-vue'
+import { BListGroup, BListGroupItem, BCard, BSpinner } from 'bootstrap-vue-next'
 import { TrackCollection } from '@/lib/Track.js'
 
 export default {

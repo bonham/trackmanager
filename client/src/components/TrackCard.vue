@@ -43,7 +43,7 @@ import {
   BCard, BCardText,
   BIcon, BIconChevronRight,
   BRow, BCol, BLink
-} from 'bootstrap-vue'
+} from 'bootstrap-vue-next'
 
 export default {
   name: 'TrackCard',

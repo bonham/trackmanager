@@ -12,7 +12,7 @@
   </div>
 </template>
 <script>
-import { BSpinner } from 'bootstrap-vue'
+import { BSpinner } from 'bootstrap-vue-next'
 import { ManagedMap } from '@/lib/mapServices.js'
 import { TrackVisibilityManager } from '@/lib/mapStateHelpers.js'
 import { getGeoJson } from '@/lib/trackServices.js'

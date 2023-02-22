@@ -5,20 +5,10 @@ const path = require('path')
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [
-    vue({
-      template: {
-        compilerOptions: {
-          compatConfig: {
-            MODE: 3
-          }
-        }
-      }
-    })],
+  plugins: [vue()],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
-      vue: '@vue/compat'
+      '@': path.resolve(__dirname, './src')
     }
   },
   server: {

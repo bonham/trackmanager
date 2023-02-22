@@ -21,7 +21,7 @@
 import { TrackCollection } from '@/lib/Track.js'
 import { getAllTracks } from '@/lib/trackServices.js'
 import TrackSection from '@/components/TrackSection.vue'
-import { BSpinner } from 'bootstrap-vue'
+import { BSpinner } from 'bootstrap-vue-next'
 import _ from 'lodash'
 
 export default {

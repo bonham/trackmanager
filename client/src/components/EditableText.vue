@@ -37,7 +37,7 @@
 <script>
 import {
   BFormTextarea, BFormInput, BIconPencilFill
-} from 'bootstrap-vue'
+} from 'bootstrap-vue-next'
 export default {
   components: {
     BFormTextarea,

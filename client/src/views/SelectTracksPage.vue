@@ -60,7 +60,7 @@
 </template>
 
 <script>
-import { BContainer, BButton, BSkeleton } from 'bootstrap-vue'
+import { BContainer, BButton, BSkeleton } from 'bootstrap-vue-next'
 import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'
 import FilteredTrackList from '@/components/FilteredTrackList.vue'
 import FilteredMap from '@/components/FilteredMap.vue'

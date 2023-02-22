@@ -57,7 +57,7 @@ import {
   BCard, BCardText, BIcon,
   BIconArrowDownCircleFill, BIconArrowRightCircleFill,
   BRow, BCol, BButton, BCollapse
-} from 'bootstrap-vue'
+} from 'bootstrap-vue-next'
 
 export default {
   name: 'TrackSection',

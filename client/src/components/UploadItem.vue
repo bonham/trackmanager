@@ -35,7 +35,7 @@
 </template>
 
 <script>
-import { BCard } from 'bootstrap-vue'
+import { BCard } from 'bootstrap-vue-next'
 
 /* vue instance */
 export default {

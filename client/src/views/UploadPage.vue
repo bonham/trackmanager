@@ -43,7 +43,7 @@
 </template>
 
 <script>
-import { BFormFile } from 'bootstrap-vue'
+import { BFormFile } from 'bootstrap-vue-next'
 import queue from 'async/queue'
 import UploadItem from '@/components/UploadItem.vue'
 import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'

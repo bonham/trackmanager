@@ -17,7 +17,7 @@ export default defineConfig({
     }
   },
   test: {
-    // setupFiles: ['tests/vitest-setupfiles/mockServiceWorker.js'],
+    setupFiles: ['tests/vitest-setupfiles/setup-jest-dom.js'],
     environment: 'jsdom'
     // globals: true
   }

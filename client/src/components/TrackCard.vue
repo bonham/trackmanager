@@ -24,11 +24,10 @@
           <b-link
             :to="'/track/'+track.id+'/sid/'+sid"
           >
-            <b-icon
-              icon="chevron-right"
+            <i-bi-chevron-right>
               class="mx-2 card-icon bg-light p-3"
               variant="secondary"
-            />
+            </i-bi-chevron-right>
           </b-link>
         </b-col>
       </b-row>
@@ -41,16 +40,12 @@
 import { Track } from '@/lib/Track.js'
 import {
   BCard, BCardText,
-  BIcon, BIconChevronRight,
   BRow, BCol, BLink
 } from 'bootstrap-vue-next'
 
 export default {
   name: 'TrackCard',
   components: {
-    BIcon,
-    // eslint-disable-next-line vue/no-unused-components
-    BIconChevronRight,
     BCard,
     BCardText,
     BRow,

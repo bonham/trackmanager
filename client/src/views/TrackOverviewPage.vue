@@ -14,7 +14,7 @@ import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'
 export default {
   name: 'TrackOverviewPage',
   components: {
-    TrackOverview: () => import(/* webpackChunkName: "TrackOverView" */ '@/components/TrackOverview.vue'),
+    TrackOverview: () => import('@/components/TrackOverview.vue'),
     TrackManagerNavBar,
     BContainer
   },

@@ -23,11 +23,9 @@
         >
           <b-link
             :to="'/track/'+track.id+'/sid/'+sid"
+            :aria-label="ariaLinkLabel"
           >
-            <i-bi-chevron-right>
-              class="mx-2 card-icon bg-light p-3"
-              variant="secondary"
-            </i-bi-chevron-right>
+            <i-bi-chevron-right />
           </b-link>
         </b-col>
       </b-row>
@@ -62,6 +60,11 @@ export default {
       default: ''
     }
 
+  },
+  computed: {
+    ariaLinkLabel () {
+      return `link-to-track-${this.track.id}`
+    }
   }
 }
 </script>

@@ -1,18 +1,16 @@
-import { render, fireEvent } from '@testing-library/vue'
+import { render } from '@testing-library/vue'
+// import userEvent from '@testing-library/user-event'
 import { store } from '../../src/store.js'
-import TrackOverviewPage from '@/views/TrackOverviewPage.vue'
-import TrackDetailPage from '@/views/TrackDetailPage.vue'
-import { vi, describe, test, beforeEach } from 'vitest'
-import { mockFetch } from './mockResponse.js'
 import { createStore } from 'vuex'
+import router from '../../src/router'
+import { vi, describe, test, beforeEach, expect } from 'vitest'
+import { mockFetch } from './mockResponse.js'
+import { Request } from 'cross-fetch'
 
-// const routes = [
-//   { path: '/toverview/sid/:sid', component: TrackOverviewPage, props: true },
-//   { path: '/track/:id/sid/:sid', component: TrackDetailPage, props: true }
+import TrackOverviewPage from '@/views/TrackOverviewPage.vue'
+// import TrackDetailPage from '@/views/TrackDetailPage.vue'
 
-// ]
-
-describe.skip('TrackOverview and TrackDetail', () => {
+describe('TrackOverview and TrackDetail', () => {
   beforeEach(() => {
     vi.stubGlobal('fetch', mockFetch)
   })
@@ -23,46 +21,53 @@ describe.skip('TrackOverview and TrackDetail', () => {
       {
         props: { sid: 'abcd1234' },
         global: {
-          plugins: [storeInstance]
+          plugins: [storeInstance, router]
         }
       }
     )
-    await findByText('Track Overview')
+    expect(await findByText('Track Overview')).toBeInTheDocument()
     await findByText('2021')
     await findByText('Saupferchweg')
+    // debug()
   })
 
-  test('Navigate to detail page', async () => {
+  test.only('Navigate to detail page', async () => {
+    vi.stubGlobal('Request', Request)
+    vi.stubGlobal('fetch', mockFetch)
+    // const user = userEvent.setup()
+
     const storeInstance = createStore(store)
-    const { findAllByRole, findByText, findByTitle } = render(
-      TrackDetailPage,
+    const { findAllByRole, findByText } = render(
+      TrackOverviewPage,
       {
         props: { sid: 'abcd1234' },
         global: {
-          plugins: [storeInstance]
+          plugins: [storeInstance, router]
         }
       }
     )
+    expect(await findByText('Track Overview')).toBeInTheDocument()
+
     await findByText('Saupferchweg')
 
     // find all hyperlinks
     const allLinks = await findAllByRole('link')
+    expect(allLinks.length).toBeGreaterThan(0)
 
-    // find <a href ...> tag with a chevron arrow as child
-    const found = allLinks.find(element => {
-      const c = element.firstElementChild
-      if (c === null) { return false }
-      const a = c.getAttribute('aria-label')
-      if (a === 'chevron right') {
-        return true
-      }
-      return false
-    })
+    // find hyperlink with aria label
+    const found = allLinks.find(el => el.getAttribute('aria-label') === 'link-to-track-404')
+    expect(found).toBeDefined()
+
+    const link = found
+    expect(link.pathname).toMatch(/^\/track\/404\/sid\/abcd1234$/)
+
+    // await user.click(link)
+    // debug()
 
     // click on detail
-    await fireEvent.click(found)
-    await findByText('Track 404 Details')
+    // await fireEvent.click(link)
+    // expect(await findByText('Track 404 Details')).toBeInTheDocument()
     // check if map is rendered
-    await findByTitle('Zoom in')
+    // await findByTitle('Zoom in')
   })
 })

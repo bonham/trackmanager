@@ -53,6 +53,7 @@
       </template>
       <template #cell(dbutton)="row">
         <b-button
+          aria-label="delete"
           @click="deleteTrackFromTable(row.item)"
         >
           <i-bi-trash />

@@ -109,7 +109,6 @@ export default {
     },
     processBlur (event) {
       this.editing = false
-      this.$emit('blur')
     }
   }
 }

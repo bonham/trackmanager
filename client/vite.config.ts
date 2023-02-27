@@ -19,6 +19,9 @@ export default defineConfig({
       autoInstall: true
     })
   ],
+  build: {
+    sourcemap: true
+  },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src')

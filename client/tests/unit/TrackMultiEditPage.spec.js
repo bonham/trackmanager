@@ -4,12 +4,16 @@ import TrackMultiEditPage from '@/views/TrackMultiEditPage.vue'
 import ResizeObserverMock from './__mocks__/ResizeObserver'
 import { store } from '../../src/store.js'
 import { createStore } from 'vuex'
+import { Request, Response } from 'cross-fetch'
 
 // skipped tests do not work because of https://github.com/testing-library/vue-testing-library/issues/298
 describe('MultiEditPage', () => {
   beforeEach(() => {
     vi.stubGlobal('ResizeObserver', ResizeObserverMock) // eslint-disable-line no-undef
     vi.stubGlobal('fetch', mockFetch) // eslint-disable-line no-undef
+    vi.stubGlobal('Request', Request) // eslint-disable-line no-undef
+    vi.stubGlobal('Response', Response) // eslint-disable-line no-undef
+
     fetch.mockClear()
   })
 

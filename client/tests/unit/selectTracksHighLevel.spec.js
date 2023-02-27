@@ -5,11 +5,14 @@ import ResizeObserverMock from './__mocks__/ResizeObserver'
 import { store } from '../../src/store.js'
 import { createStore } from 'vuex'
 import { mockFetch } from './mockResponse.js'
+import { Request, Response } from 'cross-fetch'
 
 describe('SelectTracksPage - DOM testing', () => {
   beforeEach(() => {
     vi.stubGlobal('ResizeObserver', ResizeObserverMock)
     vi.stubGlobal('fetch', mockFetch)
+    vi.stubGlobal('Request', Request) // eslint-disable-line no-undef
+    vi.stubGlobal('Response', Response) // eslint-disable-line no-undef
   })
 
   // does not work because of https://github.com/testing-library/vue-testing-library/issues/298

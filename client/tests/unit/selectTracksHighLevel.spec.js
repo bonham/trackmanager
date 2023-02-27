@@ -13,7 +13,7 @@ describe('SelectTracksPage - DOM testing', () => {
   })
 
   // does not work because of https://github.com/testing-library/vue-testing-library/issues/298
-  test.skip('Load Tracks of 2021', async () => {
+  test('Load Tracks of 2021', async () => {
     const storeInstance = createStore(store)
     const rresult = render(SelectTracksPage, {
       props: { sid: 'abcd1234' },

@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/vue'
 import userEvent from '@testing-library/user-event'
 import EditableText from '@/components/EditableText.vue'
 
-describe.skip('EditableText', () => {
+describe('EditableText', () => {
   test('Simple', async () => {
     const user = userEvent.setup()
     const mockUpdateFunc = vi.fn()

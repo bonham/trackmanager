@@ -24,6 +24,7 @@
             v-for="track in loadedTracksSorted"
             :key="track.id"
             :ref="'track_'+track.id"
+            :label="'track_'+track.id"
             :active="itemActiveStatus(track.id)"
             @click="toggleActive(track.id)"
           >
@@ -102,8 +103,16 @@ export default {
           )
           if (selectionUpdateObj.selected.length > 0) {
             const scrollId = selectionUpdateObj.selected[0]
+            console.log('scrollid', scrollId)
+            console.log('xx', this.$refs)
             const itemRef = `track_${scrollId}`
-            this.$refs[itemRef][0].scrollIntoView({
+            const items = this.$refs[itemRef]
+            console.log('YYYY', items)
+            const item0 = items[0]
+            console.log('ZZZZ', item0)
+            console.log('ZZZZ', item0.data)
+
+            this.$refs[itemRef][0].$el.scrollIntoView({
               behavior: 'smooth',
               block: 'center'
             })

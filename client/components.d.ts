@@ -16,7 +16,6 @@ declare module '@vue/runtime-core' {
     IBiArrowLeft: typeof import('~icons/bi/arrow-left')['default']
     IBiArrowRightCircle: typeof import('~icons/bi/arrow-right-circle')['default']
     IBiChevronRight: typeof import('~icons/bi/chevron-right')['default']
-    IBiIconTrash: typeof import('~icons/bi/icon-trash')['default']
     IBiPencilFill: typeof import('~icons/bi/pencil-fill')['default']
     IBiTrash: typeof import('~icons/bi/trash')['default']
     MapComponent: typeof import('./src/components/MapComponent.vue')['default']

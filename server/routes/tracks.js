@@ -284,7 +284,7 @@ const upload = multer(
   }
 )
 
-// POST route for obtaining the contents of the file
+// POST route for handling gpx track file uploads.
 router.post(
   '/addtrack/sid/:sid',
   sidValidationChain,

@@ -1,6 +1,7 @@
 <template>
   <div>
     <b-card
+      v-b-tooltip="'my title'"
       no-body
       class="m-1"
       bg-variant="light"
@@ -10,7 +11,7 @@
           <span class="ml-2">{{ fname }}</span>
           <span
             v-if="error"
-            v-b-tooltip.hover
+
             class="text-danger"
             :title="error.cause"
           > {{ error.message }}</span>
@@ -35,13 +36,18 @@
 </template>
 
 <script>
-import { BCard } from 'bootstrap-vue-next'
+import { BCard, BCol, BRow, vBTooltip } from 'bootstrap-vue-next'
 
 /* vue instance */
 export default {
   name: 'UploadItem',
   components: {
-    BCard
+    BCard,
+    BCol,
+    BRow
+  },
+  directives: {
+    'b-tooltip': vBTooltip
   },
   props: {
     fname: {

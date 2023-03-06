@@ -35,6 +35,12 @@ export default defineConfig({
   test: {
     setupFiles: ['tests/vitest-setupfiles/setup-jest-dom.js'],
     environment: 'jsdom',
-    globals: true
+    globals: true,
+    coverage: {
+      enabled: true,
+      include: ['src/**/'],
+      reporter: 'html',
+      all: true
+    }
   }
 })

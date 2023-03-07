@@ -25,7 +25,7 @@ try {
   console.log('config.js was not found. Please copy config_dist.js to config.js and adjust according to your needs')
   console.log(e)
 }
-const { tracks: { database, uploadDir, python, gpx2dbScript } } = config
+const { tracks: { database, uploadDir, gpx2dbScript } } = config
 const uploadDirPrefix = 'trackmanager-upload-'
 
 // sql query pool
@@ -298,7 +298,6 @@ router.post(
 
     // build arguments
     const args = [
-      gpx2dbScript,
       '-s',
       SIMPLIFY_DISTANCE,
       filePath,
@@ -308,8 +307,10 @@ router.post(
 
     // run child process - execute python executable to process the upload
     try {
-      const out = execFileSync(python, args)
-      console.log('Stdout ', out)
+      // console.log('Command: ', gpx2dbScript, args)
+      const stdout = execFileSync(gpx2dbScript, args, { encoding: 'utf-8' })
+      // const stdout = stdoutBuf.toString()
+      console.log(`Stdout >>${stdout}<<`)
     } catch (err) {
       console.log('Child error', err.message)
       res.status(422).json({ message: err.message })
@@ -317,7 +318,7 @@ router.post(
     } finally {
     // cleanup of file and directory
       fsprom.rmdir(uploadDir, { recursive: true }).then(
-        (result) => console.log('Success'),
+        (result) => console.log('Successfully purged upload dir'),
         (err) => { console.log('Error, could not remove directory', err) }
       )
     }

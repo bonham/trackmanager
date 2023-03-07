@@ -3,8 +3,6 @@ import { Track, TrackCollection } from '@/lib/Track'
 import TrackSection from '@/components/TrackSection.vue'
 import { DateTime } from 'luxon'
 
-import { describe, test, expect } from 'vitest'
-
 describe('TrackSection', () => {
   test('Simple', async () => {
     const initData1 = {

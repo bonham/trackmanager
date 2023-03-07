@@ -10,6 +10,7 @@
 
     <BRow class="mt-3">
       <BCol>
+        <label for="input">Choose file</label>&nbsp;
         <input
           id="input"
           type="file"
@@ -81,38 +82,6 @@ export default {
   },
 
   methods: {
-    onChange (event) {
-      const files = event.target.files
-      console.log(event)
-      console.log('files', files)
-
-      this.processDragDrop(files)
-    },
-
-    // Queue new files
-    processDragDrop (files) {
-      // take files from input
-      for (const thisFile of files) {
-        const fileIdObject = this.makeFileIdObject(thisFile)
-        fileIdObject.sid = this.sid
-        this.addItemToQueue(fileIdObject)
-      }
-    },
-
-    makeFileIdObject (file) {
-      const thisKey = this.getNextKey()
-      const fName = file.name
-      return {
-        key: thisKey,
-        fname: fName,
-        fileBlob: file,
-        error: null,
-        details: null,
-        status: 'Queued',
-        sid: null,
-        visible: true
-      }
-    },
 
     getUploadItemByKey (key) {
       const item = this.uploadList.find(element => element.key === key)
@@ -130,17 +99,38 @@ export default {
       item.visible = visibility
     },
 
-    completedCallBack (err, key) {
-      console.log(`Finished processing ${key}`)
+    onChange (event) {
+      const files = event.target.files
+      this.processDragDrop(files)
+    },
 
-      if (err) { console.error('Error occured during queue processing: ', err) }
+    getNextKey () {
+      return (this.maxKey += 1)
+    },
 
-      this.setItemProcessingStatus(key, 'Completed')
-      setTimeout(() => {
-        this.setItemVisibility(key, false)
-        console.log(`Removed ${key}`)
-      },
-      1000)
+    makeFileIdObject (file) {
+      const thisKey = this.getNextKey()
+      const fName = file.name
+      return {
+        key: thisKey,
+        fname: fName,
+        fileBlob: file,
+        error: null,
+        details: null,
+        status: 'Queued',
+        sid: null,
+        visible: true
+      }
+    },
+
+    // Queue new files
+    processDragDrop (files) {
+      // take files from input
+      for (const thisFile of files) {
+        const fileIdObject = this.makeFileIdObject(thisFile)
+        fileIdObject.sid = this.sid
+        this.addItemToQueue(fileIdObject)
+      }
     },
 
     addItemToQueue (fileIdObject) {
@@ -148,16 +138,28 @@ export default {
       this.workerQueue.push(
         {
           fileIdObject,
-          setItemProcessingStatus: this.setItemProcessingStatus
+          setItemProcessingStatus: this.setItemProcessingStatus // callback to set status while processed in queue
         },
         this.completedCallBack
       )
     },
 
-    getNextKey () {
-      return (this.maxKey += 1)
-    }
+    completedCallBack (err, key) {
+      console.log(`Finished processing ${key}`)
 
+      if (err) {
+        console.log('Error occured during queue processing: ', err.message)
+        console.log('Error cause: ', err.cause)
+        this.setItemProcessingStatus(key, 'Failed')
+      } else {
+        this.setItemProcessingStatus(key, 'Completed')
+        setTimeout(() => {
+          this.setItemVisibility(key, false)
+          console.log(`Removed ${key}`)
+        },
+        1000)
+      }
+    }
   }
 }
 </script>

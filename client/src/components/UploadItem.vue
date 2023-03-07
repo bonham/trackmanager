@@ -1,18 +1,16 @@
 <template>
   <div>
     <b-card
-      v-b-tooltip="'my title'"
       no-body
       class="m-1"
       bg-variant="light"
     >
       <b-row class="align-items-center">
         <b-col cols="10">
-          <span class="ml-2">{{ fname }}</span>
+          <span class="ms-2">{{ fname }}</span>
           <span
             v-if="error"
-
-            class="text-danger"
+            class="ms-2 text-danger"
             :title="error.cause"
           > {{ error.message }}</span>
         </b-col>
@@ -36,7 +34,7 @@
 </template>
 
 <script>
-import { BCard, BCol, BRow, vBTooltip } from 'bootstrap-vue-next'
+import { BCard, BCol, BRow } from 'bootstrap-vue-next'
 
 /* vue instance */
 export default {
@@ -45,9 +43,6 @@ export default {
     BCard,
     BCol,
     BRow
-  },
-  directives: {
-    'b-tooltip': vBTooltip
   },
   props: {
     fname: {

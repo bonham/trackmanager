@@ -11,7 +11,14 @@ async function uploadFile (fileIdObject, uploadUrl, formParameter) {
 
   if (!response.ok) {
     const errDetail = await response.text()
-    throw new Error('HTTP error, status = ' + response.status, { cause: errDetail })
+    let errcause = ''
+    try {
+      const j = JSON.parse(errDetail)
+      errcause = j.message
+    } catch {
+      errcause = errDetail
+    }
+    throw new Error('HTTP error, status = ' + response.status, { cause: errcause })
   }
 
   return response.json()

@@ -9,24 +9,26 @@
     </h1>
 
     <BRow class="mt-3">
-      <BCol>
-        <label for="input">Choose file</label>&nbsp;
-        <input
-          id="input"
-          type="file"
-          multiple
-          @change="onChange"
-        >
-      </BCol>
+      <BCol />
     </BRow>
     <BRow>
       <BCol>
         <DropField @files-dropped="handleDrops">
-          <div class="border border-1 rounded p-2 d-flex flex-row">
+          <label
+            for="input"
+            class="border border-1 rounded p-2 d-flex flex-row"
+          >
             <div class="flex-grow-1 border border-3 rounded-2 border-secondary-subtle dropzone d-flex align-items-center justify-content-center text-secondary">
-              Drop files here
+              Drop files or klick to upload
             </div>
-          </div>
+          </label>
+          <input
+            id="input"
+            type="file"
+            multiple
+            class="hideinput"
+            @change="onChange"
+          >
         </DropField>
       </BCol>
     </BRow>
@@ -198,4 +200,16 @@ export default {
   height: 8em;
   margin: 2em 8em 2em 8em;
 }
+
+.hideinput {
+  opacity: 0;
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;}
 </style>

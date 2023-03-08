@@ -19,6 +19,17 @@
         >
       </BCol>
     </BRow>
+    <BRow>
+      <BCol>
+        <DropField @files-dropped="handleDrops">
+          <div class="border border-1 rounded p-2 d-flex flex-row">
+            <div class="flex-grow-1 border border-3 rounded-2 border-secondary-subtle dropzone d-flex align-items-center justify-content-center text-secondary">
+              Drop files here
+            </div>
+          </div>
+        </DropField>
+      </BCol>
+    </BRow>
     <transition-group
       name="list"
       tag="span"
@@ -44,6 +55,7 @@
 import { BContainer, BRow, BCol } from 'bootstrap-vue-next'
 import UploadItem from '@/components/UploadItem.vue'
 import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'
+import DropField from '@/components/DropField.vue'
 import { FileUploadQueue } from '@/lib/FileUploadQueue'
 
 /* vue instance */
@@ -52,6 +64,7 @@ export default {
   components: {
     UploadItem,
     TrackManagerNavBar,
+    DropField,
     BContainer,
     BRow,
     BCol
@@ -99,6 +112,9 @@ export default {
       item.visible = visibility
     },
 
+    handleDrops (fileList) {
+      this.processDragDrop(fileList)
+    },
     onChange (event) {
       const files = event.target.files
       this.processDragDrop(files)
@@ -177,4 +193,9 @@ export default {
 /* .list-move {
   transition: transform 1s;
 } */
+.dropzone {
+  --bs-border-style: dashed;
+  height: 8em;
+  margin: 2em 8em 2em 8em;
+}
 </style>

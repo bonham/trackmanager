@@ -9,7 +9,7 @@ describe('UploadPage', () => {
     vi.stubGlobal('fetch', vi.fn(() => new Response('{"message":"ok"}')))
     const user = userEvent.setup()
     const { getByLabelText } = render(UploadPage)
-    const input = getByLabelText(/Choose file/i)
+    const input = getByLabelText(/Drop files/i)
     const file = new File(['hello'], 'hello.gpx', { type: 'text/xml' })
 
     await user.upload(input, file)
@@ -23,7 +23,7 @@ describe('UploadPage', () => {
 
     const user = userEvent.setup()
     const { getByLabelText, findByText } = render(UploadPage)
-    const input = getByLabelText(/Choose file/i)
+    const input = getByLabelText(/Drop files/i)
     const file = new File(['hello'], 'hello.gpx', { type: 'text/xml' })
 
     await user.upload(input, file)

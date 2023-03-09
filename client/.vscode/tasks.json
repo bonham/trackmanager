@@ -17,6 +17,23 @@
 				"showReuseMessage": true,
 				"clear": false
 			}
+		},
+		{
+			"type": "npm",
+			"script": "test",
+			"problemMatcher": [],
+			"label": "vitest",
+			"runOptions": {
+				"runOn": "folderOpen"
+			},
+			"presentation": {
+				"echo": true,
+				"reveal": "always",
+				"focus": false,
+				"panel": "new",
+				"showReuseMessage": true,
+				"clear": false
+			}
 		}
 	]
 }

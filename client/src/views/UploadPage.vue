@@ -13,7 +13,7 @@
     </BRow>
     <BRow>
       <BCol>
-        <DropField @files-dropped="handleDrops">
+        <DropField @files-dropped="processDragDrop">
           <label
             for="input"
             class="border border-1 rounded p-2 d-flex flex-row"
@@ -114,9 +114,6 @@ export default {
       item.visible = visibility
     },
 
-    handleDrops (fileList) {
-      this.processDragDrop(fileList)
-    },
     onChange (event) {
       const files = event.target.files
       this.processDragDrop(files)

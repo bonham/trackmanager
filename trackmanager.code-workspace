@@ -29,5 +29,6 @@
 		"jest.disabledWorkspaceFolders": [
 			"client"
 		],
+		"testing.automaticallyOpenPeekView": "never",
 	}
 }

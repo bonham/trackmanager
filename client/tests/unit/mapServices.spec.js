@@ -1,5 +1,4 @@
-
-import './mockJsdom'
+import { describe, test, beforeEach, expect } from 'vitest'
 import { ManagedMap, GeoJsonCollection, ExtentCollection } from '@/lib/mapServices'
 const _ = require('lodash')
 

@@ -1,39 +1,35 @@
 {
-  "version": "0.2.0",
   "configurations": [
     {
-      "type": "pwa-chrome",
+      "name": "Launch Chrome workspace:root",
       "request": "launch",
-      "name": "vuejs: chrome",
-      "url": "http://localhost:8080",
-      "webRoot": "${workspaceFolder}",
-      "breakOnLoad": true,
-      "pathMapping": {
-        "/_karma_webpack_": "${workspaceFolder}"
-      },
-      "sourceMapPathOverrides": {
-        "webpack:/*": "${webRoot}/*",
-        "/./*": "${webRoot}/*",
-        "/src/*": "${webRoot}/*",
-        "/*": "*",
-        "/./~/*": "${webRoot}/node_modules/*"
-      }
+      "type": "chrome",
+      "url": "http://localhost:4000/select_tracks/sid/42trblax9",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "Launch Chrome workspace:src",
+      "request": "launch",
+      "type": "chrome",
+      "url": "http://localhost:4000/select_tracks/sid/42trblax9",
+      "webRoot": "${workspaceFolder}/src"
     },
     {
       "type": "node",
-      "name": "vscode-jest-tests",
       "request": "launch",
-      "console": "integratedTerminal",
-      "internalConsoleOptions": "neverOpen",
-      "disableOptimisticBPs": true,
-      "program": "./node_modules/@vue/cli-service/bin/vue-cli-service.js",
-      "cwd": "${workspaceFolder}",
+      "name": "Debug Current Test File",
+      "autoAttachChildProcesses": true,
+      "skipFiles": [
+        "<node_internals>/**",
+        "**/node_modules/**"
+      ],
+      "program": "${workspaceRoot}/node_modules/vitest/vitest.mjs",
       "args": [
-        
-        "test:unit",
-        "--runInBand",
-        "--watchAll=false"
-      ]
+        "run",
+        "${relativeFile}"
+      ],
+      "smartStep": true,
+      "console": "integratedTerminal"
     }
   ]
 }

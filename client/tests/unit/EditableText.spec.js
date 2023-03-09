@@ -1,3 +1,4 @@
+import { test, describe, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/vue'
 import userEvent from '@testing-library/user-event'
 import EditableText from '@/components/EditableText.vue'
@@ -5,7 +6,7 @@ import EditableText from '@/components/EditableText.vue'
 describe('EditableText', () => {
   test('Simple', async () => {
     const user = userEvent.setup()
-    const mockUpdateFunc = jest.fn()
+    const mockUpdateFunc = vi.fn()
     render(
       EditableText, {
         props: {
@@ -21,7 +22,7 @@ describe('EditableText', () => {
   })
   test('Emtpy', async () => {
     const user = userEvent.setup()
-    const mockUpdateFunc = jest.fn()
+    const mockUpdateFunc = vi.fn()
     render(
       EditableText, {
         props: {

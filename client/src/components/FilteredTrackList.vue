@@ -15,7 +15,6 @@
       <b-card
         ref="testref"
         no-body
-        class="fs-2"
       >
         <b-list-group
           flush
@@ -24,6 +23,7 @@
             v-for="track in loadedTracksSorted"
             :key="track.id"
             :ref="'track_'+track.id"
+            :label="'track_'+track.id"
             :active="itemActiveStatus(track.id)"
             @click="toggleActive(track.id)"
           >
@@ -37,11 +37,14 @@
 </template>
 <script>
 import { mapState, mapMutations } from 'vuex'
-import { BListGroup, BListGroupItem, BCard, BSpinner } from 'bootstrap-vue'
+import { BListGroup, BListGroupItem, BCard, BSpinner } from 'bootstrap-vue-next'
 import { TrackCollection } from '@/lib/Track.js'
 
 export default {
   name: 'FilteredTrackList',
+  compatConfig: {
+    WATCH_ARRAY: false
+  },
   components: {
     BListGroup,
     BListGroupItem,
@@ -100,7 +103,8 @@ export default {
           if (selectionUpdateObj.selected.length > 0) {
             const scrollId = selectionUpdateObj.selected[0]
             const itemRef = `track_${scrollId}`
-            this.$refs[itemRef][0].scrollIntoView({
+
+            this.$refs[itemRef][0].$el.scrollIntoView({
               behavior: 'smooth',
               block: 'center'
             })

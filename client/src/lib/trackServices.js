@@ -1,5 +1,5 @@
 import { Track } from '@/lib/Track.js'
-const _ = require('lodash')
+import _ from 'lodash'
 
 // /// Get all tracks
 async function getAllTracks (sid) {
@@ -80,7 +80,14 @@ async function getGeoJson (idList, sid) {
 
   const response = await fetch(req)
   if (response.ok) {
-    const respJson = response.json()
+    let respJson
+    try {
+      respJson = await response.json()
+    } catch (e) {
+      if (e instanceof SyntaxError) {
+        throw new Error('Failed to convert response to json. Response', e)
+      }
+    }
     return respJson
   } else {
     const errText = await response.text()

@@ -1,4 +1,5 @@
-import { Track, TrackCollection } from '@/lib/Track.js'
+import { describe, test, expect } from 'vitest'
+import { Track, TrackCollection } from '@/lib/Track'
 import { DateTime } from 'luxon'
 
 const initData1 = {

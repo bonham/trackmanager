@@ -8,7 +8,7 @@ import Select from 'ol/interaction/Select'
 import { getUid } from 'ol/util'
 import GeoJSON from 'ol/format/GeoJSON'
 import { StyleFactory } from './mapStyles.js'
-const _ = require('lodash')
+import _ from 'lodash'
 
 /*
 How to use:

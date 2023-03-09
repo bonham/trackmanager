@@ -9,6 +9,9 @@ on:
   pull_request:
     branches: [master]
 
+env:
+  LANG: de_DE.UTF-8
+
 jobs:
   build_client:
     runs-on: ubuntu-latest
@@ -20,9 +23,12 @@ jobs:
         with:
           node-version: "16.x"
           cache: "npm"
+          cache-dependency-path: ./client/package-lock.json
+      - run: npm install
+        working-directory: ./client
       - run: npm test
         working-directory: ./client
-      - run: npm build
+      - run: npm run build
         working-directory: ./client
 
   build_server:

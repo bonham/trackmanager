@@ -23,12 +23,9 @@
         >
           <b-link
             :to="'/track/'+track.id+'/sid/'+sid"
+            :aria-label="ariaLinkLabel"
           >
-            <b-icon
-              icon="chevron-right"
-              class="mx-2 card-icon bg-light p-3"
-              variant="secondary"
-            />
+            <i-bi-chevron-right />
           </b-link>
         </b-col>
       </b-row>
@@ -41,16 +38,12 @@
 import { Track } from '@/lib/Track.js'
 import {
   BCard, BCardText,
-  BIcon, BIconChevronRight,
   BRow, BCol, BLink
-} from 'bootstrap-vue'
+} from 'bootstrap-vue-next'
 
 export default {
   name: 'TrackCard',
   components: {
-    BIcon,
-    // eslint-disable-next-line vue/no-unused-components
-    BIconChevronRight,
     BCard,
     BCardText,
     BRow,
@@ -67,6 +60,11 @@ export default {
       default: ''
     }
 
+  },
+  computed: {
+    ariaLinkLabel () {
+      return `link-to-track-${this.track.id}`
+    }
   }
 }
 </script>

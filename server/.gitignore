@@ -1,7 +1,8 @@
+config.js
+
 .DS_Store
 node_modules
 /dist
-/config.js
 
 
 # local env files

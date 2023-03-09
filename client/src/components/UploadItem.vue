@@ -7,11 +7,10 @@
     >
       <b-row class="align-items-center">
         <b-col cols="10">
-          <span class="ml-2">{{ fname }}</span>
+          <span class="ms-2">{{ fname }}</span>
           <span
             v-if="error"
-            v-b-tooltip.hover
-            class="text-danger"
+            class="ms-2 text-danger"
             :title="error.cause"
           > {{ error.message }}</span>
         </b-col>
@@ -35,13 +34,15 @@
 </template>
 
 <script>
-import { BCard } from 'bootstrap-vue'
+import { BCard, BCol, BRow } from 'bootstrap-vue-next'
 
 /* vue instance */
 export default {
   name: 'UploadItem',
   components: {
-    BCard
+    BCard,
+    BCol,
+    BRow
   },
   props: {
     fname: {

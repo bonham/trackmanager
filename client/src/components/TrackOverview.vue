@@ -20,16 +20,14 @@
 <script>
 import { TrackCollection } from '@/lib/Track.js'
 import { getAllTracks } from '@/lib/trackServices.js'
-import TrackSection from '@/components/TrackSection.vue'
-import { BSpinner } from 'bootstrap-vue'
-const _ = require('lodash')
+import { BSpinner } from 'bootstrap-vue-next'
+import _ from 'lodash'
 
 export default {
   name: 'TrackOverview',
   components: {
     BSpinner,
-    TrackSection
-    // TrackSection: () => import(/* webpackChunkName: "TrackSection" */ '@/components/TrackSection.vue')
+    TrackSection: () => import('@/components/TrackSection.vue')
   },
   props: {
     sid: {

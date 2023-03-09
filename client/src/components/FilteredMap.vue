@@ -12,12 +12,12 @@
   </div>
 </template>
 <script>
-import { BSpinner } from 'bootstrap-vue'
+import { BSpinner } from 'bootstrap-vue-next'
 import { ManagedMap } from '@/lib/mapServices.js'
 import { TrackVisibilityManager } from '@/lib/mapStateHelpers.js'
 import { getGeoJson } from '@/lib/trackServices.js'
 import { mapMutations, mapGetters } from 'vuex'
-const _ = require('lodash')
+import _ from 'lodash'
 
 export default {
   name: 'FilteredMap',
@@ -145,6 +145,7 @@ export default {
 </script>
 
 <style>
+@import '../../node_modules/ol/ol.css';
 #mapdiv {
   width: 100%;
   height: 100%;
@@ -156,7 +157,5 @@ export default {
 .mapspinner {
   position: absolute;
 }
-
-  @import '../../node_modules/ol/ol.css'
 
 </style>

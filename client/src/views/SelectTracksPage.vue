@@ -60,14 +60,14 @@
 </template>
 
 <script>
-import { BContainer, BButton, BSkeleton } from 'bootstrap-vue'
+import { BContainer, BButton, BSkeleton } from 'bootstrap-vue-next'
 import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'
 import FilteredTrackList from '@/components/FilteredTrackList.vue'
 import FilteredMap from '@/components/FilteredMap.vue'
 import { TrackCollection } from '@/lib/Track'
 import { getTracksByYear, getAllTracks } from '@/lib/trackServices.js'
 import { mapActions, mapState, mapMutations } from 'vuex'
-const _ = require('lodash')
+import _ from 'lodash'
 
 export default {
   name: 'SelectTracksPage',
@@ -107,7 +107,7 @@ export default {
       await this.loadTracksOfYear(this.years[0])
     }
   },
-  beforeDestroy () {
+  beforeUnmount () {
     this.resizeObserver.unobserve(this.$refs.outerSplitFrame)
   },
   mounted: function () {

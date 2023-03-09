@@ -1,3 +1,6 @@
+import { Request, Response } from 'cross-fetch'
+import { vi } from 'vitest'
+
 const mockTrack = {
   id: 404,
   name: 'Saupferchweg',
@@ -38,22 +41,24 @@ const mockGeoJson = {
   }
 }
 
-const responseMockFunction = (req) => {
-  const mockTrackListResponse = JSON.stringify([mockTrack])
-  const mockGeoJsonListResponse = JSON.stringify([mockGeoJson])
-  const mockSingleTrackResponse = JSON.stringify(mockTrack)
+const mockTrackListResponse = JSON.stringify([mockTrack])
+const mockGeoJsonListResponse = JSON.stringify([mockGeoJson])
+const mockSingleTrackResponse = JSON.stringify(mockTrack)
+
+const mockFetch = vi.fn((reqOrUrl) => {
+  const req = new Request(reqOrUrl)
 
   if (req.url.match('^/api/tracks/getall/sid/[A-Za-z0-9]+')) {
-    return new Promise(resolve => resolve(mockTrackListResponse))
+    return new Response(mockTrackListResponse)
   } else if (req.url.match('^/api/tracks/byyear/\\d+/sid/[A-Za-z0-9]+')) {
-    return new Promise(resolve => resolve(mockTrackListResponse))
+    return new Response(mockTrackListResponse)
   } else if (req.url.match('^/api/tracks/geojson/sid/[A-Za-z0-9]+')) {
-    return new Promise(resolve => resolve(mockGeoJsonListResponse))
+    return new Response(mockGeoJsonListResponse)
   } else if (req.url.match('^/api/tracks/byid/404/sid/[A-Za-z0-9]+')) {
-    return new Promise(resolve => resolve(mockSingleTrackResponse))
+    return new Response(mockSingleTrackResponse)
   } else {
     throw new Error(`Url ${req.url} is not mocked`)
   }
-}
+})
 
-export { responseMockFunction }
+export { mockFetch }

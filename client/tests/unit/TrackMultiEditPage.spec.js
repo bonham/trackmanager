@@ -1,40 +1,57 @@
-import fetchMock from 'jest-fetch-mock'
+import { mockFetch } from './mockResponse.js'
 import { render, fireEvent, waitForElementToBeRemoved } from '@testing-library/vue'
 import TrackMultiEditPage from '@/views/TrackMultiEditPage.vue'
-import ResizeObserver from './__mocks__/ResizeObserver'
-import { responseMockFunction } from './mockResponse'
-import { ModalPlugin, BModal } from 'bootstrap-vue'
+import ResizeObserverMock from './__mocks__/ResizeObserver'
+import { store } from '../../src/store.js'
+import { createStore } from 'vuex'
+import { Request, Response } from 'cross-fetch'
 
-fetchMock.enableMocks()
-
+// skipped tests do not work because of https://github.com/testing-library/vue-testing-library/issues/298
 describe('MultiEditPage', () => {
   beforeEach(() => {
-    fetchMock.resetMocks()
-    global.ResizeObserver = ResizeObserver
+    vi.stubGlobal('ResizeObserver', ResizeObserverMock) // eslint-disable-line no-undef
+    vi.stubGlobal('fetch', mockFetch) // eslint-disable-line no-undef
+    vi.stubGlobal('Request', Request) // eslint-disable-line no-undef
+    vi.stubGlobal('Response', Response) // eslint-disable-line no-undef
+
+    fetch.mockClear()
   })
+
   afterEach(() => {
   })
-  test('Clean Button', async () => {
-    fetch.mockResponse(responseMockFunction)
 
+  test('Simple', async () => {
+    const storeInstance = createStore(store)
     const rresult = render(
       TrackMultiEditPage,
       {
         props: { sid: 'abcd1234' },
-        components: {
-          BModal
+        global: {
+          plugins: [storeInstance]
         }
-      },
-      vue => vue.use(ModalPlugin)
-    )
-    await rresult.findByText('Saupferchweg')
+      })
+    expect(await rresult.findByText('Saupferchweg')).toBeInTheDocument()
+    rresult.getByText('Edit Tracks')
+    // rresult.debug()
+  })
+
+  test('Clean Button', async () => {
+    const storeInstance = createStore(store)
+    const rresult = render(
+      TrackMultiEditPage,
+      {
+        props: { sid: 'abcd1234' },
+        global: {
+          plugins: [storeInstance]
+        }
+      })
+    expect(await rresult.findByText('Saupferchweg')).toBeInTheDocument()
+
     const button1 = await rresult.findByText('Clean all')
     expect(fetch.mock.calls.length).toEqual(1)
     expect(fetch.mock.calls[0][0]).toEqual('/api/tracks/getall/sid/abcd1234')
     await fireEvent.click(button1)
-    const button2 = await rresult.findByText('Proceed')
-    await fireEvent.click(button2)
-    await rresult.findByText('Muellerweg')
+    expect(await rresult.findByText('Muellerweg')).toBeInTheDocument()
     expect(fetch.mock.calls.length).toEqual(2)
     const secondCallRequest = fetch.mock.calls[1][0]
     expect(secondCallRequest.method).toEqual('PUT')
@@ -43,21 +60,19 @@ describe('MultiEditPage', () => {
       expect(body).toHaveProperty('updateAttributes.0', 'name')
     })
   })
-  test('Clean Button', async () => {
-    fetch.mockResponse(responseMockFunction)
-
+  test('Clean Button 2', async () => {
+    const storeInstance = createStore(store)
     const rresult = render(
       TrackMultiEditPage,
       {
         props: { sid: 'abcd1234' },
-        components: {
-          BModal
+        global: {
+          plugins: [storeInstance]
         }
-      },
-      vue => vue.use(ModalPlugin)
-    )
-    await rresult.findByText('Saupferchweg')
-    const deleteButton = await rresult.findByLabelText('trash')
+      })
+
+    expect(await rresult.findByText('Saupferchweg')).toBeInTheDocument()
+    const deleteButton = await rresult.getByRole('button', { name: 'delete' })
     expect(fetch.mock.calls.length).toEqual(1)
     await fireEvent.click(deleteButton)
     await waitForElementToBeRemoved(

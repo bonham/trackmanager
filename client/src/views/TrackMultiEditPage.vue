@@ -14,22 +14,12 @@
     </div>
 
     <b-button
-      v-b-modal.my-modal
       class="mb-3"
+      @click="cleanAll"
     >
       Clean all
     </b-button>
-    <!-- The modal -->
-    <b-modal
-      id="my-modal"
-      ok-title="Proceed"
-      ok-variant="danger"
-      cancel-title="Abort"
-      @ok="cleanAll"
-    >
-      This can take very long and may have unpredicted results. Better try line by line first.
-    </b-modal>
-    <b-table-lite
+    <BTable
       id="tracktable"
       striped
       hover
@@ -58,27 +48,27 @@
         <b-button
           @click="cleanUpText(row.item)"
         >
-          <b-icon-arrow-left />
+          <i-bi-arrow-left />
         </b-button>
       </template>
       <template #cell(dbutton)="row">
         <b-button
+          aria-label="delete"
           @click="deleteTrackFromTable(row.item)"
         >
-          <b-icon-trash />
+          <i-bi-trash />
         </b-button>
       </template>
-    </b-table-lite>
+    </BTable>
   </b-container>
 </template>
 
 <script>
 import {
-  BTableLite, BButton,
-  BIconArrowLeft, BIconTrash,
-  BContainer, BSpinner,
-  BModal
-} from 'bootstrap-vue'
+  BTable, BButton,
+  BContainer, BSpinner
+
+} from 'bootstrap-vue-next'
 import { getAllTracks, updateTrack, updateTrackById, deleteTrack } from '@/lib/trackServices.js'
 import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'
 import EditableText from '@/components/EditableText.vue'
@@ -126,13 +116,10 @@ const trackTableFields = [
 export default {
   name: 'TrackMultiEdit',
   components: {
-    BTableLite,
+    BTable,
     BButton,
-    BIconArrowLeft,
-    BIconTrash,
     BContainer,
     BSpinner,
-    BModal,
     TrackManagerNavBar,
     EditableText
   },

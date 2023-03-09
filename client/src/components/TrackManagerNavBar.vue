@@ -36,7 +36,7 @@
 </template>
 
 <script>
-import { BNavbar, BNavbarNav, BNavItem } from 'bootstrap-vue'
+import { BNavbar, BNavbarNav, BNavItem } from 'bootstrap-vue-next'
 
 export default {
   name: 'TrackManagerNavBar',

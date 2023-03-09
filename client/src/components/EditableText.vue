@@ -6,7 +6,7 @@
       :class="{ 'editable-empty' : valueIsEmptyOrWhitespace }"
       @click="makeEditable"
     >
-      <b-icon-pencil-fill />
+      <i-bi-pencil-fill />
       {{ valueOrEmptyPlaceholder }}
     </div>
     <div v-show="editing">
@@ -36,13 +36,12 @@
 </template>
 <script>
 import {
-  BFormTextarea, BFormInput, BIconPencilFill
-} from 'bootstrap-vue'
+  BFormTextarea, BFormInput
+} from 'bootstrap-vue-next'
 export default {
   components: {
     BFormTextarea,
-    BFormInput,
-    BIconPencilFill
+    BFormInput
   },
   props:
     {
@@ -110,7 +109,6 @@ export default {
     },
     processBlur (event) {
       this.editing = false
-      this.$emit('blur')
     }
   }
 }

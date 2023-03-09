@@ -6,10 +6,10 @@
     <track-manager-nav-bar :sid="sid" />
     <div class="flex-grow-1 d-flex flex-column">
       <h1 class="mt-4 mb-4">
-        Track {{ $route.params.id }} Details
+        Track {{ id }} Details
       </h1>
       <MapComponent
-        :track-id="Number.parseInt($route.params.id)"
+        :track-id="Number.parseInt(id)"
         :sid="sid"
       />
     </div>
@@ -18,11 +18,11 @@
 
 <script>
 import MapComponent from '@/components/MapComponent.vue'
-import { BContainer } from 'bootstrap-vue'
+import { BContainer } from 'bootstrap-vue-next'
 import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'
 
 export default {
-  name: 'MapC',
+  name: 'TrackDetailPage',
   components: {
     MapComponent,
     BContainer,
@@ -32,6 +32,10 @@ export default {
     sid: {
       type: String,
       default: ''
+    },
+    id: {
+      type: String,
+      default: 'iddefault'
     }
   }
 

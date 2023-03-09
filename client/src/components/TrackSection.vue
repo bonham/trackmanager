@@ -16,9 +16,8 @@
               :aria-controls="collapseId"
               @click="toggleMemberVisibility"
             >
-              <b-icon
-                :icon="expandIcon"
-              />
+              <i-bi-arrow-down-circle-fill v-if="expanded" />
+              <i-bi-arrow-right-circle v-else />
             </b-button>
             <h4 class="mx-2 my-0">
               {{ label }}
@@ -54,21 +53,14 @@
 import TrackCard from '@/components/TrackCard.vue'
 import { TrackCollection } from '@/lib/Track.js'
 import {
-  BCard, BCardText, BIcon,
-  BIconArrowDownCircleFill, BIconArrowRightCircleFill,
+  BCard, BCardText,
   BRow, BCol, BButton, BCollapse
-} from 'bootstrap-vue'
+} from 'bootstrap-vue-next'
 
 export default {
   name: 'TrackSection',
   components: {
     TrackCard,
-    // TrackCard: () => import(/* webpackChunkName: "TrackCard" */ '@/components/TrackCard.vue'),
-    BIcon,
-    // eslint-disable-next-line vue/no-unused-components
-    BIconArrowDownCircleFill,
-    // eslint-disable-next-line vue/no-unused-components
-    BIconArrowRightCircleFill,
     BCard,
     BCardText,
     BRow,

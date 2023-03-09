@@ -8,8 +8,6 @@
 		}
 	],
 	"settings": {
-		"npm.packageManager": "yarn",
-		"eslint.packageManager": "yarn",
 		"eslint.alwaysShowStatus": true,
 		"eslint.format.enable": true,
 		"eslint.validate": [
@@ -28,5 +26,9 @@
 			"editor.defaultFormatter": "dbaeumer.vscode-eslint"
 		},
 		"task.allowAutomaticTasks": "on",
+		"jest.disabledWorkspaceFolders": [
+			"client"
+		],
+		"testing.automaticallyOpenPeekView": "never",
 	}
 }

@@ -4,6 +4,7 @@ module.exports = {
 
   env: {
     browser: true,
+    es2021: true,
     jest: true
   },
 
@@ -12,10 +13,6 @@ module.exports = {
     'plugin:vue/recommended',
     '@vue/standard'
   ],
-
-  parserOptions: {
-    parser: '@babel/eslint-parser'
-  },
 
   plugins: [
     'vue'

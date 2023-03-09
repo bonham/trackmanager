@@ -7,7 +7,7 @@
 </template>
 
 <script>
-import { BContainer } from 'bootstrap-vue'
+import { BContainer } from 'bootstrap-vue-next'
 
 export default {
   name: 'NoSidPage',
@@ -15,3 +15,4 @@ export default {
     BContainer
   }
 }
+</script>

@@ -8,101 +8,68 @@
       Upload new Tracks
     </h1>
 
-    <b-row class="mt-3">
-      <b-col>
-        <b-form-file
-          v-model="files"
-          multiple
-          :state="files.length > 0"
-          placeholder="Choose some files or drop them here..."
-          drop-placeholder="Drop files here..."
-          size="lg"
-          @input="onChange"
-        />
-      </b-col>
-    </b-row>
+    <BRow class="mt-3">
+      <BCol />
+    </BRow>
+    <BRow>
+      <BCol>
+        <DropField @files-dropped="processDragDrop">
+          <label
+            for="input"
+            class="border border-1 rounded p-2 d-flex flex-row"
+          >
+            <div class="flex-grow-1 border border-3 rounded-2 border-secondary-subtle dropzone d-flex align-items-center justify-content-center text-secondary">
+              Drop files or klick to upload
+            </div>
+          </label>
+          <input
+            id="input"
+            type="file"
+            multiple
+            class="hideinput"
+            @change="onChange"
+          >
+        </DropField>
+      </BCol>
+    </BRow>
     <transition-group
       name="list"
       tag="span"
     >
-      <b-row
+      <BRow
         v-for="item in visibleUploadItems"
         :key="item.key"
         class="list-item"
       >
-        <b-col>
+        <BCol>
           <UploadItem
             :fname="item.fname"
             :status="item.status"
             :error="item.error"
           />
-        </b-col>
-      </b-row>
+        </BCol>
+      </BRow>
     </transition-group>
   </b-container>
 </template>
 
 <script>
-import { BFormFile } from 'bootstrap-vue'
-import queue from 'async/queue'
+import { BContainer, BRow, BCol } from 'bootstrap-vue-next'
 import UploadItem from '@/components/UploadItem.vue'
 import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'
-
-const FORMPARAM = 'newtrack'
-const WORKERS = 4
-const UP_BASE_URL = '/api/tracks/addtrack'
-// const UP_BASE_URL = 'https://httpbin.org/status/500'
-// const UP_BASE_URL = 'https://httpbin.org/delay/3'
-
-async function uploadFile (fileIdObject, uploadUrl, formParameter) {
-  // construct body
-
-  const formData = new FormData()
-  formData.set(formParameter, fileIdObject.fileBlob)
-
-  const response = await fetch(uploadUrl, {
-    method: 'POST',
-    body: formData
-  })
-
-  if (!response.ok) {
-    const errDetail = await response.text()
-    throw new Error('HTTP error, status = ' + response.status, { cause: errDetail })
-  }
-
-  return response.json()
-}
-
-// queue from async package
-// eslint-disable-next-line no-unused-vars
-const workerQueue = queue(function (fileIdObject, callback) {
-  const thisKey = fileIdObject.key
-  console.log(`Queue function called for id ${thisKey}`)
-
-  fileIdObject.status = 'Processing'
-
-  // do the work in async way
-  const url = `${UP_BASE_URL}/sid/${fileIdObject.sid}`
-  uploadFile(fileIdObject, url, FORMPARAM)
-    .then(json => {
-      console.log(`Finished uploading key ${fileIdObject.key}, Message: ${json.message}`)
-      fileIdObject.status = 'Completed'
-      callback()
-    })
-    .catch(err => {
-      fileIdObject.error = err
-      fileIdObject.status = 'Failed'
-      callback(err)
-    })
-}, WORKERS)
+import DropField from '@/components/DropField.vue'
+import { FileUploadQueue } from '@/lib/FileUploadQueue'
 
 /* vue instance */
 export default {
   name: 'UploadPage',
   components: {
-    BFormFile,
     UploadItem,
-    TrackManagerNavBar
+    TrackManagerNavBar,
+    DropField,
+    BContainer,
+    BRow,
+    BCol
   },
 
   props: {
@@ -111,10 +78,8 @@ export default {
       default: ''
     }
   },
-
   data () {
     return {
-      files: [],
       uploadList: [],
       // uploadList: [{ key: -1, fname: 'One', status: 'Queued' }, { key: -2, fname: 'One', status: 'Queued' }, { key: -3, fname: 'One', status: 'Queued' }],
       maxKey: 0
@@ -122,33 +87,40 @@ export default {
   },
   computed: {
     visibleUploadItems: function () {
-      return this.uploadList.filter(item => item.visible)
+      const visibleList = this.uploadList.filter(item => item.visible)
+      return visibleList
     }
   },
-  // watch: {
-  //   files: function (newVal, oldVal) {
-  //     // avoid firing if files variable is reset to null
-  //     if (newVal && (newVal.length > 0)) {
-  //       this.processDragDrop()
-  //       // reset early to allow re-drop same file ( although rarely used )
-  //       this.files = []
-  //     }
-  //   }
-  // },
+
+  created () {
+    this.workerQueue = new FileUploadQueue()
+  },
 
   methods: {
-    onChange (event) {
-      this.processDragDrop()
+
+    getUploadItemByKey (key) {
+      const item = this.uploadList.find(element => element.key === key)
+      if (item === undefined) { throw new Error(`Could not find Upload item with id ${key}`) }
+      return item
     },
 
-    // Queue new files
-    processDragDrop () {
-      // take files from input
-      this.files.forEach(thisFile => {
-        const fileIdObject = this.makeFileIdObject(thisFile)
-        fileIdObject.sid = this.sid
-        this.addItemToQueue(fileIdObject)
-      })
+    setItemProcessingStatus (key, status) {
+      const item = this.getUploadItemByKey(key)
+      item.status = status
+    },
+
+    setItemVisibility (key, visibility) {
+      const item = this.getUploadItemByKey(key)
+      item.visible = visibility
+    },
+
+    onChange (event) {
+      const files = event.target.files
+      this.processDragDrop(files)
+    },
+
+    getNextKey () {
+      return (this.maxKey += 1)
     },
 
     makeFileIdObject (file) {
@@ -166,25 +138,43 @@ export default {
       }
     },
 
-    addItemToQueue (fileIdObject) {
-      this.uploadList.push(fileIdObject)
-
-      workerQueue.push(fileIdObject, function (err) {
-        // callback on completion
-        if (err) console.log(err)
-        console.log(`Finished processing ${fileIdObject.key}`)
-        setTimeout(() => {
-          fileIdObject.visible = false
-          console.log(`Removed ${fileIdObject}`)
-        },
-        1000)
-      })
+    // Queue new files
+    processDragDrop (files) {
+      // take files from input
+      for (const thisFile of files) {
+        const fileIdObject = this.makeFileIdObject(thisFile)
+        fileIdObject.sid = this.sid
+        this.addItemToQueue(fileIdObject)
+      }
     },
 
-    getNextKey () {
-      return (this.maxKey += 1)
-    }
+    addItemToQueue (fileIdObject) {
+      this.uploadList.push(fileIdObject)
+      this.workerQueue.push(
+        {
+          fileIdObject,
+          setItemProcessingStatus: this.setItemProcessingStatus // callback to set status while processed in queue
+        },
+        this.completedCallBack
+      )
+    },
 
+    completedCallBack (err, key) {
+      console.log(`Finished processing ${key}`)
+
+      if (err) {
+        console.log('Error occured during queue processing: ', err.message)
+        console.log('Error cause: ', err.cause)
+        this.setItemProcessingStatus(key, 'Failed')
+      } else {
+        this.setItemProcessingStatus(key, 'Completed')
+        setTimeout(() => {
+          this.setItemVisibility(key, false)
+          console.log(`Removed ${key}`)
+        },
+        1000)
+      }
+    }
   }
 }
 </script>
@@ -202,4 +192,21 @@ export default {
 /* .list-move {
   transition: transform 1s;
 } */
+.dropzone {
+  --bs-border-style: dashed;
+  height: 8em;
+  margin: 2em 8em 2em 8em;
+}
+
+.hideinput {
+  opacity: 0;
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;}
 </style>

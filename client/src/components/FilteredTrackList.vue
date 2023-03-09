@@ -103,14 +103,7 @@ export default {
           )
           if (selectionUpdateObj.selected.length > 0) {
             const scrollId = selectionUpdateObj.selected[0]
-            console.log('scrollid', scrollId)
-            console.log('xx', this.$refs)
             const itemRef = `track_${scrollId}`
-            const items = this.$refs[itemRef]
-            console.log('YYYY', items)
-            const item0 = items[0]
-            console.log('ZZZZ', item0)
-            console.log('ZZZZ', item0.data)
 
             this.$refs[itemRef][0].$el.scrollIntoView({
               behavior: 'smooth',

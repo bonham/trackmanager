@@ -15,7 +15,6 @@
       <b-card
         ref="testref"
         no-body
-        class="fs-2"
       >
         <b-list-group
           flush

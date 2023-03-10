@@ -10,7 +10,7 @@
   ],
   "compilerOptions": {
     "composite": true,
-    "baseUrl": "./src/",
+    "baseUrl": "./",
     "paths": {
       "@/*": [
         "./src/*"

@@ -9,6 +9,7 @@ export {}
 
 declare module '@vue/runtime-core' {
   export interface GlobalComponents {
+    DropField: typeof import('./src/components/DropField.vue')['default']
     EditableText: typeof import('./src/components/EditableText.vue')['default']
     FilteredMap: typeof import('./src/components/FilteredMap.vue')['default']
     FilteredTrackList: typeof import('./src/components/FilteredTrackList.vue')['default']

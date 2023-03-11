@@ -54,16 +54,14 @@
 </template>
 
 <script lang="ts">
-///<reference path="@/lib/upload.d.ts">
 
 import { BContainer, BRow, BCol } from 'bootstrap-vue-next'
 import UploadItem from '@/components/UploadItem.vue'
 import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'
 import DropField from '@/components/DropField.vue'
-import { FileUploadQueue } from '@/lib/FileUploadQueue'
 import { defineComponent } from 'vue'
-
-
+import { FileUploadQueue, makeFileIdObject } from '@/lib/FileUploadQueue'
+import type { QueueStatus, QueuedFile } from '@/lib/FileUploadQueue'
 
 /* vue instance */
 export default defineComponent({
@@ -127,26 +125,12 @@ export default defineComponent({
       return (this.maxKey += 1)
     },
 
-    makeFileIdObject (file: File, sid: string) : QueuedFile {
-      const thisKey = this.getNextKey()
-      const fName = file.name
-      return {
-        key: thisKey,
-        fname: fName,
-        fileBlob: file,
-        error: null,
-        details: null,
-        status: 'Queued',
-        sid: sid,
-        visible: true
-      }
-    },
-
-    // Queue new files
+     // Queue new files
     processDragDrop (files: FileList) {
       // take files from input
       for (const thisFile of files) {
-        const fileIdObject = this.makeFileIdObject(thisFile, this.sid)
+        const key = this.getNextKey()
+        const fileIdObject = makeFileIdObject(key, thisFile, this.sid)
         this.addItemToQueue(fileIdObject)
       }
     },
@@ -162,7 +146,7 @@ export default defineComponent({
       )
     },
 
-    completedCallBack (err: Error|null, key: number) {
+    completedCallBack (err: Error|null, key: number) :void {
       console.log(`Finished processing ${key}`)
 
       if (err) {

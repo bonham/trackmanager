@@ -1,4 +1,4 @@
-///<reference path="upload.d.ts">
+import type { QueuedFile } from "./FileUploadQueue"
 // Takes care to upload a file to backend
 class UploadError extends Error {
   cause: string

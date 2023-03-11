@@ -1,4 +1,9 @@
 {
   "vitest.enable": true,
-  "vitest.commandLine": "npx vitest"
+  "vitest.commandLine": "npx vitest",
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "vue"
+  ]
 }

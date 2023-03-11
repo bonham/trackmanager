@@ -8,16 +8,10 @@
 		}
 	],
 	"settings": {
-		"eslint.alwaysShowStatus": true,
 		"eslint.format.enable": true,
 		"eslint.validate": [
 			"javascript",
-			"javascriptreact",
-			"vue"
 		],
-		"vetur.format.defaultFormatter.js": "prettier-eslint",
-		"vetur.validation.template": false,
-		"vetur.format.enable": false,
 		"editor.formatOnSave": true,
 		"[vue]": {
 			"editor.defaultFormatter": "dbaeumer.vscode-eslint"

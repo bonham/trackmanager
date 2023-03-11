@@ -8,8 +8,28 @@ import { sprintf } from 'sprintf-js'
  *
  * It can calculate properties etc
  */
+
 class Track {
-  constructor (initData) { // id, name, length, src, time, timelength, ascent
+
+  id: number
+  name: string
+  length: number
+  src: string
+  timelength: number
+  ascent: number
+  geojson: any
+  time: null | DateTime
+
+  constructor (initData: {
+    id: number,
+    name: string,
+    length: number,
+    src: string,
+    timelength: number,
+    ascent: number,
+    geojson: any,
+    timeString: string
+  }) { // id, name, length, src, time, timelength, ascent
     this.id = initData.id
     this.name = initData.name
     this.length = initData.length
@@ -17,7 +37,7 @@ class Track {
     this.timelength = (initData.timelength === null ? 0 : initData.timelength)
     this.ascent = initData.ascent
     this.geojson = ('geojson' in initData ? initData.geojson : null)
-    this.time = (initData.time === null ? null : DateTime.fromISO(initData.time))
+    this.time = (initData.timeString === null ? null : DateTime.fromISO(initData.timeString))
   }
 
   distance () {
@@ -48,12 +68,12 @@ class Track {
     )
   }
 
-  secondsToHms (s) {
-    const hms = {}
-
-    hms.hours = Math.floor(s / 3600)
-    hms.minutes = (s / 60) % 60
-    hms.seconds = s % 60
+  secondsToHms (s: number) {
+    const hms = {
+      hours: Math.floor(s / 3600),
+      minutes: (s / 60) % 60,
+      seconds: s % 60
+    }
     return hms
   }
 
@@ -72,14 +92,15 @@ class Track {
 }
 
 class TrackCollection {
-  constructor (listOfTracks) {
+  tlist: Track[]
+  constructor (listOfTracks: Track[]) {
     this.tlist = []
     for (const track of listOfTracks) {
       this.add(track)
     }
   }
 
-  add (track) {
+  add (track: Track) {
     this.tlist.push(track)
   }
 

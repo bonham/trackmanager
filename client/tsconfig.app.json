@@ -6,7 +6,8 @@
     "src/**/*.vue"
   ],
   "exclude": [
-    "src/**/__tests__/*"
+    // exclude tests here if needed. ( don't know why )
+    "dist"
   ],
   "compilerOptions": {
     "composite": true,

@@ -53,15 +53,20 @@
   </b-container>
 </template>
 
-<script>
+<script lang="ts">
+///<reference path="@/lib/upload.d.ts">
+
 import { BContainer, BRow, BCol } from 'bootstrap-vue-next'
 import UploadItem from '@/components/UploadItem.vue'
 import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'
 import DropField from '@/components/DropField.vue'
 import { FileUploadQueue } from '@/lib/FileUploadQueue'
+import { defineComponent } from 'vue'
+
+
 
 /* vue instance */
-export default {
+export default defineComponent({
   name: 'UploadPage',
   components: {
     UploadItem,
@@ -78,11 +83,12 @@ export default {
       default: ''
     }
   },
-  data () {
+  data: function () {
     return {
-      uploadList: [],
+      uploadList: [] as Array<QueuedFile>,
       // uploadList: [{ key: -1, fname: 'One', status: 'Queued' }, { key: -2, fname: 'One', status: 'Queued' }, { key: -3, fname: 'One', status: 'Queued' }],
-      maxKey: 0
+      maxKey: 0,
+      workerQueue: new FileUploadQueue()
     }
   },
   computed: {
@@ -92,38 +98,36 @@ export default {
     }
   },
 
-  created () {
-    this.workerQueue = new FileUploadQueue()
-  },
-
   methods: {
 
-    getUploadItemByKey (key) {
+    getUploadItemByKey (key: number) {
       const item = this.uploadList.find(element => element.key === key)
       if (item === undefined) { throw new Error(`Could not find Upload item with id ${key}`) }
       return item
     },
 
-    setItemProcessingStatus (key, status) {
+    setItemProcessingStatus (key: number, status: QueueStatus) {
       const item = this.getUploadItemByKey(key)
       item.status = status
     },
 
-    setItemVisibility (key, visibility) {
+    setItemVisibility (key: number, visibility: boolean) {
       const item = this.getUploadItemByKey(key)
       item.visible = visibility
     },
 
-    onChange (event) {
-      const files = event.target.files
-      this.processDragDrop(files)
+    onChange (event: Event) {
+      if (event.target === null) { console.error("Event target is null"); return}
+      const target = (event.target as HTMLInputElement)
+      if (target.files === null ) { console.error("target.files is null"); return}
+      this.processDragDrop(target.files)
     },
 
-    getNextKey () {
+    getNextKey() :number {
       return (this.maxKey += 1)
     },
 
-    makeFileIdObject (file) {
+    makeFileIdObject (file: File, sid: string) : QueuedFile {
       const thisKey = this.getNextKey()
       const fName = file.name
       return {
@@ -133,22 +137,21 @@ export default {
         error: null,
         details: null,
         status: 'Queued',
-        sid: null,
+        sid: sid,
         visible: true
       }
     },
 
     // Queue new files
-    processDragDrop (files) {
+    processDragDrop (files: FileList) {
       // take files from input
       for (const thisFile of files) {
-        const fileIdObject = this.makeFileIdObject(thisFile)
-        fileIdObject.sid = this.sid
+        const fileIdObject = this.makeFileIdObject(thisFile, this.sid)
         this.addItemToQueue(fileIdObject)
       }
     },
 
-    addItemToQueue (fileIdObject) {
+    addItemToQueue (fileIdObject: QueuedFile) {
       this.uploadList.push(fileIdObject)
       this.workerQueue.push(
         {
@@ -159,15 +162,15 @@ export default {
       )
     },
 
-    completedCallBack (err, key) {
+    completedCallBack (err: Error|null, key: number) {
       console.log(`Finished processing ${key}`)
 
       if (err) {
         console.log('Error occured during queue processing: ', err.message)
-        console.log('Error cause: ', err.cause)
+        console.log('Error cause: ', err)
         this.setItemProcessingStatus(key, 'Failed')
       } else {
-        this.setItemProcessingStatus(key, 'Completed')
+        this.setItemProcessingStatus(key, 'Completed' as QueueStatus)
         setTimeout(() => {
           this.setItemVisibility(key, false)
           console.log(`Removed ${key}`)
@@ -176,7 +179,7 @@ export default {
       }
     }
   }
-}
+})
 </script>
 <style scoped>
 /* .list-item {

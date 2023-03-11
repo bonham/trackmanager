@@ -1,5 +1,15 @@
-// Takes care to upload a file to backen
-async function uploadFile (fileIdObject, uploadUrl, formParameter) {
+///<reference path="upload.d.ts">
+// Takes care to upload a file to backend
+class UploadError extends Error {
+  cause: string
+
+  constructor(message: string, cause: string) {
+    super(message)
+    this.cause = cause
+  }
+
+}
+async function uploadFile (fileIdObject: QueuedFile, uploadUrl: string, formParameter:string) {
   // construct body
   const formData = new FormData()
   formData.set(formParameter, fileIdObject.fileBlob)
@@ -18,7 +28,7 @@ async function uploadFile (fileIdObject, uploadUrl, formParameter) {
     } catch {
       errcause = errDetail
     }
-    throw new Error('HTTP error, status = ' + response.status, { cause: errcause })
+    throw new UploadError('HTTP error, status = ' + response.status, errcause)
   }
 
   return response.json()

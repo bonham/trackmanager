@@ -1,14 +1,13 @@
 import { Stroke, Style } from 'ol/style'
 
 class StyleFactory {
-  constructor () {
-    this.count = 0
-    this.rgbSetBrown = [
+
+  count: number = 0
+  rgbSetBrown = [
       '#621708',
       '#941b0c',
       '#bc3908'
     ]
-  }
 
   getNext () {
     const idx = this.count % this.rgbSetBrown.length

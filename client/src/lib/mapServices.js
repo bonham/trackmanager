@@ -7,7 +7,7 @@ import Collection from 'ol/Collection'
 import Select from 'ol/interaction/Select'
 import { getUid } from 'ol/util'
 import GeoJSON from 'ol/format/GeoJSON'
-import { StyleFactory } from './mapStyles.js'
+import { StyleFactory } from './mapStyles'
 import _ from 'lodash'
 
 /*

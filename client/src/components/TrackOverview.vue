@@ -17,9 +17,9 @@
   </div>
 </template>
 
-<script>
-import { TrackCollection } from '@/lib/Track.js'
-import { getAllTracks } from '@/lib/trackServices.js'
+<script lang="ts">
+import { Track, TrackCollection } from '@/lib/Track'
+import { getAllTracks } from '@/lib/trackServices'
 import { BSpinner } from 'bootstrap-vue-next'
 import _ from 'lodash'
 
@@ -45,7 +45,7 @@ export default {
     tracksByYear () {
       // object to array:
       const trackFlatList = _.values(this.loadedTracks)
-      return _.groupBy(trackFlatList, x => x.year())
+      return _.groupBy(trackFlatList, (x: Track) => x.year())
     },
     yearList () {
       const yearList = _.keys(this.tracksByYear)
@@ -53,7 +53,7 @@ export default {
       return yearList
     },
     trackCollections () {
-      const r = []
+      const r: { year: string, collection: TrackCollection }[] = []
       this.yearList.forEach(y => {
         const tc = new TrackCollection(this.tracksByYear[y])
         r.push({
@@ -70,7 +70,7 @@ export default {
     this.loading = false
   },
   methods: {
-    isYearCollapsed (thisYear) {
+    isYearCollapsed (thisYear: string) {
       const firstYearInCollection = this.trackCollections[0].year
       return thisYear !== firstYearInCollection
     }

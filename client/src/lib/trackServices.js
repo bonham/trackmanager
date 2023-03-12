@@ -1,4 +1,4 @@
-import { Track } from '@/lib/Track.js'
+import { Track } from '@/lib/Track'
 import _ from 'lodash'
 
 // /// Get all tracks

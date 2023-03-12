@@ -35,7 +35,7 @@
 
 <script>
 
-import { Track } from '@/lib/Track.js'
+import { Track } from '@/lib/Track'
 import {
   BCard, BCardText,
   BRow, BCol, BLink

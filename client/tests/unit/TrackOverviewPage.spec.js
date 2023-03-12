@@ -1,6 +1,6 @@
 import { render } from '@testing-library/vue'
 // import userEvent from '@testing-library/user-event'
-import { store } from '../../src/store.js'
+import { store } from '../../src/store'
 import { createStore } from 'vuex'
 import router from '../../src/router'
 import { vi, describe, test, beforeEach, expect } from 'vitest'

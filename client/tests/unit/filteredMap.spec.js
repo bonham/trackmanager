@@ -5,7 +5,7 @@ import FilteredMap from '@/components/FilteredMap.vue'
 import { ManagedMap } from '@/lib/mapServices.js'
 
 import { createStore } from 'vuex'
-import { store } from '../../src/store.js'
+import { store } from '../../src/store'
 import { describe, test, expect } from 'vitest'
 
 describe('Basic store test with FilteredMap', () => {

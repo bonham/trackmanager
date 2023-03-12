@@ -38,7 +38,7 @@ export default defineConfig({
     globals: true,
     coverage: {
       enabled: true,
-      include: ['src/**/'],
+      include: ['src/**/*'],
       reporter: 'html',
       all: true
     }

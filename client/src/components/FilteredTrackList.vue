@@ -35,10 +35,10 @@
     </div>
   </div>
 </template>
-<script>
+<script lang="ts">
 import { mapState, mapMutations } from 'vuex'
 import { BListGroup, BListGroupItem, BCard, BSpinner } from 'bootstrap-vue-next'
-import { TrackCollection } from '@/lib/Track.js'
+import { TrackCollection, Track } from '@/lib/Track'
 
 export default {
   name: 'FilteredTrackList',
@@ -53,8 +53,8 @@ export default {
   },
   data () {
     return {
-      selectedTrackMap: {},
-      selectedTrackList: []
+      selectedTrackMap: [] as { [index: number]: boolean},
+      selectedTrackList: [] as number[]
     }
   },
   computed: {
@@ -64,7 +64,7 @@ export default {
     ]),
     loadedTracksSorted () {
       const l = this.loadedTracks
-      l.sort((a, b) => (a.secondsSinceEpoch() - b.secondsSinceEpoch()))
+      l.sort((a: Track, b: Track) => (a.secondsSinceEpoch() - b.secondsSinceEpoch()))
       return l
     },
     sumDistance () {
@@ -79,19 +79,19 @@ export default {
   created () {
     // (Re- Initialize) map for selected tracks when loaded tracks are changing
     this.$watch(
-      function (state) {
+       () => {
         return this.loadedTracks
       },
       (tracks) => {
-        const allDeselected = {}
-        tracks.forEach((track) => {
+        const allDeselected = {} as any
+        tracks.forEach((track: Track) => {
           allDeselected[track.id] = false
         })
         this.selectedTrackMap = allDeselected
       }
     )
     this.$watch(
-      function (state) {
+      () => {  
         return this.$store.state.selectionForList
       },
       async (selectionUpdateObj) => {
@@ -102,23 +102,24 @@ export default {
           )
           if (selectionUpdateObj.selected.length > 0) {
             const scrollId = selectionUpdateObj.selected[0]
-            const itemRef = `track_${scrollId}`
 
-            this.$refs[itemRef][0].$el.scrollIntoView({
+            const itemRef = `track_${scrollId}`
+            const listgroupItem = this.$refs[itemRef] as InstanceType<typeof BListGroupItem>[]
+            const htmlElement = listgroupItem[0].$el as Element
+            htmlElement.scrollIntoView({
               behavior: 'smooth',
               block: 'center'
             })
           }
         }
-      },
-      this.clearSelectionForList()
+      }
     )
   },
   methods: {
-    itemActiveStatus (trackId) {
+    itemActiveStatus (trackId: number) {
       return this.selectedTrackMap[trackId]
     },
-    toggleActive (newTrackId) {
+    toggleActive (newTrackId: number) {
       // currently - shift select abd deselect is not implemented
       const deselected = this.selectedTrackList
       const selected = [newTrackId]
@@ -131,7 +132,7 @@ export default {
         }
       )
     },
-    updateSelectedTracksData (toSelectList, toDeselectList) {
+    updateSelectedTracksData (toSelectList: number[], toDeselectList: number[]) {
       toDeselectList.forEach(tid => {
         this.selectedTrackMap[tid] = false
       })

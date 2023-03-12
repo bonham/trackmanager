@@ -9,6 +9,39 @@ import { sprintf } from 'sprintf-js'
  * It can calculate properties etc
  */
 
+type TrackProperties =  {
+  id: number,
+  name: string,
+  length: number,
+  src: string,
+  timelength: number,
+  ascent: number,
+  geojson: any,
+  time: DateTime
+}
+
+type TrackInitData =  {
+  id: number,
+  name: string,
+  length: number,
+  src: string,
+  timelength: number,
+  ascent: number,
+  geojson: any,
+  timeString: string | null
+  time: string
+}
+type TrackPropertiesOptional =  {
+  id?: number,
+  name?: string,
+  length?: number,
+  src?: string,
+  timelength?: number,
+  ascent?: number,
+  geojson?: any,
+  time?: DateTime
+}
+
 class Track {
 
   id: number
@@ -20,16 +53,7 @@ class Track {
   geojson: any
   time: null | DateTime
 
-  constructor (initData: {
-    id: number,
-    name: string,
-    length: number,
-    src: string,
-    timelength: number,
-    ascent: number,
-    geojson: any,
-    timeString: string
-  }) { // id, name, length, src, time, timelength, ascent
+  constructor (initData: TrackInitData) { // id, name, length, src, time, timelength, ascent
     this.id = initData.id
     this.name = initData.name
     this.length = initData.length
@@ -37,7 +61,7 @@ class Track {
     this.timelength = (initData.timelength === null ? 0 : initData.timelength)
     this.ascent = initData.ascent
     this.geojson = ('geojson' in initData ? initData.geojson : null)
-    this.time = (initData.timeString === null ? null : DateTime.fromISO(initData.timeString))
+    this.time = (initData.timeString === null ? null : DateTime.fromISO(initData.time))
   }
 
   distance () {
@@ -120,3 +144,4 @@ class TrackCollection {
 }
 
 export { Track, TrackCollection }
+export type { TrackProperties, TrackPropertiesOptional }

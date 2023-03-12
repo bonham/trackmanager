@@ -51,7 +51,7 @@
 <script>
 // import TrackHeader from '@/components/TrackHeader.vue'
 import TrackCard from '@/components/TrackCard.vue'
-import { TrackCollection } from '@/lib/Track.js'
+import { TrackCollection } from '@/lib/Track'
 import {
   BCard, BCardText,
   BRow, BCol, BButton, BCollapse

@@ -3,13 +3,13 @@
   "include": [
     "env.d.ts",
     "src/**/*",
-    "src/**/*.vue"
   ],
   "exclude": [
     // exclude tests here if needed. ( don't know why )
     "dist"
   ],
   "compilerOptions": {
+    "outDir": "dist_random", // satisfy vs code syntax check
     "composite": true,
     "baseUrl": ".",
     "paths": {

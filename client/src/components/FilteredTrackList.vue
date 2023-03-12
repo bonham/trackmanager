@@ -104,8 +104,8 @@ export default {
             const scrollId = selectionUpdateObj.selected[0]
 
             const itemRef = `track_${scrollId}`
-            const listgroup = this.$refs[itemRef] as InstanceType<typeof BListGroupItem>
-            const htmlElement = listgroup.$el as Element
+            const listgroupItem = this.$refs[itemRef] as InstanceType<typeof BListGroupItem>[]
+            const htmlElement = listgroupItem[0].$el as Element
             htmlElement.scrollIntoView({
               behavior: 'smooth',
               block: 'center'

@@ -25,11 +25,10 @@ type TrackInitData =  {
   name: string,
   length: number,
   src: string,
-  timelength: number,
+  timelength: number | null,
   ascent: number,
   geojson: any,
-  timeString: string | null
-  time: string
+  time: string | null
 }
 type TrackPropertiesOptional =  {
   id?: number,
@@ -61,7 +60,17 @@ class Track {
     this.timelength = (initData.timelength === null ? 0 : initData.timelength)
     this.ascent = initData.ascent
     this.geojson = ('geojson' in initData ? initData.geojson : null)
-    this.time = (initData.timeString === null ? null : DateTime.fromISO(initData.time))
+
+    if ( initData.time === null ) {
+      this.time = null
+    } else {
+      const tmpTime = DateTime.fromISO(initData.time)
+      if (tmpTime.isValid) {
+        this.time = tmpTime
+      } else {
+        this.time = null
+      }
+    }
   }
 
   distance () {

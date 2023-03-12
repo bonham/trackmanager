@@ -69,7 +69,7 @@ import {
   BContainer, BSpinner
 
 } from 'bootstrap-vue-next'
-import { getAllTracks, updateTrack, updateTrackById, deleteTrack } from '@/lib/trackServices.js'
+import { getAllTracks, updateTrack, updateTrackById, deleteTrack } from '@/lib/trackServices'
 import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'
 import EditableText from '@/components/EditableText.vue'
 

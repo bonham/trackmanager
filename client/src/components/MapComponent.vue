@@ -6,7 +6,7 @@
 </template>
 
 <script>
-import { getGeoJson } from '@/lib/trackServices.js'
+import { getGeoJson } from '@/lib/trackServices'
 import { ManagedMap } from '@/lib/mapServices.js'
 
 export default {

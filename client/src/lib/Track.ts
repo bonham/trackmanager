@@ -38,7 +38,7 @@ type TrackPropertiesOptional =  {
   timelength?: number,
   ascent?: number,
   geojson?: any,
-  time?: DateTime
+  time?: DateTime | null | undefined
 }
 
 class Track {
@@ -50,7 +50,7 @@ class Track {
   timelength: number
   ascent: number
   geojson: any
-  time: null | DateTime
+  time: DateTime | null | undefined
 
   constructor (initData: TrackInitData) { // id, name, length, src, time, timelength, ascent
     this.id = initData.id
@@ -78,7 +78,7 @@ class Track {
   }
 
   year () {
-    if (this.time === null) {
+    if (!this.time) {
       return 0
     } else {
       return this.time.year
@@ -87,17 +87,17 @@ class Track {
 
   monthAndDay () {
     return (
-      this.time === null
-        ? 'Unknown Day'
-        : this.time.toLocaleString({ month: 'long', day: 'numeric' })
+      this.time
+        ? this.time.toLocaleString({ month: 'long', day: 'numeric' })
+        : 'Unknown Day'
     )
   }
 
   localeDateShort () {
     return (
-      this.time === null
-        ? ''
-        : this.time.toLocaleString(DateTime.DATE_SHORT)
+      this.time
+        ? this.time.toLocaleString(DateTime.DATE_SHORT)
+        : ''
     )
   }
 
@@ -153,4 +153,4 @@ class TrackCollection {
 }
 
 export { Track, TrackCollection }
-export type { TrackProperties, TrackPropertiesOptional }
+export type { TrackProperties, TrackPropertiesOptional, TrackInitData }

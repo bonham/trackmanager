@@ -65,7 +65,7 @@ import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'
 import FilteredTrackList from '@/components/FilteredTrackList.vue'
 import FilteredMap from '@/components/FilteredMap.vue'
 import { TrackCollection } from '@/lib/Track'
-import { getTracksByYear, getAllTracks } from '@/lib/trackServices.js'
+import { getTracksByYear, getAllTracks } from '@/lib/trackServices'
 import { mapActions, mapState, mapMutations } from 'vuex'
 import _ from 'lodash'
 

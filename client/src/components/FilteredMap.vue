@@ -11,7 +11,7 @@
     </div>
   </div>
 </template>
-<script>
+<script lang="ts">
 import { BSpinner } from 'bootstrap-vue-next'
 import { ManagedMap } from '@/lib/mapServices'
 import { TrackVisibilityManager } from '@/lib/mapStateHelpers'
@@ -32,8 +32,9 @@ export default {
   },
   data () {
     return {
-      loading: false
-    }
+      loading: false,
+      mmap: null
+    } as { loading: boolean;  mmap: ManagedMap | null }
   },
   computed: {
     ...mapGetters({
@@ -46,7 +47,7 @@ export default {
 
     // watch if the viewport is resized and resize the map
     this.$watch(
-      function (state) {
+       () => {
         return this.$store.state.resizeMap
       },
       (newValue, oldValue) => {
@@ -54,8 +55,12 @@ export default {
           if (oldValue === true) {
             console.log('Triggered watch of updateSize while update was running')
           }
-          this.mmap.map.updateSize()
-          this.resizeMapClear()
+          if (this.mmap) {
+            this.mmap.map.updateSize()
+            this.resizeMapClear()
+          } else {
+            console.error("mmap was not initialized")
+          }
         }
       }
     )
@@ -63,10 +68,10 @@ export default {
     const unboundRedrawTracks = this.redrawTracks
     const boundRedrawTracks = unboundRedrawTracks.bind(this)
     this.$watch(
-      function (state) {
+       () => {
         return this.$store.state.redrawTracksOnMap
       },
-      async function (newValue, oldValue) {
+      async  (newValue, oldValue) => {
         if (newValue === true) {
           if (oldValue === true) {
             console.log('Warn: Triggering redrawTracks watch while a redraw is running')
@@ -78,10 +83,14 @@ export default {
     )
     // watch for selected tracks
     this.$watch(
-      function (state) {
+       () => {
         return this.$store.state.selectionForMap
       },
-      async function (selectionUpdateObj) {
+      async (selectionUpdateObj) => {
+        if(this.mmap === null ) {
+          console.error("mmap not initalized")
+          return
+        }
         if (selectionUpdateObj !== null) {
           await this.mmap.setSelectedTracks(selectionUpdateObj)
           await this.clearSelectionForMap()
@@ -95,12 +104,20 @@ export default {
   },
   mounted () {
     this.$nextTick(() => {
+      if(this.mmap === null ) {
+          console.error("mmap not initalized")
+          return
+      }
       this.mmap.map.setTarget('mapdiv')
     })
   },
   methods: {
     redrawTracks: async function () {
       this.loading = true
+      if(this.mmap === null ) {
+          console.error("mmap not initalized")
+          return
+      }
       const mmap = this.mmap
       const tvm = new TrackVisibilityManager(
         mmap.getTrackIdsVisible(),
@@ -116,7 +133,8 @@ export default {
       // A2: load missing and add vector layer to map
       const toBeLoaded = tvm.toBeLoaded()
       console.log('To be loaded: ', toBeLoaded)
-      let resultSet
+      
+      let resultSet :any[] // TODO explicit type
       if (toBeLoaded.length > 0) {
         resultSet = await getGeoJson(toBeLoaded, this.sid)
       } else {

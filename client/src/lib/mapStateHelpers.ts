@@ -1,7 +1,13 @@
 import _ from 'lodash'
 
+type TrackIdList = number[]
+
 class TrackVisibilityManager {
-  constructor (currentlyVisible, toBeVisible, alreadyLoaded) {
+  currentlyVisible :TrackIdList
+  toBeVisible :TrackIdList
+  alreadyLoaded :TrackIdList
+  
+  constructor (currentlyVisible :TrackIdList, toBeVisible :TrackIdList, alreadyLoaded :TrackIdList) {
     this.currentlyVisible = _.uniq(currentlyVisible)
     this.toBeVisible = _.uniq(toBeVisible)
     this.alreadyLoaded = _.uniq(alreadyLoaded)

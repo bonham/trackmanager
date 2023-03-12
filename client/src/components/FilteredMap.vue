@@ -13,9 +13,9 @@
 </template>
 <script>
 import { BSpinner } from 'bootstrap-vue-next'
-import { ManagedMap } from '@/lib/mapServices.js'
-import { TrackVisibilityManager } from '@/lib/mapStateHelpers.js'
-import { getGeoJson } from '@/lib/trackServices.js'
+import { ManagedMap } from '@/lib/mapServices'
+import { TrackVisibilityManager } from '@/lib/mapStateHelpers'
+import { getGeoJson } from '@/lib/trackServices'
 import { mapMutations, mapGetters } from 'vuex'
 import _ from 'lodash'
 

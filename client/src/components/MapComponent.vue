@@ -7,7 +7,7 @@
 
 <script>
 import { getGeoJson } from '@/lib/trackServices'
-import { ManagedMap } from '@/lib/mapServices.js'
+import { ManagedMap } from '@/lib/mapServices'
 
 export default {
   name: 'MapComponent',

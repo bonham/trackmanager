@@ -1,6 +1,6 @@
 import { describe, test, beforeEach, expect } from 'vitest'
 import { ManagedMap, GeoJsonCollection, ExtentCollection } from '@/lib/mapServices'
-const _ = require('lodash')
+import _ from 'lodash'
 
 let mm
 let gList1
@@ -84,9 +84,8 @@ describe('geojson collection and bounding box', () => {
     const ec = new ExtentCollection([bbox1, bbox3])
     expect(ec.boundingBox()).toEqual(bboxexpectedg1g3)
   })
-  test('extent collection empty lilst', () => {
-    const ec = new ExtentCollection([])
-    expect(ec.boundingBox()).toBeNull()
+  test('extent collection empty list', () => {
+    expect(() => { new ExtentCollection([]) }).toThrow()
   })
   test('geojson collection 1 2', () => {
     const gjc = new GeoJsonCollection([gList1, gList2])

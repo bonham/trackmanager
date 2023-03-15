@@ -59,7 +59,7 @@
   </b-container>
 </template>
 
-<script>
+<script lang="ts">
 import { BContainer, BButton, BSkeleton } from 'bootstrap-vue-next'
 import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'
 import FilteredTrackList from '@/components/FilteredTrackList.vue'
@@ -87,10 +87,11 @@ export default {
   },
   data: function () {
     return {
-      resizeObserver: null,
-      years: [],
+      resizeObserver: null as (null | ResizeObserver),
+      years: [] as number[],
       buttonsLoading: false,
-      showAllButton: false
+      showAllButton: false,
+      currentOrientation: null as (null | "landscape" | "portrait ")
     }
   },
   computed: {
@@ -108,7 +109,7 @@ export default {
     }
   },
   beforeUnmount () {
-    this.resizeObserver.unobserve(this.$refs.outerSplitFrame)
+    this.resizeObserver!.unobserve(this.$refs.outerSplitFrame as Element)
   },
   mounted: function () {
     // split should definitely run before the map is attached to the div
@@ -120,7 +121,7 @@ export default {
       300
     )
     this.resizeObserver = new ResizeObserver(debouncedOnResize)
-    this.resizeObserver.observe(this.$refs.outerSplitFrame)
+    this.resizeObserver.observe(this.$refs.outerSplitFrame as Element)
   },
   methods: {
     ...mapActions([
@@ -138,7 +139,7 @@ export default {
       })
     },
 
-    loadTracksOfYear: function (year) {
+    loadTracksOfYear: function (year: number) {
     // call loadTracksAndRedraw action from store while injecting the load function
       const sid = this.sid
       const loadFunction = function () { return getTracksByYear(year, sid) }

@@ -12,7 +12,7 @@ async function getAllTracks (sid: string) {
 }
 
 // /// Get tracks by year
-async function getTracksByYear (year: string, sid: string) {
+async function getTracksByYear (year: number, sid: string) {
   if (!_.isInteger(year)) throw Error('Year is not integer: ' + year)
   const url = `/api/tracks/byyear/${year}/sid/${sid}`
   let response

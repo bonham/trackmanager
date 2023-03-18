@@ -1,8 +1,8 @@
 <template>
-  <div class="flex-grow-1 d-flex flex-column justify-content-center align-items-center min-vh-100">
+  <div class="flex-grow-1 d-flex flex-column justify-content-center align-items-center">
     <div
       id="mapdiv"
-      class="flex-grow-1 d-flex flex-column justify-content-center align-items-center min-vh-100"
+      class="flex-grow-1 d-flex flex-column justify-content-center align-items-center"
     />
     <div
       v-if="loading"
@@ -34,8 +34,8 @@ export default {
   data () {
     return {
       loading: false,
-      mmap: null
-    } as { loading: boolean;  mmap: ManagedMap | null }
+      mmap: null as (null | ManagedMap )
+    }
   },
   computed: {
     ...mapGetters({
@@ -168,7 +168,8 @@ export default {
 #mapdiv {
   width: 100%; /* needed - otherwise map does not show */
   flex-grow: 1; /* maybe not needed */
-  height: 1em; /* needed - otherwise map does not show */
+  height: 30em; /* needed - otherwise map does not show */
+  min-height: 100%; 
 }
 .map-control-expand {
   top: 4em;

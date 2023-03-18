@@ -45,7 +45,6 @@
       </b-button>
     </div>
     <div
-      ref="outerSplitFrame"
       class="flex-grow-1 flex-column d-flex"
     >
       <div
@@ -54,7 +53,6 @@
       >
         <filtered-map :sid="sid" />
       </div>
-      <filtered-track-list />
     </div>
   </b-container>
 </template>
@@ -62,18 +60,15 @@
 <script lang="ts">
 import { BContainer, BButton, BSkeleton } from 'bootstrap-vue-next'
 import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'
-import FilteredTrackList from '@/components/FilteredTrackList.vue'
 import FilteredMap from '@/components/FilteredMap.vue'
 import { TrackCollection } from '@/lib/Track'
 import { getTracksByYear, getAllTracks } from '@/lib/trackServices'
-import { mapActions, mapState, mapMutations } from 'vuex'
-import _ from 'lodash'
+import { mapActions, mapState } from 'vuex'
 
 export default {
   name: 'SelectTracksPage',
   components: {
     TrackManagerNavBar,
-    FilteredTrackList,
     FilteredMap,
     BContainer,
     BButton,
@@ -87,7 +82,6 @@ export default {
   },
   data: function () {
     return {
-      resizeObserver: null as (null | ResizeObserver),
       years: [] as number[],
       buttonsLoading: false,
       showAllButton: false,
@@ -108,28 +102,10 @@ export default {
       await this.loadTracksOfYear(this.years[0])
     }
   },
-  beforeUnmount () {
-    this.resizeObserver!.unobserve(this.$refs.outerSplitFrame as Element)
-  },
-  mounted: function () {
-    // split should definitely run before the map is attached to the div
-    // so when map is run through nextTick - then let's not run split in nexttick - otherwise
-    // it runs to early and map is not correctly rendered
-    // observe if window aspect is changing, then call setLayout
-    const debouncedOnResize = _.debounce(
-      this.onResize,
-      300
-    )
-    this.resizeObserver = new ResizeObserver(debouncedOnResize)
-    this.resizeObserver.observe(this.$refs.outerSplitFrame as Element)
-  },
+  
   methods: {
     ...mapActions([
       'loadTracksAndRedraw'
-    ]),
-    ...mapMutations([
-      // indicate the map that it needs a resize
-      'resizeMapFlag'
     ]),
 
     async getYears () {
@@ -150,10 +126,6 @@ export default {
       const loadFunc = () => getAllTracks(sid)
       this.loadTracksAndRedraw(loadFunc).catch(e => console.error('Error loading all tracks', e))
     },
-    onResize () {
-      console.log('resize1')
-      this.resizeMapFlag()
-    }
   }
 }
 </script>

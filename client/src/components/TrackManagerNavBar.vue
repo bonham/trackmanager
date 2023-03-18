@@ -10,7 +10,15 @@
           p-2
           text-dark"
         >
-          Select
+          Map
+        </b-nav-item>
+        <b-nav-item
+          :to="navPath('/tracklist')"
+          class="
+          p-2
+          text-dark"
+        >
+          Tracks
         </b-nav-item>
         <b-nav-item
           :to="navPath('/toverview')"

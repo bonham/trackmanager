@@ -16,6 +16,13 @@ const router = createRouter({
       props: true
     },
     {
+      path: '/tracklist/sid/:sid',
+      alias: '/:sid',
+      name: 'TracklistPage',
+      component: () => import('../views/TracklistPage.vue'),
+      props: true
+    },
+    {
       path: '/toverview/sid/:sid',
       name: 'TrackOverviewPage',
       component: () => import('../views/TrackOverviewPage.vue'),

@@ -1,7 +1,8 @@
 <template>
-  <div class="flex-grow-1 d-flex flex-column justify-content-center align-items-center">
+  <div class="flex-grow-1 d-flex flex-column justify-content-center align-items-center min-vh-100">
     <div
       id="mapdiv"
+      class="flex-grow-1 d-flex flex-column justify-content-center align-items-center min-vh-100"
     />
     <div
       v-if="loading"
@@ -165,8 +166,9 @@ export default {
 <style>
 @import '../../node_modules/ol/ol.css';
 #mapdiv {
-  width: 100%;
-  height: 100%;
+  width: 100%; /* needed - otherwise map does not show */
+  flex-grow: 1; /* maybe not needed */
+  height: 1em; /* needed - otherwise map does not show */
 }
 .map-control-expand {
   top: 4em;

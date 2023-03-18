@@ -1,7 +1,7 @@
 <template>
   <b-container
     id="root"
-    class="d-flex flex-column"
+    class="d-flex flex-column min-vh-100"
   >
     <track-manager-nav-bar :sid="sid" />
     <div
@@ -44,15 +44,8 @@
         All
       </b-button>
     </div>
-    <div
-      class="flex-grow-1 flex-column d-flex"
-    >
-      <div
-        class="d-flex p-2"
-        style="height: 40vh;"
-      >
-        <filtered-map :sid="sid" />
-      </div>
+    <div class="d-flex flex-column flex-grow-1">
+      <filtered-map :sid="sid" />
     </div>
   </b-container>
 </template>

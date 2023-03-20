@@ -1,39 +1,19 @@
 <template>
   <div>
-    <div
-      v-show="!editing"
-      :class="{ 'editable-empty' : valueIsEmptyOrWhitespace }"
-      @click="makeEditable"
-    >
+    <div v-show="!editing" :class="{ 'editable-empty': valueIsEmptyOrWhitespace }" @click="makeEditable">
       <i-bi-pencil-fill />
       {{ valueOrEmptyPlaceholder }}
     </div>
     <div v-show="editing">
-      <b-form-textarea
-        v-if="textarea"
-        ref="inputref"
-        v-model="value"
-        rows="2"
-        max-rows="20"
-        type="textarea"
-        class="form-control overflow-hidden"
-        @change="processValueChange"
-        @blur="processBlur"
-        @keydown.enter="processEnter"
-      />
-      <b-form-input
-        v-else
-        ref="inputref"
-        v-model="value"
-        type="text"
-        @blur="processBlur"
-        @change="processValueChange"
-        @keydown.enter="processEnter"
-      />
+      <b-form-textarea v-if="textarea" ref="inputref" v-model="value" rows="2" max-rows="20" type="textarea"
+        class="form-control overflow-hidden" @change="processValueChange" @blur="processBlur"
+        @keydown.enter="processEnter" />
+      <b-form-input v-else ref="inputref" v-model="value" type="text" @blur="processBlur" @change="processValueChange"
+        @keydown.enter="processEnter" />
     </div>
   </div>
 </template>
-<script>
+<script lang="ts">
 import {
   BFormTextarea, BFormInput
 } from 'bootstrap-vue-next'
@@ -43,70 +23,70 @@ export default {
     BFormInput
   },
   props:
-    {
-      initialtext: {
-        type: String,
-        default: '',
-        required: false
-      },
-      updateFunction: {
-        type: Function,
-        default: function () {},
-        required: false
-      },
-      textarea: {
-        type: Boolean,
-        default: false,
-        required: false
-      }
+  {
+    initialtext: {
+      type: String,
+      default: '',
+      required: false
     },
+    updateFunction: {
+      type: Function,
+      default: function () { },
+      required: false
+    },
+    textarea: {
+      type: Boolean,
+      default: false,
+      required: false
+    }
+  },
   emits: {
     blur
   },
-  data () {
+  data() {
     return {
       editing: false,
       value: ''
     }
   },
   computed: {
-    valueOrEmptyPlaceholder () {
+    valueOrEmptyPlaceholder() {
       if (this.valueIsEmptyOrWhitespace) {
         return 'No Name'
       } else {
         return this.value
       }
     },
-    valueIsEmptyOrWhitespace () {
+    valueIsEmptyOrWhitespace() {
       const isEmptyString = (this.value === '')
       const wsRegex = /^\s+$/
       const isWhitespace = wsRegex.test(this.value)
       return (isEmptyString || isWhitespace)
     }
   },
-  created () {
+  created() {
     this.value = this.initialtext
   },
   methods: {
-    makeEditable: () => {
+    makeEditable: function () {
       this.editing = true
       this.$nextTick(() => {
-        this.$refs.inputref.focus()
+        (this.$refs.inputref as any).focus()
       })
     },
 
-    processValueChange (value) {
+    processValueChange(value: string) {
       const inputValue = value
       console.log('change', inputValue)
       this.updateFunction(inputValue)
     },
-    processEnter (event) {
-      const value = event.target.value
+    processEnter(event: KeyboardEvent) {
+      const value = (event.target as HTMLInputElement).value
       const valueNoWhiteSpace = value.trim()
       this.processValueChange(valueNoWhiteSpace)
       this.editing = false
     },
-    processBlur () {
+    processBlur() {
       this.editing = false
     }
   }

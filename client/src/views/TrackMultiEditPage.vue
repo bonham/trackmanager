@@ -22,7 +22,7 @@
         <div v-else>
 
           <editable-text :textarea="false" :initialtext="data.value"
-            :update-function="(value) => processUpdate(data.item.id, value)" />
+            :update-function="(value: string) => processUpdate(data.item.id, value)" />
         </div>
       </template>
       <template #cell(cbutton)="row">
@@ -39,15 +39,25 @@
   </b-container>
 </template>
 
-<script>
+<script lang="ts">
 import {
   BTable, BButton,
   BContainer, BSpinner
 
 } from 'bootstrap-vue-next'
 import { getAllTracks, updateTrack, updateTrackById, deleteTrack } from '@/lib/trackServices'
+import type { Track } from '@/lib/Track'
 import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'
 import EditableText from '@/components/EditableText.vue'
+
+type TableItem = {
+  id: number
+  name: string
+  src: string
+  length: string
+  time: string
+  loading: boolean
+}
 
 const trackTableFields = [
   {
@@ -108,8 +118,8 @@ export default {
   data() {
     return {
       trackTableFields,
-      tableItems: [],
-      tracksByTrackId: {},
+      tableItems: [] as TableItem[],
+      tracksByTrackId: {} as { [index: number]: Track },
       transProps: {
         // Transition name
         name: 'flip-list'
@@ -123,15 +133,21 @@ export default {
   },
   methods: {
 
-    loadTracks: async () => {
+    loadTracks: async function () {
       this.loading = true
       const tracks = await getAllTracks(this.sid)
-      tracks.sort((a, b) => a.time < b.time)
+      tracks.sort(
+        (a, b) => {
+          if (!a.time) return -1
+          if (!b.time) return 1
+          return a.time < b.time ? -1 : 1
+        }
+      )
       tracks.forEach((t) => {
         // sort by track id
         this.tracksByTrackId[t.id] = t
 
-        const item = {}
+        const item = {} as TableItem
         item.id = t.id
         item.name = t.name
         item.src = t.src
@@ -143,7 +159,7 @@ export default {
       })
       this.loading = false
     },
-    cleanUpText: async function (item) {
+    cleanUpText: async function (item: TableItem) {
       const id = item.id
       item.loading = true
       let convertedName = item.src
@@ -173,7 +189,7 @@ export default {
         this.cleanUpText(item)
       })
     },
-    deleteTrackFromTable: async function (item) {
+    deleteTrackFromTable: async function (item: TableItem) {
       const success = await deleteTrack(item.id, this.sid)
       if (success) {
         delete this.tracksByTrackId[item.id]
@@ -182,7 +198,7 @@ export default {
         this.tableItems.splice(idx, 1)
       }
     },
-    processUpdate(trackId, value) {
+    processUpdate(trackId: number, value: string) {
       console.log('in upper component:', trackId, value)
       updateTrackById(trackId, { name: value }, this.sid)
     }

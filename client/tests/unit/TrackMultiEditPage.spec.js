@@ -5,6 +5,7 @@ import ResizeObserverMock from './__mocks__/ResizeObserver'
 import { store } from '../../src/store'
 import { createStore } from 'vuex'
 import { Request, Response } from 'cross-fetch'
+import { describe, beforeEach, test, expect } from 'vitest'
 
 // skipped tests do not work because of https://github.com/testing-library/vue-testing-library/issues/298
 describe('MultiEditPage', () => {
@@ -15,9 +16,6 @@ describe('MultiEditPage', () => {
     vi.stubGlobal('Response', Response) // eslint-disable-line no-undef
 
     fetch.mockClear()
-  })
-
-  afterEach(() => {
   })
 
   test('Simple', async () => {

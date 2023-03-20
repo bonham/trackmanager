@@ -8,12 +8,12 @@
 import { onMounted, onUnmounted } from 'vue'
 const emit = defineEmits(['files-dropped'])
 
-function onDrop (e: DragEvent) {
-  if(e.dataTransfer === null) { throw new Error("e.dataTransfer is null")}
+function onDrop(e: DragEvent) {
+  if (e.dataTransfer === null) { throw new Error("e.dataTransfer is null") }
   emit('files-dropped', [...e.dataTransfer.files])
 }
 
-function preventDefaults (e: Event) {
+function preventDefaults(e: Event) {
   e.preventDefault()
 }
 

@@ -4,12 +4,12 @@ class StyleFactory {
 
   count: number = 0
   rgbSetBrown = [
-      '#621708',
-      '#941b0c',
-      '#bc3908'
-    ]
+    '#621708',
+    '#941b0c',
+    '#bc3908'
+  ]
 
-  getNext () {
+  getNext() {
     const idx = this.count % this.rgbSetBrown.length
     const color = this.rgbSetBrown[idx]
     this.count++

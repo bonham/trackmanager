@@ -5,28 +5,14 @@
         <span v-if="trackLoadStatus === 0">Not loaded</span>
         <span v-else-if="trackLoadStatus === 1">
           Loading
-          <b-spinner
-            small
-            label="Spinning"
-          />
+          <b-spinner small label="Spinning" />
         </span>
         <span v-else>{{ headline }}</span>
       </div>
-      <b-card
-        ref="testref"
-        no-body
-      >
-        <b-list-group
-          flush
-        >
-          <b-list-group-item
-            v-for="track in loadedTracksSorted"
-            :key="track.id"
-            :ref="'track_'+track.id"
-            :label="'track_'+track.id"
-            :active="itemActiveStatus(track.id)"
-            @click="toggleActive(track.id)"
-          >
+      <b-card ref="testref" no-body>
+        <b-list-group flush>
+          <b-list-group-item v-for="track in loadedTracksSorted" :key="track.id" :ref="'track_' + track.id"
+            :label="'track_' + track.id" :active="itemActiveStatus(track.id)" @click="toggleActive(track.id)">
             <span>{{ track.name }}, </span>
             <span>{{ (track.distance() / 1000).toFixed(0) }} km, {{ track.localeDateShort() }}</span>
           </b-list-group-item>
@@ -51,9 +37,9 @@ export default {
     BCard,
     BSpinner
   },
-  data () {
+  data() {
     return {
-      selectedTrackMap: [] as { [index: number]: boolean},
+      selectedTrackMap: [] as { [index: number]: boolean },
       selectedTrackList: [] as number[]
     }
   },
@@ -62,24 +48,24 @@ export default {
       'loadedTracks',
       'trackLoadStatus'
     ]),
-    loadedTracksSorted () {
+    loadedTracksSorted() {
       const l = this.loadedTracks
       l.sort((a: Track, b: Track) => (a.secondsSinceEpoch() - b.secondsSinceEpoch()))
       return l
     },
-    sumDistance () {
+    sumDistance() {
       const tc = new TrackCollection(this.loadedTracks)
       return tc.distance()
     },
-    headline () {
+    headline() {
       const dist = Math.round(this.sumDistance / 1000)
       return `${this.loadedTracks.length} Tracks, ${dist} km`
     }
   },
-  created () {
+  created() {
     // (Re- Initialize) map for selected tracks when loaded tracks are changing
     this.$watch(
-       () => {
+      () => {
         return this.loadedTracks
       },
       (tracks) => {
@@ -91,7 +77,7 @@ export default {
       }
     )
     this.$watch(
-      () => {  
+      () => {
         return this.$store.state.selectionForList
       },
       async (selectionUpdateObj) => {
@@ -116,10 +102,10 @@ export default {
     )
   },
   methods: {
-    itemActiveStatus (trackId: number) {
+    itemActiveStatus(trackId: number) {
       return this.selectedTrackMap[trackId]
     },
-    toggleActive (newTrackId: number) {
+    toggleActive(newTrackId: number) {
       // currently - shift select abd deselect is not implemented
       const deselected = this.selectedTrackList
       const selected = [newTrackId]
@@ -132,7 +118,7 @@ export default {
         }
       )
     },
-    updateSelectedTracksData (toSelectList: number[], toDeselectList: number[]) {
+    updateSelectedTracksData(toSelectList: number[], toDeselectList: number[]) {
       toDeselectList.forEach(tid => {
         this.selectedTrackMap[tid] = false
       })

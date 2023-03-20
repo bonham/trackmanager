@@ -1,4 +1,3 @@
-/* eslint-disable vue/no-v-html */
 <template>
   <div>
     <div
@@ -89,7 +88,7 @@ export default {
     this.value = this.initialtext
   },
   methods: {
-    makeEditable: function () {
+    makeEditable: () => {
       this.editing = true
       this.$nextTick(() => {
         this.$refs.inputref.focus()
@@ -107,7 +106,7 @@ export default {
       this.processValueChange(valueNoWhiteSpace)
       this.editing = false
     },
-    processBlur (event) {
+    processBlur () {
       this.editing = false
     }
   }

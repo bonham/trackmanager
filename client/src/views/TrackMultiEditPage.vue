@@ -1,61 +1,37 @@
 <template>
-  <b-container
-    id="root"
-    class="d-flex flex-column vh-100"
-  >
+  <b-container id="root" class="d-flex flex-column vh-100">
     <track-manager-nav-bar :sid="sid" />
     <div class="mt-4 mb-4">
       <h1 style="display: inline-block;">
         Edit Tracks
       </h1>
-      <b-spinner
-        v-if="loading"
-      />
+      <b-spinner v-if="loading" />
     </div>
 
-    <b-button
-      class="mb-3"
-      @click="cleanAll"
-    >
+    <b-button class="mb-3" @click="cleanAll">
       Clean all
     </b-button>
-    <BTable
-      id="tracktable"
-      striped
-      hover
-      :items="tableItems"
-      :fields="trackTableFields"
-      primary-key="id"
-    >
+    <BTable id="tracktable" striped hover :items="tableItems" :fields="trackTableFields" primary-key="id">
       <!-- put following line into table lite tag for transitions in table -->
       <!-- :tbody-transition-props="transProps" -->
 
       <template #cell(name)="data">
-        <div
-          v-if="data.item.loading"
-        >
+        <div v-if="data.item.loading">
           <span class="cell-updating">Updating ..</span>
         </div>
         <div v-else>
-          <editable-text
-            :initialtext="data.value"
-            :update-function="(value) => processUpdate(data.item.id, value)"
-            :textarea="false"
-          />
+
+          <editable-text :textarea="false" :initialtext="data.value"
+            :update-function="(value) => processUpdate(data.item.id, value)" />
         </div>
       </template>
       <template #cell(cbutton)="row">
-        <b-button
-          @click="cleanUpText(row.item)"
-        >
+        <b-button @click="cleanUpText(row.item)">
           <i-bi-arrow-left />
         </b-button>
       </template>
       <template #cell(dbutton)="row">
-        <b-button
-          aria-label="delete"
-          @click="deleteTrackFromTable(row.item)"
-        >
+        <b-button aria-label="delete" @click="deleteTrackFromTable(row.item)">
           <i-bi-trash />
         </b-button>
       </template>
@@ -129,7 +105,7 @@ export default {
       default: ''
     }
   },
-  data () {
+  data() {
     return {
       trackTableFields,
       tableItems: [],
@@ -146,7 +122,8 @@ export default {
     await this.loadTracks()
   },
   methods: {
-    loadTracks: async function () {
+
+    loadTracks: async () => {
       this.loading = true
       const tracks = await getAllTracks(this.sid)
       tracks.sort((a, b) => a.time < b.time)
@@ -205,7 +182,7 @@ export default {
         this.tableItems.splice(idx, 1)
       }
     },
-    processUpdate (trackId, value) {
+    processUpdate(trackId, value) {
       console.log('in upper component:', trackId, value)
       updateTrackById(trackId, { name: value }, this.sid)
     }
@@ -217,15 +194,17 @@ export default {
 .flip-list-move {
   transition: all 1s;
 }
+
 .flip-list-leave-active {
   display: none;
 }
+
 .flip-list-leave-to {
   opacity: 0;
 }
+
 .cell-updating {
   opacity: 0.5;
   font-style: italic;
 }
-
 </style>

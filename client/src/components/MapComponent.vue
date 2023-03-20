@@ -1,8 +1,5 @@
 <template>
-  <div
-    id="mapdiv"
-    label="Map"
-  />
+  <div id="mapdiv" label="Map" />
 </template>
 
 <script>
@@ -21,7 +18,7 @@ export default {
       default: ''
     }
   },
-  data () {
+  data() {
     return {
     }
   },
@@ -29,7 +26,7 @@ export default {
     this.mmap = new ManagedMap()
     await this.drawTrack()
   },
-  mounted () {
+  mounted() {
     this.$nextTick(() => {
       this.mmap.map.setTarget('mapdiv')
     })
@@ -49,13 +46,14 @@ export default {
 
 <style>
 @import '../../node_modules/ol/ol.css';
+
 #mapdiv {
   width: 100%;
   height: 100%;
 }
+
 .map-control-expand {
   top: 4em;
   left: .5em;
 }
-
 </style>

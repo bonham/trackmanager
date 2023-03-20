@@ -9,7 +9,7 @@ import { sprintf } from 'sprintf-js'
  * It can calculate properties etc
  */
 
-type TrackProperties =  {
+type TrackProperties = {
   id: number,
   name: string,
   length: number,
@@ -20,7 +20,7 @@ type TrackProperties =  {
   time: DateTime
 }
 
-type TrackInitData =  {
+type TrackInitData = {
   id: number,
   name: string,
   length: number,
@@ -30,7 +30,7 @@ type TrackInitData =  {
   geojson: any,
   time: string | null
 }
-type TrackPropertiesOptional =  {
+type TrackPropertiesOptional = {
   id?: number,
   name?: string,
   length?: number,
@@ -52,7 +52,7 @@ class Track {
   geojson: any
   time: DateTime | null | undefined
 
-  constructor (initData: TrackInitData) { // id, name, length, src, time, timelength, ascent
+  constructor(initData: TrackInitData) { // id, name, length, src, time, timelength, ascent
     this.id = initData.id
     this.name = initData.name
     this.length = initData.length
@@ -61,7 +61,7 @@ class Track {
     this.ascent = initData.ascent
     this.geojson = ('geojson' in initData ? initData.geojson : null)
 
-    if ( initData.time === null ) {
+    if (initData.time === null) {
       this.time = null
     } else {
       const tmpTime = DateTime.fromISO(initData.time)
@@ -73,11 +73,11 @@ class Track {
     }
   }
 
-  distance () {
+  distance() {
     return (this.length ? this.length : 0)
   }
 
-  year () {
+  year() {
     if (!this.time) {
       return 0
     } else {
@@ -85,7 +85,7 @@ class Track {
     }
   }
 
-  monthAndDay () {
+  monthAndDay() {
     return (
       this.time
         ? this.time.toLocaleString({ month: 'long', day: 'numeric' })
@@ -93,7 +93,7 @@ class Track {
     )
   }
 
-  localeDateShort () {
+  localeDateShort() {
     return (
       this.time
         ? this.time.toLocaleString(DateTime.DATE_SHORT)
@@ -101,7 +101,7 @@ class Track {
     )
   }
 
-  secondsToHms (s: number) {
+  secondsToHms(s: number) {
     const hms = {
       hours: Math.floor(s / 3600),
       minutes: (s / 60) % 60,
@@ -110,43 +110,43 @@ class Track {
     return hms
   }
 
-  timeLengthHms () {
+  timeLengthHms() {
     return this.secondsToHms(this.timelength)
   }
 
-  timeLengthFormatted () {
+  timeLengthFormatted() {
     const thms = this.timeLengthHms()
     return sprintf('%d:%02d', thms.hours, thms.minutes)
   }
 
-  secondsSinceEpoch () {
+  secondsSinceEpoch() {
     return (this.time ? this.time.toSeconds() : 0)
   }
 }
 
 class TrackCollection {
   tlist: Track[]
-  constructor (listOfTracks: Track[]) {
+  constructor(listOfTracks: Track[]) {
     this.tlist = []
     for (const track of listOfTracks) {
       this.add(track)
     }
   }
 
-  add (track: Track) {
+  add(track: Track) {
     this.tlist.push(track)
   }
 
-  members () {
+  members() {
     return this.tlist
   }
 
-  distance () {
+  distance() {
     const sum = this.members().reduce((s, tr) => s + tr.distance(), 0)
     return sum
   }
 
-  yearList () {
+  yearList() {
     const yList = this.members().map(x => x.year())
     return _.uniq(yList)
   }

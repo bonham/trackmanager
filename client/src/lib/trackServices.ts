@@ -3,16 +3,16 @@ import type { TrackInitData, TrackPropertiesOptional } from '@/lib/Track'
 import _ from 'lodash'
 
 // /// Get all tracks
-async function getAllTracks (sid: string) {
+async function getAllTracks(sid: string) {
   const response = await fetch(`/api/tracks/getall/sid/${sid}`)
-  const responseJson : TrackInitData[] = await response.json()
+  const responseJson: TrackInitData[] = await response.json()
 
   const trackArray = responseJson.map(t => new Track(t))
   return trackArray
 }
 
 // /// Get tracks by year
-async function getTracksByYear (year: number, sid: string) {
+async function getTracksByYear(year: number, sid: string) {
   if (!_.isInteger(year)) throw Error('Year is not integer: ' + year)
   const url = `/api/tracks/byyear/${year}/sid/${sid}`
   let response
@@ -28,7 +28,7 @@ async function getTracksByYear (year: number, sid: string) {
   }
 
   try {
-    const responseJson :TrackInitData[] = await response.json()
+    const responseJson: TrackInitData[] = await response.json()
     const trackArray = responseJson.map(t => new Track(t))
     return trackArray
   } catch (error) {
@@ -37,7 +37,7 @@ async function getTracksByYear (year: number, sid: string) {
   }
 }
 
-async function getTrackById (id: number, sid: string) {
+async function getTrackById(id: number, sid: string) {
   const url = `/api/tracks/byid/${id}/sid/${sid}`
   let response
   try {
@@ -63,7 +63,7 @@ async function getTrackById (id: number, sid: string) {
 }
 
 // /// Get geojson by id
-async function getGeoJson (idList: number[], sid: string) {
+async function getGeoJson(idList: number[], sid: string) {
   const payload = { ids: idList }
 
   const url = `/api/tracks/geojson/sid/${sid}`
@@ -97,13 +97,13 @@ async function getGeoJson (idList: number[], sid: string) {
   }
 }
 
-async function updateTrack (track: Track, attributes: string[], sid: string) {
+async function updateTrack(track: Track, attributes: string[], sid: string) {
   const id = track.id
   const keyValuePairs = _.pick(track, attributes)
   await updateTrackById(id, keyValuePairs, sid)
 }
 
-async function updateTrackById (trackId: number, keyValuePairs: TrackPropertiesOptional, sid: string) {
+async function updateTrackById(trackId: number, keyValuePairs: TrackPropertiesOptional, sid: string) {
   const id = trackId
   const attributes = _.keys(keyValuePairs) // hopefully we can deprecate this from the api soon
   const mybody = {
@@ -139,7 +139,7 @@ async function updateTrackById (trackId: number, keyValuePairs: TrackPropertiesO
   }
 }
 
-async function deleteTrack (id: number, sid: string) {
+async function deleteTrack(id: number, sid: string) {
   const req = new Request(
     `/api/tracks/byid/${id}/sid/${sid}`,
     {

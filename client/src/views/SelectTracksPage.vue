@@ -1,46 +1,22 @@
 <template>
-  <b-container
-    id="root"
-    class="d-flex flex-column min-vh-100"
-  >
+  <b-container id="root" class="d-flex flex-column min-vh-100">
     <track-manager-nav-bar :sid="sid" />
-    <div
-      v-if="buttonsLoading"
-      class="year-navbar"
-    >
-      <b-button
-        class="m-2"
-      >
+    <div v-if="buttonsLoading" class="year-navbar">
+      <b-button class="m-2">
         <b-skeleton width="3rem" />
       </b-button>
-      <b-button
-        class="m-2"
-      >
+      <b-button class="m-2">
         <b-skeleton width="3rem" />
       </b-button>
-      <b-button
-        class="m-2"
-      >
+      <b-button class="m-2">
         <b-skeleton width="3rem" />
       </b-button>
     </div>
-    <div
-      v-else
-      class="year-navbar"
-    >
-      <b-button
-        v-for="year in years"
-        :key="year"
-        class="m-2 button-year-navbar"
-        @click="loadTracksOfYear(year)"
-      >
+    <div v-else class="year-navbar">
+      <b-button v-for="year in years" :key="year" class="m-2 button-year-navbar" @click="loadTracksOfYear(year)">
         {{ year === 0 ? "No date" : year }}
       </b-button>
-      <b-button
-        v-if="showAllButton"
-        class="m-2 button-year-navbar"
-        @click="loadAllTracks()"
-      >
+      <b-button v-if="showAllButton" class="m-2 button-year-navbar" @click="loadAllTracks()">
         All
       </b-button>
     </div>
@@ -86,7 +62,7 @@ export default {
       'loadedTracks'
     ])
   },
-  async created () {
+  async created() {
     this.currentOrientation = 'landscape'
     this.buttonsLoading = true
     await this.getYears()
@@ -95,13 +71,13 @@ export default {
       await this.loadTracksOfYear(this.years[0])
     }
   },
-  
+
   methods: {
     ...mapActions([
       'loadTracksAndRedraw'
     ]),
 
-    async getYears () {
+    async getYears() {
       await getAllTracks(this.sid).then((trackList) => {
         const tColl = new TrackCollection(trackList)
         this.years = tColl.yearList().sort((a, b) => b - a)
@@ -109,7 +85,7 @@ export default {
     },
 
     loadTracksOfYear: function (year: number) {
-    // call loadTracksAndRedraw action from store while injecting the load function
+      // call loadTracksAndRedraw action from store while injecting the load function
       const sid = this.sid
       const loadFunction = function () { return getTracksByYear(year, sid) }
       this.loadTracksAndRedraw(loadFunction).catch(e => console.error('Error loading tracks by year', e))
@@ -123,7 +99,6 @@ export default {
 }
 </script>
 <style>
-
 .button-year-navbar {
   height: max-content;
   white-space: nowrap;
@@ -136,5 +111,4 @@ export default {
   flex: 0 0 auto;
   align-content: center;
 }
-
 </style>

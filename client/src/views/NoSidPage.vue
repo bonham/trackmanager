@@ -1,7 +1,5 @@
 <template>
-  <b-container
-    class="d-flex flex-column vh-100"
-  >
+  <b-container class="d-flex flex-column vh-100">
     Trackmanager wants a secret id ;-(
   </b-container>
 </template>

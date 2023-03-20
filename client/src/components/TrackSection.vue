@@ -1,21 +1,11 @@
 <template>
   <div>
-    <b-card
-      bg-variant="light"
-      class="my-2"
-    >
+    <b-card bg-variant="light" class="my-2">
       <b-card-text>
         <b-row class="align-items-center">
-          <b-col
-            cols="9"
-            class="d-flex flex-row align-items-center"
-          >
-            <b-button
-              :class="expanded ? null : 'collapsed'"
-              :aria-expanded="expanded ? 'true' : 'false'"
-              :aria-controls="collapseId"
-              @click="toggleMemberVisibility"
-            >
+          <b-col cols="9" class="d-flex flex-row align-items-center">
+            <b-button :class="expanded ? null : 'collapsed'" :aria-expanded="expanded ? 'true' : 'false'"
+              :aria-controls="collapseId" @click="toggleMemberVisibility">
               <i-bi-arrow-down-circle-fill v-if="expanded" />
               <i-bi-arrow-right-circle v-else />
             </b-button>
@@ -26,23 +16,13 @@
               {{ Math.round(coll.distance() / 1000) }} km total
             </div>
           </b-col>
-          <b-col
-            cols="3"
-          />
+          <b-col cols="3" />
         </b-row>
       </b-card-text>
     </b-card>
-    <b-collapse
-      :id="collapseId"
-      :visible="expanded"
-    >
+    <b-collapse :id="collapseId" :visible="expanded">
       <div v-if="everVisible">
-        <TrackCard
-          v-for="item in myDataList"
-          :key="item.id"
-          :track="item"
-          :sid="sid"
-        />
+        <TrackCard v-for="item in myDataList" :key="item.id" :track="item" :sid="sid" />
       </div>
     </b-collapse>
   </div>
@@ -86,7 +66,7 @@ export default {
       default: ''
     }
   },
-  data () {
+  data() {
     return {
       myDataList: this.coll.members(),
       expanded: !this.collapsed,

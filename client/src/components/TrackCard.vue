@@ -1,12 +1,8 @@
 <template>
-  <b-card
-    class="my-2"
-  >
+  <b-card class="my-2">
     <b-card-text>
       <b-row class="align-items-center">
-        <b-col
-          cols="9"
-        >
+        <b-col cols="9">
           <h4>
             {{ track.name || track.src }}
           </h4>
@@ -17,14 +13,8 @@
             / {{ track.timeLengthFormatted() }} h
           </div>
         </b-col>
-        <b-col
-          cols="3"
-          class="d-flex align-items-center justify-content-end"
-        >
-          <b-link
-            :to="'/track/'+track.id+'/sid/'+sid"
-            :aria-label="ariaLinkLabel"
-          >
+        <b-col cols="3" class="d-flex align-items-center justify-content-end">
+          <b-link :to="'/track/' + track.id + '/sid/' + sid" :aria-label="ariaLinkLabel">
             <i-bi-chevron-right />
           </b-link>
         </b-col>
@@ -62,7 +52,7 @@ export default {
 
   },
   computed: {
-    ariaLinkLabel () {
+    ariaLinkLabel() {
       return `link-to-track-${this.track.id}`
     }
   }
@@ -72,5 +62,4 @@ export default {
 .card-icon {
   font-size: 4rem;
 }
-
 </style>

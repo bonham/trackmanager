@@ -1,13 +1,7 @@
 <template>
   <div class="flex-grow-1 d-flex flex-column justify-content-center align-items-center">
-    <div
-      id="mapdiv"
-      class="flex-grow-1 d-flex flex-column justify-content-center align-items-center"
-    />
-    <div
-      v-if="loading"
-      class="mapspinner"
-    >
+    <div id="mapdiv" class="flex-grow-1 d-flex flex-column justify-content-center align-items-center" />
+    <div v-if="loading" class="mapspinner">
       <b-spinner />
     </div>
   </div>
@@ -31,10 +25,10 @@ export default {
       default: ''
     }
   },
-  data () {
+  data() {
     return {
       loading: false,
-      mmap: null as (null | ManagedMap )
+      mmap: null as (null | ManagedMap)
     }
   },
   computed: {
@@ -42,13 +36,13 @@ export default {
       shouldBeVisibleIds: 'getLoadedTrackIds'
     })
   },
-  created () {
+  created() {
     // create map object
     this.mmap = new ManagedMap({ selectCallBackFn: (this.updateSelectionForList).bind(this) })
 
     // watch if the viewport is resized and resize the map
     this.$watch(
-       () => {
+      () => {
         return this.$store.state.resizeMap
       },
       (newValue, oldValue) => {
@@ -69,10 +63,10 @@ export default {
     const unboundRedrawTracks = this.redrawTracks
     const boundRedrawTracks = unboundRedrawTracks.bind(this)
     this.$watch(
-       () => {
+      () => {
         return this.$store.state.redrawTracksOnMap
       },
-      async  (newValue, oldValue) => {
+      async (newValue, oldValue) => {
         if (newValue === true) {
           if (oldValue === true) {
             console.log('Warn: Triggering redrawTracks watch while a redraw is running')
@@ -84,11 +78,11 @@ export default {
     )
     // watch for selected tracks
     this.$watch(
-       () => {
+      () => {
         return this.$store.state.selectionForMap
       },
       async (selectionUpdateObj) => {
-        if(this.mmap === null ) {
+        if (this.mmap === null) {
           console.error("mmap not initalized")
           return
         }
@@ -103,11 +97,11 @@ export default {
       }
     )
   },
-  mounted () {
+  mounted() {
     this.$nextTick(() => {
-      if(this.mmap === null ) {
-          console.error("mmap not initalized")
-          return
+      if (this.mmap === null) {
+        console.error("mmap not initalized")
+        return
       }
       this.mmap.map.setTarget('mapdiv')
     })
@@ -115,9 +109,9 @@ export default {
   methods: {
     redrawTracks: async function () {
       this.loading = true
-      if(this.mmap === null ) {
-          console.error("mmap not initalized")
-          return
+      if (this.mmap === null) {
+        console.error("mmap not initalized")
+        return
       }
       const mmap = this.mmap
       const tvm = new TrackVisibilityManager(
@@ -134,8 +128,8 @@ export default {
       // A2: load missing and add vector layer to map
       const toBeLoaded = tvm.toBeLoaded()
       console.log('To be loaded: ', toBeLoaded)
-      
-      let resultSet :any[] // TODO explicit type
+
+      let resultSet: any[] // TODO explicit type
       if (toBeLoaded.length > 0) {
         resultSet = await getGeoJson(toBeLoaded, this.sid)
       } else {
@@ -165,18 +159,23 @@ export default {
 
 <style>
 @import '../../node_modules/ol/ol.css';
+
 #mapdiv {
-  width: 100%; /* needed - otherwise map does not show */
-  flex-grow: 1; /* maybe not needed */
-  height: 30em; /* needed - otherwise map does not show */
-  min-height: 100%; 
+  width: 100%;
+  /* needed - otherwise map does not show */
+  flex-grow: 1;
+  /* maybe not needed */
+  height: 30em;
+  /* needed - otherwise map does not show */
+  min-height: 100%;
 }
+
 .map-control-expand {
   top: 4em;
   left: .5em;
 }
+
 .mapspinner {
   position: absolute;
 }
-
 </style>

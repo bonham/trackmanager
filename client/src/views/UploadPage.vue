@@ -1,8 +1,5 @@
 <template>
-  <b-container
-    id="root"
-    class="d-flex flex-column vh-100"
-  >
+  <b-container id="root" class="d-flex flex-column vh-100">
     <track-manager-nav-bar :sid="sid" />
     <h1 class="mt-4 mb-4">
       Upload new Tracks
@@ -14,39 +11,20 @@
     <BRow>
       <BCol>
         <DropField @files-dropped="processDragDrop">
-          <label
-            for="input"
-            class="border border-1 rounded p-2 d-flex flex-row"
-          >
-            <div class="flex-grow-1 border border-3 rounded-2 border-secondary-subtle dropzone d-flex align-items-center justify-content-center text-secondary">
+          <label for="input" class="border border-1 rounded p-2 d-flex flex-row">
+            <div
+              class="flex-grow-1 border border-3 rounded-2 border-secondary-subtle dropzone d-flex align-items-center justify-content-center text-secondary">
               Drop files or klick to upload
             </div>
           </label>
-          <input
-            id="input"
-            type="file"
-            multiple
-            class="hideinput"
-            @change="onChange"
-          >
+          <input id="input" type="file" multiple class="hideinput" @change="onChange">
         </DropField>
       </BCol>
     </BRow>
-    <transition-group
-      name="list"
-      tag="span"
-    >
-      <BRow
-        v-for="item in visibleUploadItems"
-        :key="item.key"
-        class="list-item"
-      >
+    <transition-group name="list" tag="span">
+      <BRow v-for="item in visibleUploadItems" :key="item.key" class="list-item">
         <BCol>
-          <UploadItem
-            :fname="item.fname"
-            :status="item.status"
-            :error="item.error"
-          />
+          <UploadItem :fname="item.fname" :status="item.status" :error="item.error" />
         </BCol>
       </BRow>
     </transition-group>
@@ -98,35 +76,35 @@ export default defineComponent({
 
   methods: {
 
-    getUploadItemByKey (key: number) {
+    getUploadItemByKey(key: number) {
       const item = this.uploadList.find(element => element.key === key)
       if (item === undefined) { throw new Error(`Could not find Upload item with id ${key}`) }
       return item
     },
 
-    setItemProcessingStatus (key: number, status: QueueStatus) {
+    setItemProcessingStatus(key: number, status: QueueStatus) {
       const item = this.getUploadItemByKey(key)
       item.status = status
     },
 
-    setItemVisibility (key: number, visibility: boolean) {
+    setItemVisibility(key: number, visibility: boolean) {
       const item = this.getUploadItemByKey(key)
       item.visible = visibility
     },
 
-    onChange (event: Event) {
-      if (event.target === null) { console.error("Event target is null"); return}
+    onChange(event: Event) {
+      if (event.target === null) { console.error("Event target is null"); return }
       const target = (event.target as HTMLInputElement)
-      if (target.files === null ) { console.error("target.files is null"); return}
+      if (target.files === null) { console.error("target.files is null"); return }
       this.processDragDrop(target.files)
     },
 
-    getNextKey() :number {
+    getNextKey(): number {
       return (this.maxKey += 1)
     },
 
-     // Queue new files
-    processDragDrop (files: FileList) {
+    // Queue new files
+    processDragDrop(files: FileList) {
       // take files from input
       for (const thisFile of files) {
         const key = this.getNextKey()
@@ -135,7 +113,7 @@ export default defineComponent({
       }
     },
 
-    addItemToQueue (fileIdObject: QueuedFile) {
+    addItemToQueue(fileIdObject: QueuedFile) {
       this.uploadList.push(fileIdObject)
       this.workerQueue.push(
         {
@@ -146,7 +124,7 @@ export default defineComponent({
       )
     },
 
-    completedCallBack (err: Error|null, key: number) :void {
+    completedCallBack(err: Error | null, key: number): void {
       console.log(`Finished processing ${key}`)
 
       if (err) {
@@ -159,7 +137,7 @@ export default defineComponent({
           this.setItemVisibility(key, false)
           console.log(`Removed ${key}`)
         },
-        1000)
+          1000)
       }
     }
   }
@@ -173,9 +151,15 @@ export default defineComponent({
 .list-leave-active {
   transition: all 1s;
 }
-.list-enter, .list-leave-to /* .list-leave-active below version 2.1.8 */ {
+
+.list-enter,
+.list-leave-to
+
+/* .list-leave-active below version 2.1.8 */
+  {
   opacity: 0;
 }
+
 /* .list-move {
   transition: transform 1s;
 } */
@@ -195,5 +179,6 @@ export default defineComponent({
   overflow: hidden !important;
   clip: rect(0, 0, 0, 0) !important;
   white-space: nowrap !important;
-  border: 0 !important;}
+  border: 0 !important;
+}
 </style>

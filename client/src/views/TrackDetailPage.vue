@@ -1,17 +1,11 @@
 <template>
-  <b-container
-    id="root"
-    class="d-flex flex-column vh-100"
-  >
+  <b-container id="root" class="d-flex flex-column vh-100">
     <track-manager-nav-bar :sid="sid" />
     <div class="flex-grow-1 d-flex flex-column">
       <h1 class="mt-4 mb-4">
         Track {{ id }} Details
       </h1>
-      <MapComponent
-        :track-id="Number.parseInt(id)"
-        :sid="sid"
-      />
+      <MapComponent :track-id="Number.parseInt(id)" :sid="sid" />
     </div>
   </b-container>
 </template>

@@ -7,37 +7,37 @@ const UP_BASE_URL = '/api/tracks/addtrack'
 
 export interface QueuedFile {
   key: number,
-        fname: string,
-        fileBlob: File,
-        error: Error | null,
-        details: string | null,
-        status: QueueStatus,
-        sid: string,
-        visible: boolean
+  fname: string,
+  fileBlob: File,
+  error: Error | null,
+  details: string | null,
+  status: QueueStatus,
+  sid: string,
+  visible: boolean
 }
 
-export type QueueStatus = 'Queued' | 'Processing' | 'Failed' |'Done'
+export type QueueStatus = 'Queued' | 'Processing' | 'Failed' | 'Done'
 
-export type ICompletedCallback = (err: Error|null, key: number) => void
+export type ICompletedCallback = (err: Error | null, key: number) => void
 export type IsetItemProcessingStatus = (key: number, status: QueueStatus) => void
 export type IQueuedItem = { fileIdObject: QueuedFile, setItemProcessingStatus: IsetItemProcessingStatus }
 
 class FileUploadQueue {
   workerQueue: any
 
-  constructor () {
+  constructor() {
     this.workerQueue = queue(
       performUpload,
       WORKERS
     )
   }
 
-  push (obj: IQueuedItem, callback: ICompletedCallback) {
+  push(obj: IQueuedItem, callback: ICompletedCallback) {
     this.workerQueue.push(obj, callback)
   }
 }
 
-function performUpload (options: IQueuedItem, callback: ICompletedCallback) {
+function performUpload(options: IQueuedItem, callback: ICompletedCallback) {
   const { fileIdObject, setItemProcessingStatus } = options
   const thisKey = fileIdObject.key
   console.log(`Queue function called for id ${thisKey}`)
@@ -56,7 +56,7 @@ function performUpload (options: IQueuedItem, callback: ICompletedCallback) {
     })
 }
 
-function makeFileIdObject (key: number, file: File, sid: string) : QueuedFile {
+function makeFileIdObject(key: number, file: File, sid: string): QueuedFile {
   const thisKey = key
   const fName = file.name
   return {

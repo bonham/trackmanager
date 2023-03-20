@@ -9,7 +9,7 @@ class UploadError extends Error {
   }
 
 }
-async function uploadFile (fileIdObject: QueuedFile, uploadUrl: string, formParameter:string) {
+async function uploadFile(fileIdObject: QueuedFile, uploadUrl: string, formParameter: string) {
   // construct body
   const formData = new FormData()
   formData.set(formParameter, fileIdObject.fileBlob)

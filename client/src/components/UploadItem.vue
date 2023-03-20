@@ -1,31 +1,16 @@
 <template>
   <div>
-    <b-card
-      no-body
-      class="m-1"
-      bg-variant="light"
-    >
+    <b-card no-body class="m-1" bg-variant="light">
       <b-row class="align-items-center">
         <b-col cols="10">
           <span class="ms-2">{{ fname }}</span>
-          <span
-            v-if="error"
-            class="ms-2 text-danger"
-            :title="error.cause"
-          > {{ error.message }}</span>
+          <span v-if="error" class="ms-2 text-danger" :title="error.cause"> {{ error.message }}</span>
         </b-col>
-        <b-col
-          cols="2"
-          class="d-flex"
-        >
+        <b-col cols="2" class="d-flex">
           <span :class="statusClass">
             {{ status }}
-            <span
-              v-if="status == 'Processing'"
-              class="spinner-border spinner-border-sm"
-              role="status"
-              aria-hidden="true"
-            />
+            <span v-if="status == 'Processing'" class="spinner-border spinner-border-sm" role="status"
+              aria-hidden="true" />
           </span>
         </b-col>
       </b-row>
@@ -60,7 +45,7 @@ export default {
   },
 
   computed: {
-    statusClass () {
+    statusClass() {
       const prefix = 'badge p-3 flex-fill'
       const lookup = {
         Queued: 'bg-secondary text-light',

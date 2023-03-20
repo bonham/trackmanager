@@ -3,43 +3,43 @@ import _ from 'lodash'
 type TrackIdList = number[]
 
 class TrackVisibilityManager {
-  currentlyVisible :TrackIdList
-  toBeVisible :TrackIdList
-  alreadyLoaded :TrackIdList
-  
-  constructor (currentlyVisible :TrackIdList, toBeVisible :TrackIdList, alreadyLoaded :TrackIdList) {
+  currentlyVisible: TrackIdList
+  toBeVisible: TrackIdList
+  alreadyLoaded: TrackIdList
+
+  constructor(currentlyVisible: TrackIdList, toBeVisible: TrackIdList, alreadyLoaded: TrackIdList) {
     this.currentlyVisible = _.uniq(currentlyVisible)
     this.toBeVisible = _.uniq(toBeVisible)
     this.alreadyLoaded = _.uniq(alreadyLoaded)
   }
 
   // ids which need to be enabled, regardless if loaded or not
-  deltaToBeEnabled () {
+  deltaToBeEnabled() {
     return _.difference(this.toBeVisible, this.currentlyVisible)
   }
 
   // ids which should be loaded and are already visible
-  alreadyVisible () {
+  alreadyVisible() {
     return _.intersection(this.toBeVisible, this.currentlyVisible)
   }
 
   // ids which are visible and should not be in future
-  toBeHidden () {
+  toBeHidden() {
     return _.difference(this.currentlyVisible, this.toBeVisible)
   }
 
   // ids which need to be enabled and should be loaded
-  toBeLoaded () {
+  toBeLoaded() {
     return _.difference(this.deltaToBeEnabled(), this.alreadyLoaded)
   }
 
   // ids which need to be enabled and are already loaded
-  toggleToVisible () {
+  toggleToVisible() {
     return _.intersection(this.deltaToBeEnabled(), this.alreadyLoaded)
   }
 
   // ids which are loaded but do not need a toggle because they are already at the desired target state
-  loadedButDoNotToggle () {
+  loadedButDoNotToggle() {
     const loadedVisibleShouldStay = _.intersection(this.currentlyVisible, this.toBeVisible, this.alreadyLoaded)
 
     // loaded and invisible and should be invisible

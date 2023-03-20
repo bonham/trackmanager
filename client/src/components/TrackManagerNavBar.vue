@@ -1,41 +1,24 @@
 <template>
   <div>
-    <b-navbar
-      class="shadow-sm bg-white border-bottom"
-    >
+    <b-navbar class="shadow-sm bg-white border-bottom">
       <b-navbar-nav class="my-2 my-md-0 mr-md-3">
-        <b-nav-item
-          :to="navPath('/select_tracks')"
-          class="
-          p-2
-          text-dark"
-        >
+        <b-nav-item :to="navPath('/select_tracks')" class="
+              p-2
+              text-dark">
           Map
         </b-nav-item>
-        <b-nav-item
-          :to="navPath('/tracklist')"
-          class="
-          p-2
-          text-dark"
-        >
+        <b-nav-item :to="navPath('/tracklist')" class="
+              p-2
+              text-dark">
           Tracks
         </b-nav-item>
-        <b-nav-item
-          :to="navPath('/toverview')"
-          class="p-2 text-dark"
-        >
+        <b-nav-item :to="navPath('/toverview')" class="p-2 text-dark">
           By Year
         </b-nav-item>
-        <b-nav-item
-          :to="navPath('/track_multi_edit')"
-          class="p-2 text-dark"
-        >
+        <b-nav-item :to="navPath('/track_multi_edit')" class="p-2 text-dark">
           Edit
         </b-nav-item>
-        <b-nav-item
-          :to="navPath('/upload')"
-          class="p-2 text-dark"
-        >
+        <b-nav-item :to="navPath('/upload')" class="p-2 text-dark">
           Upload
         </b-nav-item>
       </b-navbar-nav>
@@ -60,7 +43,7 @@ export default {
     }
   },
   methods: {
-    navPath (path) {
+    navPath(path) {
       const pathSid = `${path}/sid/${this.sid}`
       return {
         path: pathSid

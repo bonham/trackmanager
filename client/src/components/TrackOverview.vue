@@ -5,14 +5,8 @@
       </span>
     </div>
     <div>
-      <TrackSection
-        v-for="trCol in trackCollections"
-        :key="trCol.year"
-        :coll="trCol.collection"
-        :label="trCol.year === '0' ? 'No date' : trCol.year"
-        :collapsed="isYearCollapsed(trCol.year)"
-        :sid="sid"
-      />
+      <TrackSection v-for="trCol in trackCollections" :key="trCol.year" :coll="trCol.collection"
+        :label="trCol.year === '0' ? 'No date' : trCol.year" :collapsed="isYearCollapsed(trCol.year)" :sid="sid" />
     </div>
   </div>
 </template>
@@ -42,17 +36,17 @@ export default {
     }
   },
   computed: {
-    tracksByYear () {
+    tracksByYear() {
       // object to array:
       const trackFlatList = _.values(this.loadedTracks)
       return _.groupBy(trackFlatList, (x: Track) => x.year())
     },
-    yearList () {
+    yearList() {
       const yearList = _.keys(this.tracksByYear)
       yearList.sort().reverse()
       return yearList
     },
-    trackCollections () {
+    trackCollections() {
       const r: { year: string, collection: TrackCollection }[] = []
       this.yearList.forEach(y => {
         const tc = new TrackCollection(this.tracksByYear[y])
@@ -70,7 +64,7 @@ export default {
     this.loading = false
   },
   methods: {
-    isYearCollapsed (thisYear: string) {
+    isYearCollapsed(thisYear: string) {
       const firstYearInCollection = this.trackCollections[0].year
       return thisYear !== firstYearInCollection
     }

@@ -13,9 +13,7 @@
 			"javascript",
 		],
 		"editor.formatOnSave": true,
-		"[vue]": {
-			"editor.defaultFormatter": "dbaeumer.vscode-eslint"
-		},
+		"[vue]": {},
 		"[javascript]": {
 			"editor.defaultFormatter": "dbaeumer.vscode-eslint"
 		},

@@ -12,11 +12,8 @@
 		"eslint.validate": [
 			"javascript",
 		],
-		"editor.formatOnSave": true,
 		"[vue]": {},
-		"[javascript]": {
-			"editor.defaultFormatter": "dbaeumer.vscode-eslint"
-		},
+		"[javascript]": {},
 		"task.allowAutomaticTasks": "on",
 		"jest.disabledWorkspaceFolders": [
 			"client"

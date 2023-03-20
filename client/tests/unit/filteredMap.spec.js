@@ -6,9 +6,13 @@ import { ManagedMap } from '@/lib/mapServices'
 
 import { createStore } from 'vuex'
 import { store } from '../../src/store'
-import { describe, test, expect } from 'vitest'
+import { vi, test, beforeEach, describe, expect } from 'vitest'
+import ResizeObserverMock from './__mocks__/ResizeObserver'
 
 describe('Basic store test with FilteredMap', () => {
+  beforeEach(() => {
+    vi.stubGlobal('ResizeObserver', ResizeObserverMock)
+  })
   test('Trivial mount', async () => {
     const storeInstance = createStore(store)
     render(FilteredMap, {

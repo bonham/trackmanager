@@ -1,6 +1,9 @@
+import { vi } from 'vitest'
 import { describe, test, beforeEach, expect } from 'vitest'
 import { ManagedMap, GeoJsonCollection, ExtentCollection } from '@/lib/mapServices'
 import _ from 'lodash'
+import ResizeObserverMock from './__mocks__/ResizeObserver'
+
 
 let mm
 let gList1
@@ -34,6 +37,8 @@ const geojson = {
 }
 
 beforeEach(() => {
+  vi.stubGlobal('ResizeObserver', ResizeObserverMock)
+
   mm = new ManagedMap({ selectCallBackFn: (e) => { console.log('callback', e) } })
   bbox1 = [-20, -10.1, 40, 80]
   bbox2 = [-23, -11, -5, 70]

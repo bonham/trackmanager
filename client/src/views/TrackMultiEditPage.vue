@@ -21,7 +21,8 @@
         </div>
         <div v-else>
 
-          <editable-text :textarea="false" :initialtext="data.value"
+          <editable-text
+:textarea="false" :initialtext="data.value"
             :update-function="(value: string) => processUpdate(data.item.id, value)" />
         </div>
       </template>

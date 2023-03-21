@@ -5,10 +5,12 @@
       {{ valueOrEmptyPlaceholder }}
     </div>
     <div v-show="editing">
-      <b-form-textarea v-if="textarea" ref="inputref" v-model="value" rows="2" max-rows="20" type="textarea"
+      <b-form-textarea
+v-if="textarea" ref="inputref" v-model="value" rows="2" max-rows="20" type="textarea"
         class="form-control overflow-hidden" @change="processValueChange" @blur="processBlur"
         @keydown.enter="processEnter" />
-      <b-form-input v-else ref="inputref" v-model="value" type="text" @blur="processBlur" @change="processValueChange"
+      <b-form-input
+v-else ref="inputref" v-model="value" type="text" @blur="processBlur" @change="processValueChange"
         @keydown.enter="processEnter" />
     </div>
   </div>

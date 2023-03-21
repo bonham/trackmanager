@@ -6,7 +6,7 @@
     "dev": "vite --port 4000",
     "build": "vite build",
     "serve": "vite preview",
-    "lint": "eslint --ext .js,.vue --ignore-path .gitignore --fix src",
+    "lint": "eslint --ext .ts,.js,.vue --ignore-path .gitignore  src",
     "test": "vitest"
   },
   "dependencies": {

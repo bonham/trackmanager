@@ -9,7 +9,12 @@ module.exports = {
     '@vue/eslint-config-typescript',
     '@vue/eslint-config-prettier/skip-formatting'
   ],
+  parser: "vue-eslint-parser",
   parserOptions: {
-    ecmaVersion: 'latest'
+    ecmaVersion: 'latest',
+    parser: {
+      // Script parser for `<script lang="ts">`
+      "ts": "@typescript-eslint/parser"
+    }
   }
 }

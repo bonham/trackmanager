@@ -39,7 +39,8 @@ import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'
 import DropField from '@/components/DropField.vue'
 import { defineComponent } from 'vue'
 import { FileUploadQueue, makeFileIdObject } from '@/lib/FileUploadQueue'
-import type { QueueStatus, QueuedFile } from '@/lib/FileUploadQueue'
+import type { QueueStatus, QueuedFile } from '@/lib/uploadFile'
+import { UploadError } from '@/lib/uploadFile'
 
 /* vue instance */
 export default defineComponent({
@@ -69,7 +70,7 @@ export default defineComponent({
   },
   computed: {
     visibleUploadItems: function () {
-      const visibleList = this.uploadList.filter(item => item.visible)
+      const visibleList = this.uploadList.filter((item): item is QueuedFile => item.visible)
       return visibleList
     }
   },
@@ -78,7 +79,7 @@ export default defineComponent({
 
     getUploadItemByKey(key: number) {
       const item = this.uploadList.find(element => element.key === key)
-      if (item === undefined) { throw new Error(`Could not find Upload item with id ${key}`) }
+      if (item === undefined) { throw new UploadError(`Could not find Upload item with id ${key}`, "") }
       return item
     },
 
@@ -124,7 +125,7 @@ export default defineComponent({
       )
     },
 
-    completedCallBack(err: Error | null, key: number): void {
+    completedCallBack(err: UploadError | null, key: number): void {
       console.log(`Finished processing ${key}`)
 
       if (err) {

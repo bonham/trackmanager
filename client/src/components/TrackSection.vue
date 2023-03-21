@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/first-attribute-linebreak -->
 <template>
   <div>
     <b-card bg-variant="light" class="my-2">
@@ -28,7 +29,7 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 // import TrackHeader from '@/components/TrackHeader.vue'
 import TrackCard from '@/components/TrackCard.vue'
 import { TrackCollection } from '@/lib/Track'

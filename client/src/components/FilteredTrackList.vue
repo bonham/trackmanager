@@ -11,7 +11,8 @@
       </div>
       <b-card ref="testref" no-body>
         <b-list-group flush>
-          <b-list-group-item v-for="track in loadedTracksSorted" :key="track.id" :ref="'track_' + track.id"
+          <b-list-group-item
+v-for="track in loadedTracksSorted" :key="track.id" :ref="'track_' + track.id"
             :label="'track_' + track.id" :active="itemActiveStatus(track.id)" @click="toggleActive(track.id)">
             <span>{{ track.name }}, </span>
             <span>{{ (track.distance() / 1000).toFixed(0) }} km, {{ track.localeDateShort() }}</span>

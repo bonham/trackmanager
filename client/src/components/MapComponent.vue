@@ -2,7 +2,7 @@
   <div id="mapdiv" label="Map" />
 </template>
 
-<script>
+<script lang="ts">
 import { getGeoJson } from '@/lib/trackServices'
 import { ManagedMap } from '@/lib/mapServices'
 
@@ -20,6 +20,7 @@ export default {
   },
   data() {
     return {
+      mmap: null as null | ManagedMap
     }
   },
   created: async function () {
@@ -28,7 +29,7 @@ export default {
   },
   mounted() {
     this.$nextTick(() => {
-      this.mmap.map.setTarget('mapdiv')
+      this.mmap!.map.setTarget('mapdiv')
     })
   },
   methods: {
@@ -36,8 +37,8 @@ export default {
     drawTrack: async function () {
       const resultSet = await getGeoJson([this.trackId], this.sid)
       const result = resultSet[0]
-      this.mmap.addTrackLayer(result)
-      this.mmap.setExtentAndZoomOut()
+      this.mmap!.addTrackLayer(result)
+      this.mmap!.setExtentAndZoomOut()
     }
   }
 }

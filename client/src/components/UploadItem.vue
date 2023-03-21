@@ -1,3 +1,4 @@
+<!-- eslint-disable vue/first-attribute-linebreak -->
 <template>
   <div>
     <b-card no-body class="m-1" bg-variant="light">
@@ -18,11 +19,16 @@
   </div>
 </template>
 
-<script>
+
+<script lang="ts">
 import { BCard, BCol, BRow } from 'bootstrap-vue-next'
+import { defineComponent } from 'vue'
+import type { PropType } from 'vue'
+import { UploadError } from '@/lib/uploadFile'
+import type { QueueStatus } from '@/lib/uploadFile'
 
 /* vue instance */
-export default {
+export default defineComponent({
   name: 'UploadItem',
   components: {
     BCard,
@@ -35,19 +41,21 @@ export default {
       default: null
     },
     status: {
-      type: String,
-      default: 'Queued'
+      type: String as PropType<QueueStatus>,
+      default: () => "Queued" as QueueStatus
     },
     error: {
-      type: Error,
-      default: null
+      type: UploadError as PropType<UploadError | null>,
+      default: null,
+      required: true
     }
   },
 
   computed: {
     statusClass() {
       const prefix = 'badge p-3 flex-fill'
-      const lookup = {
+      let lookup: { [K in QueueStatus]: string }
+      lookup = {
         Queued: 'bg-secondary text-light',
         Processing: 'bg-warning',
         Completed: 'bg-success text-light',
@@ -57,5 +65,5 @@ export default {
     }
   }
 
-}
+})
 </script>

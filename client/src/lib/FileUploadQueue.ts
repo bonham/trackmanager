@@ -1,26 +1,17 @@
+import { uploadFile, UploadError } from "./uploadFile"
+import type { QueuedFile, QueueStatus } from "./uploadFile"
 const queue = require('async/queue')
-import { uploadFile } from '@/lib/uploadFile'
 
 const FORMPARAM = 'newtrack'
 const WORKERS = 4
 const UP_BASE_URL = '/api/tracks/addtrack'
 
-export interface QueuedFile {
-  key: number,
-  fname: string,
-  fileBlob: File,
-  error: Error | null,
-  details: string | null,
-  status: QueueStatus,
-  sid: string,
-  visible: boolean
-}
 
-export type QueueStatus = 'Queued' | 'Processing' | 'Failed' | 'Done'
 
-export type ICompletedCallback = (err: Error | null, key: number) => void
+export type ICompletedCallback = (err: UploadError | null, key: number) => void
 export type IsetItemProcessingStatus = (key: number, status: QueueStatus) => void
 export type IQueuedItem = { fileIdObject: QueuedFile, setItemProcessingStatus: IsetItemProcessingStatus }
+
 
 class FileUploadQueue {
   workerQueue: any
@@ -51,6 +42,7 @@ function performUpload(options: IQueuedItem, callback: ICompletedCallback) {
       callback(null, thisKey)
     })
     .catch(err => {
+      if (!(err instanceof UploadError)) throw err
       fileIdObject.error = err
       callback(err, thisKey)
     })

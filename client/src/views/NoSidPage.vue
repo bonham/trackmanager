@@ -4,7 +4,7 @@
   </b-container>
 </template>
 
-<script>
+<script lang="ts">
 import { BContainer } from 'bootstrap-vue-next'
 
 export default {

@@ -1,14 +1,6 @@
-import type { QueuedFile } from "./FileUploadQueue"
+
 // Takes care to upload a file to backend
-class UploadError extends Error {
-  cause: string
 
-  constructor(message: string, cause: string) {
-    super(message)
-    this.cause = cause
-  }
-
-}
 async function uploadFile(fileIdObject: QueuedFile, uploadUrl: string, formParameter: string) {
   // construct body
   const formData = new FormData()
@@ -32,6 +24,29 @@ async function uploadFile(fileIdObject: QueuedFile, uploadUrl: string, formParam
   }
 
   return response.json()
+}
+
+export type QueueStatus = 'Queued' | 'Processing' | 'Failed' | 'Completed'
+
+export interface QueuedFile {
+  key: number,
+  fname: string,
+  fileBlob: File,
+  error: UploadError | null,
+  details: string | null,
+  status: QueueStatus,
+  sid: string,
+  visible: boolean
+}
+
+export class UploadError extends Error {
+  cause: string
+
+  constructor(message: string, cause: string) {
+    super(message)
+    this.cause = cause
+  }
+
 }
 
 export { uploadFile }

@@ -10,7 +10,7 @@
   </b-container>
 </template>
 
-<script>
+<script lang="ts">
 import MapComponent from '@/components/MapComponent.vue'
 import { BContainer } from 'bootstrap-vue-next'
 import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'

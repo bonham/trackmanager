@@ -23,7 +23,7 @@
   </b-card>
 </template>
 
-<script>
+<script lang="ts">
 
 import { Track } from '@/lib/Track'
 import {

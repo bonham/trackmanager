@@ -1,15 +1,16 @@
+<!-- eslint-disable vue/first-attribute-linebreak -->
 <template>
   <div>
     <b-navbar class="shadow-sm bg-white border-bottom">
       <b-navbar-nav class="my-2 my-md-0 mr-md-3">
         <b-nav-item :to="navPath('/select_tracks')" class="
-              p-2
-              text-dark">
+                        p-2
+                        text-dark">
           Map
         </b-nav-item>
         <b-nav-item :to="navPath('/tracklist')" class="
-              p-2
-              text-dark">
+                        p-2
+                        text-dark">
           Tracks
         </b-nav-item>
         <b-nav-item :to="navPath('/toverview')" class="p-2 text-dark">
@@ -26,7 +27,7 @@
   </div>
 </template>
 
-<script>
+<script lang="ts">
 import { BNavbar, BNavbarNav, BNavItem } from 'bootstrap-vue-next'
 
 export default {
@@ -43,7 +44,7 @@ export default {
     }
   },
   methods: {
-    navPath(path) {
+    navPath(path: string) {
       const pathSid = `${path}/sid/${this.sid}`
       return {
         path: pathSid

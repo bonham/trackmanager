@@ -8,7 +8,7 @@
   </b-container>
 </template>
 
-<script>
+<script lang="ts">
 import { BContainer } from 'bootstrap-vue-next'
 import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'
 export default {

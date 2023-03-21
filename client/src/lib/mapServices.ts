@@ -57,7 +57,7 @@ class ManagedMap {
   select: Select
 
 
-  constructor(opts: undefined | { selectCallBackFn: SelectCallbackFn }) {
+  constructor(opts?: { selectCallBackFn: SelectCallbackFn }) {
 
     this.map = this._createMap()
     // should be defined outside map and passed to map

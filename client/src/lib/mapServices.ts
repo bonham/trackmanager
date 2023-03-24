@@ -1,21 +1,23 @@
+import { ExtentCollection } from '@/lib/mapservices/ExtentCollection'
+import { PopoverManager } from '@/lib/mapservices/PopoverManager'
+import { createLayerFromGeoJson } from '@/lib/mapservices/createLayerFromGeoJson'
+
 import { Feature, Map as OlMap, View } from 'ol' // rename needed not to conflict with javascript native Map()
 import { transformExtent } from 'ol/proj'
 import type { Extent } from 'ol/extent'
-import { Layer, Tile as TileLayer, Vector as VectorLayer } from 'ol/layer'
+import { Layer, Tile as TileLayer } from 'ol/layer'
 import { OSM, Vector as VectorSource } from 'ol/source'
 import { Control, defaults as defaultControls } from 'ol/control'
 import type { Options as ZoomOptions } from 'ol/control/Zoom'
 import Collection from 'ol/Collection'
 import Select from 'ol/interaction/Select'
 import { getUid } from 'ol/util'
-import GeoJSON from 'ol/format/GeoJSON'
 import type { Geometry } from 'ol/geom'
 import { SelectEvent } from 'ol/interaction/Select'
 import type BaseEvent from 'ol/events/Event'
 import type { GeoJsonObject } from 'geojson'
 import _ from 'lodash'
 import { StyleFactory } from './mapStyles'
-import type { StyleLike } from 'ol/style/Style'
 
 type SelectionObject = { selected: number[], deselected: number[] }
 type SelectCallbackFn = (x: SelectionObject) => void
@@ -55,6 +57,7 @@ class ManagedMap {
   featureIdMap: Map<string, FeatureIdMapMember>
   selectCollection: Collection<Feature<Geometry>>
   select: Select
+  popovermgr = null as (null | PopoverManager)
 
 
   constructor(opts?: { selectCallBackFn: SelectCallbackFn }) {
@@ -86,6 +89,12 @@ class ManagedMap {
 
     this.select.on(['select'], boundSelectHandler)
     this.select.on(['select'], (this.manageZIndexOnSelect).bind(this))
+
+  }
+
+  initPopup(popupElement: HTMLElement) {
+    this.popovermgr = new PopoverManager(popupElement)
+    this.map.addOverlay(this.popovermgr.getOverlay())
   }
 
   ZINDEX_DEFAULT = 0
@@ -115,7 +124,7 @@ class ManagedMap {
     const fn = (e: BaseEvent | Event) => {
 
       if (!(e instanceof SelectEvent)) {
-        console.error("Expected SelectEvent, but dit not get it")
+        console.error("Expected SelectEvent, but dit get different type")
         return
       }
 
@@ -131,6 +140,34 @@ class ManagedMap {
         if (tid === undefined) { console.error("Got Track id which is undefined") }
         else { trackIdSelectObject.deselected.push(tid) }
       })
+
+      if (this.popovermgr) {
+
+        // only set popup on selected
+        const numselected = trackIdSelectObject.selected.length
+        if (numselected > 0) {
+
+          let content: string
+          if (numselected > 1) {
+            content = "Multiple tracks"
+          } else {
+            const trackId = trackIdSelectObject.selected[0]
+            content = "x"
+          }
+
+
+          const coord = e.mapBrowserEvent.coordinate
+          this.popovermgr.setNewPopover(coord, {
+            animation: false,
+            content,
+            placement: 'top',
+            title: 'Welcome to OpenLayers'
+          })
+        } else {
+          // otherwise dispose
+          this.popovermgr.dispose()
+        }
+      }
       callBackFn(trackIdSelectObject)
     }
     return fn
@@ -168,7 +205,7 @@ class ManagedMap {
       return
     }
     const style = this.styleFactory.getNext()
-    const { featureIdList, vectorLayer } = createLayer(geojson, style)
+    const { featureIdList, vectorLayer } = createLayerFromGeoJson(geojson, style)
     const vectorLayerId = getUid(vectorLayer)
     this.map.addLayer(vectorLayer)
     // add to maps
@@ -376,70 +413,5 @@ class ZoomToTracksControl extends Control {
   }
 }
 
-// create a layer from a geojson
-function createLayer(geoJson: GeoJsonObject, style: StyleLike) {
-  // load track
+export { ManagedMap }
 
-  const features = new GeoJSON().readFeatures(
-    geoJson,
-    {
-      dataProjection: 'EPSG:4326',
-      featureProjection: 'EPSG:3857'
-    }
-  )
-  const featureIdList = features.map((f) => getUid(f))
-
-  const vectorSource = new VectorSource({
-    features
-  })
-
-  const vectorLayer = new VectorLayer({
-    source: vectorSource,
-    style
-  })
-  return { featureIdList, vectorLayer }
-}
-
-class ExtentCollection {
-  extentList: Extent[]
-  constructor(extentList: Extent[]) { // one extent is: [minx, miny, maxx, maxy]
-    if (extentList.length === 0) throw new Error("Extentlist must have one element")
-    this.extentList = extentList
-  }
-
-  boundingBox() {
-    const l = this.extentList
-
-    const left = _.min(_.map(l, (x) => { return x[0] })) as number
-    const bottom = _.min(_.map(l, (x) => { return x[1] })) as number
-    const right = _.max(_.map(l, (x) => { return x[2] })) as number
-    const top = _.max(_.map(l, (x) => { return x[3] })) as number
-    return [left, bottom, right, top]
-  }
-}
-type GeoJSONObjectWithId = { geojson: GeoJsonObject, id: number }
-class GeoJsonCollection {
-  geoJsonList: GeoJSONObjectWithId[]
-  constructor(geoJsonList: GeoJSONObjectWithId[]) {
-    this.geoJsonList = geoJsonList
-  }
-
-  // calculate maximum bounding box for all geojson objects
-  boundingBox() {
-    const l = this.geoJsonList
-
-    function pickBbox(go: GeoJSONObjectWithId) {
-      const bbox = go.geojson.bbox
-      if (bbox == undefined) { throw new Error("geojson does not have bbox") }
-      return bbox
-    }
-
-    const left = _.min(_.map(l, (x) => { return pickBbox(x)[0] }))
-    const bottom = _.min(_.map(l, (x) => { return pickBbox(x)[1] }))
-    const right = _.max(_.map(l, (x) => { return pickBbox(x)[2] }))
-    const top = _.max(_.map(l, (x) => { return pickBbox(x)[3] }))
-    return [left, bottom, right, top]
-  }
-}
-
-export { ManagedMap, GeoJsonCollection, ExtentCollection }

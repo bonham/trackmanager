@@ -1,5 +1,6 @@
 <template>
   <div id="mapdiv" label="Map" />
+  <div ref="popupdiv"></div>
 </template>
 
 <script lang="ts">
@@ -23,13 +24,17 @@ export default {
       mmap: null as null | ManagedMap
     }
   },
-  created: async function () {
+  created: function () {
     this.mmap = new ManagedMap()
-    await this.drawTrack()
+    this.drawTrack() // async
   },
   mounted() {
     this.$nextTick(() => {
-      this.mmap!.map.setTarget('mapdiv')
+      if (!this.mmap) throw new Error("Managed map not initialized")
+      this.mmap.map.setTarget('mapdiv')
+      const popupDiv = this.$refs.popupdiv as HTMLElement
+      this.mmap.initPopup(popupDiv)
+      console.log("map mounted")
     })
   },
   methods: {
@@ -56,5 +61,9 @@ export default {
 .map-control-expand {
   top: 4em;
   left: .5em;
+}
+
+.popover-body {
+  min-width: 276px;
 }
 </style>

@@ -30,6 +30,7 @@
     "@testing-library/user-event": "^14.4.3",
     "@testing-library/vue": "^6.6.1",
     "@types/async": "^3.2.18",
+    "@types/bootstrap": "^5.2.6",
     "@types/error-cause": "^1.0.1",
     "@types/geojson": "^7946.0.10",
     "@types/jsdom": "^21.1.0",

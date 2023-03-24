@@ -4,6 +4,7 @@
     <div v-if="loading" class="mapspinner">
       <b-spinner />
     </div>
+    <div ref="popupdiv"></div>
   </div>
 </template>
 <script lang="ts">
@@ -104,6 +105,8 @@ export default {
         return
       }
       this.mmap.map.setTarget('mapdiv')
+      const popupDiv = this.$refs.popupdiv as HTMLElement
+      this.mmap.initPopup(popupDiv)
     })
   },
   methods: {
@@ -177,5 +180,9 @@ export default {
 
 .mapspinner {
   position: absolute;
+}
+
+.popover-body {
+  min-width: 276px;
 }
 </style>

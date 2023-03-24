@@ -1,6 +1,8 @@
 import { vi } from 'vitest'
 import { describe, test, beforeEach, expect } from 'vitest'
-import { ManagedMap, GeoJsonCollection, ExtentCollection } from '@/lib/mapServices'
+import { ManagedMap } from '@/lib/mapServices'
+import { GeoJsonCollection } from '@/lib/mapservices/GeoJsonCollection'
+import { ExtentCollection } from '@/lib/mapservices/ExtentCollection'
 import _ from 'lodash'
 import ResizeObserverMock from './__mocks__/ResizeObserver'
 

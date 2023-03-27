@@ -1,5 +1,5 @@
 <template>
-  <b-container id="root" class="d-flex flex-column min-vh-100">
+  <b-container id="root" class="d-flex flex-column vh-100">
     <track-manager-nav-bar :sid="sid" />
     <div v-if="buttonsLoading" class="year-navbar">
       <b-button class="m-2">

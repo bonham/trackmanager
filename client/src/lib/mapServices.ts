@@ -2,7 +2,7 @@ import { ExtentCollection } from '@/lib/mapservices/ExtentCollection'
 import { PopoverManager } from '@/lib/mapservices/PopoverManager'
 import { createLayerFromGeoJson } from '@/lib/mapservices/createLayerFromGeoJson'
 
-import { Feature, Map as OlMap, View } from 'ol' // rename needed not to conflict with javascript native Map()
+import { Feature, Map as OlMap, MapBrowserEvent, View } from 'ol' // rename needed not to conflict with javascript native Map()
 import { transformExtent } from 'ol/proj'
 import type { Extent } from 'ol/extent'
 import { Layer, Tile as TileLayer } from 'ol/layer'
@@ -18,6 +18,8 @@ import type BaseEvent from 'ol/events/Event'
 import type { GeoJsonObject } from 'geojson'
 import _ from 'lodash'
 import { StyleFactory } from './mapStyles'
+import { toStringHDMS } from 'ol/coordinate.js';
+import { toLonLat } from 'ol/proj'
 
 type SelectionObject = { selected: number[], deselected: number[] }
 type SelectCallbackFn = (x: SelectionObject) => void
@@ -88,6 +90,26 @@ class ManagedMap {
     const boundSelectHandler = selectHandler.bind(this)
 
     this.select.on(['select'], boundSelectHandler)
+    this.map.on(['click'], (e) => {
+      if (!(e instanceof MapBrowserEvent)) throw new Error("Expecting other event type")
+
+      if (this.popovermgr) {
+
+        // this.popovermgr.setPosition(e.coordinate)
+        // const lonLatCoord = toLonLat(e.coordinate)
+        // const coordHMS = toStringHDMS(lonLatCoord)
+
+        // const content = `HMS: ${coordHMS}`
+
+        // this.popovermgr.setNewPopover(e.coordinate, {
+        //   animation: false,
+        //   content,
+        //   placement: 'top',
+        //   title: 'Welcome to OpenLayers'
+        // })
+      }
+
+    })
     this.select.on(['select'], (this.manageZIndexOnSelect).bind(this))
 
   }
@@ -151,8 +173,11 @@ class ManagedMap {
           if (numselected > 1) {
             content = "Multiple tracks"
           } else {
+            const coord = e.mapBrowserEvent.coordinate
+            const lonLatCoord = toLonLat(coord)
+            const coordHMS = toStringHDMS(lonLatCoord)
             const trackId = trackIdSelectObject.selected[0]
-            content = "x"
+            content = `Track: ${trackId}<br>HMS: ${coordHMS}`
           }
 
 
@@ -173,7 +198,7 @@ class ManagedMap {
     return fn
   }
 
-  // set map view from bounding box in EPSG:4326
+  // set map view from bounding box in EPSG:4326 (GPS Lat Lon system https://epsg.io/4326 )
   setMapViewBbox(bbox: Extent) {
     const extent = transformExtent(
       bbox,
@@ -184,7 +209,7 @@ class ManagedMap {
     this.setMapView(extent)
   }
 
-  // set map view from extent in map projection EPSG:3857
+  // set map view from extent in map projection EPSG:3857 ( Web Mercator, OpenStreetmap https://epsg.io/3857 )
   setMapView(extent: Extent) {
     const mapSize = this.map.getSize()
     if (mapSize === undefined) { console.error("Map size is undefined"); return }

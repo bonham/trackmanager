@@ -166,10 +166,13 @@ export default {
 #mapdiv {
   width: 100%;
   /* needed - otherwise map does not show */
+
   flex-grow: 1;
   /* maybe not needed */
-  height: 30em;
-  /* needed - otherwise map does not show */
+
+  /* height: 30em; */
+  /* not needed and not useful - height is set as vh-100 in topmost container */
+
   min-height: 100%;
 }
 

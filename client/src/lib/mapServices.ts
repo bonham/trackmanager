@@ -18,12 +18,12 @@ import type BaseEvent from 'ol/events/Event'
 import type { GeoJsonObject } from 'geojson'
 import _ from 'lodash'
 import { StyleFactory } from './mapStyles'
-import { toStringHDMS } from 'ol/coordinate.js';
-import { toLonLat } from 'ol/proj'
+import type { Track } from '@/lib/Track'
 
 type SelectionObject = { selected: number[], deselected: number[] }
 type SelectCallbackFn = (x: SelectionObject) => void
-type GeoJSONWithTrackId = { id: number, geojson: GeoJsonObject }
+export type GeoJSONWithTrackId = { id: number, geojson: GeoJsonObject }
+export type GeoJsonWithTrack = { track: Track, geojson: GeoJsonObject }
 type FeatureIdMapMember = { vectorLayerId: string, trackId: number }
 
 
@@ -56,6 +56,7 @@ class ManagedMap {
   map: OlMap
   styleFactory: StyleFactory
   trackIdToLayerMap: Map<number, Layer>
+  trackMap: Map<number, Track>
   featureIdMap: Map<string, FeatureIdMapMember>
   selectCollection: Collection<Feature<Geometry>>
   select: Select
@@ -69,6 +70,7 @@ class ManagedMap {
     this.styleFactory = new StyleFactory()
     this.trackIdToLayerMap = new Map() // ids are keys, values are layers
     this.featureIdMap = new Map()
+    this.trackMap = new Map()
 
     // setup for track select interaction
     //
@@ -169,15 +171,19 @@ class ManagedMap {
         const numselected = trackIdSelectObject.selected.length
         if (numselected > 0) {
 
-          let content: string
+          let content = "no track details"
+          let title = "no track title"
           if (numselected > 1) {
             content = "Multiple tracks"
           } else {
-            const coord = e.mapBrowserEvent.coordinate
-            const lonLatCoord = toLonLat(coord)
-            const coordHMS = toStringHDMS(lonLatCoord)
             const trackId = trackIdSelectObject.selected[0]
-            content = `Track: ${trackId}<br>HMS: ${coordHMS}`
+            const track = this.trackMap.get(trackId)
+
+            if (track) {
+              const dateopts: Intl.DateTimeFormatOptions = { weekday: 'short', month: 'short', day: '2-digit', year: '2-digit' }
+              title = `${track.localeDateShort(dateopts)}`
+              content = `${track.name}<br>Dist: ${(track.distance() / 1000).toFixed()} km<br>Ascent: ${track.ascent.toFixed()} m`
+            }
           }
 
 
@@ -186,7 +192,7 @@ class ManagedMap {
             animation: false,
             content,
             placement: 'top',
-            title: 'Welcome to OpenLayers'
+            title
           })
         } else {
           // otherwise dispose
@@ -221,9 +227,10 @@ class ManagedMap {
     )
   }
 
-  addTrackLayer(geoJsonWithId: GeoJSONWithTrackId) { // geojsonwithid: { id: id, geojson: geojson }
-    const geojson = geoJsonWithId.geojson
-    const trackId = geoJsonWithId.id
+  addTrackLayer(geoJsonWithTrack: GeoJsonWithTrack) { // geojsonwithid: { id: id, geojson: geojson }
+    const geojson = geoJsonWithTrack.geojson
+    const track = geoJsonWithTrack.track
+    const trackId = track.id
 
     if (this.trackIdToLayerMap.has(trackId)) {
       console.log(`An attempt was made to add layer with track id ${trackId}, but a track with this id already exists in map layers`)
@@ -235,6 +242,7 @@ class ManagedMap {
     this.map.addLayer(vectorLayer)
     // add to maps
     this.trackIdToLayerMap.set(trackId, vectorLayer)
+    this.trackMap.set(trackId, track)
     featureIdList.forEach((fid) => {
       this.featureIdMap.set(fid, { vectorLayerId, trackId })
     })

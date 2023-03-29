@@ -10,6 +10,7 @@
 <script lang="ts">
 import { BSpinner } from 'bootstrap-vue-next'
 import { ManagedMap } from '@/lib/mapServices'
+import type { GeoJSONWithTrackId } from '@/lib/mapServices'
 import { TrackVisibilityManager } from '@/lib/mapStateHelpers'
 import { getGeoJson } from '@/lib/trackServices'
 import { mapMutations, mapGetters } from 'vuex'
@@ -34,7 +35,8 @@ export default {
   },
   computed: {
     ...mapGetters({
-      shouldBeVisibleIds: 'getLoadedTrackIds'
+      shouldBeVisibleIds: 'getLoadedTrackIds',
+      getTrackById: 'getTrackById'
     })
   },
   created() {
@@ -132,13 +134,16 @@ export default {
       const toBeLoaded = tvm.toBeLoaded()
       console.log('To be loaded: ', toBeLoaded)
 
-      let resultSet: any[] // TODO explicit type
+      let resultSet: GeoJSONWithTrackId[]
       if (toBeLoaded.length > 0) {
         resultSet = await getGeoJson(toBeLoaded, this.sid)
       } else {
         resultSet = []
       }
-      resultSet.forEach(result => { mmap.addTrackLayer(result) })
+      resultSet.forEach(result => {
+        const tr = this.getTrackById(result.id)
+        mmap.addTrackLayer({ track: tr, geojson: result.geojson })
+      })
 
       // B: tracks to hide
       const toHide = tvm.toBeHidden()

@@ -1,6 +1,7 @@
 import { Track } from '@/lib/Track'
 import type { TrackInitData, TrackPropertiesOptional } from '@/lib/Track'
 import _ from 'lodash'
+import type { GeoJSONWithTrackId } from '@/lib/mapServices'
 
 // /// Get all tracks
 async function getAllTracks(sid: string) {
@@ -83,12 +84,12 @@ async function getGeoJson(idList: number[], sid: string) {
   if (response.ok) {
     let respJson
     try {
-      respJson = await response.json()
+      respJson = (await response.json() as GeoJSONWithTrackId[])
     } catch (e) {
       if (e instanceof SyntaxError) {
         console.log(e)
         throw new Error('Failed to convert response to json. Response')
-      }
+      } else throw new Error("Unknown error after trying to read json response")
     }
     return respJson
   } else {

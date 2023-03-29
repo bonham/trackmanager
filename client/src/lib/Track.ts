@@ -93,10 +93,12 @@ class Track {
     )
   }
 
-  localeDateShort() {
+  localeDateShort(opts?: Intl.DateTimeFormatOptions) {
+
+    const ouropts = opts || DateTime.DATE_SHORT
     return (
       this.time
-        ? this.time.toLocaleString(DateTime.DATE_SHORT)
+        ? this.time.toLocaleString(ouropts)
         : ''
     )
   }

@@ -62,7 +62,7 @@ export default {
         }
       }
     )
-    // watch if tracks are loaded and should be drawn
+    // watch for a command in store to redraw the tracks on the map
     const unboundRedrawTracks = this.redrawTracks
     const boundRedrawTracks = unboundRedrawTracks.bind(this)
     this.$watch(
@@ -96,7 +96,7 @@ export default {
         if (selectionUpdateObj !== null) {
           const selectedTrackids = selectionUpdateObj.selected
           await this.mmap.setSelectedTracks(selectedTrackids)
-          await this.clearSelectionForMap()
+          await this.clearSelectionForMap() // clear command
           setTimeout(
             (this.mmap.setExtentAndZoomOut).bind(this.mmap),
             1
@@ -117,6 +117,8 @@ export default {
     })
   },
   methods: {
+    // method is redrawing tracks AND resetting selection ! 
+    // ( the latter might need to be factored out)
     redrawTracks: async function () {
       this.loading = true
       if (this.mmap === null) {
@@ -124,6 +126,11 @@ export default {
         return
       }
       const mmap = this.mmap
+
+      // reset selection and popups
+      mmap.clearSelection()
+      mmap.popovermgr?.dispose()
+
       const tvm = new TrackVisibilityManager(
         mmap.getTrackIdsVisible(),
         this.shouldBeVisibleIds,
@@ -156,7 +163,7 @@ export default {
       _.forEach(toHide, function (id) { mmap.setInvisible(id) })
 
       this.loading = false
-      this.mmap.setExtentAndZoomOut()
+      mmap.setExtentAndZoomOut()
     },
     ...mapMutations([
       'resizeMapClear',

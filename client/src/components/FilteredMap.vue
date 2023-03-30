@@ -75,6 +75,7 @@ export default {
             console.log('Warn: Triggering redrawTracks watch while a redraw is running')
           }
           await boundRedrawTracks()
+          await this.mmap?.setSelectedTracks([])
           this.redrawTracksOnMapFlag(false)
         }
       }

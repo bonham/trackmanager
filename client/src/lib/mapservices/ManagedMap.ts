@@ -228,18 +228,19 @@ export class ManagedMap {
     })
   }
 
-  setSelectedTracks(obj: SelectionObject) {
-    const selected = obj.selected
-    // const deselected = obj.deselected
-
-    console.log('Warning: can only select first track of list')
-
+  clearSelection() {
     // reset current selection
-    const selectCollection = this.selectCollection
-    selectCollection.forEach((feature) => {
+    this.selectCollection.forEach((feature) => {
       this.setZIndex(feature, this.ZINDEX_DEFAULT)
     })
-    selectCollection.clear()
+    this.selectCollection.clear()
+  }
+
+  setSelectedTracks(obj: SelectionObject) {
+    const selected = obj.selected
+
+    console.log('Warning: can only select first track of list')
+    this.clearSelection()
 
     // do nothing
     if (selected.length === 0) return
@@ -258,7 +259,7 @@ export class ManagedMap {
       console.log(`Not exactly 1 feature in layer, but: ${features.length}`)
     } else {
       this.setZIndex(features[0], this.ZINDEX_SELECTED)
-      selectCollection.push(features[0])
+      this.selectCollection.push(features[0])
     }
   }
 

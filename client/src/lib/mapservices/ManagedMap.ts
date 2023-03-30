@@ -236,8 +236,10 @@ export class ManagedMap {
     this.selectCollection.clear()
   }
 
-  setSelectedTracks(obj: SelectionObject) {
-    const selected = obj.selected
+  // set a list of tracks as selected and
+  // all other tracks will be 'deselected'
+  setSelectedTracks(trackIdList: number[]) {
+    const selected = trackIdList
 
     console.log('Warning: can only select first track of list')
     this.clearSelection()

@@ -79,7 +79,11 @@ export default {
         }
       }
     )
-    // watch for selected tracks
+
+    // watch for a command in store
+    // Select / deselect events can be transmitted
+    // after completion of the action, the 'selectionForMap'
+    // will be cleared
     this.$watch(
       () => {
         return this.$store.state.selectionForMap
@@ -90,7 +94,8 @@ export default {
           return
         }
         if (selectionUpdateObj !== null) {
-          await this.mmap.setSelectedTracks(selectionUpdateObj)
+          const selectedTrackids = selectionUpdateObj.selected
+          await this.mmap.setSelectedTracks(selectedTrackids)
           await this.clearSelectionForMap()
           setTimeout(
             (this.mmap.setExtentAndZoomOut).bind(this.mmap),

@@ -1,7 +1,7 @@
 import { Track } from '@/lib/Track'
 import type { TrackInitData, TrackPropertiesOptional } from '@/lib/Track'
 import _ from 'lodash'
-import type { GeoJSONWithTrackId } from '@/lib/mapServices'
+import type { GeoJSONWithTrackId } from '@/lib/mapservices/ManagedMap'
 
 // /// Get all tracks
 async function getAllTracks(sid: string) {

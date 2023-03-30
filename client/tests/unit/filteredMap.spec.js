@@ -2,7 +2,7 @@ import { render } from '@testing-library/vue'
 import { mount } from '@vue/test-utils'
 
 import FilteredMap from '@/components/FilteredMap.vue'
-import { ManagedMap } from '@/lib/mapServices'
+import { ManagedMap } from '@/lib/mapservices/ManagedMap'
 
 import { createStore } from 'vuex'
 import { store } from '../../src/store'

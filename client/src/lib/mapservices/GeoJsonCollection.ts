@@ -1,7 +1,7 @@
 import _ from 'lodash'
 import type { GeoJsonObject } from 'geojson'
 
-type GeoJSONObjectWithId = { geojson: GeoJsonObject, id: number }
+export type GeoJSONObjectWithId = { geojson: GeoJsonObject, id: number }
 
 class GeoJsonCollection {
   geoJsonList: GeoJSONObjectWithId[]

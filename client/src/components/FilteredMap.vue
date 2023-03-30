@@ -9,8 +9,8 @@
 </template>
 <script lang="ts">
 import { BSpinner } from 'bootstrap-vue-next'
-import { ManagedMap } from '@/lib/mapServices'
-import type { GeoJSONWithTrackId } from '@/lib/mapServices'
+import { ManagedMap } from '@/lib/mapservices/ManagedMap'
+import type { GeoJSONWithTrackId } from '@/lib/mapservices/ManagedMap'
 import { TrackVisibilityManager } from '@/lib/mapStateHelpers'
 import { getGeoJson } from '@/lib/trackServices'
 import { mapMutations, mapGetters } from 'vuex'

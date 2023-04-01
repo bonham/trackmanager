@@ -22,7 +22,7 @@
   </div>
 </template>
 <script lang="ts">
-import { mapState, mapMutations } from 'vuex'
+import { mapState } from 'vuex'
 import { BListGroup, BListGroupItem, BCard, BSpinner } from 'bootstrap-vue-next'
 import { TrackCollection, Track } from '@/lib/Track'
 
@@ -111,12 +111,6 @@ export default {
       const selected = [newTrackId]
 
       this.updateSelectedTracksData(selected, deselected)
-      this.updateSelectionForMap(
-        {
-          selected: [newTrackId],
-          deselected
-        }
-      )
     },
     updateSelectedTracksData(toSelectList: number[], toDeselectList: number[]) {
       toDeselectList.forEach(tid => {
@@ -127,9 +121,6 @@ export default {
       })
       this.selectedTrackList = toSelectList
     },
-    ...mapMutations([
-      'updateSelectionForMap'
-    ])
   }
 }
 </script>

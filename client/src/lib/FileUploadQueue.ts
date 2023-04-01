@@ -1,6 +1,6 @@
 import { uploadFile, UploadError } from "./uploadFile"
 import type { QueuedFile, QueueStatus } from "./uploadFile"
-const queue = require('async/queue')
+import { queue } from 'async'
 
 const FORMPARAM = 'newtrack'
 const WORKERS = 4

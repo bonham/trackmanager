@@ -1,5 +1,7 @@
 import { DateTime } from 'luxon'
 import _ from 'lodash'
+import type { GeoJsonObject } from 'geojson'
+
 
 // const sprintf = require('sprintf-js').sprintf
 import { sprintf } from 'sprintf-js'
@@ -16,7 +18,7 @@ type TrackProperties = {
   src: string,
   timelength: number,
   ascent: number,
-  geojson: any,
+  geojson: GeoJsonObject,
   time: DateTime
 }
 
@@ -27,7 +29,7 @@ type TrackInitData = {
   src: string,
   timelength: number | null,
   ascent: number,
-  geojson: any,
+  geojson: GeoJsonObject | null,
   time: string | null
 }
 type TrackPropertiesOptional = {
@@ -37,7 +39,7 @@ type TrackPropertiesOptional = {
   src?: string,
   timelength?: number,
   ascent?: number,
-  geojson?: any,
+  geojson?: GeoJsonObject,
   time?: DateTime | null | undefined
 }
 
@@ -61,7 +63,7 @@ class Track {
     this.ascent = initData.ascent
     this.geojson = ('geojson' in initData ? initData.geojson : null)
 
-    if (initData.time === null) {
+    if (!initData.time) {
       this.time = null
     } else {
       const tmpTime = DateTime.fromISO(initData.time)
@@ -93,10 +95,12 @@ class Track {
     )
   }
 
-  localeDateShort() {
+  localeDateShort(opts?: Intl.DateTimeFormatOptions) {
+
+    const ouropts = opts || DateTime.DATE_SHORT
     return (
       this.time
-        ? this.time.toLocaleString(DateTime.DATE_SHORT)
+        ? this.time.toLocaleString(ouropts)
         : ''
     )
   }

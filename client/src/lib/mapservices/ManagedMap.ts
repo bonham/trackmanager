@@ -1,25 +1,29 @@
+import { ExtentCollection } from '@/lib/mapservices/ExtentCollection'
+import { PopoverManager } from '@/lib/mapservices/PopoverManager'
+import { createLayerFromGeoJson } from '@/lib/mapservices/createLayerFromGeoJson'
+import { ZoomToTracksControl } from './ZoomToTracksControl'
+
 import { Feature, Map as OlMap, View } from 'ol' // rename needed not to conflict with javascript native Map()
 import { transformExtent } from 'ol/proj'
 import type { Extent } from 'ol/extent'
-import { Layer, Tile as TileLayer, Vector as VectorLayer } from 'ol/layer'
+import { Layer, Tile as TileLayer } from 'ol/layer'
 import { OSM, Vector as VectorSource } from 'ol/source'
-import { Control, defaults as defaultControls } from 'ol/control'
-import type { Options as ZoomOptions } from 'ol/control/Zoom'
+import { defaults as defaultControls } from 'ol/control'
 import Collection from 'ol/Collection'
 import Select from 'ol/interaction/Select'
 import { getUid } from 'ol/util'
-import GeoJSON from 'ol/format/GeoJSON'
 import type { Geometry } from 'ol/geom'
 import { SelectEvent } from 'ol/interaction/Select'
 import type BaseEvent from 'ol/events/Event'
 import type { GeoJsonObject } from 'geojson'
 import _ from 'lodash'
-import { StyleFactory } from './mapStyles'
-import type { StyleLike } from 'ol/style/Style'
+import { StyleFactory } from '../mapStyles'
+import type { Track } from '@/lib/Track'
 
 type SelectionObject = { selected: number[], deselected: number[] }
 type SelectCallbackFn = (x: SelectionObject) => void
-type GeoJSONWithTrackId = { id: number, geojson: GeoJsonObject }
+export type GeoJSONWithTrackId = { id: number, geojson: GeoJsonObject }
+export type GeoJsonWithTrack = { track: Track, geojson: GeoJsonObject }
 type FeatureIdMapMember = { vectorLayerId: string, trackId: number }
 
 
@@ -47,14 +51,16 @@ How to use:
 }
 
  */
-class ManagedMap {
+export class ManagedMap {
 
   map: OlMap
   styleFactory: StyleFactory
   trackIdToLayerMap: Map<number, Layer>
+  trackMap: Map<number, Track>
   featureIdMap: Map<string, FeatureIdMapMember>
   selectCollection: Collection<Feature<Geometry>>
   select: Select
+  popovermgr = null as (null | PopoverManager)
 
 
   constructor(opts?: { selectCallBackFn: SelectCallbackFn }) {
@@ -64,6 +70,7 @@ class ManagedMap {
     this.styleFactory = new StyleFactory()
     this.trackIdToLayerMap = new Map() // ids are keys, values are layers
     this.featureIdMap = new Map()
+    this.trackMap = new Map()
 
     // setup for track select interaction
     //
@@ -86,6 +93,12 @@ class ManagedMap {
 
     this.select.on(['select'], boundSelectHandler)
     this.select.on(['select'], (this.manageZIndexOnSelect).bind(this))
+
+  }
+
+  initPopup(popupElement: HTMLElement) {
+    this.popovermgr = new PopoverManager(popupElement)
+    this.map.addOverlay(this.popovermgr.getOverlay())
   }
 
   ZINDEX_DEFAULT = 0
@@ -115,7 +128,7 @@ class ManagedMap {
     const fn = (e: BaseEvent | Event) => {
 
       if (!(e instanceof SelectEvent)) {
-        console.error("Expected SelectEvent, but dit not get it")
+        console.error("Expected SelectEvent, but dit get different type")
         return
       }
 
@@ -131,12 +144,47 @@ class ManagedMap {
         if (tid === undefined) { console.error("Got Track id which is undefined") }
         else { trackIdSelectObject.deselected.push(tid) }
       })
+
+      if (this.popovermgr) {
+
+        // only set popup on selected
+        const numselected = trackIdSelectObject.selected.length
+        if (numselected > 0) {
+
+          let content = "no track details"
+          let title = "no track title"
+          if (numselected > 1) {
+            content = "Multiple tracks"
+          } else {
+            const trackId = trackIdSelectObject.selected[0]
+            const track = this.trackMap.get(trackId)
+
+            if (track) {
+              const dateopts: Intl.DateTimeFormatOptions = { weekday: 'short', month: 'short', day: '2-digit', year: '2-digit' }
+              title = `${track.localeDateShort(dateopts)}`
+              content = `${track.name}<br>Dist: ${(track.distance() / 1000).toFixed()} km<br>Ascent: ${track.ascent.toFixed()} m`
+            }
+          }
+
+
+          const coord = e.mapBrowserEvent.coordinate
+          this.popovermgr.setNewPopover(coord, {
+            animation: false,
+            content,
+            placement: 'top',
+            title
+          })
+        } else {
+          // otherwise dispose
+          this.popovermgr.dispose()
+        }
+      }
       callBackFn(trackIdSelectObject)
     }
     return fn
   }
 
-  // set map view from bounding box in EPSG:4326
+  // set map view from bounding box in EPSG:4326 (GPS Lat Lon system https://epsg.io/4326 )
   setMapViewBbox(bbox: Extent) {
     const extent = transformExtent(
       bbox,
@@ -147,7 +195,7 @@ class ManagedMap {
     this.setMapView(extent)
   }
 
-  // set map view from extent in map projection EPSG:3857
+  // set map view from extent in map projection EPSG:3857 ( Web Mercator, OpenStreetmap https://epsg.io/3857 )
   setMapView(extent: Extent) {
     const mapSize = this.map.getSize()
     if (mapSize === undefined) { console.error("Map size is undefined"); return }
@@ -159,37 +207,42 @@ class ManagedMap {
     )
   }
 
-  addTrackLayer(geoJsonWithId: GeoJSONWithTrackId) { // geojsonwithid: { id: id, geojson: geojson }
-    const geojson = geoJsonWithId.geojson
-    const trackId = geoJsonWithId.id
+  addTrackLayer(geoJsonWithTrack: GeoJsonWithTrack) { // geojsonwithid: { id: id, geojson: geojson }
+    const geojson = geoJsonWithTrack.geojson
+    const track = geoJsonWithTrack.track
+    const trackId = track.id
 
     if (this.trackIdToLayerMap.has(trackId)) {
       console.log(`An attempt was made to add layer with track id ${trackId}, but a track with this id already exists in map layers`)
       return
     }
     const style = this.styleFactory.getNext()
-    const { featureIdList, vectorLayer } = createLayer(geojson, style)
+    const { featureIdList, vectorLayer } = createLayerFromGeoJson(geojson, style)
     const vectorLayerId = getUid(vectorLayer)
     this.map.addLayer(vectorLayer)
     // add to maps
     this.trackIdToLayerMap.set(trackId, vectorLayer)
+    this.trackMap.set(trackId, track)
     featureIdList.forEach((fid) => {
       this.featureIdMap.set(fid, { vectorLayerId, trackId })
     })
   }
 
-  setSelectedTracks(obj: SelectionObject) {
-    const selected = obj.selected
-    // const deselected = obj.deselected
-
-    console.log('Warning: can only select first track of list')
-
+  clearSelection() {
     // reset current selection
-    const selectCollection = this.selectCollection
-    selectCollection.forEach((feature) => {
+    this.selectCollection.forEach((feature) => {
       this.setZIndex(feature, this.ZINDEX_DEFAULT)
     })
-    selectCollection.clear()
+    this.selectCollection.clear()
+  }
+
+  // set a list of tracks as selected and
+  // all other tracks will be 'deselected'
+  setSelectedTracks(trackIdList: number[]) {
+    const selected = trackIdList
+
+    console.log('Warning: can only select first track of list')
+    this.clearSelection()
 
     // do nothing
     if (selected.length === 0) return
@@ -208,7 +261,7 @@ class ManagedMap {
       console.log(`Not exactly 1 feature in layer, but: ${features.length}`)
     } else {
       this.setZIndex(features[0], this.ZINDEX_SELECTED)
-      selectCollection.push(features[0])
+      this.selectCollection.push(features[0])
     }
   }
 
@@ -345,101 +398,3 @@ class ManagedMap {
     }
   }
 }
-
-interface ZoomToTracksControlOptions extends ZoomOptions {
-  actionCallBack: (() => void)
-}
-class ZoomToTracksControl extends Control {
-  /**
-   * @param {Object} [optOptions] Control options.
-   */
-  constructor(optOptions: ZoomToTracksControlOptions) {
-    // options:
-    //   actionsCallback
-    const options = optOptions
-
-    const button = document.createElement('button')
-    // const svg = document.createElement('svg')
-
-    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-fullscreen" viewBox="0 0 16 16"><path d="M1.5 1a.5.5 0 0 0-.5.5v4a.5.5 0 0 1-1 0v-4A1.5 1.5 0 0 1 1.5 0h4a.5.5 0 0 1 0 1h-4zM10 .5a.5.5 0 0 1 .5-.5h4A1.5 1.5 0 0 1 16 1.5v4a.5.5 0 0 1-1 0v-4a.5.5 0 0 0-.5-.5h-4a.5.5 0 0 1-.5-.5zM.5 10a.5.5 0 0 1 .5.5v4a.5.5 0 0 0 .5.5h4a.5.5 0 0 1 0 1h-4A1.5 1.5 0 0 1 0 14.5v-4a.5.5 0 0 1 .5-.5zm15 0a.5.5 0 0 1 .5.5v4a1.5 1.5 0 0 1-1.5 1.5h-4a.5.5 0 0 1 0-1h4a.5.5 0 0 0 .5-.5v-4a.5.5 0 0 1 .5-.5z"/></svg>'
-
-    const element = document.createElement('div')
-    element.className = 'map-control-expand ol-unselectable ol-control'
-    element.appendChild(button)
-
-    super({
-      element,
-      target: options.target
-    })
-
-    button.addEventListener('click', optOptions.actionCallBack, false)
-  }
-}
-
-// create a layer from a geojson
-function createLayer(geoJson: GeoJsonObject, style: StyleLike) {
-  // load track
-
-  const features = new GeoJSON().readFeatures(
-    geoJson,
-    {
-      dataProjection: 'EPSG:4326',
-      featureProjection: 'EPSG:3857'
-    }
-  )
-  const featureIdList = features.map((f) => getUid(f))
-
-  const vectorSource = new VectorSource({
-    features
-  })
-
-  const vectorLayer = new VectorLayer({
-    source: vectorSource,
-    style
-  })
-  return { featureIdList, vectorLayer }
-}
-
-class ExtentCollection {
-  extentList: Extent[]
-  constructor(extentList: Extent[]) { // one extent is: [minx, miny, maxx, maxy]
-    if (extentList.length === 0) throw new Error("Extentlist must have one element")
-    this.extentList = extentList
-  }
-
-  boundingBox() {
-    const l = this.extentList
-
-    const left = _.min(_.map(l, (x) => { return x[0] })) as number
-    const bottom = _.min(_.map(l, (x) => { return x[1] })) as number
-    const right = _.max(_.map(l, (x) => { return x[2] })) as number
-    const top = _.max(_.map(l, (x) => { return x[3] })) as number
-    return [left, bottom, right, top]
-  }
-}
-type GeoJSONObjectWithId = { geojson: GeoJsonObject, id: number }
-class GeoJsonCollection {
-  geoJsonList: GeoJSONObjectWithId[]
-  constructor(geoJsonList: GeoJSONObjectWithId[]) {
-    this.geoJsonList = geoJsonList
-  }
-
-  // calculate maximum bounding box for all geojson objects
-  boundingBox() {
-    const l = this.geoJsonList
-
-    function pickBbox(go: GeoJSONObjectWithId) {
-      const bbox = go.geojson.bbox
-      if (bbox == undefined) { throw new Error("geojson does not have bbox") }
-      return bbox
-    }
-
-    const left = _.min(_.map(l, (x) => { return pickBbox(x)[0] }))
-    const bottom = _.min(_.map(l, (x) => { return pickBbox(x)[1] }))
-    const right = _.max(_.map(l, (x) => { return pickBbox(x)[2] }))
-    const top = _.max(_.map(l, (x) => { return pickBbox(x)[3] }))
-    return [left, bottom, right, top]
-  }
-}
-
-export { ManagedMap, GeoJsonCollection, ExtentCollection }

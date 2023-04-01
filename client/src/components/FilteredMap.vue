@@ -4,11 +4,13 @@
     <div v-if="loading" class="mapspinner">
       <b-spinner />
     </div>
+    <div ref="popupdiv"></div>
   </div>
 </template>
 <script lang="ts">
 import { BSpinner } from 'bootstrap-vue-next'
-import { ManagedMap } from '@/lib/mapServices'
+import { ManagedMap } from '@/lib/mapservices/ManagedMap'
+import type { GeoJSONWithTrackId } from '@/lib/mapservices/ManagedMap'
 import { TrackVisibilityManager } from '@/lib/mapStateHelpers'
 import { getGeoJson } from '@/lib/trackServices'
 import { mapMutations, mapGetters } from 'vuex'
@@ -33,7 +35,8 @@ export default {
   },
   computed: {
     ...mapGetters({
-      shouldBeVisibleIds: 'getLoadedTrackIds'
+      shouldBeVisibleIds: 'getLoadedTrackIds',
+      getTrackById: 'getTrackById'
     })
   },
   created() {
@@ -59,7 +62,7 @@ export default {
         }
       }
     )
-    // watch if tracks are loaded and should be drawn
+    // watch for a command in store to redraw the tracks on the map
     const unboundRedrawTracks = this.redrawTracks
     const boundRedrawTracks = unboundRedrawTracks.bind(this)
     this.$watch(
@@ -76,7 +79,11 @@ export default {
         }
       }
     )
-    // watch for selected tracks
+
+    // watch for a command in store
+    // Select / deselect events can be transmitted
+    // after completion of the action, the 'selectionForMap'
+    // will be cleared
     this.$watch(
       () => {
         return this.$store.state.selectionForMap
@@ -87,8 +94,9 @@ export default {
           return
         }
         if (selectionUpdateObj !== null) {
-          await this.mmap.setSelectedTracks(selectionUpdateObj)
-          await this.clearSelectionForMap()
+          const selectedTrackids = selectionUpdateObj.selected
+          await this.mmap.setSelectedTracks(selectedTrackids)
+          await this.clearSelectionForMap() // clear command
           setTimeout(
             (this.mmap.setExtentAndZoomOut).bind(this.mmap),
             1
@@ -104,9 +112,13 @@ export default {
         return
       }
       this.mmap.map.setTarget('mapdiv')
+      const popupDiv = this.$refs.popupdiv as HTMLElement
+      this.mmap.initPopup(popupDiv)
     })
   },
   methods: {
+    // method is redrawing tracks AND resetting selection ! 
+    // ( the latter might need to be factored out)
     redrawTracks: async function () {
       this.loading = true
       if (this.mmap === null) {
@@ -114,6 +126,11 @@ export default {
         return
       }
       const mmap = this.mmap
+
+      // reset selection and popups
+      mmap.clearSelection()
+      mmap.popovermgr?.dispose()
+
       const tvm = new TrackVisibilityManager(
         mmap.getTrackIdsVisible(),
         this.shouldBeVisibleIds,
@@ -129,13 +146,16 @@ export default {
       const toBeLoaded = tvm.toBeLoaded()
       console.log('To be loaded: ', toBeLoaded)
 
-      let resultSet: any[] // TODO explicit type
+      let resultSet: GeoJSONWithTrackId[]
       if (toBeLoaded.length > 0) {
         resultSet = await getGeoJson(toBeLoaded, this.sid)
       } else {
         resultSet = []
       }
-      resultSet.forEach(result => { mmap.addTrackLayer(result) })
+      resultSet.forEach(result => {
+        const tr = this.getTrackById(result.id)
+        mmap.addTrackLayer({ track: tr, geojson: result.geojson })
+      })
 
       // B: tracks to hide
       const toHide = tvm.toBeHidden()
@@ -143,7 +163,7 @@ export default {
       _.forEach(toHide, function (id) { mmap.setInvisible(id) })
 
       this.loading = false
-      this.mmap.setExtentAndZoomOut()
+      mmap.setExtentAndZoomOut()
     },
     ...mapMutations([
       'resizeMapClear',
@@ -163,10 +183,13 @@ export default {
 #mapdiv {
   width: 100%;
   /* needed - otherwise map does not show */
+
   flex-grow: 1;
   /* maybe not needed */
-  height: 30em;
-  /* needed - otherwise map does not show */
+
+  /* height: 30em; */
+  /* not needed and not useful - height is set as vh-100 in topmost container */
+
   min-height: 100%;
 }
 
@@ -177,5 +200,9 @@ export default {
 
 .mapspinner {
   position: absolute;
+}
+
+.popover-body {
+  min-width: 276px;
 }
 </style>

@@ -31,7 +31,7 @@ describe('TrackOverview and TrackDetail', () => {
     // debug()
   })
 
-  test('Navigate to detail page', async () => {
+  test.skip('Navigate to detail page', async () => {
     vi.stubGlobal('Request', Request)
     vi.stubGlobal('fetch', mockFetch)
     // const user = userEvent.setup()

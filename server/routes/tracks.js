@@ -45,8 +45,8 @@ router.get(
     try {
       const queryResult = await pool.query(
         'select id, name, length, src, ' +
-      'time, timelength, ascent ' +
-      `from ${schema}.tracks order by time`)
+        'time, timelength, ascent ' +
+        `from ${schema}.tracks order by time`)
 
       const rows = queryResult.rows
       // convert geojson string to object
@@ -73,7 +73,7 @@ router.post(
   async (req, res) => {
     const schema = req.schema
     try {
-    // validate expected property
+      // validate expected property
       if (!(_.has(req.body, 'ids'))) {
         throw new Error('Request does not contain expected property')
       }
@@ -120,8 +120,8 @@ router.get(
     const trackId = req.params.trackId
 
     const query = 'select id, name, length, src,' +
-    'time, timelength, ascent ' +
-    `from ${schema}.tracks where id = '${trackId}'`
+      'time, timelength, ascent ' +
+      `from ${schema}.tracks where id = '${trackId}'`
 
     let rows
     try {
@@ -225,12 +225,12 @@ router.delete(
       `where track_id = ${trackId}`
 
     const query2 =
-    `delete from ${schema}.segments ` +
-    `where track_id = ${trackId}`
+      `delete from ${schema}.segments ` +
+      `where track_id = ${trackId}`
 
     const query3 =
-    `delete from ${schema}.tracks ` +
-    `where id = ${trackId}`
+      `delete from ${schema}.tracks ` +
+      `where id = ${trackId}`
 
     try {
       await pool.query(query1)
@@ -306,17 +306,18 @@ router.post(
     ]
 
     // run child process - execute python executable to process the upload
+    let stdout = ''
     try {
-      // console.log('Command: ', gpx2dbScript, args)
-      const stdout = execFileSync(gpx2dbScript, args, { encoding: 'utf-8' })
-      // const stdout = stdoutBuf.toString()
+      console.log('Command: ', gpx2dbScript, args)
+      stdout = execFileSync(gpx2dbScript, args, { encoding: 'utf-8' })
       console.log(`Stdout >>${stdout}<<`)
     } catch (err) {
-      console.log('Child error', err.message)
+      console.log(`Stdout >>${stdout}<<`)
+      console.log('Child error', err)
       res.status(422).json({ message: err.message })
       return
     } finally {
-    // cleanup of file and directory
+      // cleanup of file and directory
       fsprom.rmdir(uploadDir, { recursive: true }).then(
         (result) => console.log('Successfully purged upload dir'),
         (err) => { console.log('Error, could not remove directory', err) }

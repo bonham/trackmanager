@@ -8,6 +8,7 @@ const path = require('path')
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  base: "/tm",
   plugins: [
     vue(),
     Components({

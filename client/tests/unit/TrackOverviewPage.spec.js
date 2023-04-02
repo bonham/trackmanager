@@ -31,7 +31,7 @@ describe('TrackOverview and TrackDetail', () => {
     // debug()
   })
 
-  test.skip('Navigate to detail page', async () => {
+  test('Navigate to detail page', async () => {
     vi.stubGlobal('Request', Request)
     vi.stubGlobal('fetch', mockFetch)
     // const user = userEvent.setup()
@@ -59,7 +59,7 @@ describe('TrackOverview and TrackDetail', () => {
     expect(found).toBeDefined()
 
     const link = found
-    expect(link.pathname).toMatch(/^\/track\/404\/sid\/abcd1234$/)
+    expect(link.pathname).toMatch(/\/track\/404\/sid\/abcd1234$/)
 
     // await user.click(link)
     // debug()

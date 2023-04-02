@@ -13,10 +13,10 @@
             / {{ track.timeLengthFormatted() }} h
           </div>
         </b-col>
-        <b-col cols="3" class="d-flex align-items-center justify-content-end" title="Link is disabled">
-          <!-- <b-link :to="'/track/' + track.id + '/sid/' + sid" :aria-label="ariaLinkLabel"> -->
-          <i-bi-chevron-right />
-          <!-- </b-link> -->
+        <b-col cols="3" class="d-flex align-items-center justify-content-end">
+          <b-link :to="'/track/' + track.id + '/sid/' + sid" :aria-label="ariaLinkLabel">
+            <i-bi-chevron-right />
+          </b-link>
         </b-col>
       </b-row>
     </b-card-text>
@@ -37,8 +37,8 @@ export default {
     BCard,
     BCardText,
     BRow,
-    BCol
-    // BLink
+    BCol,
+    BLink
   },
   props: {
     track: {

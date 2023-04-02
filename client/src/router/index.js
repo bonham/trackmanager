@@ -39,6 +39,12 @@ const router = createRouter({
       name: 'TrackMultiEditPage',
       component: () => import('../views/TrackMultiEditPage.vue'),
       props: true
+    },
+    {
+      path: '/track/:id/sid/:sid',
+      name: 'TrackDetailPage',
+      component: () => import('../views/TrackDetailPage.vue'),
+      props: true
     }
   ]
 })

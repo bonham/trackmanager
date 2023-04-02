@@ -162,7 +162,8 @@ export class ManagedMap {
             if (track) {
               const dateopts: Intl.DateTimeFormatOptions = { weekday: 'short', month: 'short', day: '2-digit', year: '2-digit' }
               title = `${track.localeDateShort(dateopts)}`
-              content = `${track.name}<br>Dist: ${(track.distance() / 1000).toFixed()} km<br>Ascent: ${track.ascent.toFixed()} m`
+              content = `${track.name}<br>Dist: ${(track.distance() / 1000).toFixed()} km`
+              content += track.ascentString() ? `<br>Ascent: ${track.ascentString()}` : ""
             }
           }
 

@@ -34,24 +34,24 @@ type TrackInitData = {
 }
 type TrackPropertiesOptional = {
   id?: number,
-  name?: string,
-  length?: number,
-  src?: string,
-  timelength?: number,
-  ascent?: number,
-  geojson?: GeoJsonObject,
+  name?: string | null,
+  length?: number | null,
+  src?: string | null,
+  timelength?: number | null,
+  ascent?: number | null,
+  geojson?: GeoJsonObject | null,
   time?: DateTime | null | undefined
 }
 
 class Track {
 
   id: number
-  name: string
-  length: number
-  src: string
-  timelength: number
-  ascent: number
-  geojson: any
+  name: string | null
+  length: number | null
+  src: string | null
+  timelength: number | null
+  ascent: number | null
+  geojson: GeoJsonObject | null
   time: DateTime | null | undefined
 
   constructor(initData: TrackInitData) { // id, name, length, src, time, timelength, ascent
@@ -73,6 +73,10 @@ class Track {
         this.time = null
       }
     }
+  }
+
+  ascentString() {
+    return this.ascent === null ? "" : this.ascent.toFixed() + " m"
   }
 
   distance() {
@@ -115,12 +119,18 @@ class Track {
   }
 
   timeLengthHms() {
-    return this.secondsToHms(this.timelength)
+    if (this.timelength === null) {
+      return null
+    } else {
+      return this.secondsToHms(this.timelength)
+    }
   }
 
   timeLengthFormatted() {
     const thms = this.timeLengthHms()
-    return sprintf('%d:%02d', thms.hours, thms.minutes)
+    if (thms === null) {
+      return ""
+    } else return sprintf('%d:%02d', thms.hours, thms.minutes)
   }
 
   secondsSinceEpoch() {

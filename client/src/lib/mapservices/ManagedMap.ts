@@ -145,6 +145,7 @@ export class ManagedMap {
         else { trackIdSelectObject.deselected.push(tid) }
       })
 
+      // Manage popup: show on select
       if (this.popovermgr) {
 
         // only set popup on selected

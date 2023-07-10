@@ -1,77 +1,48 @@
-<!-- eslint-disable vue/first-attribute-linebreak -->
 <template>
   <div>
-    <b-navbar class="shadow-sm" toggleable="sm">
-      <b-navbar-brand href="#">Trackmanager</b-navbar-brand>
-      <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
-      <b-collapse id="nav-collapse" is-nav>
-        <b-navbar-nav class="my-2 my-md-0 mr-md-3">
-          <b-nav-item-dropdown id="dropdown-1" text="Filter" toggle-class="nav-link-custom" right class="p-2">
-            <b-dropdown-item :to="navPath('/select_tracks')" class="p-2">Year</b-dropdown-item>
-            <b-dropdown-item class="p-2" disabled>Text</b-dropdown-item>
-            <b-dropdown-item class="p-2" disabled>Area</b-dropdown-item>
-          </b-nav-item-dropdown>
 
-          <b-nav-item-dropdown id="dropdown-2" text="List" toggle-class="nav-link-custom" right class="p-2">
-            <b-nav-item :to="navPath('/toverview')" class="p-2">
-              Sections
-            </b-nav-item>
-            <b-nav-item :to="navPath('/tracklist')" class="p-2">
-              Flat
-            </b-nav-item>
-          </b-nav-item-dropdown>
+    <nav class="navbar navbar-expand-sm bg-body-tertiary shadow-sm py-3">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#">Trackmanager</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown"
+          aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavDropdown">
+          <ul class="navbar-nav">
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                Filter
+              </a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="#">Year</a></li>
+                <li><a class="dropdown-item" href="#">Text</a></li>
+                <li><a class="dropdown-item" href="#">Area</a></li>
+              </ul>
+            </li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                List
+              </a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="#">Sections</a></li>
+                <li><a class="dropdown-item" href="#">Flat</a></li>
+              </ul>
+            </li>
 
-          <b-nav-item-dropdown id="dropdown-3" text="Maintain" toggle-class="nav-link-custom" right class="p-2">
-            <b-nav-item :to="navPath('/track_multi_edit')" class="p-2 ">
-              Edit
-            </b-nav-item>
-            <b-nav-item :to="navPath('/upload')" class="p-2 ">
-              Upload
-            </b-nav-item>
-          </b-nav-item-dropdown>
-        </b-navbar-nav>
-      </b-collapse>
-    </b-navbar>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                Maintain
+              </a>
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="#">Edit</a></li>
+                <li><a class="dropdown-item" href="#">Upload</a></li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
   </div>
 </template>
-
-<script lang="ts">
-import { BNavbar, BNavbarNav, BNavbarToggle, BNavbarBrand, BCollapse, BNavItem, BNavItemDropdown, BDropdownItem } from 'bootstrap-vue-next'
-
-export default {
-  name: 'TrackManagerNavBar',
-  components: {
-    BNavbar,
-    BNavbarNav,
-    BNavbarToggle,
-    BNavbarBrand,
-    BCollapse,
-    BNavItem,
-    BNavItemDropdown,
-    BDropdownItem
-  },
-  props: {
-    sid: {
-      type: String,
-      default: ''
-    }
-  },
-  methods: {
-    navPath(path: string) {
-      const pathSid = `${path}/sid/${this.sid}`
-      return {
-        path: pathSid
-      }
-    }
-  }
-}
-</script>
-
-<style lang="scss">
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  color: #2c3e50;
-}
-</style>

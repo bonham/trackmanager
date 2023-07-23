@@ -32,27 +32,23 @@
   </div>
 </template>
 
-<script lang="ts">
-
-export default {
-  name: 'TrackManagerNavBar',
+<script setup lang="ts">
 
 
-  props: {
-    sid: {
-      type: String,
-      default: ''
-    }
-  },
-  methods: {
-    navPath(path: string) {
-      const pathSid = `${path}/sid/${this.sid}`
-      return {
-        path: pathSid
-      }
-    }
+const props = defineProps({
+  sid: {
+    type: String,
+    default: ''
+  }
+})
+
+function navPath(path: string) {
+  const pathSid = `${path}/sid/${props.sid}`
+  return {
+    path: pathSid
   }
 }
+
 </script>
 
 <style lang="scss">

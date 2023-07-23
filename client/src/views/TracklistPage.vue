@@ -1,16 +1,11 @@
 <template>
   <b-container id="root" class="d-flex flex-column">
     <track-manager-nav-bar :sid="sid" />
-    <div v-if="buttonsLoading" class="year-navbar">
-      <b-button class="m-2">
-        <b-skeleton width="3rem" />
-      </b-button>
-      <b-button class="m-2">
-        <b-skeleton width="3rem" />
-      </b-button>
-      <b-button class="m-2">
-        <b-skeleton width="3rem" />
-      </b-button>
+    <div v-if="buttonsLoading" class="placeholder-glow d-flex flex-row" style="width: 20em;">
+      <b-button class="placeholder bg-secondary flex-fill m-2"></b-button>
+      <b-button class="placeholder bg-secondary flex-fill m-2"></b-button>
+      <b-button class="placeholder bg-secondary flex-fill m-2"></b-button>
+      <b-button class="placeholder bg-secondary flex-fill m-2"></b-button>
     </div>
     <div v-else class="year-navbar">
       <b-button v-for="year in years" :key="year" class="m-2 button-year-navbar" @click="loadTracksOfYear(year)">
@@ -27,7 +22,7 @@
 </template>
 
 <script lang="ts">
-import { BContainer, BButton, BSkeleton } from 'bootstrap-vue-next'
+import { BContainer, BButton } from 'bootstrap-vue-next'
 import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'
 import FilteredTrackList from '@/components/FilteredTrackList.vue'
 import { TrackCollection } from '@/lib/Track'
@@ -41,7 +36,6 @@ export default {
     FilteredTrackList,
     BContainer,
     BButton,
-    BSkeleton
   },
   props: {
     sid: {
@@ -101,13 +95,5 @@ export default {
 .button-year-navbar {
   height: max-content;
   white-space: nowrap;
-}
-
-.year-navbar {
-  display: flex;
-  flex-flow: row nowrap;
-  overflow: auto;
-  flex: 0 0 auto;
-  align-content: center;
 }
 </style>

@@ -1,22 +1,21 @@
 {
+  "extends": "@tsconfig/node20/tsconfig.json",
   "compilerOptions": {
     "outDir": "dist",
     "sourceMap": true,
-    "target": "ES6",
-    "module": "Node16",
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
     "noImplicitAny": true,
-    "strict": true,
-    "skipLibCheck": true
+    "allowJs": true,
+    "checkJs": false, // todo: set to true
   },
   "ts-node": {
-    "esm": true
+    "esm": false
   },
   "include": [
     "./*.js",
-    "tests/**/*.[jt]s",
-    "routes/**/*.[jt]s",
-    "lib/**/*.[jt]s",
+    "./*.ts",
+    "tests/**/*",
+    "routes/**/*",
+    "lib/**/*",
+    "src/**/*"
   ],
 }

@@ -3,12 +3,11 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "develop": "nodemon ./bin/www",
-    "start": "node --loader ts-node/esm ./bin/www",
+    "develop": "nodemon ./index.ts",
+    "start": "ts-node ./index.ts",
     "test": "jest",
-    "copyconfig": "node ./bin/copyconfig.js",
-    "lint": "eslint --fix lib routes tests",
-    "build": "tsc"
+    "copyconfig": "ts-node ./src/bin/copyconfig.ts",
+    "lint": "eslint index.ts src lib routes tests"
   },
   "dependencies": {
     "@simplewebauthn/server": "^7.2.0",
@@ -32,6 +31,7 @@
   },
   "devDependencies": {
     "@simplewebauthn/typescript-types": "^7.0.0",
+    "@tsconfig/node20": "^20.1.0",
     "@types/cors": "^2.8.13",
     "@types/express": "^4.17.17",
     "@types/express-session": "^1.17.7",
@@ -42,6 +42,7 @@
     "@typescript-eslint/eslint-plugin": "^6.1.0",
     "@typescript-eslint/parser": "^6.1.0",
     "eslint": "^8.45.0",
+    "eslint-config-airbnb": "^19.0.4",
     "eslint-config-airbnb-typescript": "^17.0.0",
     "eslint-config-standard": "^17.1.0",
     "eslint-import-resolver-typescript": "^3.5.5",

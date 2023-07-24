@@ -5,9 +5,11 @@
 			"type": "npm",
 			"script": "develop",
 			"problemMatcher": [],
-			"label": "npm: develop",
-			"detail": "nodemon ./bin/www",
-			"runOptions": {"runOn": "folderOpen"},
+			"label": "develop",
+			"detail": "nodemon ts-node ./index.ts",
+			"runOptions": {
+				"runOn": "folderOpen"
+			},
 			"presentation": {
 				"echo": true,
 				"reveal": "always",

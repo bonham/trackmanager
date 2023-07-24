@@ -1,17 +1,17 @@
-async function getSchema (sid, pool) {
-  const sql = `select schema from tm_meta.schema_sid where sid = '${sid}'`
-  let queryResult
+async function getSchema(sid, pool) {
+  const sql = `select schema from tm_meta.schema_sid where sid = '${sid}'`;
+  let queryResult;
   try {
-    queryResult = await pool.query(sql)
+    queryResult = await pool.query(sql);
   } catch (err) {
-    console.error('Could not get schema from sid:', err)
-    return null
+    console.error('Could not get schema from sid:', err);
+    return null;
   }
-  const rows = queryResult.rows
+  const { rows } = queryResult;
   if (rows.length !== 1) {
-    console.error(`Sid ${sid} not found in DB`)
-    return null
+    console.error(`Sid ${sid} not found in DB`);
+    return null;
   }
-  return rows[0].schema
+  return rows[0].schema;
 }
-module.exports = getSchema
+module.exports = getSchema;

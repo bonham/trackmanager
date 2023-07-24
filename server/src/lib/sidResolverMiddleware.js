@@ -1,15 +1,15 @@
-const getSchema = require('./getSchema')
-const { param, validationResult } = require('express-validator')
+const { param, validationResult } = require('express-validator');
+const getSchema = require('./getSchema');
 
 const handleErrors = (req, res, next) => {
-  const errors = validationResult(req)
+  const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    console.log('Sid validation failed', errors.array())
-    return res.status(401).end()
-  } else {
-    next()
+    console.log('Sid validation failed', errors.array());
+    return res.status(401).end();
   }
-}
+  next();
+  return undefined;
+};
 
 function createSidValidationChain(pool) {
   return [
@@ -20,16 +20,16 @@ function createSidValidationChain(pool) {
       .withMessage('Sid is not alphanum')
       .bail()
       .custom(async (value, { req }) => {
-        const sid = value
-        const schema = await getSchema(sid, pool)
+        const sid = value;
+        const schema = await getSchema(sid, pool);
         if (schema === null) {
-          throw new Error('Could not resolve schema')
+          throw new Error('Could not resolve schema');
         } else {
-          req.schema = schema
+          req.schema = schema;
         }
       }),
-    handleErrors
-  ]
+    handleErrors,
+  ];
 }
 
-module.exports = createSidValidationChain
+module.exports = createSidValidationChain;

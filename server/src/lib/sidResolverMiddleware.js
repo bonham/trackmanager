@@ -1,4 +1,4 @@
-const getSchema = require('../lib/getSchema')
+const getSchema = require('./getSchema')
 const { param, validationResult } = require('express-validator')
 
 const handleErrors = (req, res, next) => {
@@ -11,7 +11,7 @@ const handleErrors = (req, res, next) => {
   }
 }
 
-function createSidValidationChain (pool) {
+function createSidValidationChain(pool) {
   return [
     param('sid')
       .exists()

@@ -11,11 +11,7 @@
     "esm": false
   },
   "include": [
-    "./*.js",
-    "./*.ts",
     "tests/**/*",
-    "routes/**/*",
-    "lib/**/*",
     "src/**/*"
   ],
 }

@@ -1,9 +1,9 @@
 import { Router } from 'express';
-import { MySession } from '../authInterfaces.js';
 
 import { verifyRegistrationResponse } from '@simplewebauthn/server';
 import type { VerifiedRegistrationResponse } from '@simplewebauthn/server';
 import type { AuthenticatorTransportFuture, RegistrationResponseJSON } from '@simplewebauthn/typescript-types';
+import { MySession } from '../authInterfaces.js';
 import type { Authenticator } from '../server.js';
 
 import { AutenticatorDb } from './AuthenticatorDb.js';
@@ -11,9 +11,7 @@ import { AutenticatorDb } from './AuthenticatorDb.js';
 const router = Router();
 
 export function makeRegisterRoute(origin: string, rpID: string, authdb: AutenticatorDb) {
-
   router.post('/register', async (req, res) => {
-
     let myreq: any;
 
     if ('session' in req) {
@@ -55,7 +53,7 @@ export function makeRegisterRoute(origin: string, rpID: string, authdb: Autentic
       console.error(error);
       let message: string;
       if (error instanceof Error) {
-        message = error.name + ' / ' + error.message;
+        message = `${error.name} / ${error.message}`;
       } else {
         message = String(error);
       }
@@ -76,7 +74,9 @@ export function makeRegisterRoute(origin: string, rpID: string, authdb: Autentic
       return;
     }
 
-    const { credentialPublicKey, credentialID, counter, credentialDeviceType, credentialBackedUp } = registrationInfo;
+    const {
+      credentialPublicKey, credentialID, counter, credentialDeviceType, credentialBackedUp,
+    } = registrationInfo;
     const newAuthenticator: Authenticator = {
       credentialPublicKey,
       credentialID,
@@ -94,22 +94,19 @@ export function makeRegisterRoute(origin: string, rpID: string, authdb: Autentic
     }
 
     // mark registration key used
-    const regkey = (req.session as any).regkey;
+    const { regkey } = (req.session as any);
     if (regkey !== undefined) {
       const markSuccess = authdb.markRegistrationCodeUsed(regkey);
       if (!markSuccess) {
         console.log(`Could not mark regkey ${regkey} as used`);
         res.sendStatus(401);
         return;
-      } else {
-        (req.session as any).regkey = undefined;
       }
+      (req.session as any).regkey = undefined;
     }
 
     // Success !!
     res.json(verification);
-    return;
-
   });
   return router;
 }

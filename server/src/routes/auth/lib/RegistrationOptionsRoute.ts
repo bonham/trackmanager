@@ -1,31 +1,27 @@
 import { Router } from 'express';
 import type { Request, Response } from 'express-serve-static-core';
 
-//import { getRegistrationUserId } from './getRegistrationUserid.js';
+// import { getRegistrationUserId } from './getRegistrationUserid.js';
+import { generateRegistrationOptions } from '@simplewebauthn/server';
 import { AutenticatorDb } from './AuthenticatorDb.js';
 
 import type { Authenticator } from '../server.js';
 
-import { generateRegistrationOptions } from '@simplewebauthn/server';
-
 const MAX_REGCODE_AGE_MS = 1000 * 60 * 60 * 24; // 1 day
-//const MAX_REGCODE_AGE_MS = 1000 * 60 * 5; // 5 minutes
+// const MAX_REGCODE_AGE_MS = 1000 * 60 * 5; // 5 minutes
 
 const router = Router();
 
-
 export function makeRegistrationOptionsRoute(rpName: string, rpID: string, authdb: AutenticatorDb) {
-
   const handleRegistration = async (req: Request, res: Response, reguser: string) => {
-
-
-    //const registrationuser = await getRegistrationUserId();
+    // const registrationuser = await getRegistrationUserId();
     const registrationuser = reguser;
     (req.session as any).reguser = registrationuser;
 
     // (Pseudocode) Retrieve any of the user's previously-
     // registered authenticators
-    const userAuthenticators: Authenticator[] = await authdb.getUserAuthenticators(registrationuser);
+    const userAuthenticatorsPromise = authdb.getUserAuthenticators(registrationuser);
+    const userAuthenticators: Authenticator[] = await userAuthenticatorsPromise;
 
     try {
       const options = generateRegistrationOptions({
@@ -44,7 +40,7 @@ export function makeRegistrationOptionsRoute(rpName: string, rpID: string, authd
         // (Recommended for smoother UX)
         attestationType: 'none',
         // Prevent users from re-registering existing authenticators
-        excludeCredentials: userAuthenticators.map(authenticator => ({
+        excludeCredentials: userAuthenticators.map((authenticator) => ({
           id: authenticator.credentialID,
           type: 'public-key',
           // Optional
@@ -55,17 +51,13 @@ export function makeRegistrationOptionsRoute(rpName: string, rpID: string, authd
       // (Pseudocode) Remember the challenge for this user
       (req.session as any).challenge = options.challenge;
       res.json(options);
-
     } catch (error) {
       console.error('Error in generating authentication options', error);
       res.sendStatus(500);
-      return;
-
     }
   };
 
   router.get('/regoptions/regkey/:regkey', async (req: Request, res) => {
-
     const lookup = await authdb.getUserByRegistrationCode(req.params.regkey);
     (req.session as any).regkey = req.params.regkey; // save to mark as unused later
 
@@ -86,7 +78,6 @@ export function makeRegistrationOptionsRoute(rpName: string, rpID: string, authd
     const age = nowMilisec - createdMilisec;
 
     if (age > MAX_REGCODE_AGE_MS) {
-
       console.log(`Regkey too old: Age: ${age}`);
       res.sendStatus(401);
       return;

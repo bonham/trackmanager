@@ -10,7 +10,8 @@ const router = Router();
 export function makeAuthenticationOptionsRoute(authdb: AutenticatorDb) {
   // call this route with /authoptions?authuser=myuserid
   router.get('/authoptions', async (req: Request, res) => {
-    // Seems to make no sense to query user authenticators and send to client - client should discover himself
+    // Seems to make no sense to query user authenticators and send to client
+    // client should discover himself
     // const authuser = req.params.authuser;
     // const userAuthenticators: Authenticator[] = await authdb.getUserAuthenticators(authuser);
     const userAuthenticators: Authenticator[] = [];

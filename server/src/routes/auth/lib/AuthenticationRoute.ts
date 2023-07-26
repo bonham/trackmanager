@@ -1,15 +1,12 @@
 import { Router } from 'express';
 
-import { AutenticatorDb } from './AuthenticatorDb.js';
 import { verifyAuthenticationResponse } from '@simplewebauthn/server';
-
+import { AutenticatorDb } from './AuthenticatorDb.js';
 
 const router = Router();
 
 export function makeAuthenticationRoute(origin: string, rpID: string, authdb: AutenticatorDb) {
-
   router.post('/authentication', async (req, res) => {
-
     const { body } = req;
 
     const expectedChallenge = (req.session as any).challenge;
@@ -20,7 +17,7 @@ export function makeAuthenticationRoute(origin: string, rpID: string, authdb: Au
     console.log('Body id:', body.id);
     const authenticators = await authdb.getAuthenticatorsById(body.id);
 
-    if (authenticators.length != 1) {
+    if (authenticators.length !== 1) {
       console.error(`Expected 1 authenticator, got ${authenticators.length}, for credential id ${body.id}`);
       res.sendStatus(401);
       return;
@@ -39,14 +36,12 @@ export function makeAuthenticationRoute(origin: string, rpID: string, authdb: Au
       });
     } catch (error) {
       console.error('Auth verification failed', error);
-      return res.status(401).send({ error: (error as any).message });
+      res.status(401).send({ error: (error as any).message });
     }
     // success
     (req.session as any).user = authenticators[0].userid;
     console.log('Verification', verification);
     res.json(verification);
-    return;
-
   });
   return router;
 }

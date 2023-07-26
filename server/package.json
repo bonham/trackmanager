@@ -14,7 +14,6 @@
     "@types/connect-pg-simple": "^7.0.0",
     "@types/pg": "^8.10.0",
     "connect-pg-simple": "^9.0.0",
-    "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "debug": "^4.3.4",
     "dotenv": "^16.3.1",
@@ -56,12 +55,13 @@
   },
   "jest": {
     "testEnvironment": "node",
+    "preset": "ts-jest",
     "coveragePathIgnorePatterns": [
       "/node_modules/",
       "/coverage/"
     ],
     "verbose": true,
-    "collectCoverage": true,
+    "collectCoverage": false,
     "collectCoverageFrom": [
       "**/*.{js,vue}",
       "!.eslintrc.js"

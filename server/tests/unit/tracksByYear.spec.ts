@@ -1,6 +1,7 @@
+import app from '../../src/app';
+
 const request = require('supertest');
 const { Pool } = require('pg');
-const app = require('../../src/app');
 
 jest.mock('../../src/lib/getSchema');
 const mockGetSchema = require('../../src/lib/getSchema');
@@ -24,7 +25,7 @@ const mockTrack1 = {
 };
 
 describe('tracks - byYear', () => {
-  let mockPool;
+  let mockPool: any;
   beforeEach(() => {
     mockGetSchema.mockReset();
     mockPool = new Pool();

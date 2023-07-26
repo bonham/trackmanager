@@ -1,8 +1,18 @@
+import http from 'http';
+
 import app from './app';
 
-const port = process.env.PORT || '3000';
+const port = parseInt(process.env.PORT || '3000', 10);
 
-app.listen(port, () => {
-  /* eslint-disable no-console */
-  console.log(`Listening: http://localhost:${port}`);
+const server = http.createServer(app);
+
+server.listen(port);
+
+server.on('listening', () => {
+  const addr = server.address();
+  if (addr == null) throw new Error('Address is null');
+
+  const bind = typeof addr === 'string' ? `pipe ${addr}` : `port ${addr.port}`;
+  // eslint-disable-next-line no-console
+  console.log(`Listening on ${bind}`);
 });

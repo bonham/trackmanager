@@ -1,6 +1,7 @@
+import app from '../../src/app';
+
 const request = require('supertest');
 const { Pool } = require('pg');
-const app = require('../../src/app');
 
 jest.mock('pg');
 
@@ -33,7 +34,7 @@ const mockTrack1 = {
 //   })
 
 describe('Track byid', () => {
-  let mockPool;
+  let mockPool: any;
   beforeEach(() => {
     mockPool = new Pool();
     mockGetSchema.mockReset();

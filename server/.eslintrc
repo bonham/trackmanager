@@ -10,7 +10,7 @@
     ]
   },
   "extends": [
-    // "eslint:recommended",
+    "eslint:recommended",
     "airbnb-base",
     "airbnb-typescript/base"
   ],

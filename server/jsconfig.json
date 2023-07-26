@@ -1,7 +1,0 @@
-{
-  "include": [
-    "routes/**/*",
-    "app.js"
-
-  ]
-}

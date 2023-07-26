@@ -1,6 +1,7 @@
+import app from '../../src/app';
+
 const request = require('supertest');
 const { Pool } = require('pg');
-const app = require('../../src/app');
 
 jest.mock('pg');
 
@@ -38,9 +39,7 @@ describe('tracks - getall', () => {
   });
   test('wrongsid', async () => {
     mockGetSchema.mockResolvedValue(null);
-    await request(app)
-      .get('/api/tracks/getall/sid/wrong')
-      .expect(401);
+    await request(app).get('/api/tracks/getall/sid/wrong').expect(401);
     expect(mockGetSchema).toHaveBeenCalled();
   });
   test('getall nosid', async () => {

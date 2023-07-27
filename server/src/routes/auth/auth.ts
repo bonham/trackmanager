@@ -47,14 +47,25 @@ const pgpool = new pg.Pool({
 const authdb = new AutenticatorDb(pgpool);
 
 const router = express.Router();
+
+// Route: /register
 const registerRoute = makeRegisterRoute(origin, rpID, authdb);
 router.use(registerRoute);
+
+// Route: /regoptions/regkey/:regkey
+// Route: /regoptions/username/:nickname
 const registrationOptionsRoute = makeRegistrationOptionsRoute(rpName, rpID, authdb);
 router.use(registrationOptionsRoute);
+
+// Route: /authoptions
 const authentiationOptionsRoute = makeAuthenticationOptionsRoute(authdb);
 router.use(authentiationOptionsRoute);
+
+// Route: /authentication
 const authenticationRoute = makeAuthenticationRoute(origin, rpID, authdb);
 router.use(authenticationRoute);
+
+// Route: /logout
 const logoutRoute = makeLogoutRoute();
 router.use(logoutRoute);
 

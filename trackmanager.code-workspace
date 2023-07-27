@@ -19,5 +19,6 @@
 			"client"
 		],
 		"testing.automaticallyOpenPeekView": "never",
+		"eslint.lintTask.enable": true,
 	}
 }

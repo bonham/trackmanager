@@ -1,3 +1,28 @@
+
+import type { Request as ExpressRequest, Response } from 'express';
+import { isAuthenticated } from './auth/auth';
+
+interface Request extends ExpressRequest {
+  schema: string
+}
+
+interface RequestWFile extends Request {
+  file: {
+    size: any,
+    path: any,
+    destination: any
+  }
+}
+
+function isRequestWithFile(r: Request | RequestWFile): r is RequestWFile {
+  return (
+    ('file' in r)
+    && ('size' in r.file)
+    && ('path' in r.file)
+    && ('destination' in r.file)
+  );
+}
+
 require('dotenv').config();
 const os = require('os');
 
@@ -38,7 +63,7 @@ const sidValidationChain = createSidValidationChain(pool);
 router.get(
   '/getall/sid/:sid',
   sidValidationChain,
-  async (req, res) => {
+  async (req: Request, res: Response) => {
     const { schema } = req;
     try {
       const queryResult = await pool.query(
@@ -60,7 +85,8 @@ router.get(
     } catch (err) {
       console.trace('Exception handling trace');
       console.log(err);
-      res.status(500).send(err.message);
+      if (err instanceof Error && 'message' in err) res.status(500).send(err.message);
+      else res.status(500);
     }
   },
 );
@@ -70,7 +96,7 @@ router.get(
 router.post(
   '/geojson/sid/:sid',
   sidValidationChain,
-  async (req, res) => {
+  async (req: Request, res: Response) => {
     const { schema } = req;
     try {
       // validate expected property
@@ -90,7 +116,7 @@ router.post(
       }
 
       // validate integer
-      const notIntegerList = _.reject(ids, (x) => (_.isInteger(x)));
+      const notIntegerList = _.reject(ids, (x: any) => (_.isInteger(x)));
       if (notIntegerList.length) throw Error('Found non integer elements in payload');
 
       const inClause = `(${ids.join()})`;
@@ -100,13 +126,14 @@ router.post(
       const queryResult = await pool.query(query);
       const { rows } = queryResult;
 
-      const rowsWGeoJson = _.map(rows, (x) => ({ id: x.id, geojson: JSON.parse(x.geojson) }));
+      const rowsWGeoJson = _.map(rows, (x: any) => ({ id: x.id, geojson: JSON.parse(x.geojson) }));
 
       res.json(rowsWGeoJson);
-    } catch (err) {
+    } catch (err: unknown) {
       console.trace('Exception handling trace');
       console.log(err);
-      res.status(500).send(err.message);
+      if (err instanceof Error && 'message' in err) res.status(500).send(err.message);
+      else res.status(500);
     }
   },
 );
@@ -116,7 +143,7 @@ router.get(
   '/byid/:trackId/sid/:sid',
   sidValidationChain,
   trackIdValidationMiddleware,
-  async (req, res) => {
+  async (req: Request, res: Response) => {
     const { schema } = req;
     const { trackId } = req.params;
 
@@ -131,7 +158,8 @@ router.get(
     } catch (err) {
       console.trace('Exception handling trace');
       console.error(err);
-      res.status(500).send(err.message);
+      if (err instanceof Error && 'message' in err) res.status(500).send(err.message);
+      else res.status(500);
     }
 
     if (rows.length === 0) {
@@ -148,7 +176,7 @@ router.get(
   '/byyear/:year/sid/:sid',
   sidValidationChain,
   yearValidation,
-  async (req, res) => {
+  async (req: Request, res: Response) => {
     const { schema } = req;
     const { year } = req.params;
 
@@ -169,7 +197,8 @@ router.get(
     } catch (err) {
       console.trace('Exception handling trace');
       console.error(err);
-      res.status(500).send(err.message);
+      if (err instanceof Error && 'message' in err) res.status(500).send(err.message);
+      else res.status(500);
     }
   },
 );
@@ -177,18 +206,19 @@ router.get(
 /// // Update single track
 router.put(
   '/byid/:trackId/sid/:sid',
+  isAuthenticated,
   sidValidationChain,
   trackIdValidationMiddleware,
-  async (req, res) => {
+  async (req: Request, res: Response) => {
     const { schema } = req;
     const { updateAttributes } = req.body;
     const { data } = req.body;
 
     // filter out attributes not in data object
-    const existingAttributes = updateAttributes.filter((x) => (!(data[x] === undefined)));
+    const existingAttributes = updateAttributes.filter((x: any) => (!(data[x] === undefined)));
 
     // compose query
-    const halfCoalesced = existingAttributes.map((x) => `${x} = '${data[x]}'`);
+    const halfCoalesced = existingAttributes.map((x: any) => `${x} = '${data[x]}'`);
     const setExpression = halfCoalesced.join(',');
 
     const query = `update ${schema}.tracks set ${setExpression} where id = ${req.params.trackId}`;
@@ -218,9 +248,10 @@ router.put(
 /// // Delete single track
 router.delete(
   '/byid/:trackId/sid/:sid',
+  isAuthenticated,
   sidValidationChain,
   trackIdValidationMiddleware,
-  async (req, res) => {
+  async (req: Request, res: Response) => {
     const { schema } = req;
     const { trackId } = req.params;
 
@@ -263,13 +294,13 @@ router.delete(
 // upload directory for each file - to support multiple files with same name
 const storage = multer.diskStorage({
 
-  destination(req, file, cb) {
+  destination(req: Request, file: any, cb: (arg0: null, arg1: any) => void) {
     const newDestinationPrefix = path.join(uploadDir, uploadDirPrefix);
     const newDestination = fs.mkdtempSync(newDestinationPrefix);
     cb(null, newDestination);
   },
 
-  filename(req, file, cb) {
+  filename(req: Request, file: { originalname: any; }, cb: (arg0: null, arg1: any) => void) {
     cb(null, file.originalname);
   },
 
@@ -289,11 +320,13 @@ const upload = multer(
 // POST route for handling gpx track file uploads.
 router.post(
   '/addtrack/sid/:sid',
+  isAuthenticated,
   sidValidationChain,
   upload.single('newtrack'),
-  async (req, res) => {
+  async (req: Request, res: Response) => {
     const { schema } = req;
 
+    if (!isRequestWithFile(req)) throw Error('Request needs file property');
     console.log(req.file, req.file.size);
     const filePath = req.file.path;
     const uploadDirectory = req.file.destination;
@@ -316,13 +349,14 @@ router.post(
     } catch (err) {
       console.log(`Stdout >>${stdout}<<`);
       console.log('Child error', err);
-      res.status(422).json({ message: err.message });
+      const message = (err instanceof Error && 'message' in err) ? err.message : '';
+      res.status(422).json({ message });
       return;
     } finally {
       // cleanup of file and directory
       fsprom.rmdir(uploadDirectory, { recursive: true }).then(
-        (result) => console.log('Successfully purged upload dir', result),
-        (err) => { console.log('Error, could not remove directory', err); },
+        () => console.log('Successfully purged upload dir'),
+        (err: any) => { console.log('Error, could not remove directory', err); },
       );
     }
 
@@ -330,4 +364,4 @@ router.post(
   },
 );
 
-module.exports = router;
+export default router;

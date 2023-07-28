@@ -1,4 +1,12 @@
 import app from '../../src/app';
+import { isAuthenticated } from '../../src/routes/auth/auth';
+
+jest.mock('../../src/routes/auth/auth');
+const mockedIsAuthenticated = jest.mocked(isAuthenticated);
+
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const dummy = isAuthenticated;
 
 const request = require('supertest');
 const { Pool } = require('pg');
@@ -38,6 +46,11 @@ describe('Track byid', () => {
   beforeEach(() => {
     mockPool = new Pool();
     mockGetSchema.mockReset();
+
+    // disable the authentication
+    mockedIsAuthenticated.mockImplementation((req: any, res: any, next: any): any => {
+      next();
+    });
   });
   afterEach(() => {
     jest.clearAllMocks();

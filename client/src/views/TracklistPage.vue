@@ -81,12 +81,12 @@ export default {
       // call loadTracksAndRedraw action from store while injecting the load function
       const sid = this.sid
       const loadFunction = function () { return getTracksByYear(year, sid) }
-      this.loadTracks(loadFunction).catch(e => console.error('Error loading tracks by year', e))
+      this.loadTracks(loadFunction).catch((e: any) => console.error('Error loading tracks by year', e))
     },
     loadAllTracks: function () {
       const sid = this.sid
       const loadFunc = () => getAllTracks(sid)
-      this.loadTracks(loadFunc).catch(e => console.error('Error loading all tracks', e))
+      this.loadTracks(loadFunc).catch((e: any) => console.error('Error loading all tracks', e))
     }
   }
 }

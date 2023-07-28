@@ -56,8 +56,19 @@ export class AutenticatorDb {
       text: 'SELECT credentialID, credentialPublicKey, counter, credentialDeviceType, credentialBackedUp, transports, userid FROM public.cred_authenticators where credentialID = $1',
       values: [authenticatorId],
     };
-    const res = await this.pgpool.query(query);
-    return AutenticatorDb.authenticatorFromRows(res.rows);
+    try {
+      const res = await this.pgpool.query(query);
+      return AutenticatorDb.authenticatorFromRows(res.rows);
+    } catch (e: unknown) {
+      if ((e instanceof Error) && ('code' in e) && (e.code === '42P01')) {
+        throw new Error(
+          'Looks like the database schema for sessions is missing',
+          {
+            cause: e,
+          },
+        );
+      } else throw e;
+    }
   }
 
   async saveAuthenticator(auth: Authenticator, userid: string) {

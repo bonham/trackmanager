@@ -25,6 +25,9 @@
             <router-link class="nav-link m-2" :to="navPath('/upload')">
               Upload
             </router-link>
+            <router-link class="nav-link m-2" :to="navPath('/login')">
+              Login
+            </router-link>
           </div>
         </div>
       </div>

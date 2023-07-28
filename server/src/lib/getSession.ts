@@ -6,6 +6,8 @@ const PGSession = connectPgSimple(session);
 
 function getSession(pgPool: Pool) {
   const salt = process.env.PASSKEYPOC_COOKIESALT;
+  const isProduction = (process.env.NODE_ENV === 'production');
+  const secureFlag = !!isProduction;
 
   if (salt === undefined) {
     throw new Error('no cookiesalt in env');
@@ -17,12 +19,13 @@ function getSession(pgPool: Pool) {
       cookie: {
         maxAge: 60000,
         sameSite: 'strict',
+        secure: secureFlag,
       },
       resave: false,
       saveUninitialized: true,
       store: new PGSession({
         pool: pgPool,
-        createTableIfMissing: true,
+        createTableIfMissing: false,
       }),
     },
   );

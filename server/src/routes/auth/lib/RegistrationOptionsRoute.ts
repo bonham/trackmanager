@@ -87,10 +87,5 @@ export function makeRegistrationOptionsRoute(rpName: string, rpID: string, authd
     await handleRegistration(req, res, reguser);
   });
 
-  router.get('/regoptions/username/:nickname', (req, res) => {
-    const reguser = req.params.nickname;
-    handleRegistration(req, res, reguser);
-  });
-
   return router;
 }

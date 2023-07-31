@@ -56,7 +56,6 @@ async function updateUser() {
         </div>
       </nav>
       <div>
-        <RegistrationForm form-label="Register with username" place-holder="Username" />
         <RegistrationForm use-registration-key form-label="Register with registration key" place-holder="Key" />
         <LogoutForm v-if="username" @changed="updateUser" />
         <LoginForm v-else @changed="updateUser" />

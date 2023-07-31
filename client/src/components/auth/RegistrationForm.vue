@@ -8,8 +8,14 @@ import type { RegistrationResponseJSON, PublicKeyCredentialCreationOptionsJSON }
 
 const props = defineProps({
   useRegistrationKey: Boolean,
-  formLabel: String,
-  placeHolder: String,
+  formLabel: {
+    type: String,
+    default: ''
+  },
+  placeHolder: {
+    type: String,
+    default: ''
+  },
 })
 
 const regstatus = ref("None")

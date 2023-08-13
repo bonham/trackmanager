@@ -20,7 +20,6 @@ declare module 'vue' {
     LoginForm: typeof import('./src/components/auth/LoginForm.vue')['default']
     LogoutForm: typeof import('./src/components/auth/LogoutForm.vue')['default']
     MapComponent: typeof import('./src/components/MapComponent.vue')['default']
-    PassKeyFirst: typeof import('./src/components/auth/PassKeyFirst.vue')['default']
     RegistrationForm: typeof import('./src/components/auth/RegistrationForm.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']

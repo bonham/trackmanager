@@ -6,20 +6,20 @@ const PGSession = connectPgSimple(session);
 
 function getSession(pgPool: Pool) {
   const salt = process.env.PASSKEYPOC_COOKIESALT;
-  const isProduction = (process.env.NODE_ENV === 'production');
-  const secureFlag = !!isProduction;
+  const maxAge = Number(process.env.SESSION_MAX_AGE) || 60000;
 
   if (salt === undefined) {
     throw new Error('no cookiesalt in env');
   }
 
+  // secure is false because we are using http behind proxy
   const s = session(
     {
       secret: salt,
       cookie: {
-        maxAge: 60000,
+        maxAge,
         sameSite: 'strict',
-        secure: secureFlag,
+        secure: false,
       },
       resave: false,
       saveUninitialized: true,

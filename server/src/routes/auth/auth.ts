@@ -72,7 +72,7 @@ router.use(logoutRoute);
 // middleware to test if authenticated
 function isAuthenticated(req: Request, res: Response, next: NextFunction) {
   if ('user' in req.session) next();
-  else res.send(401);
+  else res.sendStatus(401);
 }
 
 router.get('/check', (req: (Request & { session: Session }), res) => {

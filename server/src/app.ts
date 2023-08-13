@@ -20,6 +20,11 @@ app.use(morgan('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+console.log(`Startign with NODE_ENV=${process.env.NODE_ENV}`);
+const TRUST_PROXY = process.env.TRUST_PROXY || 0;
+console.log(`Setting trust proxy to ${TRUST_PROXY}`);
+app.set('trust proxy', TRUST_PROXY); // needed because of express-session config cookie.secure = true
+
 const session = getSession(getPgPool());
 app.use(session);
 

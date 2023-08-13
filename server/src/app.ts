@@ -15,8 +15,12 @@ if (dotenvResult.error) {
 }
 const app = express();
 
+const nodeEnv = process.env.NODE_ENV;
+const productionMode = nodeEnv === 'production';
+
 app.use(helmet());
-app.use(morgan('dev'));
+const morganLevel = productionMode ? 'combined' : 'dev';
+app.use(morgan(morganLevel));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 

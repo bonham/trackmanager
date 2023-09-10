@@ -1,37 +1,33 @@
-
 import type { Request as ExpressRequest, Response } from 'express';
+import { Formidable } from 'formidable';
+import * as fsprom from 'node:fs/promises';
 import { isAuthenticated } from './auth/auth';
 
 interface Request extends ExpressRequest {
   schema: string
 }
 
-interface RequestWFile extends Request {
-  file: {
-    size: any,
-    path: any,
-    destination: any
-  }
-}
+// interface RequestWFile extends Request {
+//   file: {
+//     size: any,
+//     path: any,
+//     destination: any
+//   }
+// }
 
-function isRequestWithFile(r: Request | RequestWFile): r is RequestWFile {
-  return (
-    ('file' in r)
-    && ('size' in r.file)
-    && ('path' in r.file)
-    && ('destination' in r.file)
-  );
-}
+// function isRequestWithFile(r: Request | RequestWFile): r is RequestWFile {
+//   return (
+//     ('file' in r)
+//     && ('size' in r.file)
+//     && ('path' in r.file)
+//     && ('destination' in r.file)
+//   );
+// }
 
 require('dotenv').config();
-const os = require('os');
 
 const express = require('express');
-const multer = require('multer');
 
-const fs = require('fs');
-const fsprom = require('fs/promises');
-const path = require('path');
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const _ = require('lodash');
 
@@ -46,10 +42,8 @@ const yearValidation = require('../lib/yearValidation');
 
 const SIMPLIFY_DISTANCE = 2;
 
-const uploadDir = process.env.UPLOAD_DIR || os.tmpdir();
 const database = process.env.TM_DATABASE;
 const gpx2dbScript = process.env.GPX2DBSCRIPT;
-const uploadDirPrefix = 'trackmanager-upload-';
 
 // sql query pool
 const poolOptions = {
@@ -292,76 +286,87 @@ router.delete(
 
 // Initializing a multer storage engine which will create unique
 // upload directory for each file - to support multiple files with same name
-const storage = multer.diskStorage({
+// const storage = multer.diskStorage({
 
-  destination(req: Request, file: any, cb: (arg0: null, arg1: any) => void) {
-    const newDestinationPrefix = path.join(uploadDir, uploadDirPrefix);
-    const newDestination = fs.mkdtempSync(newDestinationPrefix);
-    cb(null, newDestination);
-  },
+//   destination(req: Request, file: any, cb: (arg0: null, arg1: any) => void) {
+//     const newDestinationPrefix = path.join(uploadDir, uploadDirPrefix);
+//     const newDestination = fs.mkdtempSync(newDestinationPrefix);
+//     cb(null, newDestination);
+//   },
+//   // https://stackoverflow.com/questions/72909624/multer-corrupts-utf8-filename-when-uploading-files
+//   filename(req: Request, file: { originalname: any; }, cb: (arg0: null, arg1: any) => void) {
+//     cb(null, file.originalname);
+//   },
 
-  filename(req: Request, file: { originalname: any; }, cb: (arg0: null, arg1: any) => void) {
-    cb(null, file.originalname);
-  },
+// });
 
-});
+// // multer object
+// const upload = multer(
+//   {
+//     limits: {
+//       fieldNameSize: 100,
+//       fileSize: 60000000,
+//     },
+//     storage,
+//   },
+// );
 
-// multer object
-const upload = multer(
-  {
-    limits: {
-      fieldNameSize: 100,
-      fileSize: 60000000,
-    },
-    storage,
-  },
-);
+async function processFile(filePath: string, schema: string): Promise<void> {
+  // build arguments
+  const args = [
+    '-s',
+    SIMPLIFY_DISTANCE,
+    filePath,
+    database,
+    schema,
+  ];
+
+
+  // run child process - execute python executable to process the upload
+  let stdout = '';
+  try {
+    console.log('Command: ', gpx2dbScript, args);
+    stdout = execFileSync(gpx2dbScript, args, { encoding: 'utf-8' });
+    console.log(`Stdout >>${stdout}<<`);
+  } catch (err) {
+    console.log(`Stdout >>${stdout}<<`);
+    console.log('Child error', err);
+    const message = (err instanceof Error && 'message' in err) ? err.message : '';
+    console.log('Message', message);
+    throw (err);
+  } finally {
+    // cleanup of file and directory
+    fsprom.rm(filePath).then(
+      () => console.log('Successfully purged upload file'),
+      (err: any) => { console.log('Error, could not upload file', err); },
+    );
+  }
+}
 
 // POST route for handling gpx track file uploads.
 router.post(
   '/addtrack/sid/:sid',
   isAuthenticated,
   sidValidationChain,
-  upload.single('newtrack'),
-  async (req: Request, res: Response) => {
-    const { schema } = req;
 
-    if (!isRequestWithFile(req)) throw Error('Request needs file property');
-    console.log(req.file, req.file.size);
-    const filePath = req.file.path;
-    const uploadDirectory = req.file.destination;
-
-    // build arguments
-    const args = [
-      '-s',
-      SIMPLIFY_DISTANCE,
-      filePath,
-      database,
-      schema,
-    ];
-
-    // run child process - execute python executable to process the upload
-    let stdout = '';
+  async (req: any, res: any, next: any) => {
     try {
-      console.log('Command: ', gpx2dbScript, args);
-      stdout = execFileSync(gpx2dbScript, args, { encoding: 'utf-8' });
-      console.log(`Stdout >>${stdout}<<`);
-    } catch (err) {
-      console.log(`Stdout >>${stdout}<<`);
-      console.log('Child error', err);
-      const message = (err instanceof Error && 'message' in err) ? err.message : '';
-      res.status(422).json({ message });
-      return;
-    } finally {
-      // cleanup of file and directory
-      fsprom.rmdir(uploadDirectory, { recursive: true }).then(
-        () => console.log('Successfully purged upload dir'),
-        (err: any) => { console.log('Error, could not remove directory', err); },
-      );
-    }
+      const form = new Formidable();
+      form.parse(req, async (err: any, fields: any, files: any) => {
+        if (err) {
+          next(err);
+          return;
+        }
+        const filePath = files.newtrack[0].filepath;
 
-    res.json({ message: 'ok' });
+        await processFile(filePath, req.schema);
+        res.json({ message: 'ok' });
+      });
+    } catch (error) {
+      next(error);
+    }
   },
 );
+
 
 export default router;

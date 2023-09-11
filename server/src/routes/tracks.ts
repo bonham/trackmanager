@@ -1,13 +1,21 @@
 import type { Request as ExpressRequest, NextFunction, Response } from 'express';
 import { Formidable } from 'formidable';
-import * as fsprom from 'node:fs/promises';
+import { mkdtempSync } from 'node:fs';
+import { rmdir as rmdirprom } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+
 import { isAuthenticated } from './auth/auth';
+
+const UPLOAD_DIR_PREFIX = 'trackmanager-upload-';
 
 interface Request extends ExpressRequest {
   schema: string
 }
 
 require('dotenv').config();
+
+const TMP_BASE_DIR = process.env.UPLOAD_DIR || tmpdir();
 
 const express = require('express');
 
@@ -265,7 +273,7 @@ router.delete(
 );
 
 /// // Create new track from file upload
-async function processFile(filePath: string, schema: string): Promise<void> {
+async function processFile(filePath: string, uploadDir: string, schema: string): Promise<void> {
   // build arguments
   const args = [
     '-s',
@@ -290,8 +298,8 @@ async function processFile(filePath: string, schema: string): Promise<void> {
     throw (err);
   } finally {
     // cleanup of file and directory
-    fsprom.rm(filePath).then(
-      () => console.log('Successfully purged upload file'),
+    rmdirprom(uploadDir, { recursive: true }).then(
+      () => console.log(`Successfully purged upload directory: ${uploadDir}`),
       (err: any) => { console.log('Error, could not upload file', err); },
     );
   }
@@ -305,7 +313,17 @@ router.post(
 
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const form = new Formidable();
+      const uploadDir = mkdtempSync(join(TMP_BASE_DIR, UPLOAD_DIR_PREFIX));
+      const form = new Formidable({
+        uploadDir,
+        filename: (name, ext, part) => {
+          console.log('name', name, 'ext', ext);
+          if (part.originalFilename) {
+            return part.originalFilename;
+          }
+          throw Error('Unexpected: Part does not have property originalfilename');
+        },
+      });
       form.parse(req, async (err, fields, files) => {
         if (err) {
           next(err);
@@ -314,7 +332,7 @@ router.post(
         if (files.newtrack === undefined) throw new Error('Expected form field not received: newtrack');
         const filePath = files.newtrack[0].filepath;
 
-        await processFile(filePath, req.schema);
+        await processFile(filePath, uploadDir, req.schema);
         res.json({ message: 'ok' });
       });
     } catch (error) {

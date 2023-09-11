@@ -1,4 +1,4 @@
-import type { Request as ExpressRequest, Response } from 'express';
+import type { Request as ExpressRequest, NextFunction, Response } from 'express';
 import { Formidable } from 'formidable';
 import * as fsprom from 'node:fs/promises';
 import { isAuthenticated } from './auth/auth';
@@ -6,23 +6,6 @@ import { isAuthenticated } from './auth/auth';
 interface Request extends ExpressRequest {
   schema: string
 }
-
-// interface RequestWFile extends Request {
-//   file: {
-//     size: any,
-//     path: any,
-//     destination: any
-//   }
-// }
-
-// function isRequestWithFile(r: Request | RequestWFile): r is RequestWFile {
-//   return (
-//     ('file' in r)
-//     && ('size' in r.file)
-//     && ('path' in r.file)
-//     && ('destination' in r.file)
-//   );
-// }
 
 require('dotenv').config();
 
@@ -282,35 +265,6 @@ router.delete(
 );
 
 /// // Create new track from file upload
-// initialization - multer - it is a middleware for uploading files
-
-// Initializing a multer storage engine which will create unique
-// upload directory for each file - to support multiple files with same name
-// const storage = multer.diskStorage({
-
-//   destination(req: Request, file: any, cb: (arg0: null, arg1: any) => void) {
-//     const newDestinationPrefix = path.join(uploadDir, uploadDirPrefix);
-//     const newDestination = fs.mkdtempSync(newDestinationPrefix);
-//     cb(null, newDestination);
-//   },
-//   // https://stackoverflow.com/questions/72909624/multer-corrupts-utf8-filename-when-uploading-files
-//   filename(req: Request, file: { originalname: any; }, cb: (arg0: null, arg1: any) => void) {
-//     cb(null, file.originalname);
-//   },
-
-// });
-
-// // multer object
-// const upload = multer(
-//   {
-//     limits: {
-//       fieldNameSize: 100,
-//       fileSize: 60000000,
-//     },
-//     storage,
-//   },
-// );
-
 async function processFile(filePath: string, schema: string): Promise<void> {
   // build arguments
   const args = [
@@ -349,14 +303,15 @@ router.post(
   isAuthenticated,
   sidValidationChain,
 
-  async (req: any, res: any, next: any) => {
+  async (req: Request, res: Response, next: NextFunction) => {
     try {
       const form = new Formidable();
-      form.parse(req, async (err: any, fields: any, files: any) => {
+      form.parse(req, async (err, fields, files) => {
         if (err) {
           next(err);
           return;
         }
+        if (files.newtrack === undefined) throw new Error('Expected form field not received: newtrack');
         const filePath = files.newtrack[0].filepath;
 
         await processFile(filePath, req.schema);

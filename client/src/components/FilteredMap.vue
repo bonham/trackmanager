@@ -7,173 +7,159 @@
     <div ref="popupdiv"></div>
   </div>
 </template>
-<script lang="ts">
+<script lang="ts" setup>
+import { ref, watch, onMounted, nextTick } from 'vue'
+import type { Ref } from 'vue'
 import { BSpinner } from 'bootstrap-vue-next'
 import { ManagedMap } from '@/lib/mapservices/ManagedMap'
 import type { GeoJSONWithTrackId } from '@/lib/mapservices/ManagedMap'
 import { TrackVisibilityManager } from '@/lib/mapStateHelpers'
 import { getGeoJson } from '@/lib/trackServices'
-import { mapMutations, mapGetters } from 'vuex'
 import _ from 'lodash'
 
-export default {
-  name: 'FilteredMap',
-  components: {
-    BSpinner
-  },
-  props: {
-    sid: {
-      type: String,
-      default: ''
-    }
-  },
-  data() {
-    return {
-      loading: false,
-      mmap: null as (null | ManagedMap)
-    }
-  },
-  computed: {
-    ...mapGetters({
-      shouldBeVisibleIds: 'getLoadedTrackIds',
-      getTrackById: 'getTrackById'
-    })
-  },
-  created() {
-    // create map object
-    this.mmap = new ManagedMap({ selectCallBackFn: (this.updateSelectionForList).bind(this) })
+import { useTracksStore } from '@/storepinia'
+const store = useTracksStore()
 
-    // watch if the viewport is resized and resize the map
-    this.$watch(
-      () => {
-        return this.$store.state.resizeMap
-      },
-      (newValue, oldValue) => {
-        if (newValue === true) {
-          if (oldValue === true) {
-            console.log('Triggered watch of updateSize while update was running')
-          }
-          if (this.mmap) {
-            this.mmap.map.updateSize()
-            this.resizeMapClear()
-          } else {
-            console.error("mmap was not initialized")
-          }
-        }
-      }
-    )
-    // watch for a command in store to redraw the tracks on the map
-    const unboundRedrawTracks = this.redrawTracks
-    const boundRedrawTracks = unboundRedrawTracks.bind(this)
-    this.$watch(
-      () => {
-        return this.$store.state.redrawTracksOnMap
-      },
-      async (newValue, oldValue) => {
-        if (newValue === true) {
-          if (oldValue === true) {
-            console.log('Warn: Triggering redrawTracks watch while a redraw is running')
-          }
-          await boundRedrawTracks()
-          this.redrawTracksOnMapFlag(false)
-        }
-      }
-    )
-
-    // watch for a command in store
-    // Select / deselect events can be transmitted
-    // after completion of the action, the 'selectionForMap'
-    // will be cleared
-    this.$watch(
-      () => {
-        return this.$store.state.selectionForMap
-      },
-      async (selectionUpdateObj) => {
-        if (this.mmap === null) {
-          console.error("mmap not initalized")
-          return
-        }
-        if (selectionUpdateObj !== null) {
-          const selectedTrackids = selectionUpdateObj.selected
-          await this.mmap.setSelectedTracks(selectedTrackids)
-          await this.clearSelectionForMap() // clear command
-          setTimeout(
-            (this.mmap.setExtentAndZoomOut).bind(this.mmap),
-            1
-          )
-        }
-      }
-    )
-  },
-  mounted() {
-    this.$nextTick(() => {
-      if (this.mmap === null) {
-        console.error("mmap not initalized")
-        return
-      }
-      this.mmap.map.setTarget('mapdiv')
-      const popupDiv = this.$refs.popupdiv as HTMLElement
-      this.mmap.initPopup(popupDiv)
-    })
-  },
-  methods: {
-    // method is redrawing tracks AND resetting selection ! 
-    // ( the latter might need to be factored out)
-    redrawTracks: async function () {
-      this.loading = true
-      if (this.mmap === null) {
-        console.error("mmap not initalized")
-        return
-      }
-      const mmap = this.mmap
-
-      // reset selection and popups
-      mmap.clearSelection()
-      mmap.popovermgr?.dispose()
-
-      const tvm = new TrackVisibilityManager(
-        mmap.getTrackIdsVisible(),
-        this.shouldBeVisibleIds,
-        mmap.getTrackIds()
-      )
-
-      // A1: set existing visible
-      const toggleIds = tvm.toggleToVisible()
-      console.log('Toggle: ', toggleIds)
-      _.forEach(toggleIds, function (id) { mmap.setVisible(id) })
-
-      // A2: load missing and add vector layer to map
-      const toBeLoaded = tvm.toBeLoaded()
-      console.log('To be loaded: ', toBeLoaded)
-
-      let resultSet: GeoJSONWithTrackId[]
-      if (toBeLoaded.length > 0) {
-        resultSet = await getGeoJson(toBeLoaded, this.sid)
-      } else {
-        resultSet = []
-      }
-      resultSet.forEach(result => {
-        const tr = this.getTrackById(result.id)
-        mmap.addTrackLayer({ track: tr, geojson: result.geojson })
-      })
-
-      // B: tracks to hide
-      const toHide = tvm.toBeHidden()
-      console.log('To be hidden: ', toHide)
-      _.forEach(toHide, function (id) { mmap.setInvisible(id) })
-
-      this.loading = false
-      mmap.setExtentAndZoomOut()
-    },
-    ...mapMutations([
-      'resizeMapClear',
-      'redrawTracksOnMapFlag',
-      'doZoomToExtent',
-      'updateSelectionForList',
-      'clearSelectionForMap'
-    ])
+const props = defineProps({
+  sid: {
+    type: String,
+    default: ''
   }
+})
+
+const popupdiv: Ref<(null | HTMLElement)> = ref(null) // template ref
+const loading = ref(false)
+const mmap: Ref<(null | ManagedMap)> = ref(null)
+
+
+// create map object
+mmap.value = new ManagedMap({ selectCallBackFn: (store.updateSelectionForList).bind(this) })
+
+
+// method is redrawing tracks AND resetting selection ! 
+// ( the latter might need to be factored out)
+async function redrawTracks() {
+  loading.value = true
+  let mm: ManagedMap
+  if (mmap.value === null) {
+    console.error("mmap not initalized")
+    return
+  }
+  mm = mmap.value
+
+  // reset selection and popups
+  mm.clearSelection()
+  mm.popovermgr?.dispose()
+
+  const tvm = new TrackVisibilityManager(
+    mm.getTrackIdsVisible(),
+    store.getLoadedTrackIds,
+    mm.getTrackIds()
+  )
+
+  // A1: set existing visible
+  const toggleIds = tvm.toggleToVisible()
+  console.log('Toggle: ', toggleIds)
+
+  _.forEach(toggleIds, function (id) { mm.setVisible(id) })
+
+  // A2: load missing and add vector layer to map
+  const toBeLoaded = tvm.toBeLoaded()
+  console.log('To be loaded: ', toBeLoaded)
+
+  let resultSet: GeoJSONWithTrackId[]
+  if (toBeLoaded.length > 0) {
+    resultSet = await getGeoJson(toBeLoaded, props.sid)
+  } else {
+    resultSet = []
+  }
+  resultSet.forEach(result => {
+    const tr = store.tracksById[result.id]
+    mm.addTrackLayer({ track: tr, geojson: result.geojson })
+  })
+
+  // B: tracks to hide
+  const toHide = tvm.toBeHidden()
+  console.log('To be hidden: ', toHide)
+  _.forEach(toHide, function (id) { mm.setInvisible(id) })
+
+  loading.value = false
+  mm.setExtentAndZoomOut()
 }
+
+
+// watch if the viewport is resized and resize the map
+watch(
+  () => store.resizeMap,
+
+  (newValue, oldValue) => {
+    if (newValue === true) {
+      if (oldValue === true) {
+        console.log('Triggered watch of updateSize while update was running')
+      }
+      if (mmap.value) {
+        mmap.value.map.updateSize()
+        store.resizeMap = false
+      } else {
+        console.error("mmap was not initialized")
+      }
+    }
+  }
+)
+// watch for a command in store to redraw the tracks on the map
+watch(
+  () => store.redrawTracksOnMap,
+  async (newValue, oldValue) => {
+    if (newValue === true) {
+      if (oldValue === true) {
+        console.log('Warn: Triggering redrawTracks watch while a redraw is running')
+      }
+      await redrawTracks()
+      store.redrawTracksOnMap = false
+    }
+  }
+)
+
+// watch for a command in store
+// Select / deselect events can be transmitted
+// after completion of the action, the 'selectionForMap'
+// will be cleared
+watch(
+  () => store.selectionForMap,
+  async (selectionUpdateObj) => {
+    let mm: ManagedMap
+    if (mmap.value === null) {
+      console.error("mmap not initalized")
+      return
+    } else {
+      mm = mmap.value
+    }
+    if (selectionUpdateObj !== null) {
+      const selectedTrackids = selectionUpdateObj.selected
+      await mm.setSelectedTracks(selectedTrackids)
+      store.selectionForMap = null
+      setTimeout(
+        (mm.setExtentAndZoomOut).bind(mm),
+        1
+      )
+    }
+  }
+)
+
+onMounted(() => {
+  nextTick(() => {
+    if (mmap.value === null) {
+      console.error("mmap not initalized")
+      return
+    }
+    if (popupdiv.value === null) {
+      console.error("popupdiv not initialized")
+      return
+    }
+    mmap.value.map.setTarget('mapdiv')
+    mmap.value.initPopup(popupdiv.value)
+  })
+})
 
 </script>
 

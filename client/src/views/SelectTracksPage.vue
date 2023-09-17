@@ -28,7 +28,8 @@ import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'
 import FilteredMap from '@/components/FilteredMap.vue'
 import { TrackCollection } from '@/lib/Track'
 import { getTracksByYear, getAllTracks } from '@/lib/trackServices'
-import { mapActions, mapState } from 'vuex'
+import { useTracksStore } from '@/storepinia'
+const store = useTracksStore()
 
 export default {
   name: 'SelectTracksPage',
@@ -52,11 +53,7 @@ export default {
       currentOrientation: null as (null | "landscape" | "portrait ")
     }
   },
-  computed: {
-    ...mapState([
-      'loadedTracks'
-    ])
-  },
+
   async created() {
     this.currentOrientation = 'landscape'
     this.buttonsLoading = true
@@ -68,9 +65,7 @@ export default {
   },
 
   methods: {
-    ...mapActions([
-      'loadTracksAndRedraw'
-    ]),
+
 
     async getYears() {
       await getAllTracks(this.sid).then((trackList) => {
@@ -83,12 +78,12 @@ export default {
       // call loadTracksAndRedraw action from store while injecting the load function
       const sid = this.sid
       const loadFunction = function () { return getTracksByYear(year, sid) }
-      this.loadTracksAndRedraw(loadFunction).catch(e => console.error('Error loading tracks by year', e))
+      store.loadTracksAndRedraw(loadFunction).catch((e: any) => console.error('Error loading tracks by year', e))
     },
     loadAllTracks: function () {
       const sid = this.sid
       const loadFunc = () => getAllTracks(sid)
-      this.loadTracksAndRedraw(loadFunc).catch(e => console.error('Error loading all tracks', e))
+      store.loadTracksAndRedraw(loadFunc).catch((e: any) => console.error('Error loading all tracks', e))
     },
   }
 }

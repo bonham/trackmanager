@@ -27,6 +27,7 @@ const props = defineProps({
   }
 })
 
+// reactive data
 const popupdiv: Ref<(null | HTMLElement)> = ref(null) // template ref
 const loading = ref(false)
 const mmap: Ref<(null | ManagedMap)> = ref(null)

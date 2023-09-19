@@ -15,7 +15,7 @@ describe('Basic store test with FilteredMap', () => {
   test('Trivial mount', async () => {
     render(FilteredMap, {
       global: {
-        plugins: [createTestingPinia]
+        plugins: [createTestingPinia()]
       }
     })
     // it is not possible to test anything visible here as it contains of <div>  only
@@ -24,7 +24,7 @@ describe('Basic store test with FilteredMap', () => {
   test('Low level', () => {
     const wrapper = mount(FilteredMap, {
       global: {
-        plugins: [createTestingPinia]
+        plugins: [createTestingPinia()]
       }
     })
     const mapdiv = wrapper.find('[id="mapdiv"]')

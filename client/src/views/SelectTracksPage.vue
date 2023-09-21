@@ -47,12 +47,14 @@ const buttonsLoading = ref(true)
 const showAllButton = ref(false)
 
 // initialization
-getYears().then(() => {
-  buttonsLoading.value = false
-  if (years.value.length > 0) {
-    loadTracksOfYear(years.value[0])
-  }
-})
+getYears()
+  .then(() => {
+    buttonsLoading.value = false
+    if (years.value.length > 0) {
+      loadTracksOfYear(years.value[0])
+    }
+  })
+  .catch((error) => console.error(error))
 
 async function getYears() {
   await getAllTracks(props.sid).then((trackList) => {

@@ -21,75 +21,60 @@
   </b-container>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { BContainer, BButton } from 'bootstrap-vue-next'
 import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'
 import FilteredTrackList from '@/components/FilteredTrackList.vue'
 import { TrackCollection } from '@/lib/Track'
 import { getTracksByYear, getAllTracks } from '@/lib/trackServices'
-import { mapActions, mapState } from 'vuex'
+import { ref } from 'vue'
+import { useTracksStore } from '@/storepinia'
+const store = useTracksStore()
 
-export default {
-  name: 'TrackListPage',
-  components: {
-    TrackManagerNavBar,
-    FilteredTrackList,
-    BContainer,
-    BButton,
-  },
-  props: {
-    sid: {
-      type: String,
-      default: ''
-    }
-  },
-  data: function () {
-    return {
-      years: [] as number[],
-      buttonsLoading: false,
-      showAllButton: false,
-      currentOrientation: null as (null | "landscape" | "portrait ")
-    }
-  },
-  computed: {
-    ...mapState([
-      'loadedTracks'
-    ])
-  },
-  async created() {
-    this.buttonsLoading = true
-    await this.getYears()
-    this.buttonsLoading = false
-    if (this.years.length > 0) {
-      await this.loadTracksOfYear(this.years[0])
-    }
-  },
-
-  methods: {
-    ...mapActions([
-      'loadTracks'
-    ]),
-
-    async getYears() {
-      await getAllTracks(this.sid).then((trackList) => {
-        const tColl = new TrackCollection(trackList)
-        this.years = tColl.yearList().sort((a, b) => b - a)
-      })
-    },
-
-    loadTracksOfYear: function (year: number) {
-      // call loadTracksAndRedraw action from store while injecting the load function
-      const sid = this.sid
-      const loadFunction = function () { return getTracksByYear(year, sid) }
-      this.loadTracks(loadFunction).catch((e: any) => console.error('Error loading tracks by year', e))
-    },
-    loadAllTracks: function () {
-      const sid = this.sid
-      const loadFunc = () => getAllTracks(sid)
-      this.loadTracks(loadFunc).catch((e: any) => console.error('Error loading all tracks', e))
-    }
+const props = defineProps({
+  sid: {
+    type: String,
+    default: ''
   }
+})
+
+
+
+const years = ref<number[]>([])
+const buttonsLoading = ref(true)
+const showAllButton = ref(false)
+
+getYears()
+  .then(() => {
+    buttonsLoading.value = false
+    if (years.value.length > 0) {
+      loadTracksOfYear(years.value[0])
+    }
+  })
+  .catch((e) => console.log(e))
+
+
+async function getYears() {
+  await getAllTracks(props.sid).then((trackList) => {
+    const tColl = new TrackCollection(trackList)
+    years.value = tColl.yearList().sort((a, b) => b - a)
+  })
 }
+
+function loadTracksOfYear(year: number) {
+  // call loadTracksAndRedraw action from store while injecting the load function
+  const sid = props.sid
+  const loadFunction = function () { return getTracksByYear(year, sid) }
+  store.loadTracks(loadFunction).catch((e: any) => console.error('Error loading tracks by year', e))
+}
+
+function loadAllTracks() {
+  const sid = props.sid
+  const loadFunc = () => getAllTracks(sid)
+  store.loadTracks(loadFunc).catch((e: any) => console.error('Error loading all tracks', e))
+}
+
+
 </script>
 <style>
 .button-year-navbar {

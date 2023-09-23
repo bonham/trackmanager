@@ -70,7 +70,7 @@ export const useTracksStore = defineStore('tracks', () => {
     resizeMap, redrawTracksOnMap, selectionForList,
     selectionForMap, getLoadedTrackIds, getTrackById,
     setLoadedTracks, modifyTrack, loadTracksAndRedraw,
-    updateSelectionForList
+    updateSelectionForList, loadTracks
   }
 
 })

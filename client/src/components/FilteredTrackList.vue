@@ -1,18 +1,19 @@
+<!-- eslint-disable vue/first-attribute-linebreak -->
 <template>
   <div>
     <div class="p-2">
       <div class="bg-light fs-2 listheader border-top border-left border-right rounded">
-        <span v-if="trackLoadStatus === 0">Not loaded</span>
-        <span v-else-if="trackLoadStatus === 1">
+        <span v-if="store.trackLoadStatus === 0">Not loaded</span>
+        <span v-else-if="store.trackLoadStatus === 1">
           Loading
           <b-spinner small label="Spinning" />
         </span>
         <span v-else>{{ headline }}</span>
       </div>
-      <b-card ref="testref" no-body>
+      <b-card no-body>
         <b-list-group flush>
-          <b-list-group-item v-for="track in loadedTracksSorted" :key="track.id" :ref="'track_' + track.id"
-            :label="'track_' + track.id" :active="itemActiveStatus(track.id)" @click="toggleActive(track.id)">
+          <b-list-group-item v-for="track in loadedTracksSorted" :key="track.id" :label="'track_' + track.id"
+            :active="itemActiveStatus(track.id)" @click="toggleActive(track.id)">
             <span>{{ track.name }}, </span>
             <span>{{ (track.distance() / 1000).toFixed(0) }} km, {{ track.localeDateShort() }}</span>
           </b-list-group-item>
@@ -21,107 +22,68 @@
     </div>
   </div>
 </template>
-<script lang="ts">
-import { mapState } from 'vuex'
+<script lang="ts" setup>
 import { BListGroup, BListGroupItem, BCard, BSpinner } from 'bootstrap-vue-next'
 import { TrackCollection, Track } from '@/lib/Track'
+import { useTracksStore } from '@/storepinia'
+import { ref, watch, computed } from 'vue'
+import type { Ref } from 'vue'
 
-export default {
-  name: 'FilteredTrackList',
-  compatConfig: {
-    WATCH_ARRAY: false
-  },
-  components: {
-    BListGroup,
-    BListGroupItem,
-    BCard,
-    BSpinner
-  },
-  data() {
-    return {
-      selectedTrackMap: [] as { [index: number]: boolean },
-      selectedTrackList: [] as number[]
-    }
-  },
-  computed: {
-    ...mapState([
-      'loadedTracks',
-      'trackLoadStatus'
-    ]),
-    loadedTracksSorted() {
-      const l = this.loadedTracks
-      l.sort((a: Track, b: Track) => (a.secondsSinceEpoch() - b.secondsSinceEpoch()))
-      return l
-    },
-    sumDistance() {
-      const tc = new TrackCollection(this.loadedTracks)
-      return tc.distance()
-    },
-    headline() {
-      const dist = Math.round(this.sumDistance / 1000)
-      return `${this.loadedTracks.length} Tracks, ${dist} km`
-    }
-  },
-  created() {
-    // (Re- Initialize) map for selected tracks when loaded tracks are changing
-    this.$watch(
-      () => {
-        return this.loadedTracks
-      },
-      (tracks) => {
-        const allDeselected = {} as any
-        tracks.forEach((track: Track) => {
-          allDeselected[track.id] = false
-        })
-        this.selectedTrackMap = allDeselected
-      }
-    )
-    this.$watch(
-      () => {
-        return this.$store.state.selectionForList
-      },
-      async (selectionUpdateObj) => {
-        if (selectionUpdateObj !== null) {
-          await this.updateSelectedTracksData(
-            selectionUpdateObj.selected,
-            selectionUpdateObj.deselected
-          )
-          if (selectionUpdateObj.selected.length > 0) {
-            const scrollId = selectionUpdateObj.selected[0]
 
-            const itemRef = `track_${scrollId}`
-            const listgroupItem = this.$refs[itemRef] as InstanceType<typeof BListGroupItem>[]
-            const htmlElement = listgroupItem[0].$el as Element
-            htmlElement.scrollIntoView({
-              behavior: 'smooth',
-              block: 'center'
-            })
-          }
-        }
-      }
-    )
-  },
-  methods: {
-    itemActiveStatus(trackId: number) {
-      return this.selectedTrackMap[trackId]
-    },
-    toggleActive(newTrackId: number) {
-      // currently - shift select abd deselect is not implemented
-      const deselected = this.selectedTrackList
-      const selected = [newTrackId]
+const selectedTrackMap: Ref<({ [index: number]: boolean })> = ref([])
+const selectedTrackList: Ref<(number[])> = ref([])
 
-      this.updateSelectedTracksData(selected, deselected)
-    },
-    updateSelectedTracksData(toSelectList: number[], toDeselectList: number[]) {
-      toDeselectList.forEach(tid => {
-        this.selectedTrackMap[tid] = false
-      })
-      toSelectList.forEach(tid => {
-        this.selectedTrackMap[tid] = true
-      })
-      this.selectedTrackList = toSelectList
-    },
+const store = useTracksStore()
+
+
+const loadedTracksSorted = computed(() => {
+  const l = store.loadedTracks
+  l.sort((a: Track, b: Track) => (a.secondsSinceEpoch() - b.secondsSinceEpoch()))
+  return l
+})
+const sumDistance = computed(() => {
+  const tc = new TrackCollection(store.loadedTracks)
+  return tc.distance()
+})
+
+const headline = computed(() => {
+  const dist = Math.round(sumDistance.value / 1000)
+  return `${store.loadedTracks.length} Tracks, ${dist} km`
+})
+
+// init
+// (Re- Initialize) map for selected tracks when loaded tracks are changing
+watch(
+  () => {
+    return store.loadedTracks
+  },
+  (tracks) => {
+    const allDeselected = {} as any
+    tracks.forEach((track: Track) => {
+      allDeselected[track.id] = false
+    })
+    selectedTrackMap.value = allDeselected
   }
+)
+
+function itemActiveStatus(trackId: number) {
+  return selectedTrackMap.value[trackId]
+}
+function toggleActive(newTrackId: number) {
+  // currently - shift select abd deselect is not implemented
+  const deselected = selectedTrackList.value
+  const selected = [newTrackId]
+
+  updateSelectedTracksData(selected, deselected)
+}
+function updateSelectedTracksData(toSelectList: number[], toDeselectList: number[]) {
+  toDeselectList.forEach(tid => {
+    selectedTrackMap.value[tid] = false
+  })
+  toSelectList.forEach(tid => {
+    selectedTrackMap.value[tid] = true
+  })
+  selectedTrackList.value = toSelectList
 }
 </script>
 <style scoped>

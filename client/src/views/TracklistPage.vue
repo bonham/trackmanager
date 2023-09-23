@@ -51,7 +51,7 @@ getYears()
       loadTracksOfYear(years.value[0])
     }
   })
-  .catch((e) => console.log(e))
+  .catch((e) => { console.error(e) })
 
 
 async function getYears() {

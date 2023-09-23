@@ -54,7 +54,7 @@ getYears()
       loadTracksOfYear(years.value[0])
     }
   })
-  .catch((error) => console.error(error))
+  .catch((error) => { console.error(error) })
 
 async function getYears() {
   await getAllTracks(props.sid).then((trackList) => {

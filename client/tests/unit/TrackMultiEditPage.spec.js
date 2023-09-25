@@ -2,7 +2,6 @@ import { mockFetch } from './mockResponse.js'
 import { render, fireEvent, waitForElementToBeRemoved } from '@testing-library/vue'
 import TrackMultiEditPage from '@/views/TrackMultiEditPage.vue'
 import ResizeObserverMock from './__mocks__/ResizeObserver'
-import { store } from '../../src/store'
 import { Request, Response } from 'cross-fetch'
 import { describe, beforeEach, test, expect } from 'vitest'
 

@@ -24,7 +24,7 @@
     "sprintf-js": "^1.1.2",
     "vue": "^3.2.45",
     "vue-router": "^4.1.6",
-    "vuex": "^4.1.0"
+    "vue-router-mock": "^1.0.0"
   },
   "devDependencies": {
     "@iconify-json/bi": "^1.1.15",
@@ -67,7 +67,6 @@
     "unplugin-icons": "^0.16.1",
     "unplugin-vue-components": "^0.25.1",
     "vite": "^4.4.5",
-    "vitest": "^0.33.0",
-    "vue-router-mock": "^1.0.0"
+    "vitest": "^0.33.0"
   }
 }

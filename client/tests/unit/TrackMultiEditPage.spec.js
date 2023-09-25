@@ -3,7 +3,6 @@ import { render, fireEvent, waitForElementToBeRemoved } from '@testing-library/v
 import TrackMultiEditPage from '@/views/TrackMultiEditPage.vue'
 import ResizeObserverMock from './__mocks__/ResizeObserver'
 import { store } from '../../src/store'
-import { createStore } from 'vuex'
 import { Request, Response } from 'cross-fetch'
 import { describe, beforeEach, test, expect } from 'vitest'
 
@@ -19,14 +18,11 @@ describe('MultiEditPage', () => {
   })
 
   test('Simple', async () => {
-    const storeInstance = createStore(store)
     const rresult = render(
       TrackMultiEditPage,
       {
         props: { sid: 'abcd1234' },
-        global: {
-          plugins: [storeInstance]
-        }
+
       })
     expect(await rresult.findByText('Saupferchweg')).toBeInTheDocument()
     rresult.getByText('Edit Tracks')
@@ -34,14 +30,11 @@ describe('MultiEditPage', () => {
   })
 
   test('Clean Button', async () => {
-    const storeInstance = createStore(store)
     const rresult = render(
       TrackMultiEditPage,
       {
         props: { sid: 'abcd1234' },
-        global: {
-          plugins: [storeInstance]
-        }
+
       })
     expect(await rresult.findByText('Saupferchweg')).toBeInTheDocument()
 
@@ -59,14 +52,11 @@ describe('MultiEditPage', () => {
     })
   })
   test('Clean Button 2', async () => {
-    const storeInstance = createStore(store)
     const rresult = render(
       TrackMultiEditPage,
       {
         props: { sid: 'abcd1234' },
-        global: {
-          plugins: [storeInstance]
-        }
+
       })
 
     expect(await rresult.findByText('Saupferchweg')).toBeInTheDocument()

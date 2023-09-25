@@ -1,7 +1,5 @@
 import { render } from '@testing-library/vue'
 // import userEvent from '@testing-library/user-event'
-import { store } from '../../src/store'
-import { createStore } from 'vuex'
 import router from '../../src/router'
 import { vi, describe, test, beforeEach, expect } from 'vitest'
 import { mockFetch } from './mockResponse.js'
@@ -15,13 +13,12 @@ describe('TrackOverview and TrackDetail', () => {
     vi.stubGlobal('fetch', mockFetch)
   })
   test('Render overview page', async () => {
-    const storeInstance = createStore(store)
     const { findByText } = render(
       TrackOverviewPage,
       {
         props: { sid: 'abcd1234' },
         global: {
-          plugins: [storeInstance, router]
+          plugins: [router]
         }
       }
     )
@@ -36,13 +33,12 @@ describe('TrackOverview and TrackDetail', () => {
     vi.stubGlobal('fetch', mockFetch)
     // const user = userEvent.setup()
 
-    const storeInstance = createStore(store)
     const { findAllByRole, findByText } = render(
       TrackOverviewPage,
       {
         props: { sid: 'abcd1234' },
         global: {
-          plugins: [storeInstance, router]
+          plugins: [router]
         }
       }
     )

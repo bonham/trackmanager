@@ -67,7 +67,12 @@ function loadTracksOfYear(year: number) {
   // call loadTracksAndRedraw action from store while injecting the load function
   const sid = props.sid
   const loadFunction = function () { return getTracksByYear(year, sid) }
-  store.loadTracksAndRedraw(loadFunction).catch((e: any) => console.error('Error loading tracks by year', e))
+  try {
+    const r = store.loadTracksAndRedraw(loadFunction)
+    console.log(r)
+  } catch (e) {
+    console.error('Error loading tracks by year', e)
+  }
 }
 
 function loadAllTracks() {

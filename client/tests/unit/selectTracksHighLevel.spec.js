@@ -21,7 +21,8 @@ describe('SelectTracksPage - DOM testing', () => {
     const rresult = render(SelectTracksPage, {
       props: { sid: 'abcd1234' },
       global: {
-        plugins: [pinia]
+        plugins: [pinia],
+        stubs: ['router-link']
       }
     })
 

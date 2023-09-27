@@ -34,7 +34,8 @@ const mmap: Ref<(null | ManagedMap)> = ref(null)
 
 
 // create map object
-mmap.value = new ManagedMap({ selectCallBackFn: (store.updateSelectionForList).bind(this) })
+// the callbackfunction is to react on 'select' events - e.g. setting data in a store or send events.
+mmap.value = new ManagedMap()
 
 
 // method is redrawing tracks AND resetting selection ! 
@@ -117,32 +118,6 @@ watch(
       }
       await redrawTracks()
       store.redrawTracksOnMap = false
-    }
-  }
-)
-
-// watch for a command in store
-// Select / deselect events can be transmitted
-// after completion of the action, the 'selectionForMap'
-// will be cleared
-watch(
-  () => store.selectionForMap,
-  async (selectionUpdateObj) => {
-    let mm: ManagedMap
-    if (mmap.value === null) {
-      console.error("mmap not initalized")
-      return
-    } else {
-      mm = mmap.value
-    }
-    if (selectionUpdateObj !== null) {
-      const selectedTrackids = selectionUpdateObj.selected
-      await mm.setSelectedTracks(selectedTrackids)
-      store.selectionForMap = null
-      setTimeout(
-        (mm.setExtentAndZoomOut).bind(mm),
-        1
-      )
     }
   }
 )

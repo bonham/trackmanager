@@ -19,9 +19,9 @@ import type { GeoJsonObject } from 'geojson'
 import _ from 'lodash'
 import { StyleFactory } from '../mapStyles'
 import type { Track } from '@/lib/Track'
+import type { Coordinate } from 'ol/coordinate'
 
 type SelectionObject = { selected: number[], deselected: number[] }
-type SelectCallbackFn = (x: SelectionObject) => void
 export type GeoJSONWithTrackId = { id: number, geojson: GeoJsonObject }
 export type GeoJsonWithTrack = { track: Track, geojson: GeoJsonObject }
 type FeatureIdMapMember = { vectorLayerId: string, trackId: number }
@@ -63,7 +63,7 @@ export class ManagedMap {
   popovermgr = null as (null | PopoverManager)
 
 
-  constructor(opts?: { selectCallBackFn: SelectCallbackFn }) {
+  constructor() {
 
     this.map = this._createMap()
     // should be defined outside map and passed to map
@@ -85,13 +85,7 @@ export class ManagedMap {
     })
     this.map.addInteraction(this.select) // For Option B
 
-    // A callback function can be provided to trigger actions outside this object when user
-    // is using select through klick on map ( Option B )
-    const selectCallBackFn = opts ? opts.selectCallBackFn : (() => { })
-    const selectHandler = this._createSelectHandler(selectCallBackFn)
-    const boundSelectHandler = selectHandler.bind(this)
-
-    this.select.on(['select'], boundSelectHandler)
+    this.select.on(['select'], (this.processSelectEvent).bind(this))
     this.select.on(['select'], (this.manageZIndexOnSelect).bind(this))
 
   }
@@ -124,67 +118,99 @@ export class ManagedMap {
     return map
   }
 
-  _createSelectHandler(callBackFn: SelectCallbackFn) {
-    const fn = (e: BaseEvent | Event) => {
 
-      if (!(e instanceof SelectEvent)) {
-        console.error("Expected SelectEvent, but dit get different type")
+  /**
+   * Function which can process 'SelectEvent' from openlayers. 
+   * 
+   * 
+   * During processing the following will happen
+   * - A SelectionObject will be composed, translating the 'openlayers'
+   *   Feature id for selected/deselected features
+   *   into track ids
+   * 
+   * - A popover will be created for 'selected' objects ( using the SelectionObject )
+   * 
+   * 
+   * @param callBackFn 
+   * @returns void
+   */
+  processSelectEvent(event: BaseEvent | Event) {
+
+    if (!(event instanceof SelectEvent)) {
+      console.error("Expected SelectEvent, but dit get different type")
+      return
+    }
+
+    const trackIdSelectObject = this.event2selectionObject(event)
+    const numselected = trackIdSelectObject.selected.length
+
+    if (numselected === 0) {
+      this.disposePopover()
+      return
+    }
+
+    if (numselected === 1) {
+
+      const trackId = trackIdSelectObject.selected[0]
+      const coord = event.mapBrowserEvent.coordinate
+      this.showPopover(trackId, coord)
+      return
+    }
+
+    throw Error("Can not select multiple tracks at the moment")
+  }
+
+  event2selectionObject(sEvent: SelectEvent): SelectionObject {
+
+    // Prepare SelectionObject
+    const trackIdSelectObject: SelectionObject = { selected: [], deselected: [] }
+
+    sEvent.selected.forEach((feature: Feature<Geometry>) => {
+      const tid = this.getTrackIdByFeature(feature)
+      if (tid === undefined) { console.error("Got Track id which is undefined") }
+      else { trackIdSelectObject.selected.push(tid) }
+    })
+    sEvent.deselected.forEach((feature: Feature<Geometry>) => {
+      const tid = this.getTrackIdByFeature(feature)
+      if (tid === undefined) { console.error("Got Track id which is undefined") }
+      else { trackIdSelectObject.deselected.push(tid) }
+    })
+    return trackIdSelectObject
+  }
+
+  disposePopover() {
+    if (!this.popovermgr) {
+      console.error("Not able to show popup. No popupmanager")
+      return
+    } else {
+      this.popovermgr.dispose()
+    }
+  }
+
+  showPopover(trackId: number, coord: Coordinate) {
+    // Manage popup: show on select
+    if (this.popovermgr) {
+
+      const track = this.trackMap.get(trackId)
+
+      if (!track) {
+        console.error("Could not find track with id %i", trackId)
         return
       }
+      const dateopts: Intl.DateTimeFormatOptions = { weekday: 'short', month: 'short', day: '2-digit', year: '2-digit' }
+      const title = `${track.localeDateShort(dateopts)}`
+      let content = `${track.name}<br>Dist: ${(track.distance() / 1000).toFixed()} km`
+      content += track.ascentString() ? `<br>Ascent: ${track.ascentString()}` : ""
 
-      const trackIdSelectObject: SelectionObject = { selected: [], deselected: [] }
-
-      e.selected.forEach((feature: Feature<Geometry>) => {
-        const tid = this.getTrackIdByFeature(feature)
-        if (tid === undefined) { console.error("Got Track id which is undefined") }
-        else { trackIdSelectObject.selected.push(tid) }
+      this.popovermgr.setNewPopover(coord, {
+        animation: false,
+        content,
+        placement: 'top',
+        title
       })
-      e.deselected.forEach((feature: Feature<Geometry>) => {
-        const tid = this.getTrackIdByFeature(feature)
-        if (tid === undefined) { console.error("Got Track id which is undefined") }
-        else { trackIdSelectObject.deselected.push(tid) }
-      })
-
-      // Manage popup: show on select
-      if (this.popovermgr) {
-
-        // only set popup on selected
-        const numselected = trackIdSelectObject.selected.length
-        if (numselected > 0) {
-
-          let content = "no track details"
-          let title = "no track title"
-          if (numselected > 1) {
-            content = "Multiple tracks"
-          } else {
-            const trackId = trackIdSelectObject.selected[0]
-            const track = this.trackMap.get(trackId)
-
-            if (track) {
-              const dateopts: Intl.DateTimeFormatOptions = { weekday: 'short', month: 'short', day: '2-digit', year: '2-digit' }
-              title = `${track.localeDateShort(dateopts)}`
-              content = `${track.name}<br>Dist: ${(track.distance() / 1000).toFixed()} km`
-              content += track.ascentString() ? `<br>Ascent: ${track.ascentString()}` : ""
-            }
-          }
-
-
-          const coord = e.mapBrowserEvent.coordinate
-          this.popovermgr.setNewPopover(coord, {
-            animation: false,
-            content,
-            placement: 'top',
-            title
-          })
-        } else {
-          // otherwise dispose
-          this.popovermgr.dispose()
-        }
-      }
-      callBackFn(trackIdSelectObject)
     }
-    return fn
   }
+
 
   // set map view from bounding box in EPSG:4326 (GPS Lat Lon system https://epsg.io/4326 )
   setMapViewBbox(bbox: Extent) {
@@ -207,6 +233,19 @@ export class ManagedMap {
       extent,
       { size: mapSize }
     )
+  }
+
+  getMapViewExtent() {
+    return this.map.getView().calculateExtent(this.map.getSize());
+  }
+
+  getMapViewBbox() {
+    const bbox = transformExtent(
+      this.getMapViewExtent(),
+      'EPSG:3857',
+      'EPSG:4326'
+    )
+    return bbox
   }
 
   addTrackLayer(geoJsonWithTrack: GeoJsonWithTrack) { // geojsonwithid: { id: id, geojson: geojson }

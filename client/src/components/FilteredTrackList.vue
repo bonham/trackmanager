@@ -12,8 +12,7 @@
       </div>
       <b-card no-body>
         <b-list-group flush>
-          <b-list-group-item v-for="track in loadedTracksSorted" :key="track.id" :label="'track_' + track.id"
-            :active="itemActiveStatus(track.id)" @click="toggleActive(track.id)">
+          <b-list-group-item v-for="track in loadedTracksSorted" :key="track.id" :label="'track_' + track.id">
             <span>{{ track.name }}, </span>
             <span>{{ (track.distance() / 1000).toFixed(0) }} km, {{ track.localeDateShort() }}</span>
           </b-list-group-item>
@@ -26,12 +25,7 @@
 import { BListGroup, BListGroupItem, BCard, BSpinner } from 'bootstrap-vue-next'
 import { TrackCollection, Track } from '@/lib/Track'
 import { useTracksStore } from '@/storepinia'
-import { ref, watch, computed } from 'vue'
-import type { Ref } from 'vue'
-
-
-const selectedTrackMap: Ref<({ [index: number]: boolean })> = ref([])
-const selectedTrackList: Ref<(number[])> = ref([])
+import { computed } from 'vue'
 
 const store = useTracksStore()
 
@@ -51,40 +45,6 @@ const headline = computed(() => {
   return `${store.loadedTracks.length} Tracks, ${dist} km`
 })
 
-// init
-// (Re- Initialize) map for selected tracks when loaded tracks are changing
-watch(
-  () => {
-    return store.loadedTracks
-  },
-  (tracks) => {
-    const allDeselected = {} as any
-    tracks.forEach((track: Track) => {
-      allDeselected[track.id] = false
-    })
-    selectedTrackMap.value = allDeselected
-  }
-)
-
-function itemActiveStatus(trackId: number) {
-  return selectedTrackMap.value[trackId]
-}
-function toggleActive(newTrackId: number) {
-  // currently - shift select abd deselect is not implemented
-  const deselected = selectedTrackList.value
-  const selected = [newTrackId]
-
-  updateSelectedTracksData(selected, deselected)
-}
-function updateSelectedTracksData(toSelectList: number[], toDeselectList: number[]) {
-  toDeselectList.forEach(tid => {
-    selectedTrackMap.value[tid] = false
-  })
-  toSelectList.forEach(tid => {
-    selectedTrackMap.value[tid] = true
-  })
-  selectedTrackList.value = toSelectList
-}
 </script>
 <style scoped>
 .fs-2 {

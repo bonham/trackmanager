@@ -62,7 +62,6 @@ async function getYears() {
 }
 
 function loadTracksOfYear(year: number) {
-  // call loadTracksAndRedraw action from store while injecting the load function
   const sid = props.sid
   const loadFunction = function () { return getTracksByYear(year, sid) }
   store.loadTracks(loadFunction).catch((e: any) => console.error('Error loading tracks by year', e))

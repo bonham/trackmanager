@@ -2,11 +2,36 @@ import _ from 'lodash'
 
 type TrackIdList = number[]
 
+/**
+ * This Class is calculating actions
+ * 
+ * There are 3 current states:
+ * - a track is not loaded
+ * - a track is loaded but not visible
+ * - a track is loaded and visible
+ * 
+ * The to be state is: toBeVisible
+ * 
+ * The class calculates
+ * - how many tracks are not loaded and need to be loaded and set visible
+ * - how many tracks are visible and should stay visible
+ * - how many tracks are loaded and not visible and should stay invisible
+ * - how many tracks are loaded and visible and should be set invisible
+ * - how many tracks are loaded and invisible and should be set visible
+ *  
+ */
 class TrackVisibilityManager {
   currentlyVisible: TrackIdList
   toBeVisible: TrackIdList
   alreadyLoaded: TrackIdList
 
+  /**
+   * Create instance of TrackVisibilityManager 
+   * 
+   * @param currentlyVisible 
+   * @param toBeVisible 
+   * @param alreadyLoaded 
+   */
   constructor(currentlyVisible: TrackIdList, toBeVisible: TrackIdList, alreadyLoaded: TrackIdList) {
     this.currentlyVisible = _.uniq(currentlyVisible)
     this.toBeVisible = _.uniq(toBeVisible)

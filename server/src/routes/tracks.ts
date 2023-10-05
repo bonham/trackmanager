@@ -188,6 +188,43 @@ router.get(
   },
 );
 
+/// // Get list of tracks by bounding box ( coordinates in EPSG:4326 )
+router.post(
+  '/byextent/sid/:sid',
+  sidValidationChain,
+  async (req: Request, res: Response, next: NextFunction) => {
+    let query;
+    try {
+      const { schema } = req;
+
+      // get extent from payload
+      const bbox = req.body;
+      if (!Array.isArray(bbox)) { throw Error('Payload is not array'); }
+      if (bbox.length !== 4) { throw Error('BBox must have array length 4'); }
+
+      const allAreNumbers = bbox.every((value) => (typeof value === 'number'));
+      if (!allAreNumbers) { throw Error('Not all elements of bbox are numbers'); }
+
+      const whereClause = 'ST_Intersects(wkb_geometry, ST_MakeEnvelope('
+        + `${bbox[0]}, ${bbox[1]}, ${bbox[2]}, ${bbox[3]}, '4326'))`;
+
+
+      query = 'select id, name, length, src,'
+        + 'time, timelength, ascent '
+        + `from ${schema}.tracks where ${whereClause}`;
+      console.log(query);
+    } catch (e) {
+      next(e);
+    }
+    try {
+      const queryResult = await pool.query(query);
+      res.json(queryResult.rows);
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
 /// // Update single track
 router.put(
   '/byid/:trackId/sid/:sid',

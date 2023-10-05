@@ -14,11 +14,14 @@ import { BSpinner } from 'bootstrap-vue-next'
 import { ManagedMap } from '@/lib/mapservices/ManagedMap'
 import type { GeoJSONWithTrackId } from '@/lib/mapservices/ManagedMap'
 import { TrackVisibilityManager } from '@/lib/mapStateHelpers'
-import { getGeoJson } from '@/lib/trackServices'
+import { getGeoJson, getTracksByExtent, getTracksByYear } from '@/lib/trackServices'
 import _ from 'lodash'
 
+import { useMapStateStore } from '@/stores/mapstate'
+const mapStateStore = useMapStateStore()
+
 import { useTracksStore } from '@/storepinia'
-const store = useTracksStore()
+const trackStore = useTracksStore()
 
 const props = defineProps({
   sid: {
@@ -40,7 +43,7 @@ mmap.value = new ManagedMap()
 
 // method is redrawing tracks AND resetting selection ! 
 // ( the latter might need to be factored out)
-async function redrawTracks() {
+async function redrawTracks(zoomOut = false) {
   loading.value = true
   let mm: ManagedMap
   if (mmap.value === null) {
@@ -55,7 +58,7 @@ async function redrawTracks() {
 
   const tvm = new TrackVisibilityManager(
     mm.getTrackIdsVisible(),
-    store.getLoadedTrackIds,
+    trackStore.getLoadedTrackIds,
     mm.getTrackIds()
   )
 
@@ -76,7 +79,7 @@ async function redrawTracks() {
     resultSet = []
   }
   resultSet.forEach(result => {
-    const tr = store.tracksById[result.id]
+    const tr = trackStore.tracksById[result.id]
     mm.addTrackLayer({ track: tr, geojson: result.geojson })
   })
 
@@ -86,13 +89,15 @@ async function redrawTracks() {
   _.forEach(toHide, function (id) { mm.setInvisible(id) })
 
   loading.value = false
-  mm.setExtentAndZoomOut()
+  if (zoomOut) {
+    mm.setExtentAndZoomOut()
+  }
 }
 
 
 // watch if the viewport is resized and resize the map
 watch(
-  () => store.resizeMap,
+  () => trackStore.resizeMap,
 
   (newValue, oldValue) => {
     if (newValue === true) {
@@ -101,26 +106,61 @@ watch(
       }
       if (mmap.value) {
         mmap.value.map.updateSize()
-        store.resizeMap = false
+        trackStore.resizeMap = false
       } else {
         console.error("mmap was not initialized")
       }
     }
   }
 )
-// watch for a command in store to redraw the tracks on the map
+
+// watching different commands
 watch(
-  () => store.redrawTracksOnMap,
-  async (newValue, oldValue) => {
-    if (newValue === true) {
-      if (oldValue === true) {
-        console.log('Warn: Triggering redrawTracks watch while a redraw is running')
-      }
+  () => mapStateStore.loadCommand,
+  async (command) => {
+
+    // load year - will not be repeated if submitted twice
+    if (command.command === 'year') {
+
+      const year = command.payload
+      console.log(`received year command ${year}`)
+      await loadTracksOfYear(year)
+      await redrawTracks(!!command.zoomOut)
+
+
+      // Load extent - will aways be executed
+    } else if (command.command === 'bbox') {
+
+      if (command.completed) { return }
+
+      console.log("Received request to update extent")
+      const map = mmap.value as ManagedMap
+      const bbox = map.getMapViewBbox()
+      const tracks = await getTracksByExtent(bbox, props.sid)
+      console.log("tracks from extent call", tracks)
+      trackStore.setLoadedTracks(tracks)
       await redrawTracks()
-      store.redrawTracksOnMap = false
+
+      command.completed = true
+
     }
   }
 )
+
+async function loadTracksOfYear(year: number) {
+
+  const sid = props.sid
+  try {
+    loading.value = true
+    const tracks = await getTracksByYear(year, sid)
+    trackStore.setLoadedTracks(tracks)
+  } catch (e) {
+    console.error('Error loading tracks by year', e)
+  } finally {
+    loading.value = false
+  }
+}
+
 
 onMounted(() => {
   nextTick(() => {

@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { ref, markRaw, computed } from 'vue'
 import type { Ref } from 'vue'
 
 import _ from 'lodash'
@@ -9,13 +9,16 @@ type TrackArray = Track[]
 type LoadFunctionType = () => Promise<TrackArray>
 
 export const useTracksStore = defineStore('tracks', () => {
-  const loadedTracks: Ref<Track[]> = ref([])
+  const loadedTracks: Ref<Track[]> = ref(markRaw([]))
   const tracksById: Ref<{ [index: number]: Track }> = ref({})
-  const trackLoadStatus = ref(0) // 0:not loaded, 1:loading, 2:loaded
   const resizeMap = ref(false)
   const redrawTracksOnMap = ref(false)
 
-  // getters
+  /**
+   * Returns track ids for which track details are loaded in store
+   * 
+   * @returns Array of numbers
+   */
   const getLoadedTrackIds = computed(() => {
     return _.map(loadedTracks.value, (x) => { return x.id })
   },)
@@ -27,7 +30,7 @@ export const useTracksStore = defineStore('tracks', () => {
   // actions
   function setLoadedTracks(trackList: Track[]) {
     tracksById.value = {}
-    loadedTracks.value = trackList
+    loadedTracks.value = markRaw(trackList)
     trackList.forEach(function (el) {
       const id = el.id
       tracksById.value[id] = el
@@ -40,22 +43,15 @@ export const useTracksStore = defineStore('tracks', () => {
   }
 
   async function loadTracks(loadFunction: LoadFunctionType) {
-    trackLoadStatus.value = 1
     const trackList = await loadFunction() // [ Track1, Track2, Track3 ] oder auch [ { id: 403, name: "Hammerau", .}, { id: x, ... }]
     await setLoadedTracks(trackList)
-    trackLoadStatus.value = 2
-  }
-
-  async function loadTracksAndRedraw(loadFunction: LoadFunctionType) {
-    await loadTracks(loadFunction)
-    redrawTracksOnMap.value = true
   }
 
   return {
-    loadedTracks, tracksById, trackLoadStatus,
+    loadedTracks, tracksById,
     resizeMap, redrawTracksOnMap,
     getLoadedTrackIds, getTrackById,
-    setLoadedTracks, modifyTrack, loadTracksAndRedraw,
+    setLoadedTracks, modifyTrack,
     loadTracks
   }
 

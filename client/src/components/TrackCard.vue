@@ -9,8 +9,10 @@
           <div>
             {{ track.monthAndDay() }}
             / {{ (track.distance() / 1000).toFixed(2) }} km
-            / {{ Math.round(track.ascent) }} m
+            / {{ track.ascent ? Math.round(track.ascent) : "-" }} m
             / {{ track.timeLengthFormatted() }} h
+            / {{ track.timelength }} s
+            / {{ track.timelength ? Math.round((3.6 * track.distance() / track.timelength) * 10) / 10 : "-" }} km/h avg.
           </div>
         </b-col>
         <b-col cols="3" class="d-flex align-items-center justify-content-end">

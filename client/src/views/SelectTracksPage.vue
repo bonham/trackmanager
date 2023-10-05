@@ -9,11 +9,9 @@
       <b-button class="placeholder bg-secondary flex-fill m-2"></b-button>
     </div>
     <div v-else class="year-navbar">
-      <b-button v-for="year in years" :key="year" class="m-2 button-year-navbar" @click="loadTracksOfYear(year)">
+      <b-button class="m-2 button-year-navbar" @click="loadAllTracksinView()">All in view</b-button>
+      <b-button v-for="year in years" :key="year" class="m-2 button-year-navbar" @click="loadTracksOfYear(year, false)">
         {{ year === 0 ? "No date" : year }}
-      </b-button>
-      <b-button v-if="showAllButton" class="m-2 button-year-navbar" @click="loadAllTracks()">
-        All
       </b-button>
     </div>
     <div class="d-flex flex-column flex-grow-1">
@@ -27,12 +25,12 @@ import { BContainer, BButton } from 'bootstrap-vue-next'
 import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'
 import FilteredMap from '@/components/FilteredMap.vue'
 import { TrackCollection } from '@/lib/Track'
-import { getTracksByYear, getAllTracks } from '@/lib/trackServices'
-import { useTracksStore } from '@/storepinia'
+import { getAllTracks } from '@/lib/trackServices'
+import { useMapStateStore } from '@/stores/mapstate'
 import { ref } from 'vue'
-import type { Ref } from 'vue'
 
-const store = useTracksStore()
+const mapStateStore = useMapStateStore()
+
 
 const props = defineProps({
   sid: {
@@ -42,43 +40,44 @@ const props = defineProps({
 })
 
 // reactive data
-const years: Ref<number[]> = ref([])
+const years = ref<number[]>([])
 const buttonsLoading = ref(true)
-const showAllButton = ref(false)
 
 // initialization
 getYears()
   .then(() => {
     buttonsLoading.value = false
     if (years.value.length > 0) {
-      loadTracksOfYear(years.value[0])
+      const mostRecentYear = years.value[0]
+      loadTracksOfYear(mostRecentYear, true)
     }
   })
   .catch((error) => { console.error(error) })
 
 async function getYears() {
-  await getAllTracks(props.sid).then((trackList) => {
-    const tColl = new TrackCollection(trackList)
-    years.value = tColl.yearList().sort((a, b) => b - a)
-  })
+  await getAllTracks(props.sid)
+    .then((trackList) => {
+      const tColl = new TrackCollection(trackList)
+      years.value = tColl.yearList().sort((a, b) => b - a)
+    })
+    .catch((e: any) => { console.log("Error in getYears", e) })
 }
 
-function loadTracksOfYear(year: number) {
-  // call loadTracksAndRedraw action from store while injecting the load function
-  const sid = props.sid
-  const loadFunction = function () { return getTracksByYear(year, sid) }
-  try {
-    const r = store.loadTracksAndRedraw(loadFunction)
-    console.log(r)
-  } catch (e) {
-    console.error('Error loading tracks by year', e)
+function loadTracksOfYear(year: number, zoomOut: boolean) {
+  mapStateStore.loadCommand = {
+    command: 'year',
+    payload: year,
+    zoomOut
   }
 }
 
-function loadAllTracks() {
-  const sid = props.sid
-  const loadFunc = () => getAllTracks(sid)
-  store.loadTracksAndRedraw(loadFunc).catch((e: any) => console.error('Error loading all tracks', e))
+function loadAllTracksinView() {
+
+  mapStateStore.loadCommand = {
+    command: 'bbox',
+    completed: false
+  }
+
 }
 
 

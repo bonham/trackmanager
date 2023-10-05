@@ -21,6 +21,9 @@ import { StyleFactory } from '../mapStyles'
 import type { Track } from '@/lib/Track'
 import type { Coordinate } from 'ol/coordinate'
 
+
+
+
 type SelectionObject = { selected: number[], deselected: number[] }
 export type GeoJSONWithTrackId = { id: number, geojson: GeoJsonObject }
 export type GeoJsonWithTrack = { track: Track, geojson: GeoJsonObject }
@@ -212,7 +215,7 @@ export class ManagedMap {
   }
 
 
-  // set map view from bounding box in EPSG:4326 (GPS Lat Lon system https://epsg.io/4326 )
+  // set map view from bounding box in EPSG:4326 (GPS Lat Lon system https://epsg.io/4326 ) ( aka WGS84  )
   setMapViewBbox(bbox: Extent) {
     const extent = transformExtent(
       bbox,
@@ -235,10 +238,15 @@ export class ManagedMap {
     )
   }
 
+  // get map view extent in EPSG:3857
   getMapViewExtent() {
-    return this.map.getView().calculateExtent(this.map.getSize());
+    const extent = this.map.getView().calculateExtent(this.map.getSize());
+    console.log(extent.join(', '))
+    return extent
   }
 
+
+  // get map view extent ( bounding box ) in EPSG:4326
   getMapViewBbox() {
     const bbox = transformExtent(
       this.getMapViewExtent(),
@@ -383,6 +391,10 @@ export class ManagedMap {
     return Array.from(this.trackIdToLayerMap.keys())
   }
 
+  /**
+   * Returns all track ids which are currently visible in the map
+   * @returns Array of numbers
+   */
   getTrackIdsVisible() {
     const allIds = this.getTrackIds()
     return _.filter(
@@ -432,10 +444,10 @@ export class ManagedMap {
         source.getExtent()
       )
     }
+
     const overallBbox = new ExtentCollection(extentList).boundingBox()
     if (overallBbox) {
       this.setMapView(overallBbox)
-      this.zoomOut()
     }
   }
 }

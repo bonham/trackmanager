@@ -2,7 +2,7 @@ import { Track } from '@/lib/Track'
 import type { TrackInitData, TrackPropertiesOptional } from '@/lib/Track'
 import _ from 'lodash'
 import type { GeoJSONWithTrackId } from '@/lib/mapservices/ManagedMap'
-
+import type { Extent } from 'ol/extent'
 // /// Get all tracks
 async function getAllTracks(sid: string) {
   const response = await fetch(`/api/tracks/getall/sid/${sid}`)
@@ -25,6 +25,37 @@ async function getTracksByYear(year: number, sid: string) {
   }
   if (!response.ok) {
     console.error('Response not ok when fetching tracks by year', response)
+    return []
+  }
+
+  try {
+    const responseJson: TrackInitData[] = await response.json()
+    const trackArray = responseJson.map(t => new Track(t))
+    return trackArray
+  } catch (error) {
+    console.error('Error when processing result from http call', error)
+    return []
+  }
+}
+
+// /// Get tracks by year
+async function getTracksByExtent(extent: Extent, sid: string) {
+
+  const url = `/api/tracks/byextent/sid/${sid}`
+  const body = JSON.stringify(extent)
+  let response
+  try {
+    response = await fetch(url, {
+      method: 'POST',
+      body,
+      headers: { 'Content-Type': 'application/json' }
+    })
+  } catch (error) {
+    console.error('Error when fetching tracks by extent', error)
+    return []
+  }
+  if (!response.ok) {
+    console.error('Response not ok when fetching tracks by extent', response)
     return []
   }
 
@@ -168,5 +199,5 @@ async function deleteTrack(id: number, sid: string) {
 export {
   getAllTracks, getTracksByYear, getGeoJson,
   updateTrack, updateTrackById,
-  deleteTrack, getTrackById
+  deleteTrack, getTrackById, getTracksByExtent
 }

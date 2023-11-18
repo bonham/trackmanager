@@ -1,9 +1,9 @@
 import type { Request as ExpressRequest, NextFunction, Response } from 'express';
 import { Formidable } from 'formidable';
 import { mkdtempSync } from 'node:fs';
-import { rmdir as rmdirprom } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { processFile } from '../lib/processUpload';
 
 import { isAuthenticated } from './auth/auth';
 
@@ -26,7 +26,6 @@ const router = express.Router();
 router.use(express.json()); // use builtin json body parser
 
 const { Pool } = require('pg');
-const { execFileSync } = require('child_process');
 const createSidValidationChain = require('../lib/sidResolverMiddleware');
 const trackIdValidationMiddleware = require('../lib/trackIdValidationMiddleware');
 const yearValidation = require('../lib/yearValidation');
@@ -34,7 +33,6 @@ const yearValidation = require('../lib/yearValidation');
 const SIMPLIFY_DISTANCE = 2;
 
 const database = process.env.TM_DATABASE;
-const gpx2dbScript = process.env.GPX2DBSCRIPT;
 
 // sql query pool
 const poolOptions = {
@@ -309,38 +307,6 @@ router.delete(
   },
 );
 
-/// // Create new track from file upload
-async function processFile(filePath: string, uploadDir: string, schema: string): Promise<void> {
-  // build arguments
-  const args = [
-    '-s',
-    SIMPLIFY_DISTANCE,
-    filePath,
-    database,
-    schema,
-  ];
-
-
-  // run child process - execute python executable to process the upload
-  let stdout = '';
-  try {
-    console.log('Command: ', gpx2dbScript, args);
-    stdout = execFileSync(gpx2dbScript, args, { encoding: 'utf-8' });
-    console.log(`Stdout >>${stdout}<<`);
-  } catch (err) {
-    console.log(`Stdout >>${stdout}<<`);
-    console.log('Child error', err);
-    const message = (err instanceof Error && 'message' in err) ? err.message : '';
-    console.log('Message', message);
-    throw (err);
-  } finally {
-    // cleanup of file and directory
-    rmdirprom(uploadDir, { recursive: true }).then(
-      () => console.log(`Successfully purged upload directory: ${uploadDir}`),
-      (err: any) => { console.log('Error, could not upload file', err); },
-    );
-  }
-}
 
 // POST route for handling gpx track file uploads.
 router.post(
@@ -369,7 +335,7 @@ router.post(
         if (files.newtrack === undefined) throw new Error('Expected form field not received: newtrack');
         const filePath = files.newtrack[0].filepath;
 
-        await processFile(filePath, uploadDir, req.schema);
+        await processFile(filePath, uploadDir, req.schema, SIMPLIFY_DISTANCE);
         res.json({ message: 'ok' });
       });
     } catch (error) {

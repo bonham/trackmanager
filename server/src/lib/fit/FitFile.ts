@@ -25,6 +25,15 @@ class FitFile {
     return decoder.isFIT();
   }
 
+  getFirstSessionMessage() {
+    const numSessions = this.messages.sessionMesgs.length;
+    if (numSessions < 1) {
+      throw Error('No session message in fit file');
+    }
+    if (numSessions > 1) console.warn('Fit file contains multiple sessions');
+    return this.messages.sessionMesgs[0];
+  }
+
   getFitMessages() {
     return this.messages;
   }

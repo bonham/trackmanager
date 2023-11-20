@@ -14,6 +14,10 @@ class AbstractBaseMessage<T extends (BaseFitMessage | EventFitMessage | RecordFi
     return this.m;
   }
 
+  getDate() {
+    return this.m.timestamp;
+  }
+
   /**
    *
    * @returns Luxon DateTime object

@@ -1,24 +1,25 @@
-import { rmdir as rmdirprom } from 'node:fs/promises';
+import { readFileSync } from 'fs';
+import { basename } from 'node:path';
+import { FitFile } from './fit/FitFile';
+import { processFitFile } from './processFitFile';
 
 const { execFileSync } = require('child_process');
 
-const database = process.env.TM_DATABASE;
-const gpx2dbScript = process.env.GPX2DBSCRIPT;
+const DATABASE = process.env.TM_DATABASE;
+const GPX2DB_SCRIPT = process.env.GPX2DBSCRIPT;
 
-
-/// // Create new track from file upload
-async function processFile(
+function processGpxFile(
+  simplifyDistance: number,
   filePath: string,
-  uploadDir: string,
+  dbname: string,
   schema: string,
-  simplifyDistance = 2,
-): Promise<void> {
+) {
   // build arguments
   const args = [
     '-s',
     simplifyDistance,
     filePath,
-    database,
+    dbname,
     schema,
   ];
 
@@ -26,8 +27,8 @@ async function processFile(
   // run child process - execute python executable to process the upload
   let stdout = '';
   try {
-    console.log('Command: ', gpx2dbScript, args);
-    stdout = execFileSync(gpx2dbScript, args, { encoding: 'utf-8' });
+    console.log('Command: ', GPX2DB_SCRIPT, args);
+    stdout = execFileSync(GPX2DB_SCRIPT, args, { encoding: 'utf-8' });
     console.log(`Stdout >>${stdout}<<`);
   } catch (err) {
     console.log(`Stdout >>${stdout}<<`);
@@ -35,14 +36,28 @@ async function processFile(
     const message = (err instanceof Error && 'message' in err) ? err.message : '';
     console.log('Message', message);
     throw (err);
-  } finally {
-    // cleanup of file and directory
-    rmdirprom(uploadDir, { recursive: true }).then(
-      () => console.log(`Successfully purged upload directory: ${uploadDir}`),
-      (err: any) => { console.log('Error, could not upload file', err); },
-    );
   }
 }
+
+
+/// // Create new track from file upload
+function processFile(
+  filePath: string,
+  schema: string,
+  simplifyDistance = 2,
+) {
+  if (DATABASE === undefined) throw Error('Database is undefined');
+
+  const fileName = basename(filePath);
+  // Decide if fit or gpx file
+  const fileBuffer = readFileSync(filePath);
+  if (FitFile.isFit(fileBuffer)) {
+    processFitFile(fileBuffer, fileName, DATABASE, schema);
+  } else {
+    processGpxFile(simplifyDistance, filePath, DATABASE, schema);
+  }
+}
+
 
 export { processFile };
 

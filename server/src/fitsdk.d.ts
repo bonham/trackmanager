@@ -22,9 +22,29 @@ declare module '@garmin/fitsdk' {
     'timerTrigger': string
   }
 
+  interface SessionFitMessage extends BaseFitMessage {
+    'sport'?: string;
+    'startTime'?: Date;
+    'timestamp'?: Date;
+    'totalElapsedTime'?: number;
+    'totalTimerTime'?: number;
+    'numLaps'?: number;
+    'trigger'?: string;
+    'thresholdPower'?: number;
+    'totalDistance'?: number;
+    'avgSpeed'?: number;
+    'maxSpeed'?: number;
+    'totalAscent'?: number;
+    'totalDescent'?: number;
+    'minAltitude'?: number;
+    'maxAltitude'?: number;
+    'avgAltitude'?: number;
+  }
+
   interface FitMessages {
     'eventMesgs': EventFitMessage[];
     'recordMesgs': RecordFitMessage[];
+    'sessionMesgs': SessionFitMessage[];
   }
 
   export class Stream {

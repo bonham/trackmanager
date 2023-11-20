@@ -1,9 +1,10 @@
 import type { Request as ExpressRequest, NextFunction, Response } from 'express';
 import { Formidable } from 'formidable';
-import { mkdtempSync } from 'node:fs';
+import { mkdtemp as mkdtempprom, rmdir as rmdirprom } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { processFile } from '../lib/processUpload';
+
 
 import { isAuthenticated } from './auth/auth';
 
@@ -316,30 +317,40 @@ router.post(
 
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const uploadDir = mkdtempSync(join(TMP_BASE_DIR, UPLOAD_DIR_PREFIX));
-      const form = new Formidable({
-        uploadDir,
-        filename: (name, ext, part) => {
-          console.log('name', name, 'ext', ext);
-          if (part.originalFilename) {
-            return part.originalFilename;
+      const uploadDir = await mkdtempprom(join(TMP_BASE_DIR, UPLOAD_DIR_PREFIX));
+      try {
+        const form = new Formidable({
+          uploadDir,
+          filename: (name, ext, part) => {
+            console.log('name', name, 'ext', ext);
+            if (part.originalFilename) {
+              return part.originalFilename;
+            }
+            throw Error('Unexpected: Part does not have property originalfilename');
+          },
+        });
+        form.parse(req, async (err, fields, files) => {
+          if (err) {
+            next(err);
+            return;
           }
-          throw Error('Unexpected: Part does not have property originalfilename');
-        },
-      });
-      form.parse(req, async (err, fields, files) => {
-        if (err) {
-          next(err);
-          return;
-        }
-        if (files.newtrack === undefined) throw new Error('Expected form field not received: newtrack');
-        const filePath = files.newtrack[0].filepath;
+          if (files.newtrack === undefined) throw new Error('Expected form field not received: newtrack');
+          const filePath = files.newtrack[0].filepath;
 
-        await processFile(filePath, uploadDir, req.schema, SIMPLIFY_DISTANCE);
-        res.json({ message: 'ok' });
-      });
-    } catch (error) {
-      next(error);
+          await processFile(filePath, req.schema, SIMPLIFY_DISTANCE);
+          res.json({ message: 'ok' });
+        });
+      } catch (error) {
+        next(error);
+      } finally {
+        // is async
+        rmdirprom(uploadDir, { recursive: true }).then(
+          () => console.log(`Successfully purged upload directory: ${uploadDir}`),
+          (err: any) => { console.log('Error, could not upload file', err); },
+        );
+      }
+    } catch (e) {
+      next(e);
     }
   },
 );

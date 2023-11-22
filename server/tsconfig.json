@@ -6,13 +6,21 @@
     "noImplicitAny": true,
     "allowJs": true,
     "checkJs": false, // todo: set to true
-    "rootDir": "./src"
+    "rootDir": "./",
+    "baseUrl": "./",
+    "paths": {
+
+    }
   },
   "ts-node": {
-    "esm": false
+    "esm": true
   },
   "include": [
-    "src/**/*"
+    "src/**/*.ts",
+    "tests/**/*.ts",
   ],
+  "exclude": [
+    "dist"
+  ]
   
 }

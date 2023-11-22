@@ -1,6 +1,8 @@
 /* eslint-disable padded-blocks */
 /* eslint-disable no-trailing-spaces */
-import { Decoder, FitMessages, Stream } from '@garmin/fitsdk';
+import {
+  Decoder, FitMessages, SessionFitMessage, Stream,
+} from '@garmin/fitsdk';
 import { RecordMessageList, StartStopList } from './Messages';
 import { intersectRecordMessages } from './intersect';
 import { joinSegments } from './joinSegments';
@@ -25,7 +27,7 @@ class FitFile {
     return decoder.isFIT();
   }
 
-  getFirstSessionMessage() {
+  getFirstSessionMessage(): SessionFitMessage {
     const numSessions = this.messages.sessionMesgs.length;
     if (numSessions < 1) {
       throw Error('No session message in fit file');

@@ -34,7 +34,7 @@ const segment2: TrackPoint[] = [
 
 
 
-describe('Track Object', async () => {
+describe('Track Object', () => {
   test('Simple1', () => {
     const t1 = new Track({
       name: 'First Track',

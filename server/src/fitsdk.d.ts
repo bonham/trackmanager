@@ -25,7 +25,6 @@ declare module '@garmin/fitsdk' {
   interface SessionFitMessage extends BaseFitMessage {
     'sport'?: string;
     'startTime'?: Date;
-    'timestamp'?: Date;
     'totalElapsedTime'?: number;
     'totalTimerTime'?: number;
     'numLaps'?: number;

@@ -5,7 +5,7 @@
   "scripts": {
     "develop": "nodemon --ignore dist --ext ts,js,json src/index.ts",
     "tsnode": "ts-node src/index.ts",
-    "build": "tsc --build --clean && tsc && tscp",
+    "build": "tsc --build --clean && tsc",
     "start": "node ./dist/index.js",
     "test": "jest",
     "copyconfig": "ts-node ./src/bin/copyconfig.ts",
@@ -60,25 +60,5 @@
     "ts-node": "^10.9.1",
     "typescript": "^5.0.4",
     "typescript-cp": "^0.1.9"
-  },
-  "jest": {
-    "testEnvironment": "node",
-    "preset": "ts-jest",
-    "coveragePathIgnorePatterns": [
-      "/node_modules/",
-      "/coverage/"
-    ],
-    "verbose": true,
-    "collectCoverage": false,
-    "collectCoverageFrom": [
-      "**/*.{js,vue}",
-      "!.eslintrc.js"
-    ],
-    "coverageReporters": [
-      "clover",
-      "json",
-      "lcov",
-      "text-summary"
-    ]
   }
 }

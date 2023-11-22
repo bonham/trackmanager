@@ -1,4 +1,4 @@
-import { readFileSync } from 'fs';
+import { readFileSync } from 'node:fs';
 import { basename } from 'node:path';
 import { FitFile } from './fit/FitFile';
 import { processFitFile } from './processFitFile';

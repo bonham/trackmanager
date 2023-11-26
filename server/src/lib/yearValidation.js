@@ -1,6 +1,7 @@
-const { param, validationResult } = require('express-validator');
+import * as expressvalidator from 'express-validator';
+const { param, validationResult } = expressvalidator
 
-module.exports = [
+export default [
   param('year').exists().isInt(),
   (req, res, next) => {
     const errors = validationResult(req);

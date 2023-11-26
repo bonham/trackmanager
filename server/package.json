@@ -6,7 +6,7 @@
     "develop": "nodemon --ignore dist --ext ts,js,json src/index.ts",
     "tsnode": "ts-node --esm src/index.mts",
     "build": "tsc --build --clean && tsc",
-    "start": "node ./dist/index.mjs",
+    "start": "node ./dist/src/index.mjs",
     "test": "jest",
     "copyconfig": "ts-node --esm ./src/bin/copyconfig.ts",
     "lint": "eslint src tests"
@@ -39,6 +39,7 @@
     "@types/express-session": "^1.17.7",
     "@types/formidable": "^3.4.2",
     "@types/jest": "^29.5.1",
+    "@types/lodash": "^4.14.202",
     "@types/luxon": "^3.3.4",
     "@types/morgan": "^1.9.4",
     "@types/node": "^20.4.4",

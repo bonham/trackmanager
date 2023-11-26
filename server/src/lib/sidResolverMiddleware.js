@@ -1,5 +1,6 @@
-const { param, validationResult } = require('express-validator');
-const getSchema = require('./getSchema');
+import * as expressvalidator from 'express-validator';
+import getSchema from './getSchema.js';
+const { param, validationResult } = expressvalidator
 
 const handleErrors = (req, res, next) => {
   const errors = validationResult(req);
@@ -32,4 +33,4 @@ function createSidValidationChain(pool) {
   ];
 }
 
-module.exports = createSidValidationChain;
+export default createSidValidationChain;

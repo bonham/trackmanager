@@ -1,23 +1,23 @@
 {
   "extends": "@tsconfig/node18/tsconfig.json",
   "compilerOptions": {
-    "module": "NodeNext",
+    "module": "Node16",
     "outDir": "dist",
+    "strict": true,
     "sourceMap": true,
-    "noImplicitAny": true,
-    "allowJs": true,
+    //"allowJs": true,
     "checkJs": false, // todo: set to true
-    "rootDir": "./",
-    "baseUrl": "./",
-    "verbatimModuleSyntax": true
+    "verbatimModuleSyntax": true,
+    "target": "ES2022"
   },
   "ts-node": {
-    "esm": true
+    "esm": true,
+    "files": true
   },
   "include": [
-    "src/**/*.ts",
-    "tests/**/*.ts",
-    "src/fitsdk.d.ts"
+    "src/**/*",
+    "tests/**/*",
+    "types/**/*"
   ],
   "exclude": [
     "dist"

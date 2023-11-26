@@ -1,13 +1,12 @@
 {
   "name": "trackmanager-server",
   "version": "0.0.0",
-  "private": true,
   "type": "module",
   "scripts": {
     "develop": "nodemon --ignore dist --ext ts,js,json src/index.ts",
-    "tsnode": "ts-node --esm src/index.ts",
+    "tsnode": "ts-node --esm src/index.mts",
     "build": "tsc --build --clean && tsc",
-    "start": "node ./dist/index.js",
+    "start": "node ./dist/index.mjs",
     "test": "jest",
     "copyconfig": "ts-node --esm ./src/bin/copyconfig.ts",
     "lint": "eslint src tests"

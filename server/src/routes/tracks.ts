@@ -1,4 +1,6 @@
+import * as dotenv from 'dotenv';
 import type { Request as ExpressRequest, NextFunction, Response } from 'express';
+import express from 'express';
 import { Formidable } from 'formidable';
 import { mkdtemp as mkdtempprom, rmdir as rmdirprom } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -14,11 +16,10 @@ interface Request extends ExpressRequest {
   schema: string
 }
 
-require('dotenv').config();
+dotenv.config();
 
 const TMP_BASE_DIR = process.env.UPLOAD_DIR || tmpdir();
 
-const express = require('express');
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const _ = require('lodash');

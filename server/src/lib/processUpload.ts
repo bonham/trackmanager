@@ -3,7 +3,7 @@ import { basename } from 'node:path';
 import { FitFile } from './fit/FitFile.js';
 import { processFitFile } from './processFitFile.js';
 
-const { execFileSync } = require('child_process');
+import { execFileSync } from 'node:child_process';
 
 const DATABASE = process.env.TM_DATABASE;
 const GPX2DB_SCRIPT = process.env.GPX2DBSCRIPT;
@@ -17,7 +17,7 @@ function processGpxFile(
   // build arguments
   const args = [
     '-s',
-    simplifyDistance,
+    simplifyDistance.toString(),
     filePath,
     dbname,
     schema,
@@ -28,6 +28,7 @@ function processGpxFile(
   let stdout = '';
   try {
     console.log('Command: ', GPX2DB_SCRIPT, args);
+    if (GPX2DB_SCRIPT === undefined) throw new Error("GPX2DB_SCRIPT config var not defined")
     stdout = execFileSync(GPX2DB_SCRIPT, args, { encoding: 'utf-8' });
     console.log(`Stdout >>${stdout}<<`);
   } catch (err) {

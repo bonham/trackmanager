@@ -1,6 +1,6 @@
 /* eslint-disable no-continue */
 import geodesic from 'geographiclib-geodesic';
-import { RecordMessageList, concatRecordMessageLists } from './Messages';
+import { RecordMessageList, concatRecordMessageLists } from './Messages.js';
 
 const geod = geodesic.Geodesic.WGS84;
 

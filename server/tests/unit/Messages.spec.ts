@@ -6,7 +6,7 @@ import {
   RecordMessage, RecordMessageList,
   StartStopList,
   concatRecordMessageLists,
-} from '../../src/lib/fit/Messages';
+} from '../../src/lib/fit/Messages.js';
 
 test('interval', () => {
   fs.readFile(

@@ -1,11 +1,12 @@
 /* eslint-disable padded-blocks */
 /* eslint-disable no-trailing-spaces */
+import type { FitMessages, SessionFitMessage } from '@garmin/fitsdk';
 import {
-  Decoder, FitMessages, SessionFitMessage, Stream,
+  Decoder, Stream,
 } from '@garmin/fitsdk';
-import { RecordMessageList, StartStopList } from './Messages';
-import { intersectRecordMessages } from './intersect';
-import { joinSegments } from './joinSegments';
+import { RecordMessageList, StartStopList } from './Messages.js';
+import { intersectRecordMessages } from './intersect.js';
+import { joinSegments } from './joinSegments.js';
 
 
 class FitFile {

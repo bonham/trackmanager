@@ -1,4 +1,4 @@
-import app from '../../src/app';
+import app from '../../src/app.js';
 
 const request = require('supertest');
 const { Pool } = require('pg');

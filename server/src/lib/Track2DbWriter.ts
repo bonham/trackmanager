@@ -1,6 +1,6 @@
 
 import { Pool } from 'pg';
-import { Track } from './Track';
+import { Track } from './Track.js';
 
 interface DBOpts {
   dbUser: string,

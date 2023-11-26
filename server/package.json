@@ -2,18 +2,20 @@
   "name": "trackmanager-server",
   "version": "0.0.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "develop": "nodemon --ignore dist --ext ts,js,json src/index.ts",
-    "tsnode": "ts-node src/index.ts",
+    "tsnode": "ts-node --esm src/index.ts",
     "build": "tsc --build --clean && tsc",
     "start": "node ./dist/index.js",
     "test": "jest",
-    "copyconfig": "ts-node ./src/bin/copyconfig.ts",
+    "copyconfig": "ts-node --esm ./src/bin/copyconfig.ts",
     "lint": "eslint src tests"
   },
   "dependencies": {
     "@garmin/fitsdk": "^21.126.0",
     "@simplewebauthn/server": "^7.2.0",
+    "@tsconfig/node18": "^18.2.2",
     "@types/connect-pg-simple": "^7.0.0",
     "@types/pg": "^8.10.0",
     "connect-pg-simple": "^9.0.0",
@@ -33,7 +35,6 @@
   },
   "devDependencies": {
     "@simplewebauthn/typescript-types": "^7.0.0",
-    "@tsconfig/node20": "^20.1.0",
     "@types/cors": "^2.8.13",
     "@types/express": "^4.17.17",
     "@types/express-session": "^1.17.7",

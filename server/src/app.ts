@@ -3,10 +3,10 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 
 import * as dotenv from 'dotenv';
-import getPgPool from './lib/getPgPool';
-import getSession from './lib/getSession';
-import authrouter from './routes/auth/auth';
-import tracksRouter from './routes/tracks';
+import getPgPool from './lib/getPgPool.js';
+import getSession from './lib/getSession.js';
+import authrouter from './routes/auth/auth.js';
+import tracksRouter from './routes/tracks.js';
 
 const dotenvResult = dotenv.config();
 if (dotenvResult.error) {

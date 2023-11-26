@@ -3,10 +3,10 @@ import { Formidable } from 'formidable';
 import { mkdtemp as mkdtempprom, rmdir as rmdirprom } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { processFile } from '../lib/processUpload';
+import { processFile } from '../lib/processUpload.js';
 
 
-import { isAuthenticated } from './auth/auth';
+import { isAuthenticated } from './auth/auth.js';
 
 const UPLOAD_DIR_PREFIX = 'trackmanager-upload-';
 

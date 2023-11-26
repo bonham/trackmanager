@@ -1,5 +1,5 @@
-import type { TrackPoint } from '../../src/lib/Track';
-import { Track } from '../../src/lib/Track';
+import type { TrackPoint } from '../../src/lib/Track.js';
+import { Track } from '../../src/lib/Track.js';
 
 const segment1: TrackPoint[] = [
   {

@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { basename } from 'node:path';
-import { FitFile } from './fit/FitFile';
-import { processFitFile } from './processFitFile';
+import { FitFile } from './fit/FitFile.js';
+import { processFitFile } from './processFitFile.js';
 
 const { execFileSync } = require('child_process');
 

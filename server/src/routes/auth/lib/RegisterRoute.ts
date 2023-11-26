@@ -1,9 +1,9 @@
 import { Router } from 'express';
 
-import { verifyRegistrationResponse } from '@simplewebauthn/server';
 import type { VerifiedRegistrationResponse } from '@simplewebauthn/server';
+import { verifyRegistrationResponse } from '@simplewebauthn/server';
 import type { AuthenticatorTransportFuture, RegistrationResponseJSON } from '@simplewebauthn/typescript-types';
-import { MySession } from '../authInterfaces.js';
+import type { MySession } from '../authInterfaces.js';
 import type { Authenticator } from '../server.js';
 
 import { AutenticatorDb } from './AuthenticatorDb.js';

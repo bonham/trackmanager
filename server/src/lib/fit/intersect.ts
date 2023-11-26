@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/indent */
 import { DateTime } from 'luxon';
-import { RecordMessageList } from './Messages';
-import type { DateTimeInterval } from './types';
+import { RecordMessageList } from './Messages.js';
+import type { DateTimeInterval } from './types.js';
 
 /**
  * Return index of next matching interval. Returns undefined if no matching interval found

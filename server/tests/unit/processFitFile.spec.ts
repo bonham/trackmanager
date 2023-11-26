@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { readFileSync } from 'node:fs';
 import { Pool } from 'pg';
-import { processFitFile } from '../../src/lib/processFitFile';
+import { processFitFile } from '../../src/lib/processFitFile.js';
 
 jest.mock('pg');
 jest.mock('pg', () => {

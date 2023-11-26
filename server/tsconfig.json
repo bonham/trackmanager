@@ -1,6 +1,7 @@
 {
-  "extends": "@tsconfig/node20/tsconfig.json",
+  "extends": "@tsconfig/node18/tsconfig.json",
   "compilerOptions": {
+    "module": "NodeNext",
     "outDir": "dist",
     "sourceMap": true,
     "noImplicitAny": true,
@@ -8,9 +9,7 @@
     "checkJs": false, // todo: set to true
     "rootDir": "./",
     "baseUrl": "./",
-    "paths": {
-
-    }
+    "verbatimModuleSyntax": true
   },
   "ts-node": {
     "esm": true
@@ -18,6 +17,7 @@
   "include": [
     "src/**/*.ts",
     "tests/**/*.ts",
+    "src/fitsdk.d.ts"
   ],
   "exclude": [
     "dist"

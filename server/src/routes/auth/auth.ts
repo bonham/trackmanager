@@ -3,14 +3,14 @@ import type { NextFunction, Request, Response } from 'express';
 import express from 'express';
 import type { Session } from 'express-session';
 import pg from 'pg';
-import { makeAuthenticationOptionsRoute } from './lib/AuthenticationOptionsRoute';
-import { makeAuthenticationRoute } from './lib/AuthenticationRoute';
-import { AutenticatorDb } from './lib/AuthenticatorDb';
-import { makeLogoutRoute } from './lib/LogoutRoute';
-import { makeRegisterRoute } from './lib/RegisterRoute';
-import { makeRegistrationOptionsRoute } from './lib/RegistrationOptionsRoute';
+import { makeAuthenticationOptionsRoute } from './lib/AuthenticationOptionsRoute.js';
+import { makeAuthenticationRoute } from './lib/AuthenticationRoute.js';
+import { AutenticatorDb } from './lib/AuthenticatorDb.js';
+import { makeLogoutRoute } from './lib/LogoutRoute.js';
+import { makeRegisterRoute } from './lib/RegisterRoute.js';
+import { makeRegistrationOptionsRoute } from './lib/RegistrationOptionsRoute.js';
 
-import { MySession } from './authInterfaces.js';
+import type { MySession } from './authInterfaces.js';
 
 const dotenvResult = dotenv.config();
 if (dotenvResult.error) {

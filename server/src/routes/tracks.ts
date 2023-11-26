@@ -1,35 +1,37 @@
+import * as dotenv from 'dotenv';
 import type { Request as ExpressRequest, NextFunction, Response } from 'express';
+import express from 'express';
 import { Formidable } from 'formidable';
+import * as _ from 'lodash';
 import { mkdtemp as mkdtempprom, rmdir as rmdirprom } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { processFile } from '../lib/processUpload';
+import pkg from 'pg';
+import { processFile } from '../lib/processUpload.js';
+const { Pool } = pkg;
 
 
-import { isAuthenticated } from './auth/auth';
+
+import { isAuthenticated } from './auth/auth.js';
 
 const UPLOAD_DIR_PREFIX = 'trackmanager-upload-';
 
-interface Request extends ExpressRequest {
+type ReqWSchema = ExpressRequest & {
   schema: string
 }
 
-require('dotenv').config();
+dotenv.config();
 
 const TMP_BASE_DIR = process.env.UPLOAD_DIR || tmpdir();
 
-const express = require('express');
 
-// eslint-disable-next-line @typescript-eslint/naming-convention
-const _ = require('lodash');
 
 const router = express.Router();
 router.use(express.json()); // use builtin json body parser
 
-const { Pool } = require('pg');
-const createSidValidationChain = require('../lib/sidResolverMiddleware');
-const trackIdValidationMiddleware = require('../lib/trackIdValidationMiddleware');
-const yearValidation = require('../lib/yearValidation');
+import createSidValidationChain from '../lib/sidResolverMiddleware.js';
+import trackIdValidationMiddleware from '../lib/trackIdValidationMiddleware.js';
+import yearValidation from '../lib/yearValidation.js';
 
 const SIMPLIFY_DISTANCE = 2;
 
@@ -47,8 +49,8 @@ const sidValidationChain = createSidValidationChain(pool);
 router.get(
   '/getall/sid/:sid',
   sidValidationChain,
-  async (req: Request, res: Response) => {
-    const { schema } = req;
+  async (req: ExpressRequest, res: Response) => {
+    const { schema } = req as ReqWSchema
     try {
       const queryResult = await pool.query(
         'select id, name, length, src, '
@@ -80,8 +82,8 @@ router.get(
 router.post(
   '/geojson/sid/:sid',
   sidValidationChain,
-  async (req: Request, res: Response) => {
-    const { schema } = req;
+  async (req: ExpressRequest, res: Response) => {
+    const { schema } = req as ReqWSchema
     try {
       // validate expected property
       if (!(_.has(req.body, 'ids'))) {
@@ -127,8 +129,8 @@ router.get(
   '/byid/:trackId/sid/:sid',
   sidValidationChain,
   trackIdValidationMiddleware,
-  async (req: Request, res: Response) => {
-    const { schema } = req;
+  async (req: ExpressRequest, res: Response) => {
+    const { schema } = req as ReqWSchema
     const { trackId } = req.params;
 
     const query = 'select id, name, length, src,'
@@ -139,6 +141,13 @@ router.get(
     try {
       const queryResult = await pool.query(query);
       rows = queryResult.rows;
+      if (rows.length === 0) {
+        res.status(404).end();
+      } else {
+        const row = rows[0];
+        res.json(row);
+      }
+
     } catch (err) {
       console.trace('Exception handling trace');
       console.error(err);
@@ -146,12 +155,6 @@ router.get(
       else res.status(500);
     }
 
-    if (rows.length === 0) {
-      res.status(404).end();
-    } else {
-      const row = rows[0];
-      res.json(row);
-    }
   },
 );
 
@@ -160,8 +163,8 @@ router.get(
   '/byyear/:year/sid/:sid',
   sidValidationChain,
   yearValidation,
-  async (req: Request, res: Response) => {
-    const { schema } = req;
+  async (req: ExpressRequest, res: Response) => {
+    const { schema } = req as ReqWSchema;
     const { year } = req.params;
 
     let whereClause;
@@ -191,10 +194,10 @@ router.get(
 router.post(
   '/byextent/sid/:sid',
   sidValidationChain,
-  async (req: Request, res: Response, next: NextFunction) => {
-    let query;
+  async (req: ExpressRequest, res: Response, next: NextFunction) => {
+    let query: string;
     try {
-      const { schema } = req;
+      const { schema } = req as ReqWSchema;
 
       // get extent from payload
       const bbox = req.body;
@@ -212,10 +215,7 @@ router.post(
         + 'time, timelength, ascent '
         + `from ${schema}.tracks where ${whereClause}`;
       console.log(query);
-    } catch (e) {
-      next(e);
-    }
-    try {
+
       const queryResult = await pool.query(query);
       res.json(queryResult.rows);
     } catch (err) {
@@ -230,8 +230,8 @@ router.put(
   isAuthenticated,
   sidValidationChain,
   trackIdValidationMiddleware,
-  async (req: Request, res: Response) => {
-    const { schema } = req;
+  async (req: ExpressRequest, res: Response) => {
+    const { schema } = req as ReqWSchema;
     const { updateAttributes } = req.body;
     const { data } = req.body;
 
@@ -272,8 +272,8 @@ router.delete(
   isAuthenticated,
   sidValidationChain,
   trackIdValidationMiddleware,
-  async (req: Request, res: Response) => {
-    const { schema } = req;
+  async (req: ExpressRequest, res: Response) => {
+    const { schema } = req as ReqWSchema;
     const { trackId } = req.params;
 
     const query1 = `delete from ${schema}.track_points `
@@ -315,7 +315,7 @@ router.post(
   isAuthenticated,
   sidValidationChain,
 
-  async (req: Request, res: Response, next: NextFunction) => {
+  async (req: ExpressRequest, res: Response, next: NextFunction) => {
     try {
       const uploadDir = await mkdtempprom(join(TMP_BASE_DIR, UPLOAD_DIR_PREFIX));
       try {
@@ -337,7 +337,7 @@ router.post(
           if (files.newtrack === undefined) throw new Error('Expected form field not received: newtrack');
           const filePath = files.newtrack[0].filepath;
 
-          await processFile(filePath, req.schema, SIMPLIFY_DISTANCE);
+          await processFile(filePath, (req as ReqWSchema).schema, SIMPLIFY_DISTANCE);
           res.json({ message: 'ok' });
         });
       } catch (error) {

@@ -1,12 +1,16 @@
 {
   "root": true,
+  "ignorePatterns": [
+    "config.js",
+    "jest.config.ts"
+  ],
   "env": {
     "jest": true
   },
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
     "project": [
-      "./tsconfig-test.json"
+      "./tsconfig.json"
     ]
   },
   "extends": [

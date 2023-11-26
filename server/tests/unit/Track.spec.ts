@@ -1,5 +1,5 @@
-import type { TrackPoint } from '../../src/lib/Track';
-import { Track } from '../../src/lib/Track';
+import type { TrackPoint } from '../../src/lib/Track.js';
+import { Track } from '../../src/lib/Track.js';
 
 const segment1: TrackPoint[] = [
   {
@@ -34,7 +34,7 @@ const segment2: TrackPoint[] = [
 
 
 
-describe('Track Object', async () => {
+describe('Track Object', () => {
   test('Simple1', () => {
     const t1 = new Track({
       name: 'First Track',

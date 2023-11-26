@@ -1,6 +1,5 @@
-
-import { Pool } from 'pg';
-import { Track } from './Track';
+import * as pg from 'pg';
+import { Track } from './Track.js';
 
 interface DBOpts {
   dbUser: string,
@@ -12,7 +11,7 @@ interface DBOpts {
 class Track2DbWriter {
   dbOptions: DBOpts;
 
-  pool: Pool;
+  pool: pg.Pool;
 
   fileBufferHash: string;
 
@@ -20,7 +19,7 @@ class Track2DbWriter {
     this.dbOptions = dbOptions;
     this.fileBufferHash = fileBufferHash;
 
-    this.pool = new Pool({
+    this.pool = new pg.Pool({
       database: dbOptions.dbName,
       host: dbOptions.dbHost,
       user: dbOptions.dbUser,

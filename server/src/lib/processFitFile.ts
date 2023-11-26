@@ -1,9 +1,9 @@
 
 import { createHash } from 'node:crypto';
-import type { TrackPoint } from './Track';
-import { Track } from './Track';
-import { Track2DbWriter } from './Track2DbWriter';
-import { FitFile } from './fit/FitFile';
+import type { TrackPoint } from './Track.js';
+import { Track } from './Track.js';
+import { Track2DbWriter } from './Track2DbWriter.js';
+import { FitFile } from './fit/FitFile.js';
 
 // read metadata from fit session messages ( avg speed, start time, distance, ascent )
 

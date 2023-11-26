@@ -14,4 +14,4 @@ async function getSchema(sid, pool) {
   }
   return rows[0].schema;
 }
-module.exports = getSchema;
+export default getSchema;

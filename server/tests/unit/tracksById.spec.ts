@@ -1,5 +1,5 @@
-import app from '../../src/app';
-import { isAuthenticated } from '../../src/routes/auth/auth';
+import app from '../../src/app.js';
+import { isAuthenticated } from '../../src/routes/auth/auth.js';
 
 jest.mock('../../src/routes/auth/auth');
 const mockedIsAuthenticated = jest.mocked(isAuthenticated);

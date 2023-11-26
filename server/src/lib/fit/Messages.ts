@@ -1,7 +1,7 @@
 /* eslint-disable max-classes-per-file */
 import type { BaseFitMessage, EventFitMessage, RecordFitMessage } from '@garmin/fitsdk';
 import { DateTime } from 'luxon';
-import type { DateTimeInterval } from './types';
+import type { DateTimeInterval } from './types.js';
 
 class AbstractBaseMessage<T extends (BaseFitMessage | EventFitMessage | RecordFitMessage)> {
   m: T;

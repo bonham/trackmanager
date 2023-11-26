@@ -1,18 +1,26 @@
 {
-  "extends": "@tsconfig/node20/tsconfig.json",
+  "extends": "@tsconfig/node18/tsconfig.json",
   "compilerOptions": {
+    "module": "Node16",
     "outDir": "dist",
+    "strict": true,
     "sourceMap": true,
-    "noImplicitAny": true,
     "allowJs": true,
     "checkJs": false, // todo: set to true
-    "rootDir": "./src"
+    "verbatimModuleSyntax": true,
+    "target": "ES2022"
   },
   "ts-node": {
-    "esm": false
+    "esm": true,
+    "files": true
   },
   "include": [
-    "src/**/*"
+    "src/**/*",
+    "tests/**/*",
+    "types/**/*"
   ],
+  "exclude": [
+    "dist"
+  ]
   
 }

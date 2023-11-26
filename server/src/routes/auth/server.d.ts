@@ -15,7 +15,7 @@ export type Authenticator = {
   counter: number;
   // SQL: `VARCHAR(32)` or similar, longest possible value is currently 12 characters
   // Ex: 'singleDevice' | 'multiDevice'
-  credentialDeviceType: CredentialDeviceType;
+  credentialDeviceType: string;
   // SQL: `BOOL` or whatever similar type is supported
   credentialBackedUp: boolean;
   // SQL: `VARCHAR(255)` and store string array as a CSV string

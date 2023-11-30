@@ -3,9 +3,10 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "tsnode": "ts-node --esm src/index.mts",
+    "develop": "nodemon src/index.ts",
+    "start": "ts-node --esm src/index.mts",
     "build": "tsc --build --clean && tsc",
-    "start": "node ./dist/src/index.mjs",
+    "startbuild": "node ./dist/src/index.mjs",
     "test": "jest",
     "copyconfig": "ts-node --esm ./src/bin/copyconfig.ts",
     "lint": "eslint src tests"

@@ -1,3 +1,4 @@
+import type { RequestHandler } from 'express';
 import { Router } from 'express';
 
 import type { VerifiedRegistrationResponse } from '@simplewebauthn/server';
@@ -11,7 +12,7 @@ import { AutenticatorDb } from './AuthenticatorDb.js';
 const router = Router();
 
 export function makeRegisterRoute(origin: string, rpID: string, authdb: AutenticatorDb) {
-  router.post('/register', async (req, res) => {
+  router.post('/register', (async (req, res) => {
     let myreq: any;
 
     if ('session' in req) {
@@ -97,7 +98,7 @@ export function makeRegisterRoute(origin: string, rpID: string, authdb: Autentic
     const { regkey } = (req.session as any);
     if (regkey !== undefined) {
       const markSuccess = authdb.markRegistrationCodeUsed(regkey);
-      if (!markSuccess) {
+      if (!(await markSuccess)) {
         console.log(`Could not mark regkey ${regkey} as used`);
         res.sendStatus(401);
         return;
@@ -107,6 +108,6 @@ export function makeRegisterRoute(origin: string, rpID: string, authdb: Autentic
 
     // Success !!
     res.json(verification);
-  });
+  }) as RequestHandler);
   return router;
 }

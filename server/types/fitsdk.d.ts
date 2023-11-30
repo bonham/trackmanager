@@ -46,15 +46,18 @@ declare module '@garmin/fitsdk' {
     'sessionMesgs': SessionFitMessage[];
   }
 
-  export class Stream {
+  class Stream {
     static fromByteArray(bytes: number[]): Stream;
   }
 
-  export class Decoder {
+  class Decoder {
     constructor(stream: Stream);
     isFIT(): boolean;
     checkIntegrity(): boolean;
     read(): { messages: FitMessages, errors: any };
   }
+
+  export { Decoder, Stream };
+  export type { BaseFitMessage, EventFitMessage, EventFitMessage, FitMessages, RecordFitMessage };
 
 }

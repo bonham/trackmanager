@@ -1,4 +1,4 @@
-const getSchema = require('../../src/lib/getSchema');
+import getSchema from '../../src/lib/getSchema.js';
 
 describe('getSchema', () => {
   test('happypath', async () => {

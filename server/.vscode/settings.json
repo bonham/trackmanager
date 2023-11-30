@@ -3,5 +3,5 @@
     "source.fixAll": true,
     "source.organizeImports": true
   },
-  "eslint.enable": false
+  "eslint.enable": true
 }

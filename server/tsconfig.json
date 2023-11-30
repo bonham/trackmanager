@@ -1,14 +1,20 @@
 {
-  "extends": "@tsconfig/node18/tsconfig.json",
   "compilerOptions": {
-    "module": "Node16",
-    "outDir": "dist",
+    "lib": ["es2023"],
+    "module": "node16",
+    "target": "es2022",
+
     "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "moduleResolution": "node16",
+    "outDir": "dist",
     "sourceMap": true,
     "allowJs": true,
     "checkJs": false, // todo: set to true
-    "verbatimModuleSyntax": true,
-    "target": "ES2022"
+//    "verbatimModuleSyntax": true,
+    "rootDir": "./"
   },
   "ts-node": {
     "esm": true,
@@ -16,8 +22,7 @@
   },
   "include": [
     "src/**/*",
-    "tests/**/*",
-    "types/**/*"
+    "types/**/*",
   ],
   "exclude": [
     "dist"

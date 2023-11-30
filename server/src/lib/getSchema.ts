@@ -1,4 +1,5 @@
-async function getSchema(sid, pool) {
+import type { Pool } from "pg";
+async function getSchema(sid: string, pool: Pool): Promise<string | null> {
   const sql = `select schema from tm_meta.schema_sid where sid = '${sid}'`;
   let queryResult;
   try {

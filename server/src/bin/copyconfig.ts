@@ -1,5 +1,5 @@
-const { copyFile } = require('fs/promises');
-const { constants } = require('fs');
+import { constants } from 'node:fs';
+import { copyFile } from 'node:fs/promises';
 
 async function main() {
   try {

@@ -1,10 +1,15 @@
 import app from '../../src/app.js';
 
-const request = require('supertest');
-const { Pool } = require('pg');
+import * as pg from 'pg';
+import request from 'supertest';
 
-jest.mock('../../src/lib/getSchema');
-const mockGetSchema = require('../../src/lib/getSchema');
+import getSchema from '../../src/lib/getSchema.js';
+jest.mock('../../src/lib/getSchema.js')
+
+const { Pool } = pg
+
+
+const mockGetSchema = jest.mocked(getSchema)
 
 jest.mock('pg', () => {
   const mClient = {

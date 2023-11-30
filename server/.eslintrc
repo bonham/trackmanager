@@ -8,11 +8,6 @@
     "jest": true
   },
   "parser": "@typescript-eslint/parser",
-  "parserOptions": {
-    "project": [
-      "./tsconfig.json"
-    ]
-  },
   "extends": [
     "eslint:recommended",
     "airbnb-base",

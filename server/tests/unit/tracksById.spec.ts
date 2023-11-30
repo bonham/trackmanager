@@ -1,21 +1,22 @@
+import * as pg from 'pg';
+import request from 'supertest';
+
 import app from '../../src/app.js';
+import getSchema from '../../src/lib/getSchema.js';
 import { isAuthenticated } from '../../src/routes/auth/auth.js';
 
 jest.mock('../../src/routes/auth/auth');
+jest.mock('../../src/lib/getSchema.js')
+
 const mockedIsAuthenticated = jest.mocked(isAuthenticated);
 
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const dummy = isAuthenticated;
 
-const request = require('supertest');
-const { Pool } = require('pg');
+const mockGetSchema = jest.mocked(getSchema)
 
-jest.mock('pg');
-
-jest.mock('../../src/lib/getSchema');
-const mockGetSchema = require('../../src/lib/getSchema');
-
+const { Pool } = pg
 jest.mock('pg', () => {
   const mClient = {
     connect: jest.fn(),

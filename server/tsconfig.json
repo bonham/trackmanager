@@ -13,7 +13,7 @@
     "sourceMap": true,
     "allowJs": true,
     "checkJs": false, // todo: set to true
-//    "verbatimModuleSyntax": true,
+    "verbatimModuleSyntax": false,
     "rootDir": "./"
   },
   "ts-node": {

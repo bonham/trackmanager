@@ -2,6 +2,9 @@
 import type { JestConfigWithTsJest } from 'ts-jest'
 
 const jestConfig: JestConfigWithTsJest = {
+  globals: {
+    tsconfig: "./tsconfig-jest.json"
+  },
   preset: "ts-jest",
   testEnvironment: "node",
   verbose: true,
@@ -18,6 +21,7 @@ const jestConfig: JestConfigWithTsJest = {
       'ts-jest',
       {
         useESM: true,
+        tsconfig: "./tsconfig-jest.json"
       },
     ],
   },

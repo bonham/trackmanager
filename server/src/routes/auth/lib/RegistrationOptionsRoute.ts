@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import type { Request, Response } from 'express-serve-static-core';
+import type { Request, RequestHandler, Response } from 'express-serve-static-core';
 
 // import { getRegistrationUserId } from './getRegistrationUserid.js';
 import { generateRegistrationOptions } from '@simplewebauthn/server';
@@ -14,7 +14,7 @@ const router = Router();
 
 export function makeRegistrationOptionsRoute(rpName: string, rpID: string, authdb: AutenticatorDb) {
   const handleRegistration = async (req: Request, res: Response, reguser: string) => {
-    // const registrationuser = await getRegistrationUserId();
+    // const registrationuser = getRegistrationUserId();
     const registrationuser = reguser;
     (req.session as any).reguser = registrationuser;
 
@@ -57,7 +57,7 @@ export function makeRegistrationOptionsRoute(rpName: string, rpID: string, authd
     }
   };
 
-  router.get('/regoptions/regkey/:regkey', async (req: Request, res) => {
+  router.get('/regoptions/regkey/:regkey', (async (req: Request, res) => {
     const lookup = await authdb.getUserByRegistrationCode(req.params.regkey);
     (req.session as any).regkey = req.params.regkey; // save to mark as unused later
 
@@ -85,7 +85,7 @@ export function makeRegistrationOptionsRoute(rpName: string, rpID: string, authd
 
     const reguser = lookup.username;
     await handleRegistration(req, res, reguser);
-  });
+  }) as RequestHandler);
 
   return router;
 }

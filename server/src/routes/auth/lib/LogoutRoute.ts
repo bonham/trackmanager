@@ -1,9 +1,11 @@
+import type { RequestHandler } from 'express';
 import { Router } from 'express';
+
 
 const router = Router();
 
 export function makeLogoutRoute() {
-  router.get('/logout', async (req, res) => {
+  router.get('/logout', ((req, res) => {
     const { session } = req;
     session.destroy((err) => {
       if (err) {
@@ -13,6 +15,6 @@ export function makeLogoutRoute() {
         res.send('OK');
       }
     });
-  });
+  }) as RequestHandler);
   return router;
 }

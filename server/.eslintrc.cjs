@@ -27,7 +27,9 @@ module.exports = {
     "@typescript-eslint/no-unsafe-assignment": "warn",
     "@typescript-eslint/no-unsafe-member-access": "warn",
     "@typescript-eslint/no-unsafe-argument": "warn",
-    "@typescript-eslint/no-import-type-side-effects": "error" // related to verbatimModuleSyntax 
+    "@typescript-eslint/no-unsafe-return": "warn",
+    "@typescript-eslint/no-import-type-side-effects": "error", // related to verbatimModuleSyntax
+    "@typescript-eslint/no-unnecessary-type-assertion": "warn",
   }
 }
 

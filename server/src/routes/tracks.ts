@@ -1,5 +1,5 @@
 import * as dotenv from 'dotenv';
-import type { Request as ExpressRequest, NextFunction, Response } from 'express';
+import type { Request as ExpressRequest, NextFunction, RequestHandler, Response } from 'express';
 import express from 'express';
 import { Formidable } from 'formidable';
 import * as _ from 'lodash';
@@ -49,7 +49,7 @@ const sidValidationChain = createSidValidationChain(pool);
 router.get(
   '/getall/sid/:sid',
   sidValidationChain,
-  async (req: ExpressRequest, res: Response) => {
+  (async (req: ExpressRequest, res: Response) => {
     const { schema } = req as ReqWSchema
     try {
       const queryResult = await pool.query(
@@ -74,7 +74,7 @@ router.get(
       if (err instanceof Error && 'message' in err) res.status(500).send(err.message);
       else res.status(500);
     }
-  },
+  }) as RequestHandler
 );
 
 /// // Get Geojson for a list of ids. Payload { ids: [..] }
@@ -82,7 +82,7 @@ router.get(
 router.post(
   '/geojson/sid/:sid',
   sidValidationChain,
-  async (req: ExpressRequest, res: Response) => {
+  (async (req: ExpressRequest, res: Response) => {
     const { schema } = req as ReqWSchema
     try {
       // validate expected property
@@ -121,7 +121,7 @@ router.post(
       if (err instanceof Error && 'message' in err) res.status(500).send(err.message);
       else res.status(500);
     }
-  },
+  }) as RequestHandler
 );
 
 /// // Get single track id
@@ -129,7 +129,7 @@ router.get(
   '/byid/:trackId/sid/:sid',
   sidValidationChain,
   trackIdValidationMiddleware,
-  async (req: ExpressRequest, res: Response) => {
+  (async (req: ExpressRequest, res: Response) => {
     const { schema } = req as ReqWSchema
     const { trackId } = req.params;
 
@@ -155,7 +155,7 @@ router.get(
       else res.status(500);
     }
 
-  },
+  }) as RequestHandler
 );
 
 /// // Get list of tracks by year
@@ -163,7 +163,7 @@ router.get(
   '/byyear/:year/sid/:sid',
   sidValidationChain,
   yearValidation,
-  async (req: ExpressRequest, res: Response) => {
+  (async (req: ExpressRequest, res: Response) => {
     const { schema } = req as ReqWSchema;
     const { year } = req.params;
 
@@ -187,14 +187,14 @@ router.get(
       if (err instanceof Error && 'message' in err) res.status(500).send(err.message);
       else res.status(500);
     }
-  },
+  }) as RequestHandler
 );
 
 /// // Get list of tracks by bounding box ( coordinates in EPSG:4326 )
 router.post(
   '/byextent/sid/:sid',
   sidValidationChain,
-  async (req: ExpressRequest, res: Response, next: NextFunction) => {
+  (async (req: ExpressRequest, res: Response, next: NextFunction) => {
     let query: string;
     try {
       const { schema } = req as ReqWSchema;
@@ -221,7 +221,7 @@ router.post(
     } catch (err) {
       next(err);
     }
-  },
+  }) as RequestHandler
 );
 
 /// // Update single track
@@ -230,7 +230,7 @@ router.put(
   isAuthenticated,
   sidValidationChain,
   trackIdValidationMiddleware,
-  async (req: ExpressRequest, res: Response) => {
+  (async (req: ExpressRequest, res: Response) => {
     const { schema } = req as ReqWSchema;
     const { updateAttributes } = req.body;
     const { data } = req.body;
@@ -263,7 +263,7 @@ router.put(
       console.error(err);
       res.status(500).send(err);
     }
-  },
+  }) as RequestHandler,
 );
 
 /// // Delete single track
@@ -272,7 +272,7 @@ router.delete(
   isAuthenticated,
   sidValidationChain,
   trackIdValidationMiddleware,
-  async (req: ExpressRequest, res: Response) => {
+  (async (req: ExpressRequest, res: Response) => {
     const { schema } = req as ReqWSchema;
     const { trackId } = req.params;
 
@@ -305,7 +305,7 @@ router.delete(
       console.error(err);
       res.status(500).send(err);
     }
-  },
+  }) as RequestHandler,
 );
 
 
@@ -315,7 +315,7 @@ router.post(
   isAuthenticated,
   sidValidationChain,
 
-  async (req: ExpressRequest, res: Response, next: NextFunction) => {
+  (async (req: ExpressRequest, res: Response, next: NextFunction) => {
     try {
       const uploadDir = await mkdtempprom(join(TMP_BASE_DIR, UPLOAD_DIR_PREFIX));
       try {
@@ -329,7 +329,7 @@ router.post(
             throw Error('Unexpected: Part does not have property originalfilename');
           },
         });
-        form.parse(req, async (err, fields, files) => {
+        form.parse(req, (err, fields, files) => {
           if (err) {
             next(err);
             return;
@@ -352,7 +352,7 @@ router.post(
     } catch (e) {
       next(e);
     }
-  },
+  }) as RequestHandler,
 );
 
 

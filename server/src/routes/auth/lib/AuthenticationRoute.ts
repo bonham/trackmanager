@@ -1,4 +1,6 @@
+import type { RequestHandler } from 'express';
 import { Router } from 'express';
+
 
 import { verifyAuthenticationResponse } from '@simplewebauthn/server';
 import { AutenticatorDb } from './AuthenticatorDb.js';
@@ -6,7 +8,7 @@ import { AutenticatorDb } from './AuthenticatorDb.js';
 const router = Router();
 
 export function makeAuthenticationRoute(origin: string, rpID: string, authdb: AutenticatorDb) {
-  router.post('/authentication', async (req, res) => {
+  router.post('/authentication', (async (req, res) => {
     const { body } = req;
 
     const expectedChallenge = (req.session as any).challenge;
@@ -42,6 +44,6 @@ export function makeAuthenticationRoute(origin: string, rpID: string, authdb: Au
     (req.session as any).user = authenticators[0].userid;
     console.log('Verification', verification);
     res.json(verification);
-  });
+  }) as RequestHandler);
   return router;
 }

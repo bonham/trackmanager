@@ -17,4 +17,4 @@ async function main() {
     console.log('The file could not be copied', e);
   }
 }
-main();
+main().catch(e => console.error(e));

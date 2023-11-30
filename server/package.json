@@ -9,7 +9,7 @@
     "startbuild": "node ./dist/src/index.js",
     "test": "jest",
     "copyconfig": "ts-node --esm ./src/bin/copyconfig.ts",
-    "lint": "eslint src tests"
+    "lint": "eslint --quiet src tests"
   },
   "dependencies": {
     "@garmin/fitsdk": "^21.126.0",

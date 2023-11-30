@@ -17,10 +17,6 @@ class FitFile {
     this.messages = this.decode(buf);
   }
 
-  static async createAsync(buf: Buffer) {
-    return new FitFile(buf);
-  }
-
   static isFit(buf: Buffer): boolean {
     const bytes = Array.from(buf);
     const stream = Stream.fromByteArray(bytes);

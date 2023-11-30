@@ -32,9 +32,6 @@ jest.mock('pg', () => {
   };
   return { Pool: jest.fn(() => mClient) };
 });
-const mockedPg = jest.mocked(pg)
-
-
 
 describe('tracks - getall', () => {
 
@@ -43,7 +40,7 @@ describe('tracks - getall', () => {
 
     const pool = new pg.Pool()
     const mockedPool = jest.mocked(pool)
-    mockedPool.query.mockImplementation((...args: any): any => {
+    mockedPool.query.mockImplementation((): any => {
       return {
         rows: [mockTrack1]
       }

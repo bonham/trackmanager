@@ -53,7 +53,9 @@ function processFile(
   // Decide if fit or gpx file
   const fileBuffer = readFileSync(filePath);
   if (FitFile.isFit(fileBuffer)) {
-    processFitFile(fileBuffer, fileName, DATABASE, schema);
+    processFitFile(fileBuffer, fileName, DATABASE, schema).catch(e => {
+      throw new Error("Error processing fit file", { cause: e })
+    });
   } else {
     processGpxFile(simplifyDistance, filePath, DATABASE, schema);
   }

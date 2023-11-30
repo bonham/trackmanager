@@ -6,9 +6,13 @@ module.exports = {
   },
   "extends": [
     "eslint:recommended",
-    "plugin:@typescript-eslint/recommended-type-checked"
+    'plugin:@typescript-eslint/recommended-type-checked',
+    'plugin:@typescript-eslint/stylistic-type-checked',
+    "prettier" // disables eslint formatting rules which could be enabled by 3rd party tools
   ],
-  "plugins": ["@typescript-eslint"],
+  "plugins": [
+    "@typescript-eslint",
+  ],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
     "project": [

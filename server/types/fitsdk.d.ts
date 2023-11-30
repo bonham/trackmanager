@@ -58,6 +58,6 @@ declare module '@garmin/fitsdk' {
   }
 
   export { Decoder, Stream };
-  export type { BaseFitMessage, EventFitMessage, EventFitMessage, FitMessages, RecordFitMessage };
+  export type { BaseFitMessage, EventFitMessage, FitMessages, RecordFitMessage, SessionFitMessage };
 
 }

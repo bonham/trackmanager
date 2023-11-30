@@ -22,7 +22,7 @@ type ReqWSchema = ExpressRequest & {
 
 dotenv.config();
 
-const TMP_BASE_DIR = process.env.UPLOAD_DIR || tmpdir();
+const TMP_BASE_DIR = process.env.UPLOAD_DIR ?? tmpdir();
 
 
 

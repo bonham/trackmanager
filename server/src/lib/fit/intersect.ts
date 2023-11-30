@@ -35,12 +35,10 @@ function intersectRecordMessages(
   bMessages: RecordMessageList,
   startStopIntervals: DateTimeInterval[],
 ): {
-  found: { [index: string]: RecordMessageList },
+  found: Record<string, RecordMessageList>,
   notfound: RecordMessageList[]
 } {
-  const msgResult: {
-    [index: string]: RecordMessageList
-  } = {}; // found interval indexes could be sparse
+  const msgResult: Record<string, RecordMessageList> = {}; // found interval indexes could be sparse
   const msgNotFound: RecordMessageList[] = [];
 
   let intervalStartSearchIdx = 0;

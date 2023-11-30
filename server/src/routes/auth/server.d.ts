@@ -6,7 +6,7 @@ import type { AuthenticatorTransportFuture } from '@simplewebauthn/typescript-ty
  * how best to store data received during registration for use
  * in subsequent authentications.
  */
-export type Authenticator = {
+export interface Authenticator {
   // SQL: Encode to base64url then store as `TEXT`. Index this column
   credentialID: Uint8Array;
   // SQL: Store raw bytes as `BYTEA`/`BLOB`/etc...
@@ -22,8 +22,8 @@ export type Authenticator = {
   // Ex: ['usb' | 'ble' | 'nfc' | 'internal']
   transports: AuthenticatorTransportFuture[];
   userid?: string;
-};
+}
 
-export type RegCodeLookup = {
+export interface RegCodeLookup {
   'regkey': string, 'username': string, 'created': Date, used: boolean
 };

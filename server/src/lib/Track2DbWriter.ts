@@ -1,5 +1,7 @@
 import pg from 'pg';
 import { Track } from './Track.js';
+import { isNextValString } from './typeguards.js';
+
 
 interface DBOpts {
   dbUser: string,
@@ -26,7 +28,7 @@ class Track2DbWriter {
     });
   }
 
-  async write(t: Track) {
+  async write(t: Track): Promise<number> {
     const schema = this.dbOptions.dbSchema;
     const meta = t.getMetaData();
     const {
@@ -35,24 +37,29 @@ class Track2DbWriter {
     } = meta;
 
     const resTrackId = await this.pool.query(`select nextval('${schema}.tracks_id')`);
-    const newId = resTrackId.rows[0].nextval;
+    const nextValRow = resTrackId.rows[0] as (object | undefined)
+    if (!isNextValString(nextValRow)) {
+      throw Error("Query did not return correct nextval structure")
+    } else {
+      const newId = parseInt(nextValRow.nextval);
 
-    const insert = `
+      const insert = `
     INSERT INTO ${schema}.tracks(
       id,
       name, src, hash, "time", length, timelength, ascent)
       VALUES (
         $1, $2, $3, $4, $5, $6, $7, $8);
     `;
-    const values = [
-      newId, name, source, this.fileBufferHash,
-      startTime, totalDistance, durationSeconds, totalAscent,
-    ];
+      const values = [
+        newId, name, source, this.fileBufferHash,
+        startTime, totalDistance, durationSeconds, totalAscent,
+      ];
 
-    const res = await this.pool.query(insert, values);
-    if (res.rowCount !== 1) throw new Error('Insert rowcount is not equal to 1');
+      const res = await this.pool.query(insert, values);
+      if (res.rowCount !== 1) throw new Error('Insert rowcount is not equal to 1');
 
-    return newId;
+      return newId;
+    }
   }
 }
 

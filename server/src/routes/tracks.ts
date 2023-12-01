@@ -81,42 +81,43 @@ router.get(
 
 /// // Get Geojson for a list of ids. Payload { ids: [..] }
 // result: { id: x.id, geojson: { .. } }
+function isIdsNumberArray(obj: any): obj is { ids: number[] } {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+  return obj && Array.isArray(obj.ids) && obj.ids.every((item: any) => typeof item === 'number');
+}
 router.post(
   '/geojson/sid/:sid',
   sidValidationChain,
   asyncWrapper(async (req: ExpressRequest, res: Response) => {
     const { schema } = req as ReqWSchema
     try {
-      // validate expected property
-      if (!(_.has(req.body, 'ids'))) {
-        throw new Error('Request does not contain expected property');
+
+      if (!isIdsNumberArray(req.body)) {
+        throw Error("Wrong type for req.body")
+      } else {
+        // validate expected property
+        const { ids } = req.body
+
+        // zero payload
+        if (ids.length === 0) {
+          res.json([]);
+        }
+
+        // validate integer
+        const notIntegerList = _.reject(ids, (x: any) => (_.isInteger(x)));
+        if (notIntegerList.length) throw Error('Found non integer elements in payload');
+
+        const inClause = `(${ids.join()})`;
+        const query = 'select id, ST_AsGeoJSON(wkb_geometry,6,3) as geojson '
+          + `from ${schema}.tracks where id in ${inClause}`;
+
+        const queryResult = await pool.query(query);
+        const { rows } = queryResult;
+
+        const rowsWGeoJson = _.map(rows, (x: any) => ({ id: x.id, geojson: JSON.parse(x.geojson) }));
+
+        res.json(rowsWGeoJson);
       }
-      const { ids } = req.body;
-
-      // validate if value is a list
-      if (!(_.isArray(ids))) {
-        throw new Error('Ids does not contain array');
-      }
-
-      // zero payload
-      if (ids.length === 0) {
-        res.json([]);
-      }
-
-      // validate integer
-      const notIntegerList = _.reject(ids, (x: any) => (_.isInteger(x)));
-      if (notIntegerList.length) throw Error('Found non integer elements in payload');
-
-      const inClause = `(${ids.join()})`;
-      const query = 'select id, ST_AsGeoJSON(wkb_geometry,6,3) as geojson '
-        + `from ${schema}.tracks where id in ${inClause}`;
-
-      const queryResult = await pool.query(query);
-      const { rows } = queryResult;
-
-      const rowsWGeoJson = _.map(rows, (x: any) => ({ id: x.id, geojson: JSON.parse(x.geojson) }));
-
-      res.json(rowsWGeoJson);
     } catch (err: unknown) {
       console.trace('Exception handling trace');
       console.log(err);

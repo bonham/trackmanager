@@ -70,7 +70,7 @@ async function processFitFile(
     dbUser: 'postgres',
   }, fileHash);
 
-  const id = await dbw.write(track);
+  const id: number = await dbw.write(track);
   console.log(`Track created with id ${id}`);
 }
 

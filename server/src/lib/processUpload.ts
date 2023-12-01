@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { readFileSync, rmSync } from 'node:fs';
 import { basename } from 'node:path';
 import { FitFile } from './fit/FitFile.js';
 import { processFitFile } from './processFitFile.js';
@@ -50,6 +50,7 @@ function processFile(
   if (DATABASE === undefined) throw Error('Database is undefined');
 
   const fileName = basename(filePath);
+
   // Decide if fit or gpx file
   const fileBuffer = readFileSync(filePath);
   if (FitFile.isFit(fileBuffer)) {
@@ -58,6 +59,12 @@ function processFile(
     });
   } else {
     processGpxFile(simplifyDistance, filePath, DATABASE, schema);
+  }
+  try {
+    rmSync(filePath)
+    console.log(`File removed: ${filePath}`)
+  } catch (e) {
+    console.warn(`could not remove ${filePath}`)
   }
 }
 

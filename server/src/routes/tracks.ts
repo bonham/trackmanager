@@ -1,13 +1,15 @@
 import * as dotenv from 'dotenv';
-import type { Request as ExpressRequest, NextFunction, RequestHandler, Response } from 'express';
+import type { Request as ExpressRequest, NextFunction, Response } from 'express';
 import express from 'express';
 import { Formidable } from 'formidable';
-import * as _ from 'lodash';
-import { mkdtemp as mkdtempprom, rmdir as rmdirprom } from 'node:fs/promises';
+import _ from 'lodash';
+import { mkdtemp as mkdtempprom } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import pkg from 'pg';
+import { asyncWrapper } from '../lib/asyncMiddlewareWrapper.js';
 import { processFile } from '../lib/processUpload.js';
+
 const { Pool } = pkg;
 
 
@@ -49,7 +51,7 @@ const sidValidationChain = createSidValidationChain(pool);
 router.get(
   '/getall/sid/:sid',
   sidValidationChain,
-  (async (req: ExpressRequest, res: Response) => {
+  asyncWrapper(async (req: ExpressRequest, res: Response) => {
     const { schema } = req as ReqWSchema
     try {
       const queryResult = await pool.query(
@@ -74,7 +76,7 @@ router.get(
       if (err instanceof Error && 'message' in err) res.status(500).send(err.message);
       else res.status(500);
     }
-  }) as RequestHandler
+  })
 );
 
 /// // Get Geojson for a list of ids. Payload { ids: [..] }
@@ -82,7 +84,7 @@ router.get(
 router.post(
   '/geojson/sid/:sid',
   sidValidationChain,
-  (async (req: ExpressRequest, res: Response) => {
+  asyncWrapper(async (req: ExpressRequest, res: Response) => {
     const { schema } = req as ReqWSchema
     try {
       // validate expected property
@@ -121,7 +123,7 @@ router.post(
       if (err instanceof Error && 'message' in err) res.status(500).send(err.message);
       else res.status(500);
     }
-  }) as RequestHandler
+  })
 );
 
 /// // Get single track id
@@ -129,7 +131,7 @@ router.get(
   '/byid/:trackId/sid/:sid',
   sidValidationChain,
   trackIdValidationMiddleware,
-  (async (req: ExpressRequest, res: Response) => {
+  asyncWrapper(async (req: ExpressRequest, res: Response) => {
     const { schema } = req as ReqWSchema
     const { trackId } = req.params;
 
@@ -155,7 +157,7 @@ router.get(
       else res.status(500);
     }
 
-  }) as RequestHandler
+  })
 );
 
 /// // Get list of tracks by year
@@ -163,7 +165,7 @@ router.get(
   '/byyear/:year/sid/:sid',
   sidValidationChain,
   yearValidation,
-  (async (req: ExpressRequest, res: Response) => {
+  asyncWrapper(async (req: ExpressRequest, res: Response) => {
     const { schema } = req as ReqWSchema;
     const { year } = req.params;
 
@@ -187,14 +189,14 @@ router.get(
       if (err instanceof Error && 'message' in err) res.status(500).send(err.message);
       else res.status(500);
     }
-  }) as RequestHandler
+  })
 );
 
 /// // Get list of tracks by bounding box ( coordinates in EPSG:4326 )
 router.post(
   '/byextent/sid/:sid',
   sidValidationChain,
-  (async (req: ExpressRequest, res: Response, next: NextFunction) => {
+  asyncWrapper(async (req: ExpressRequest, res: Response, next: NextFunction) => {
     let query: string;
     try {
       const { schema } = req as ReqWSchema;
@@ -221,7 +223,7 @@ router.post(
     } catch (err) {
       next(err);
     }
-  }) as RequestHandler
+  })
 );
 
 /// // Update single track
@@ -230,7 +232,7 @@ router.put(
   isAuthenticated,
   sidValidationChain,
   trackIdValidationMiddleware,
-  (async (req: ExpressRequest, res: Response) => {
+  asyncWrapper(async (req: ExpressRequest, res: Response) => {
     const { schema } = req as ReqWSchema;
     const { updateAttributes } = req.body;
     const { data } = req.body;
@@ -263,7 +265,7 @@ router.put(
       console.error(err);
       res.status(500).send(err);
     }
-  }) as RequestHandler,
+  }),
 );
 
 /// // Delete single track
@@ -272,7 +274,7 @@ router.delete(
   isAuthenticated,
   sidValidationChain,
   trackIdValidationMiddleware,
-  (async (req: ExpressRequest, res: Response) => {
+  asyncWrapper(async (req: ExpressRequest, res: Response) => {
     const { schema } = req as ReqWSchema;
     const { trackId } = req.params;
 
@@ -305,7 +307,7 @@ router.delete(
       console.error(err);
       res.status(500).send(err);
     }
-  }) as RequestHandler,
+  }),
 );
 
 
@@ -315,44 +317,35 @@ router.post(
   isAuthenticated,
   sidValidationChain,
 
-  (async (req: ExpressRequest, res: Response, next: NextFunction) => {
-    try {
-      const uploadDir = await mkdtempprom(join(TMP_BASE_DIR, UPLOAD_DIR_PREFIX));
-      try {
-        const form = new Formidable({
-          uploadDir,
-          filename: (name, ext, part) => {
-            console.log('name', name, 'ext', ext);
-            if (part.originalFilename) {
-              return part.originalFilename;
-            }
-            throw Error('Unexpected: Part does not have property originalfilename');
-          },
-        });
-        form.parse(req, (err, fields, files) => {
-          if (err) {
-            next(err);
-            return;
-          }
-          if (files.newtrack === undefined) throw new Error('Expected form field not received: newtrack');
-          const filePath = files.newtrack[0].filepath;
+  asyncWrapper(async (req: ExpressRequest, res: Response, next: NextFunction) => {
+    const uploadDir = await mkdtempprom(join(TMP_BASE_DIR, UPLOAD_DIR_PREFIX));
+    const form = new Formidable({
+      uploadDir,
+      filename: (name, ext, part) => {
+        console.log('name', name, 'ext', ext);
+        if (part.originalFilename) {
+          return part.originalFilename;
+        }
+        throw Error('Unexpected: Part does not have property originalfilename');
+      },
+    });
+    form.parse(req, (err, fields, files) => {
+      if (err) {
 
-          processFile(filePath, (req as ReqWSchema).schema, SIMPLIFY_DISTANCE);
-          res.json({ message: 'ok' });
-        });
-      } catch (error) {
-        next(error);
-      } finally {
-        // is async
-        rmdirprom(uploadDir, { recursive: true }).then(
-          () => console.log(`Successfully purged upload directory: ${uploadDir}`),
-          (err: any) => { console.log('Error, could not upload file', err); },
-        );
+        next(err);
+        return;
+
+      } else {
+
+        if (files.newtrack === undefined) throw new Error('Expected form field not received: newtrack');
+        const filePath = files.newtrack[0].filepath;
+
+        processFile(filePath, (req as ReqWSchema).schema, SIMPLIFY_DISTANCE);
+        res.json({ message: 'ok' });
+
       }
-    } catch (e) {
-      next(e);
-    }
-  }) as RequestHandler,
+    });
+  }),
 );
 
 

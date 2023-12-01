@@ -1,4 +1,4 @@
-import * as pg from 'pg';
+import pg from 'pg';
 import { Track } from './Track.js';
 
 interface DBOpts {
@@ -34,7 +34,7 @@ class Track2DbWriter {
       startTime, durationSeconds,
     } = meta;
 
-    const resTrackId = await this.pool.query(`select nextval(${schema}.tracks_id)`);
+    const resTrackId = await this.pool.query(`select nextval('${schema}.tracks_id')`);
     const newId = resTrackId.rows[0].nextval;
 
     const insert = `

@@ -47,15 +47,18 @@ async function processFitFile(
   segments.forEach((segment) => {
     const trackpts: TrackPoint[] = [];
 
-    segment.getFitMessages().forEach((fit) => {
-      if (fit.positionLat === undefined) throw new Error('pos lat undef');
-      if (fit.positionLong === undefined) throw new Error('pos lon undef');
-      if (fit.altitude === undefined) throw new Error('altitude undef');
+    segment.getMessages().forEach((recordMessage) => {
+      // if (recordMessage.positionLat === undefined) throw new Error('pos lat undef');
+      // if (recordMessage.positionLong === undefined) throw new Error('pos lon undef');
+      // if (recordMessage.altitude === undefined) throw new Error('altitude undef');
+      const [lat, lon] = recordMessage.getLatLon()
+      const elevation = recordMessage.getFitMessage().altitude
+      if (elevation === undefined) throw Error("Elevation not defined")
 
       trackpts.push({
-        lat: fit.positionLat,
-        lon: fit.positionLong,
-        elevation: fit.altitude,
+        lat,
+        lon,
+        elevation
       });
     });
     track.addSegment(trackpts);

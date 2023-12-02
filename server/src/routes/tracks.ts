@@ -341,9 +341,9 @@ router.post(
         if (files.newtrack === undefined) throw new Error('Expected form field not received: newtrack');
         const filePath = files.newtrack[0].filepath;
 
-        processFile(filePath, (req as ReqWSchema).schema, SIMPLIFY_DISTANCE);
-        res.json({ message: 'ok' });
-
+        processFile(filePath, (req as ReqWSchema).schema, SIMPLIFY_DISTANCE)
+          .then(() => res.json({ message: 'ok' }))
+          .catch(e => console.log("Could not parse form", e));
       }
     });
   }),

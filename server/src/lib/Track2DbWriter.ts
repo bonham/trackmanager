@@ -1,6 +1,12 @@
 import pg from 'pg';
+import type { TrackMetadata, TrackPoint } from './Track.js';
 import { Track } from './Track.js';
-import { isNextValString } from './typeguards.js';
+import { isNextValQueryResult } from './typeguards.js';
+
+const TRACK_TABLENAME = "tracks"
+const TRACK_SEQUENCENAME = "tracks_id"
+const SEGMENT_TABLENAME = "segments"
+const POINTS_TABLENAME = "track_points"
 
 
 interface DBOpts {
@@ -17,9 +23,19 @@ class Track2DbWriter {
 
   fileBufferHash: string;
 
+  tableSegment: string;
+  tableTrack: string;
+  tablePoint: string;
+  sequenceTrack: string;
+
   constructor(dbOptions: DBOpts, fileBufferHash: string) {
     this.dbOptions = dbOptions;
     this.fileBufferHash = fileBufferHash;
+
+    this.tableTrack = `${this.dbOptions.dbSchema}.${TRACK_TABLENAME}`
+    this.tableSegment = `${this.dbOptions.dbSchema}.${SEGMENT_TABLENAME}`
+    this.tablePoint = `${this.dbOptions.dbSchema}.${POINTS_TABLENAME}`
+    this.sequenceTrack = `${this.dbOptions.dbSchema}.${TRACK_SEQUENCENAME}`
 
     this.pool = new pg.Pool({
       database: dbOptions.dbName,
@@ -29,36 +45,96 @@ class Track2DbWriter {
   }
 
   async write(t: Track): Promise<number> {
-    const schema = this.dbOptions.dbSchema;
+
     const meta = t.getMetaData();
+    const trackId = await this.getNextTrackId()
+
+    await this.insertTrackMetadata(trackId, meta)
+
+    const segmentList = t.getSegments()
+    for (let segId = 0; segId < segmentList.length; segId++) {
+
+      const segment = segmentList[segId]
+      await this.insertSegment(trackId, segId)
+      await this.insertPointList(trackId, segId, segment)
+
+    }
+
+    // TODO: insert segments
+
+    return trackId;
+  }
+
+  async insertTrackMetadata(id: number, tmeta: TrackMetadata): Promise<void> {
     const {
       name, source, totalAscent, totalDistance,
       startTime, durationSeconds,
-    } = meta;
+    } = tmeta;
 
-    const resTrackId = await this.pool.query(`select nextval('${schema}.tracks_id')`);
-    const nextValRow = resTrackId.rows[0] as (object | undefined)
-    if (!isNextValString(nextValRow)) {
-      throw Error("Query did not return correct nextval structure")
-    } else {
-      const newId = parseInt(nextValRow.nextval);
-
-      const insert = `
-    INSERT INTO ${schema}.tracks(
+    const insert = `
+    INSERT INTO ${this.dbOptions.dbSchema}.tracks(
       id,
       name, src, hash, "time", length, timelength, ascent)
       VALUES (
         $1, $2, $3, $4, $5, $6, $7, $8);
     `;
-      const values = [
-        newId, name, source, this.fileBufferHash,
-        startTime, totalDistance, durationSeconds, totalAscent,
-      ];
+    const values = [
+      id, name, source, this.fileBufferHash,
+      startTime, totalDistance, durationSeconds, totalAscent,
+    ];
 
-      const res = await this.pool.query(insert, values);
-      if (res.rowCount !== 1) throw new Error('Insert rowcount is not equal to 1');
+    const res = await this.pool.query(insert, values);
+    if (res.rowCount !== 1) throw new Error('Insert rowcount is not equal to 1');
 
-      return newId;
+  }
+
+  async insertSegment(trackId: number, segId: number): Promise<void> {
+    const sql = `insert into ${this.tableSegment} (track_id, track_segment_id) VALUES($1, $2)`
+    await this.pool.query(sql, [trackId, segId])
+  }
+
+  async insertPointList(trackId: number, segId: number, tpList: TrackPoint[]): Promise<void> {
+    const sql =
+      `insert into ${this.tablePoint} ` +
+      `( track_id, track_segment_id, segment_point_id, elevation, wkb_geometry) ` +
+      `VALUES($1, $2, $3, $4, ST_GeomFromText($5)) `
+
+    for (let pointIndex = 0; pointIndex < tpList.length; pointIndex++) {
+      const point = tpList[pointIndex]
+      const parameters = [
+        trackId,
+        segId,
+        pointIndex,
+        point.elevation,
+        `POINT(${point.lon} ${point.lat})`
+      ]
+      await this.pool.query(sql, parameters)
+    }
+
+    // update geometry in track table
+    const sql2 = `
+    with base as (
+      select ST_MakeLine(wkb_geometry order by id) as wkb_geometry
+      from ${this.tablePoint} where track_id = $1
+    )
+    update ${this.tableTrack} set wkb_geometry = subquery.wkb_geometry from (
+      select ST_Collect(wkb_geometry) as wkb_geometry
+      from base
+    ) as subquery
+    where id = $1`
+
+    await this.pool.query(sql2, [trackId])
+
+  }
+
+  async getNextTrackId(): Promise<number> {
+    const resTrackId = await this.pool.query(`select nextval('${this.dbOptions.dbSchema}.tracks_id')`);
+    const nextValRow = resTrackId.rows[0] as (object | undefined)
+    if (!isNextValQueryResult(nextValRow)) {
+      throw Error("Query did not return correct nextval structure")
+    } else {
+      const newId = parseInt(nextValRow.nextval);
+      return newId
     }
   }
 }

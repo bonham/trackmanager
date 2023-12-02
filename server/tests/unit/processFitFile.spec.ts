@@ -24,8 +24,8 @@ describe('FitFile', () => {
   test('processFitFile', async () => {
     const buf = readFileSync('tests/data/Activity.fit');
     mockPool.query
-      .mockResolvedValueOnce({ rows: [{ nextval: 77 }] })
-      .mockResolvedValueOnce({ rowCount: 1 });
+      .mockResolvedValueOnce({ rows: [{ nextval: '77' }] })
+      .mockResolvedValueOnce({ rowCount: 1 })
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     await processFitFile(buf, 'myfilename.fit', 'mydbname', 'myschema');

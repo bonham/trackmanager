@@ -14,8 +14,10 @@ interface TrackMetadata {
   startTime: Date;
 }
 
+type Segment = TrackPoint[]
+
 class Track {
-  segments: TrackPoint[][] = [];
+  segments: Segment[] = [];
 
   options: TrackMetadata = { startTime: new Date() }; // this is dummy value which will be overidden
 
@@ -41,5 +43,5 @@ class Track {
 }
 
 export { Track };
-export type { TrackPoint };
+export type { Segment, TrackMetadata, TrackPoint };
 

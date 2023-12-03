@@ -52,16 +52,15 @@ class Track2DbWriter {
     await this.insertTrackMetadata(trackId, meta)
 
     const segmentList = t.getSegments()
+    console.log(`Writing ${segmentList.length} segments for track ${trackId}`)
+
     for (let segId = 0; segId < segmentList.length; segId++) {
 
       const segment = segmentList[segId]
       await this.insertSegment(trackId, segId)
       await this.insertPointList(trackId, segId, segment)
-
     }
-
-    // TODO: insert segments
-
+    await this.updateTrackWkbGeometry(trackId)
     return trackId;
   }
 
@@ -99,6 +98,8 @@ class Track2DbWriter {
       `( track_id, track_segment_id, segment_point_id, elevation, wkb_geometry) ` +
       `VALUES($1, $2, $3, $4, ST_GeomFromText($5)) `
 
+    console.log(`Writing ${tpList.length} points for track id ${trackId}`)
+
     for (let pointIndex = 0; pointIndex < tpList.length; pointIndex++) {
       const point = tpList[pointIndex]
       const parameters = [
@@ -110,21 +111,32 @@ class Track2DbWriter {
       ]
       await this.pool.query(sql, parameters)
     }
+  }
 
+  async updateTrackWkbGeometry(trackId: number): Promise<void> {
     // update geometry in track table
     const sql2 = `
-    with base as (
-      select ST_MakeLine(wkb_geometry order by id) as wkb_geometry
-      from ${this.tablePoint} where track_id = $1
-    )
-    update ${this.tableTrack} set wkb_geometry = subquery.wkb_geometry from (
-      select ST_Collect(wkb_geometry) as wkb_geometry
-      from base
-    ) as subquery
-    where id = $1`
-
+        UPDATE sch_elk.tracks
+        SET wkb_geometry = subquery.wkb_geometry
+        FROM (
+          SELECT 
+            ST_Multi(ST_Collect(line_geom)) as wkb_geometry
+          FROM (
+              SELECT 
+                track_segment_id,
+                ST_MakeLine(wkb_geometry ORDER BY segment_point_id) as line_geom
+              FROM 
+                sch_elk.track_points
+              WHERE track_id = $1
+              GROUP BY 
+                  track_segment_id
+              ---  order by track_segment_id
+          ) AS line_subquery
+        ) AS subquery
+        WHERE 
+          sch_elk.tracks.id = $1
+        `
     await this.pool.query(sql2, [trackId])
-
   }
 
   async getNextTrackId(): Promise<number> {

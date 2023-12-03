@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "develop": "nodemon --exec \"ts-node -P ./tsconfig-build.json src/index.ts\"",
+    "develop": "nodemon -e ts,js,cjs,cts,mjs,mts,json --exec \"ts-node -P ./tsconfig-build.json src/index.ts\"",
     "start": "ts-node -P ./tsconfig-build.json --esm src/index.ts",
     "build": "tsc --build --clean && tsc -p ./tsconfig-build.json",
     "startbuild": "node ./dist/src/index.js",

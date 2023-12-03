@@ -43,14 +43,11 @@ async function processFitFile(
     startTime,
   });
 
-  const segments = fitFile.getRecordMessageList();
+  const segments = fitFile.getRecordMessageList(); // default join distance of 10
   segments.forEach((segment) => {
     const trackpts: TrackPoint[] = [];
 
     segment.getMessages().forEach((recordMessage) => {
-      // if (recordMessage.positionLat === undefined) throw new Error('pos lat undef');
-      // if (recordMessage.positionLong === undefined) throw new Error('pos lon undef');
-      // if (recordMessage.altitude === undefined) throw new Error('altitude undef');
       const [lat, lon] = recordMessage.getLatLon()
       const elevation = recordMessage.getFitMessage().altitude
       if (elevation === undefined) throw Error("Elevation not defined")

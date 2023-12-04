@@ -1,10 +1,9 @@
 import type { JestConfigWithTsJest } from 'ts-jest'
+import preset from 'ts-jest/presets/index.js'
 
 const jestConfig: JestConfigWithTsJest = {
-  globals: {
-    tsconfig: "./tsconfig-jest.json"
-  },
-  preset: "ts-jest",
+  ...preset.defaultsESM,
+  //preset: "ts-jest",
   testEnvironment: "node",
   verbose: true,
   rootDir: ".",
@@ -20,7 +19,6 @@ const jestConfig: JestConfigWithTsJest = {
       'ts-jest',
       {
         useESM: true,
-        tsconfig: "./tsconfig-jest.json"
       },
     ],
   },

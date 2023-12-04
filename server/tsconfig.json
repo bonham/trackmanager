@@ -13,19 +13,13 @@
     "sourceMap": true,
     "allowJs": true,
     "checkJs": false, // todo: set to true
-    "verbatimModuleSyntax": false,
+    "verbatimModuleSyntax": false, // needed from jest https://github.com/kulshekhar/ts-jest/issues/4081
     "rootDir": "./"
   },
   "ts-node": {
     "esm": true,
     "files": true
   },
-  "include": [
-    "src/**/*",
-    "types/**/*",
-  ],
-  "exclude": [
-    "dist"
-  ]
-  
+  "include": ["src/**/*", "types/**/*"],
+  "exclude": ["dist"]
 }

@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "@garmin/fitsdk": "^21.126.0",
-    "@simplewebauthn/server": "^7.2.0",
+    "@simplewebauthn/server": "^8.3.5",
     "connect-pg-simple": "^9.0.0",
     "cors": "^2.8.5",
     "debug": "^4.3.4",
@@ -33,7 +33,7 @@
     "pg": "^8.5.1"
   },
   "devDependencies": {
-    "@simplewebauthn/typescript-types": "^7.0.0",
+    "@simplewebauthn/typescript-types": "^8.3.4",
     "@tsconfig/node18": "^18.2.2",
     "@types/connect-pg-simple": "^7.0.0",
     "@types/cors": "^2.8.13",

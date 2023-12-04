@@ -1,16 +1,16 @@
 import { generateAuthenticationOptions } from '@simplewebauthn/server';
-import type { RequestHandler } from 'express';
 import { Router } from 'express';
-import type { Request } from 'express-serve-static-core';
+import { asyncWrapper } from '../../../lib/asyncMiddlewareWrapper.js';
 import type { Authenticator } from '../server.js';
 import { AutenticatorDb } from './AuthenticatorDb.js';
+
 
 const router = Router();
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function makeAuthenticationOptionsRoute(authdb: AutenticatorDb) {
   // call this route with /authoptions?authuser=myuserid
-  router.get('/authoptions', ((req: Request, res) => {
+  router.get('/authoptions', asyncWrapper(async (req, res) => {
     // Seems to make no sense to query user authenticators and send to client
     // client should discover himself
     // const authuser = req.params.authuser;
@@ -26,7 +26,7 @@ export function makeAuthenticationOptionsRoute(authdb: AutenticatorDb) {
     // }
 
     try {
-      const options = generateAuthenticationOptions({
+      const options = await generateAuthenticationOptions({
         // Require users to use a previously-registered authenticator
         allowCredentials: userAuthenticators.map((authenticator) => ({
           id: authenticator.credentialID,
@@ -44,6 +44,6 @@ export function makeAuthenticationOptionsRoute(authdb: AutenticatorDb) {
       console.error('Error in generating authentication options', error);
       res.sendStatus(500);
     }
-  }) as RequestHandler);
+  }));
   return router;
 }

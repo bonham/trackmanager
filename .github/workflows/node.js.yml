@@ -42,8 +42,8 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: "18.x"
-          cache: "yarn"
-          cache-dependency-path: ./server/yarn.lock
+          cache: "npm"
+          cache-dependency-path: ./server/package-lock.json
       - run: npm install
         working-directory: ./server
       - run: npm run copyconfig

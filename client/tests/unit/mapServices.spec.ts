@@ -72,7 +72,7 @@ const track2 = new Track(initData2)
 beforeEach(() => {
   vi.stubGlobal('ResizeObserver', ResizeObserverMock)
 
-  mm = new ManagedMap({ selectCallBackFn: (e) => { console.log('callback', e) } })
+  mm = new ManagedMap()
   bbox1 = [-20, -10.1, 40, 80]
   bbox2 = [-23, -11, -5, 70]
   bbox3 = [-30, 15, -28, 16]

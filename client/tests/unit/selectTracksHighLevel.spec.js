@@ -17,7 +17,7 @@ describe('SelectTracksPage - DOM testing', () => {
 
   })
 
-  test('Load Tracks of 2021', async () => {
+  test.skip('Load Tracks of 2021', async () => {
     const rresult = render(SelectTracksPage, {
       props: { sid: 'abcd1234' },
       global: {

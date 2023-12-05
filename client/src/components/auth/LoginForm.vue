@@ -31,8 +31,7 @@ async function handleLogin() {
     return
   }
 
-  let regoptions
-  regoptions = await resp.json() as PublicKeyCredentialCreationOptionsJSON
+  const regoptions = await resp.json() as PublicKeyCredentialCreationOptionsJSON
 
   let asseResp;
   try {
@@ -84,7 +83,7 @@ async function handleLogin() {
 </script>
 <template>
   <div class="border border-secondary-subtle p-3">
-    <button @click="handleLogin" class="btn btn-secondary mb-2">Sign in with passkey</button>
+    <button class="btn btn-secondary mb-2" @click="handleLogin">Sign in with passkey</button>
     <div v-if="loginstatus" class="mt-2">Status: {{ loginstatus }}</div>
   </div>
 </template>

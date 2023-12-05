@@ -2,7 +2,7 @@ import { Stroke, Style } from 'ol/style'
 
 class StyleFactory {
 
-  count: number = 0
+  count = 0
   rgbSetBrown = [
     '#621708',
     '#941b0c',

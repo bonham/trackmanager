@@ -449,5 +449,6 @@ export class ManagedMap {
     if (overallBbox) {
       this.setMapView(overallBbox)
     }
+    this.zoomOut()
   }
 }

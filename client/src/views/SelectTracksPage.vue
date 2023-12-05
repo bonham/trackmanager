@@ -60,7 +60,7 @@ async function getYears() {
       const tColl = new TrackCollection(trackList)
       years.value = tColl.yearList().sort((a, b) => b - a)
     })
-    .catch((e: any) => { console.log("Error in getYears", e) })
+    .catch((e: Error) => { console.log("Error in getYears", e) })
 }
 
 function loadTracksOfYear(year: number, zoomOut: boolean) {

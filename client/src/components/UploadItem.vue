@@ -54,8 +54,7 @@ export default defineComponent({
   computed: {
     statusClass() {
       const prefix = 'badge p-3 flex-fill'
-      let lookup: { [K in QueueStatus]: string }
-      lookup = {
+      const lookup: { [K in QueueStatus]: string } = {
         Queued: 'bg-secondary text-light',
         Processing: 'bg-warning',
         Completed: 'bg-success text-light',

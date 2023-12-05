@@ -25,6 +25,7 @@ interface LoadYearRequest {
 interface LoadBboxRequest {
   command: 'bbox',
   completed: boolean
+  zoomOut?: boolean
 }
 
 interface InitialState {

@@ -45,12 +45,11 @@ mmap.value = new ManagedMap()
 // ( the latter might need to be factored out)
 async function redrawTracks(zoomOut = false) {
   loading.value = true
-  let mm: ManagedMap
   if (mmap.value === null) {
     console.error("mmap not initalized")
     return
   }
-  mm = mmap.value
+  const mm: ManagedMap = mmap.value
 
   // reset selection and popups
   mm.clearSelection()
@@ -139,7 +138,7 @@ watch(
       const tracks = await getTracksByExtent(bbox, props.sid)
       console.log("tracks from extent call", tracks)
       trackStore.setLoadedTracks(tracks)
-      await redrawTracks()
+      await redrawTracks(!!command.zoomOut)
 
       command.completed = true
 

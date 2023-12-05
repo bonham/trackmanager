@@ -44,13 +44,13 @@ jobs:
           node-version: "18.x"
           cache: "yarn"
           cache-dependency-path: ./server/yarn.lock
-      - run: yarn install --immutable
+      - run: npm install
         working-directory: ./server
-      - run: yarn run copyconfig
+      - run: npm run copyconfig
         working-directory: ./server
-      - run: yarn run build
+      - run: npm run build
         working-directory: ./server
-      - run: yarn run lint
+      - run: npm run lint
         working-directory: ./server
-      - run: yarn test
+      - run: npm run test
         working-directory: ./server

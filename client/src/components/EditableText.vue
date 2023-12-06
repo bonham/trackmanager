@@ -43,13 +43,17 @@ const props = defineProps({
 
 const editing = ref(false)
 const value = ref(props.initialtext)
-const inputref = ref(null)
+const inputref = ref<InstanceType<typeof BFormTextarea>>()
 
 function makeEditable() {
   editing.value = true
 
   nextTick(() => {
-    (inputref.value as any).focus()
+    if (inputref.value == undefined) {
+      console.warn("Warn, could not set focus")
+    } else {
+      (inputref.value).focus()
+    }
   })
 }
 

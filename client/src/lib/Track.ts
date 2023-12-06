@@ -3,7 +3,6 @@ import _ from 'lodash'
 import type { GeoJsonObject } from 'geojson'
 
 
-// const sprintf = require('sprintf-js').sprintf
 import { sprintf } from 'sprintf-js'
 /**
  * Track class is representing a gpx track.

@@ -41,6 +41,8 @@ import { defineComponent } from 'vue'
 import { FileUploadQueue, makeFileIdObject } from '@/lib/FileUploadQueue'
 import type { QueueStatus, QueuedFile } from '@/lib/uploadFile'
 import { UploadError } from '@/lib/uploadFile'
+import type { AsyncResultCallback } from 'async'
+type CallbackArguments = Parameters<AsyncResultCallback<number, UploadError>>;
 
 /* vue instance */
 export default defineComponent({
@@ -125,9 +127,10 @@ export default defineComponent({
       )
     },
 
-    completedCallBack(err: UploadError | null, key: number): void {
-      console.log(`Finished processing ${key}`)
 
+    completedCallBack(err: CallbackArguments[0], key: CallbackArguments[1]): void {
+      console.log(`Finished processing ${key}`)
+      if (key === null || key === undefined) throw Error("key is null")
       if (err) {
         console.log('Error occured during queue processing: ', err.message)
         console.log('Error cause: ', err)

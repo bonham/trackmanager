@@ -64,13 +64,13 @@ async function getYears() {
 function loadTracksOfYear(year: number) {
   const sid = props.sid
   const loadFunction = function () { return getTracksByYear(year, sid) }
-  store.loadTracks(loadFunction).catch((e: any) => console.error('Error loading tracks by year', e))
+  store.loadTracks(loadFunction).catch((e: unknown) => console.error('Error loading tracks by year', e))
 }
 
 function loadAllTracks() {
   const sid = props.sid
   const loadFunc = () => getAllTracks(sid)
-  store.loadTracks(loadFunc).catch((e: any) => console.error('Error loading all tracks', e))
+  store.loadTracks(loadFunc).catch((e: unknown) => console.error('Error loading all tracks', e))
 }
 
 

@@ -1,6 +1,7 @@
-import { uploadFile, UploadError } from "./uploadFile"
+import { UploadError, uploadFile } from "./uploadFile"
 import type { QueuedFile, QueueStatus } from "./uploadFile"
 import { queue } from 'async'
+import type { QueueObject, AsyncResultCallback } from 'async'
 
 const FORMPARAM = 'newtrack'
 const WORKERS = 4
@@ -14,7 +15,7 @@ export type IQueuedItem = { fileIdObject: QueuedFile, setItemProcessingStatus: I
 
 
 class FileUploadQueue {
-  workerQueue: any
+  workerQueue: QueueObject<IQueuedItem>
 
   constructor() {
     this.workerQueue = queue(
@@ -23,12 +24,12 @@ class FileUploadQueue {
     )
   }
 
-  push(obj: IQueuedItem, callback: ICompletedCallback) {
+  push(obj: IQueuedItem, callback: AsyncResultCallback<number, UploadError>) {
     this.workerQueue.push(obj, callback)
   }
 }
 
-function performUpload(options: IQueuedItem, callback: ICompletedCallback) {
+function performUpload(options: IQueuedItem, callback: AsyncResultCallback<number, UploadError>) {
   const { fileIdObject, setItemProcessingStatus } = options
   const thisKey = fileIdObject.key
   console.log(`Queue function called for id ${thisKey}`)
@@ -41,8 +42,7 @@ function performUpload(options: IQueuedItem, callback: ICompletedCallback) {
       console.log(`Finished uploading key ${fileIdObject.key}, Message: ${json.message}`)
       callback(null, thisKey)
     })
-    .catch(err => {
-      if (!(err instanceof UploadError)) throw err
+    .catch((err: UploadError) => {
       fileIdObject.error = err
       callback(err, thisKey)
     })

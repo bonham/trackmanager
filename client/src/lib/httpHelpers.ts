@@ -31,7 +31,7 @@ async function getWithCORS(path: string) {
   return resp
 }
 
-function getErrorMessage(error: any) {
+function getErrorMessage(error: unknown) {
   if (error instanceof Error) {
     return `Name: ${error.name}, Message: ${error.message}`
   } else return `Error object type ${typeof error}, Value: ${String(error)}`

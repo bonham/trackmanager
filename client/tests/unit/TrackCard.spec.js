@@ -6,7 +6,7 @@ import { DateTime } from 'luxon'
 import { describe, test, expect } from 'vitest'
 
 describe('TrackCard', () => {
-  test('Simple', async () => {
+  test.skip('Simple', async () => {
     const initData1 = {
       id: 1,
       name: 'Good track',

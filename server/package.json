@@ -11,7 +11,7 @@
     "build": "tsc --build --clean && tsc -p ./tsconfig-build.json",
     "startbuild": "node ./dist/src/index.js",
     "test": "jest",
-    "copyconfig": "ts-node --esm ./src/bin/copyconfig.ts",
+    "copyconfig": "ts-node -P ./tsconfig-build.json --esm ./src/bin/copyconfig.ts",
     "lint": "eslint --quiet ."
   },
   "dependencies": {

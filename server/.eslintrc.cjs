@@ -22,7 +22,9 @@ module.exports = {
   },
   "ignorePatterns": [
     ".eslintrc.cjs",
-    "jest.config.ts"
+    "jest.config.ts",
+    "dist",
+    "coverage"
 
   ],
   "rules": {

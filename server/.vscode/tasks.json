@@ -1,23 +1,31 @@
 {
-	"version": "2.0.0",
-	"tasks": [
-		{
-			"type": "npm",
-			"script": "develop",
-			"problemMatcher": [],
-			"label": "develop",
-			"detail": "nodemon ts-node ./index.ts",
-			"runOptions": {
-				"runOn": "folderOpen"
-			},
-			"presentation": {
-				"echo": true,
-				"reveal": "always",
-				"focus": false,
-				"panel": "new",
-				"showReuseMessage": true,
-				"clear": false
-			}
-		}
-	]
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "type": "npm",
+      "script": "develop",
+      "problemMatcher": [],
+      "label": "develop",
+      "detail": "nodemon ts-node ./index.ts",
+      "runOptions": {
+        "runOn": "folderOpen"
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "new",
+        "showReuseMessage": true,
+        "clear": false
+      }
+    },
+    {
+      "type": "eslint",
+      "problemMatcher": ["$eslint-stylish"],
+      "label": "eslint: lint whole folder",
+      "runOptions": {
+        "runOn": "folderOpen"
+      }
+    }
+  ]
 }

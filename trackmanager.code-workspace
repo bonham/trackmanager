@@ -1,23 +1,19 @@
 {
-	"folders": [
-		{
-			"path": "client"
-		},
-		{
-			"path": "server"
-		}
-	],
-	"settings": {
-		"eslint.format.enable": true,
-		"eslint.validate": [
-			"javascript",
-		],
-		"[vue]": {},
-		"[javascript]": {},
-		"task.allowAutomaticTasks": "on",
-		"jest.disabledWorkspaceFolders": [
-			"client"
-		],
-		"testing.automaticallyOpenPeekView": "never",
-	}
+  "folders": [
+    {
+      "path": "client"
+    },
+    {
+      "path": "server"
+    }
+  ],
+  "settings": {
+    "eslint.validate": ["javascript"],
+    "[vue]": {},
+    "[javascript]": {},
+    "task.allowAutomaticTasks": "on",
+    "jest.disabledWorkspaceFolders": ["client"],
+    "testing.automaticallyOpenPeekView": "never",
+    "eslint.lintTask.enable": true
+  }
 }

@@ -11,6 +11,11 @@ module.exports = {
     '@vue/eslint-config-prettier/skip-formatting',
     'plugin:vitest-globals/recommended'
   ],
+  ignorePatterns: [
+    ".eslintrc.cjs",
+    "dist",
+    "coverage"
+  ],
   parser: "vue-eslint-parser",
   parserOptions: {
     ecmaVersion: 'latest',

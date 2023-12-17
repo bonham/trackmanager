@@ -1,46 +1,47 @@
 {
-	"version": "2.0.0",
-	"tasks": [
-		{
-			"type": "npm",
-			"script": "dev",
-			"problemMatcher": [],
-			"label": "vite dev",
-			"runOptions": {
-				"runOn": "folderOpen"
-			},
-			"presentation": {
-				"echo": true,
-				"reveal": "always",
-				"focus": false,
-				"panel": "new",
-				"showReuseMessage": true,
-				"clear": false
-			}
-		},
-		{
-			"type": "npm",
-			"script": "test",
-			"problemMatcher": [],
-			"label": "vitest",
-			"runOptions": {
-				"runOn": "folderOpen"
-			},
-			"presentation": {
-				"echo": true,
-				"reveal": "always",
-				"focus": false,
-				"panel": "new",
-				"showReuseMessage": true,
-				"clear": false
-			}
-		},
-		{
-			"type": "eslint",
-			"problemMatcher": [
-				"$eslint-stylish"
-			],
-			"label": "eslint: lint whole folder"
-		}
-	]
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "type": "npm",
+      "script": "dev",
+      "problemMatcher": [],
+      "label": "vite dev",
+      "runOptions": {
+        "runOn": "folderOpen"
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "new",
+        "showReuseMessage": true,
+        "clear": false
+      }
+    },
+    {
+      "type": "npm",
+      "script": "test",
+      "problemMatcher": [],
+      "label": "vitest",
+      "runOptions": {
+        "runOn": "folderOpen"
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "new",
+        "showReuseMessage": true,
+        "clear": false
+      }
+    },
+    {
+      "type": "eslint",
+      "problemMatcher": ["$eslint-stylish"],
+      "label": "eslint: lint whole folder client",
+      "runOptions": {
+        "runOn": "folderOpen"
+      }
+    }
+  ]
 }

@@ -22,7 +22,7 @@
     {
       "type": "eslint",
       "problemMatcher": ["$eslint-stylish"],
-      "label": "eslint: lint whole folder",
+      "label": "eslint: lint whole folder server",
       "runOptions": {
         "runOn": "folderOpen"
       }

@@ -9,10 +9,10 @@ const router = createRouter({
       component: () => import('./views/NoSidPage.vue')
     },
     {
-      path: '/select_tracks/sid/:sid',
+      path: '/trackmap/sid/:sid',
       alias: '/:sid',
-      name: 'SelectTracksPage',
-      component: () => import('./views/SelectTracksPage.vue'),
+      name: 'TrackMapPage',
+      component: () => import('./views/TrackMapPage.vue'),
       props: true
     },
     {

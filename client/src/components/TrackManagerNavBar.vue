@@ -10,7 +10,7 @@
         </button>
         <div id="navbarNavAltMarkup" class="collapse navbar-collapse">
           <div class="navbar-nav">
-            <router-link class="nav-link m-2" :to="navPath('/select_tracks')">
+            <router-link class="nav-link m-2" :to="navPath('/trackmap')">
               Map
             </router-link>
             <router-link class="nav-link m-2" :to="navPath('/toverview')">

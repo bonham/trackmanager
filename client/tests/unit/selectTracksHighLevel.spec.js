@@ -1,6 +1,6 @@
 import { describe, test, beforeEach, vi } from 'vitest'
 import { render, fireEvent } from '@testing-library/vue'
-import SelectTracksPage from '@/views/SelectTracksPage.vue'
+import TrackMapPage from '@/views/TrackMapPage.vue'
 import ResizeObserverMock from './__mocks__/ResizeObserver'
 import { mockFetch } from './mockResponse.js'
 import { Request, Response } from 'cross-fetch'
@@ -9,7 +9,7 @@ import { createTestingPinia } from '@pinia/testing'
 let CustomStub
 
 
-describe('SelectTracksPage - DOM testing', () => {
+describe('TrackMapPage - DOM testing', () => {
   beforeEach(() => {
     vi.stubGlobal('ResizeObserver', ResizeObserverMock)
     vi.stubGlobal('fetch', mockFetch)
@@ -21,7 +21,7 @@ describe('SelectTracksPage - DOM testing', () => {
   })
 
   test('Load Tracks of 2021', async () => {
-    const rresult = render(SelectTracksPage, {
+    const rresult = render(TrackMapPage, {
       props: { sid: 'abcd1234' },
       global: {
         plugins: [createTestingPinia()],

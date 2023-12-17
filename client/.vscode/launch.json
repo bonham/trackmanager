@@ -4,14 +4,14 @@
       "name": "Launch Chrome workspace:root",
       "request": "launch",
       "type": "chrome",
-      "url": "http://localhost:4000/tm/select_tracks/sid/42trblax9",
+      "url": "http://localhost:4000/tm/trackmap/sid/42trblax9",
       "webRoot": "${workspaceFolder}"
     },
     {
       "name": "Launch Chrome workspace:src",
       "request": "launch",
       "type": "chrome",
-      "url": "http://localhost:4000/tm/select_tracks/sid/42trblax9",
+      "url": "http://localhost:4000/tm/trackmap/sid/42trblax9",
       "webRoot": "${workspaceFolder}/src"
     },
     {
@@ -19,15 +19,9 @@
       "request": "launch",
       "name": "Debug Current Test File",
       "autoAttachChildProcesses": true,
-      "skipFiles": [
-        "<node_internals>/**",
-        "**/node_modules/**"
-      ],
+      "skipFiles": ["<node_internals>/**", "**/node_modules/**"],
       "program": "${workspaceRoot}/node_modules/vitest/vitest.mjs",
-      "args": [
-        "run",
-        "${relativeFile}"
-      ],
+      "args": ["run", "${relativeFile}"],
       "smartStep": true,
       "console": "integratedTerminal"
     }

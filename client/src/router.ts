@@ -6,50 +6,50 @@ const router = createRouter({
     {
       path: '/',
       name: 'NoSidPage',
-      component: () => import('../views/NoSidPage.vue')
+      component: () => import('./views/NoSidPage.vue')
     },
     {
       path: '/select_tracks/sid/:sid',
       alias: '/:sid',
       name: 'SelectTracksPage',
-      component: () => import('../views/SelectTracksPage.vue'),
+      component: () => import('./views/SelectTracksPage.vue'),
       props: true
     },
     {
       path: '/tracklist/sid/:sid',
       alias: '/:sid',
       name: 'TracklistPage',
-      component: () => import('../views/TracklistPage.vue'),
+      component: () => import('./views/TracklistPage.vue'),
       props: true
     },
     {
       path: '/toverview/sid/:sid',
       name: 'TrackOverviewPage',
-      component: () => import('../views/TrackOverviewPage.vue'),
+      component: () => import('./views/TrackOverviewPage.vue'),
       props: true
     },
     {
       path: '/upload/sid/:sid',
       name: 'UploadPage',
-      component: () => import('../views/UploadPage.vue'),
+      component: () => import('./views/UploadPage.vue'),
       props: true
     },
     {
       path: '/track_multi_edit/sid/:sid',
       name: 'TrackMultiEditPage',
-      component: () => import('../views/TrackMultiEditPage.vue'),
+      component: () => import('./views/TrackMultiEditPage.vue'),
       props: true
     },
     {
       path: '/track/:id/sid/:sid',
       name: 'TrackDetailPage',
-      component: () => import('../views/TrackDetailPage.vue'),
+      component: () => import('./views/TrackDetailPage.vue'),
       props: true
     },
     {
       path: '/login/sid/:sid',
       name: 'LoginPage',
-      component: () => import('../views/LoginPage.vue'),
+      component: () => import('./views/LoginPage.vue'),
       props: true
     }
   ]

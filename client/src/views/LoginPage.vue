@@ -1,9 +1,7 @@
 <script lang="ts" setup>
-import { ref } from 'vue'
 
 import RegistrationForm from '@/components/auth/RegistrationForm.vue';
 import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'
-import { BContainer } from 'bootstrap-vue-next';
 import LoginForm from '@/components/auth/LoginForm.vue';
 import LogoutForm from '@/components/auth/LogoutForm.vue';
 import { getWithCORS } from '@/lib/httpHelpers';
@@ -63,8 +61,7 @@ async function updateUser() {
 </script>
 
 <template>
-  <b-container id="root" class="d-flex flex-column vh-100">
-    <track-manager-nav-bar :sid="sid" />
+  <track-manager-nav-bar :sid="sid">
     <h1 class="mt-4 mb-4">
       Login
     </h1>
@@ -82,5 +79,5 @@ async function updateUser() {
         <LoginForm v-else @changed="updateUser" />
       </div>
     </div>
-  </b-container>
+  </track-manager-nav-bar>
 </template>

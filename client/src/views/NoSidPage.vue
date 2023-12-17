@@ -4,13 +4,7 @@
   </b-container>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import { BContainer } from 'bootstrap-vue-next'
 
-export default {
-  name: 'NoSidPage',
-  components: {
-    BContainer
-  }
-}
 </script>

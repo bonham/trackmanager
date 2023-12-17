@@ -10,7 +10,6 @@ declare module 'vue' {
     DropField: typeof import('./src/components/DropField.vue')['default']
     EditableText: typeof import('./src/components/EditableText.vue')['default']
     FilteredMap: typeof import('./src/components/FilteredMap.vue')['default']
-    FilteredTrackList: typeof import('./src/components/FilteredTrackList.vue')['default']
     IBiArrowDownCircleFill: typeof import('~icons/bi/arrow-down-circle-fill')['default']
     IBiArrowLeft: typeof import('~icons/bi/arrow-left')['default']
     IBiArrowRightCircle: typeof import('~icons/bi/arrow-right-circle')['default']
@@ -25,7 +24,6 @@ declare module 'vue' {
     RouterView: typeof import('vue-router')['RouterView']
     TrackCard: typeof import('./src/components/TrackCard.vue')['default']
     TrackManagerNavBar: typeof import('./src/components/TrackManagerNavBar.vue')['default']
-    TrackOverview: typeof import('./src/components/TrackOverview.vue')['default']
     TrackSection: typeof import('./src/components/TrackSection.vue')['default']
     UploadItem: typeof import('./src/components/UploadItem.vue')['default']
   }

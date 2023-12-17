@@ -6,9 +6,6 @@ import { startRegistration } from '@simplewebauthn/browser';
 import type { VerifiedRegistrationResponse } from '@simplewebauthn/server'
 import type { RegistrationResponseJSON, PublicKeyCredentialCreationOptionsJSON } from '@simplewebauthn/typescript-types'
 
-import { useUserLoginStore } from '@/stores/userlogin'
-const userLoginStore = useUserLoginStore()
-
 const props = defineProps({
   useRegistrationKey: Boolean,
   formLabel: {
@@ -116,10 +113,10 @@ async function handleCreate() {
   <div class="border border-secondary-subtle p-3 mb-2 mt-2">
     <label :for="placeHolder" class="form-label">{{ formLabel }}</label>
     <div class="input-group">
-      <input v-model="registernickname" type="text" :class="{ 'is-invalid': registerNicknameFieldInValid }"
-        class="form-control" :placeholder="placeHolder" aria-label="Nickname" aria-describedby="button-addon2"
-        :id="placeHolder" autocomplete="off">
-      <button @click="handleCreate" class="btn btn-outline-secondary" type="button" id="button-addon2">Register</button>
+      <input :id="placeHolder" v-model="registernickname" type="text"
+        :class="{ 'is-invalid': registerNicknameFieldInValid }" class="form-control" :placeholder="placeHolder"
+        aria-label="Nickname" aria-describedby="button-addon2" autocomplete="off">
+      <button id="button-addon2" class="btn btn-outline-secondary" type="button" @click="handleCreate">Register</button>
     </div>
     <div class="mt-2">Status: {{ regstatus }}</div>
   </div>

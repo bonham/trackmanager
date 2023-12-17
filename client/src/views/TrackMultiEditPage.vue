@@ -1,6 +1,5 @@
 <template>
-  <b-container id="root" class="d-flex flex-column vh-100">
-    <track-manager-nav-bar :sid="sid" />
+  <track-manager-nav-bar :sid="sid">
     <div class="mt-4 mb-4">
       <h1 style="display: inline-block;">
         Edit Tracks
@@ -36,14 +35,13 @@
         </b-button>
       </template>
     </BTable>
-  </b-container>
+  </track-manager-nav-bar>
 </template>
 
 <script lang="ts" setup>
 import {
   BTable, BButton,
-  BContainer, BSpinner
-
+  BSpinner
 } from 'bootstrap-vue-next'
 import type { TableItem } from 'bootstrap-vue-next'
 import { getAllTracks, updateTrack, updateTrackById, deleteTrack } from '@/lib/trackServices'

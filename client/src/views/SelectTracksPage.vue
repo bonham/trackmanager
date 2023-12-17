@@ -1,7 +1,5 @@
 <template>
-  <b-container id="root" class="d-flex flex-column vh-100">
-    <track-manager-nav-bar :sid="sid" />
-    <!-- <div v-if="buttonsLoading" class="year-navbar"> -->
+  <track-manager-nav-bar :sid="sid">
     <div v-if="buttonsLoading" class="placeholder-glow d-flex flex-row" style="width: 20em;">
       <b-button class="placeholder bg-secondary flex-fill m-2"></b-button>
       <b-button class="placeholder bg-secondary flex-fill m-2"></b-button>
@@ -17,11 +15,11 @@
     <div class="d-flex flex-column flex-grow-1">
       <filtered-map :sid="sid" />
     </div>
-  </b-container>
+  </track-manager-nav-bar>
 </template>
 
 <script lang="ts" setup>
-import { BContainer, BButton } from 'bootstrap-vue-next'
+import { BButton } from 'bootstrap-vue-next'
 import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'
 import FilteredMap from '@/components/FilteredMap.vue'
 import { TrackCollection } from '@/lib/Track'

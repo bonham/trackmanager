@@ -1,6 +1,6 @@
 <!-- eslint-disable vue/first-attribute-linebreak -->
 <template>
-  <div>
+  <b-container id="root" class="d-flex flex-column vh-100">
     <nav class="navbar navbar-expand-sm shadow-sm bg-white border-bottom  ">
       <div class="container-fluid">
         <!-- <a class="navbar-brand" to="#">TrckM</a> -->
@@ -29,11 +29,12 @@
         </div>
       </div>
     </nav>
-  </div>
+    <slot></slot>
+  </b-container>
 </template>
 
 <script setup lang="ts">
-
+import { BContainer } from 'bootstrap-vue-next'
 import { useUserLoginStore } from '@/stores/userlogin'
 const userLoginStore = useUserLoginStore()
 

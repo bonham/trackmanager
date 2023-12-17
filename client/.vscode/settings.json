@@ -1,9 +1,9 @@
 {
   "vitest.enable": true,
   "vitest.commandLine": "npx vitest",
-  "eslint.validate": [
-    "javascript",
-    "javascriptreact",
-    "vue"
-  ]
+  "eslint.validate": ["javascript", "javascriptreact", "vue"],
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "[vue]": {
+    "editor.defaultFormatter": "Vue.volar"
+  }
 }

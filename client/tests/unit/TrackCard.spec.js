@@ -6,7 +6,7 @@ import { DateTime } from 'luxon'
 import { describe, test, expect } from 'vitest'
 
 describe('TrackCard', () => {
-  test.skip('Simple', async () => {
+  test('Simple', async () => {
     const initData1 = {
       id: 1,
       name: 'Good track',
@@ -28,6 +28,6 @@ describe('TrackCard', () => {
     )
 
     expect(await findByText('Good track')).toBeInTheDocument()
-    expect(await findByText('15. Mai / 0.01 km / 135 m / 1:00 h')).toBeInTheDocument()
+    expect(await findByText('15. Mai / 0.01 km / 135 m / 1:00 h / 3601 s / 0 km/h avg.')).toBeInTheDocument()
   })
 })

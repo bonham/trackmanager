@@ -13,16 +13,13 @@
             <router-link class="nav-link m-2" :to="navPath('/select_tracks')">
               Map
             </router-link>
-            <router-link class="nav-link m-2" :to="navPath('/tracklist')">
-              Tracks
-            </router-link>
             <router-link class="nav-link m-2" :to="navPath('/toverview')">
               By Year
             </router-link>
-            <router-link class="nav-link m-2" :to="navPath('/track_multi_edit')">
+            <router-link v-if="userLoginStore.loggedIn" class="nav-link m-2" :to="navPath('/track_multi_edit')">
               Edit
             </router-link>
-            <router-link class="nav-link m-2" :to="navPath('/upload')">
+            <router-link v-if="userLoginStore.loggedIn" class="nav-link m-2" :to="navPath('/upload')">
               Upload
             </router-link>
             <router-link class="nav-link m-2" :to="navPath('/login')">
@@ -37,6 +34,8 @@
 
 <script setup lang="ts">
 
+import { useUserLoginStore } from '@/stores/userlogin'
+const userLoginStore = useUserLoginStore()
 
 const props = defineProps({
   sid: {

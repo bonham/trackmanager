@@ -445,10 +445,14 @@ export class ManagedMap {
       )
     }
 
-    const overallBbox = new ExtentCollection(extentList).boundingBox()
-    if (overallBbox) {
-      this.setMapView(overallBbox)
+    if (extentList.length > 0) {
+      const overallBbox = new ExtentCollection(extentList).boundingBox()
+      if (overallBbox) {
+        this.setMapView(overallBbox)
+      }
+      this.zoomOut()
+    } else {
+      console.log("Extentlist was empty - no extent could be set")
     }
-    this.zoomOut()
   }
 }

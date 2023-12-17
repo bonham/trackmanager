@@ -4,6 +4,7 @@ import router from '../../src/router'
 import { vi, describe, test, beforeEach, expect } from 'vitest'
 import { mockFetch } from './mockResponse.js'
 import { Request } from 'cross-fetch'
+import { createTestingPinia } from '@pinia/testing'
 
 import TrackOverviewPage from '@/views/TrackOverviewPage.vue'
 // import TrackDetailPage from '@/views/TrackDetailPage.vue'
@@ -18,8 +19,8 @@ describe('TrackOverview and TrackDetail', () => {
       {
         props: { sid: 'abcd1234' },
         global: {
-          plugins: [router]
-        }
+          plugins: [createTestingPinia(), router]
+        },
       }
     )
     expect(await findByText('Track Overview')).toBeInTheDocument()

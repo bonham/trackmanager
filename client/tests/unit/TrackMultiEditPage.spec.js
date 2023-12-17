@@ -4,6 +4,8 @@ import TrackMultiEditPage from '@/views/TrackMultiEditPage.vue'
 import ResizeObserverMock from './__mocks__/ResizeObserver'
 import { Request, Response } from 'cross-fetch'
 import { describe, beforeEach, test, expect } from 'vitest'
+import { createTestingPinia } from '@pinia/testing'
+let CustomStub
 
 // skipped tests do not work because of https://github.com/testing-library/vue-testing-library/issues/298
 describe('MultiEditPage', () => {
@@ -14,6 +16,10 @@ describe('MultiEditPage', () => {
     vi.stubGlobal('Response', Response) // eslint-disable-line no-undef
 
     fetch.mockClear()
+
+    CustomStub = {
+      template: '<p>Nothing</p>',
+    }
   })
 
   test('Simple', async () => {
@@ -21,6 +27,14 @@ describe('MultiEditPage', () => {
       TrackMultiEditPage,
       {
         props: { sid: 'abcd1234' },
+        global: {
+          plugins: [createTestingPinia()],
+          stubs: {
+            RouterLink: CustomStub
+          }
+
+        }
+
 
       })
     expect(await rresult.findByText('Saupferchweg')).toBeInTheDocument()
@@ -33,6 +47,12 @@ describe('MultiEditPage', () => {
       TrackMultiEditPage,
       {
         props: { sid: 'abcd1234' },
+        global: {
+          plugins: [createTestingPinia()],
+          stubs: {
+            RouterLink: CustomStub
+          }
+        }
 
       })
     expect(await rresult.findByText('Saupferchweg')).toBeInTheDocument()
@@ -55,6 +75,12 @@ describe('MultiEditPage', () => {
       TrackMultiEditPage,
       {
         props: { sid: 'abcd1234' },
+        global: {
+          plugins: [createTestingPinia()],
+          stubs: {
+            RouterLink: CustomStub
+          }
+        }
 
       })
 

@@ -47,7 +47,7 @@ export default defineComponent({
     error: {
       type: UploadError as PropType<UploadError | null>,
       default: null,
-      required: true
+      required: false
     }
   },
 

@@ -3,11 +3,16 @@
 import { ref } from 'vue'
 import { getWithCORS, getErrorMessage } from '@/lib/httpHelpers';
 
+import { useUserLoginStore } from '@/stores/userlogin'
+const userLoginStore = useUserLoginStore()
+
 const emit = defineEmits(['changed'])
 
 const logoutstatus = ref("")
 
 async function handleLogout() {
+  userLoginStore.loggedIn = false
+  userLoginStore.username = "xx"
 
   const logoutUrl = "/api/v1/auth/logout"
 

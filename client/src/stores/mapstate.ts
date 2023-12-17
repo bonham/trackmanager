@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
-export const useMapStateStore = defineStore('mapstate', () => {
+const useMapStateStore = defineStore('mapstate', () => {
 
   // command to load tracks
   const loadCommand = ref<LoadTracksRequest>({ command: 'none' })
@@ -32,5 +32,6 @@ interface InitialState {
   command: 'none'
 }
 
+export { useMapStateStore }
 export type LoadTracksRequest = LoadYearRequest | LoadBboxRequest | InitialState
 

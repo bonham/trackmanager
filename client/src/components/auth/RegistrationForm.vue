@@ -6,6 +6,9 @@ import { startRegistration } from '@simplewebauthn/browser';
 import type { VerifiedRegistrationResponse } from '@simplewebauthn/server'
 import type { RegistrationResponseJSON, PublicKeyCredentialCreationOptionsJSON } from '@simplewebauthn/typescript-types'
 
+import { useUserLoginStore } from '@/stores/userlogin'
+const userLoginStore = useUserLoginStore()
+
 const props = defineProps({
   useRegistrationKey: Boolean,
   formLabel: {

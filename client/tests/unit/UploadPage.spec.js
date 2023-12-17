@@ -1,32 +1,31 @@
 import { render } from '@testing-library/vue'
 import userEvent from '@testing-library/user-event'
 import UploadPage from '@/views/UploadPage.vue'
-import { vi } from 'vitest'
+import { vi, expect, test, beforeEach } from 'vitest'
 import { Response } from 'cross-fetch'
-import { beforeEach } from 'vitest'
-import { createRouter, createWebHistory } from 'vue-router'
+import { createTestingPinia } from '@pinia/testing'
 
-
-
+let CustomStub
 
 describe('UploadPage', () => {
-  let router
   beforeEach(() => {
-    router = createRouter({
-      history: createWebHistory(),
-      routes: [], // provide your routes here
-    })
-
+    CustomStub = {
+      template: '<p>Nothing</p>',
+    }
   })
   test('UploadSuccess', async () => {
     vi.stubGlobal('fetch', vi.fn(() => new Response('{"message":"ok"}')))
     const user = userEvent.setup()
     const { getByLabelText } = render(UploadPage,
       {
+        props: { sid: 'abcd1234' },
         global: {
-          plugins: [router]
+          plugins: [createTestingPinia()],
+          stubs: {
+            RouterLink: CustomStub
+          }
         },
-        stubs: ['router-link']
+
       })
     const input = getByLabelText(/Drop files/i)
     const file = new File(['hello'], 'hello.gpx', { type: 'text/xml' })
@@ -43,10 +42,13 @@ describe('UploadPage', () => {
     const user = userEvent.setup()
     const { getByLabelText, findByText } = render(UploadPage,
       {
+        props: { sid: 'abcd1234' },
         global: {
-          plugins: [router]
+          plugins: [createTestingPinia()],
+          stubs: {
+            RouterLink: CustomStub
+          }
         },
-        stubs: ['router-link']
       })
     const input = getByLabelText(/Drop files/i)
     const file = new File(['hello'], 'hello.gpx', { type: 'text/xml' })

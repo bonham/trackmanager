@@ -1,22 +1,28 @@
-import { createRouterMock, injectRouterMock } from 'vue-router-mock'
 import { render } from '@testing-library/vue'
 import TrackManagerNavBarVue from '@/components/TrackManagerNavBar.vue'
-import { beforeEach, describe } from 'node:test'
+import { test, expect, describe, beforeEach } from 'vitest'
+import { createTestingPinia } from '@pinia/testing'
+
+let CustomStub
+
 
 describe('NavBar', () => {
-
-  const router = createRouterMock({
-    // ...
-  })
-
   beforeEach(() => {
-    injectRouterMock(router)
+    CustomStub = {
+      template: '<p>Nothing</p>',
+    }
   })
-
   test('NavBarSimple', async () => {
+
     const { getByLabelText } = render(TrackManagerNavBarVue, {
       props: {
         sid: "mysid"
+      },
+      global: {
+        plugins: [createTestingPinia()],
+        stubs: {
+          RouterLink: CustomStub
+        }
       }
     })
 

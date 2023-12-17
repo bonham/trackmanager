@@ -6,6 +6,9 @@ import { startAuthentication } from '@simplewebauthn/browser';
 import type { PublicKeyCredentialCreationOptionsJSON } from '@simplewebauthn/typescript-types'
 import type { VerifiedAuthenticationResponse, } from '@simplewebauthn/server'
 
+import { useUserLoginStore } from '@/stores/userlogin'
+const userLoginStore = useUserLoginStore()
+
 const emit = defineEmits(['changed'])
 
 const loginstatus = ref("")
@@ -13,6 +16,7 @@ const loginstatus = ref("")
 async function handleLogin() {
 
   loginstatus.value = ""
+  userLoginStore.loggedIn = false
 
   const authoptionsUrl = "/api/v1/auth/authoptions"
 
@@ -21,12 +25,14 @@ async function handleLogin() {
     resp = await getWithCORS(authoptionsUrl);
   } catch (error) {
     loginstatus.value = getErrorMessage(error)
+    userLoginStore.loggedIn = false
     emit('changed')
     return
   }
   if (!resp.ok) {
     const t = await resp.text()
     loginstatus.value = t
+    userLoginStore.loggedIn = false
     emit('changed')
     return
   }
@@ -40,6 +46,8 @@ async function handleLogin() {
   } catch (error) {
     // Some basic error handling
     loginstatus.value = "Start Auth error: " + String(error);
+    userLoginStore.loggedIn = false
+
     emit('changed')
     return
   }
@@ -52,6 +60,7 @@ async function handleLogin() {
     if (!verificationResp.ok) {
       console.log(`Verification failed with response:`, verificationResp)
       loginstatus.value = "Failed"
+      userLoginStore.loggedIn = false
       emit('changed')
       return
     }
@@ -59,6 +68,7 @@ async function handleLogin() {
     const msg = getErrorMessage(error);
     console.log("Error when calling registration endpoint: " + msg);
     loginstatus.value = "Failed"
+    userLoginStore.loggedIn = false
     emit('changed')
     return
   }
@@ -71,11 +81,13 @@ async function handleLogin() {
   if (verificationJSON && verificationJSON.verified) {
 
     loginstatus.value = 'Success!';
+    userLoginStore.loggedIn = true
 
   } else {
     loginstatus.value = `Oh no, something went wrong! Response: ${JSON.stringify(
       verificationJSON,
     )}`;
+    userLoginStore.loggedIn = false
   }
   emit('changed')
 };

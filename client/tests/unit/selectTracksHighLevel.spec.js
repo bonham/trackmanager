@@ -6,24 +6,29 @@ import { mockFetch } from './mockResponse.js'
 import { Request, Response } from 'cross-fetch'
 import { createTestingPinia } from '@pinia/testing'
 
+let CustomStub
+
+
 describe('SelectTracksPage - DOM testing', () => {
-  let pinia
   beforeEach(() => {
     vi.stubGlobal('ResizeObserver', ResizeObserverMock)
     vi.stubGlobal('fetch', mockFetch)
     vi.stubGlobal('Request', Request) // eslint-disable-line no-undef
     vi.stubGlobal('Response', Response) // eslint-disable-line no-undef
-    pinia = createTestingPinia()
-
+    CustomStub = {
+      template: '<p>Nothing</p>',
+    }
   })
 
-  test.skip('Load Tracks of 2021', async () => {
+  test('Load Tracks of 2021', async () => {
     const rresult = render(SelectTracksPage, {
       props: { sid: 'abcd1234' },
       global: {
-        plugins: [pinia],
-        stubs: ['router-link']
-      }
+        plugins: [createTestingPinia()],
+        stubs: {
+          RouterLink: CustomStub
+        }
+      },
     })
 
     const button = await rresult.findByText('2021')

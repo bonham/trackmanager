@@ -20,6 +20,7 @@ describe('TrackCard', () => {
     const mytrack = new Track(
       initData1
     )
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     const { findByText } = render(
       TrackCard,
       {

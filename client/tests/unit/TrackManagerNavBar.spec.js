@@ -12,9 +12,9 @@ describe('NavBar', () => {
       template: '<p>Nothing</p>',
     }
   })
-  test('NavBarSimple', async () => {
+  test('NavBarSimple', () => {
 
-    const { getByLabelText } = render(TrackManagerNavBarVue, {
+    const rresult = render(TrackManagerNavBarVue, {
       props: {
         sid: "mysid"
       },
@@ -26,7 +26,7 @@ describe('NavBar', () => {
       }
     })
 
-    expect(getByLabelText('Toggle navigation')).toBeInTheDocument();
+    expect(rresult.getByLabelText('Toggle navigation')).toBeInTheDocument();
   })
 
 })

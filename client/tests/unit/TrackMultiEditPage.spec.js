@@ -85,7 +85,7 @@ describe('MultiEditPage', () => {
       })
 
     expect(await rresult.findByText('Saupferchweg')).toBeInTheDocument()
-    const deleteButton = await rresult.getByRole('button', { name: 'delete' })
+    const deleteButton = rresult.getByRole('button', { name: 'delete' })
     expect(fetch.mock.calls.length).toEqual(1)
     await fireEvent.click(deleteButton)
     await waitForElementToBeRemoved(

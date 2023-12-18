@@ -44,7 +44,7 @@ export const useTracksStore = defineStore('tracks', () => {
 
   async function loadTracks(loadFunction: LoadFunctionType) {
     const trackList = await loadFunction() // [ Track1, Track2, Track3 ] oder auch [ { id: 403, name: "Hammerau", .}, { id: x, ... }]
-    await setLoadedTracks(trackList)
+    setLoadedTracks(trackList)
   }
 
   return {

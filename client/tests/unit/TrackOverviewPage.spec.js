@@ -14,7 +14,7 @@ describe('TrackOverview and TrackDetail', () => {
     vi.stubGlobal('fetch', mockFetch)
   })
   test('Render overview page', async () => {
-    const { findByText } = render(
+    const rresult = render(
       TrackOverviewPage,
       {
         props: { sid: 'abcd1234' },
@@ -23,9 +23,10 @@ describe('TrackOverview and TrackDetail', () => {
         },
       }
     )
-    expect(await findByText('Track Overview')).toBeInTheDocument()
-    await findByText('2021')
-    await findByText('Saupferchweg')
+
+    expect(await rresult.findByText('Track Overview')).toBeInTheDocument()
+    await rresult.findByText('2021')
+    await rresult.findByText('Saupferchweg')
     // debug()
   })
 
@@ -34,6 +35,7 @@ describe('TrackOverview and TrackDetail', () => {
     vi.stubGlobal('fetch', mockFetch)
     // const user = userEvent.setup()
 
+    // eslint-disable-next-line @typescript-eslint/unbound-method
     const { findAllByRole, findByText } = render(
       TrackOverviewPage,
       {

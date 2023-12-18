@@ -20,14 +20,14 @@ describe('TrackCard', () => {
     const mytrack = new Track(
       initData1
     )
-    const { findByText } = render(
+    const rresult = render(
       TrackCard,
       {
         props: { track: mytrack }
       }
     )
 
-    expect(await findByText('Good track')).toBeInTheDocument()
-    expect(await findByText('15. Mai / 0.01 km / 135 m / 1:00 h / 3601 s / 0 km/h avg.')).toBeInTheDocument()
+    expect(await rresult.findByText('Good track')).toBeInTheDocument()
+    expect(await rresult.findByText('15. Mai / 0.01 km / 135 m / 1:00 h / 3601 s / 0 km/h avg.')).toBeInTheDocument()
   })
 })

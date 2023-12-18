@@ -12,7 +12,7 @@ describe('Basic store test with FilteredMap', () => {
   beforeEach(() => {
     vi.stubGlobal('ResizeObserver', ResizeObserverMock)
   })
-  test('Trivial mount', async () => {
+  test('Trivial mount', () => {
     render(FilteredMap, {
       global: {
         plugins: [createTestingPinia()]

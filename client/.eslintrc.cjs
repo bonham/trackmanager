@@ -7,7 +7,7 @@ module.exports = {
     'eslint:recommended',
     "plugin:vue/vue3-recommended",
     'plugin:vitest-globals/recommended',
-    'plugin:@typescript-eslint/recommended',
+    'plugin:@typescript-eslint/recommended-type-checked',
     "prettier" // disables eslint formatting rules which could be enabled by 3rd party tools
 
   ],
@@ -19,17 +19,24 @@ module.exports = {
   ],
   "parser": "vue-eslint-parser",
   "parserOptions": {
-    "ecmaVersion": 'latest',
-    "parser": {
-      // Script parser for `<script lang="ts">`
-      "ts": "@typescript-eslint/parser",
-    },
+    parser: "@typescript-eslint/parser",
+    sourceType: "module",
+    ecmaVersion: 2022,
+    project: ["tsconfig.vitest.json"],
+    extraFileExtensions: [".vue"],
   },
   "env": {
     "vitest-globals/env": true,
     "node": true
   },
   "rules": {
+    "@typescript-eslint/no-explicit-any": "warn",
+    "@typescript-eslint/no-unsafe-call": "warn",
+    "@typescript-eslint/no-unsafe-member-access": "warn",
+    "@typescript-eslint/no-unsafe-assignment": "warn",
+    "@typescript-eslint/no-unsafe-member-access": "warn",
+    "@typescript-eslint/no-unsafe-argument": "warn",
+    "@typescript-eslint/no-unsafe-return": "warn",
     "vue/first-attribute-linebreak": "off"
   }
 }

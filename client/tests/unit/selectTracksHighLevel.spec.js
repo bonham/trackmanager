@@ -6,7 +6,6 @@ import { mockFetch } from './mockResponse.js'
 import { Request, Response } from 'cross-fetch'
 import { createTestingPinia } from '@pinia/testing'
 
-let CustomStub
 
 
 describe('TrackMapPage - DOM testing', () => {
@@ -15,9 +14,7 @@ describe('TrackMapPage - DOM testing', () => {
     vi.stubGlobal('fetch', mockFetch)
     vi.stubGlobal('Request', Request) // eslint-disable-line no-undef
     vi.stubGlobal('Response', Response) // eslint-disable-line no-undef
-    CustomStub = {
-      template: '<p>Nothing</p>',
-    }
+
   })
 
   test('Load Tracks of 2021', async () => {
@@ -25,9 +22,6 @@ describe('TrackMapPage - DOM testing', () => {
       props: { sid: 'abcd1234' },
       global: {
         plugins: [createTestingPinia()],
-        stubs: {
-          RouterLink: CustomStub
-        }
       },
     })
 

@@ -2,18 +2,13 @@
 import { render } from '@testing-library/vue'
 import userEvent from '@testing-library/user-event'
 import UploadPage from '@/views/UploadPage.vue'
-import { vi, expect, test, beforeEach } from 'vitest'
+import { vi, expect, test, describe } from 'vitest'
 import { Response } from 'cross-fetch'
 import { createTestingPinia } from '@pinia/testing'
 
-let CustomStub
 
 describe('UploadPage', () => {
-  beforeEach(() => {
-    CustomStub = {
-      template: '<p>Nothing</p>',
-    }
-  })
+
   test('UploadSuccess', async () => {
     vi.stubGlobal('fetch', vi.fn(() => new Response('{"message":"ok"}')))
     const user = userEvent.setup()
@@ -21,10 +16,7 @@ describe('UploadPage', () => {
       {
         props: { sid: 'abcd1234' },
         global: {
-          plugins: [createTestingPinia()],
-          stubs: {
-            RouterLink: CustomStub
-          }
+          plugins: [createTestingPinia()]
         },
 
       })
@@ -46,9 +38,7 @@ describe('UploadPage', () => {
         props: { sid: 'abcd1234' },
         global: {
           plugins: [createTestingPinia()],
-          stubs: {
-            RouterLink: CustomStub
-          }
+
         },
       })
     const input = getByLabelText(/Drop files/i)

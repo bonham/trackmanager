@@ -6,7 +6,6 @@ module.exports = {
   "extends": [
     'eslint:recommended',
     "plugin:vue/vue3-recommended",
-    'plugin:vitest-globals/recommended',
     'plugin:@typescript-eslint/recommended-type-checked',
     "prettier" // disables eslint formatting rules which could be enabled by 3rd party tools
 
@@ -26,7 +25,6 @@ module.exports = {
     extraFileExtensions: [".vue"],
   },
   "env": {
-    "vitest-globals/env": true,
     "node": true
   },
   "rules": {

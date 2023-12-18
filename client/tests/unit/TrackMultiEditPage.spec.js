@@ -3,9 +3,8 @@ import { render, fireEvent, waitForElementToBeRemoved } from '@testing-library/v
 import TrackMultiEditPage from '@/views/TrackMultiEditPage.vue'
 import ResizeObserverMock from './__mocks__/ResizeObserver'
 import { Request, Response } from 'cross-fetch'
-import { describe, beforeEach, test, expect } from 'vitest'
+import { describe, beforeEach, test, expect, vi } from 'vitest'
 import { createTestingPinia } from '@pinia/testing'
-let CustomStub
 
 // skipped tests do not work because of https://github.com/testing-library/vue-testing-library/issues/298
 describe('MultiEditPage', () => {
@@ -17,9 +16,7 @@ describe('MultiEditPage', () => {
 
     fetch.mockClear()
 
-    CustomStub = {
-      template: '<p>Nothing</p>',
-    }
+
   })
 
   test('Simple', async () => {
@@ -29,9 +26,7 @@ describe('MultiEditPage', () => {
         props: { sid: 'abcd1234' },
         global: {
           plugins: [createTestingPinia()],
-          stubs: {
-            RouterLink: CustomStub
-          }
+
 
         }
 
@@ -49,9 +44,7 @@ describe('MultiEditPage', () => {
         props: { sid: 'abcd1234' },
         global: {
           plugins: [createTestingPinia()],
-          stubs: {
-            RouterLink: CustomStub
-          }
+
         }
 
       })
@@ -77,9 +70,7 @@ describe('MultiEditPage', () => {
         props: { sid: 'abcd1234' },
         global: {
           plugins: [createTestingPinia()],
-          stubs: {
-            RouterLink: CustomStub
-          }
+
         }
 
       })

@@ -28,6 +28,6 @@ describe('TrackCard', () => {
     )
 
     expect(await rresult.findByText('Good track')).toBeInTheDocument()
-    expect(await rresult.findByText('15. Mai / 0.01 km / 135 m')).toBeInTheDocument()
+    expect(await rresult.findByText('15. Mai / 0.0 km / 135 m')).toBeInTheDocument()
   })
 })

@@ -125,7 +125,7 @@ class Track {
     }
   }
 
-  timeLengthFormatted() {
+  timeLengthFormatted(): string {
     const thms = this.timeLengthHms()
     if (thms === null) {
       return ""

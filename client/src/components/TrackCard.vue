@@ -8,13 +8,18 @@
               {{ track.name || track.src }}
             </h4>
             <div class="text-decoration-none">
-              {{ track.monthAndDay() }}
-              / {{ (track.distance() / 1000).toFixed(2) }} km
-              / {{ track.ascent ? Math.round(track.ascent) : "-" }} m
-              / {{ track.timeLengthFormatted() }} h
-              / {{ track.timelength }} s
-              / {{ track.timelength ? Math.round((3.6 * track.distance() / track.timelength) * 10) / 10 : "-" }} km/h
-              avg.
+              <span>
+                {{ track.monthAndDay() }}
+                / {{ (track.distance() / 1000).toFixed(1) }} km
+                / {{ track.ascent ? Math.round(track.ascent) : "-" }} m
+              </span>
+              <span v-if="track.timelength">
+                / {{ track.timeLengthFormatted() }} h
+              </span>
+              <span v-if="track.timelength && track.length">
+                / {{ track.timelength ? Math.round((3.6 * track.distance() / track.timelength) * 10) / 10 : "-" }} km/h
+                avg
+              </span>
             </div>
           </b-col>
           <b-col cols="3" class="d-flex align-items-center justify-content-end">

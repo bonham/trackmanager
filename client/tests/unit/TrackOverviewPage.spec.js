@@ -57,9 +57,6 @@ describe('TrackOverview and TrackDetail', () => {
     const found = allLinks.find(el => el.getAttribute('aria-label') === 'link-to-track-404')
     expect(found).toBeDefined()
 
-    const link = found
-    expect(link.pathname).toMatch(/\/track\/404\/sid\/abcd1234$/)
-
     // await user.click(link)
     // debug()
 

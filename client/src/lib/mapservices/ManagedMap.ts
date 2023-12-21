@@ -17,7 +17,8 @@ import { SelectEvent } from 'ol/interaction/Select'
 import type BaseEvent from 'ol/events/Event'
 import type { GeoJsonObject } from 'geojson'
 import _ from 'lodash'
-import { StyleFactory } from '../mapStyles'
+import { StyleFactoryFixedColors } from '../mapStyles'
+import type { StyleFactoryLike } from '../mapStyles'
 import type { Track } from '@/lib/Track'
 import type { Coordinate } from 'ol/coordinate'
 
@@ -57,7 +58,7 @@ How to use:
 export class ManagedMap {
 
   map: OlMap
-  styleFactory: StyleFactory
+  styleFactory: StyleFactoryLike
   trackIdToLayerMap: Map<number, Layer>
   trackMap: Map<number, Track>
   featureIdMap: Map<string, FeatureIdMapMember>
@@ -70,7 +71,7 @@ export class ManagedMap {
 
     this.map = this._createMap()
     // should be defined outside map and passed to map
-    this.styleFactory = new StyleFactory()
+    this.styleFactory = new StyleFactoryFixedColors()
     this.trackIdToLayerMap = new Map() // ids are keys, values are layers
     this.featureIdMap = new Map()
     this.trackMap = new Map()
@@ -254,6 +255,10 @@ export class ManagedMap {
       'EPSG:4326'
     )
     return bbox
+  }
+
+  setStyleFactory(stf: StyleFactoryLike) {
+    this.styleFactory = stf
   }
 
   addTrackLayer(geoJsonWithTrack: GeoJsonWithTrack) { // geojsonwithid: { id: id, geojson: geojson }

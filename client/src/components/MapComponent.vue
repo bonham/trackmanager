@@ -3,7 +3,7 @@
   <div ref="popupdiv"></div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import { getGeoJson, getTrackById } from '@/lib/trackServices'
 import { ManagedMap } from '@/lib/mapservices/ManagedMap'
 import { ref, onMounted, nextTick } from 'vue'

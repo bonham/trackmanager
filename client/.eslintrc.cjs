@@ -21,7 +21,7 @@ module.exports = {
     parser: "@typescript-eslint/parser",
     sourceType: "module",
     ecmaVersion: 2022,
-    project: ["tsconfig.vitest.json", "tsconfig.app.json", "tsconfig.dom.json"],
+    project: ["tsconfig.vitest.json"],
     extraFileExtensions: [".vue"],
   },
   "env": {

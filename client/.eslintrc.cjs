@@ -21,7 +21,7 @@ module.exports = {
     parser: "@typescript-eslint/parser",
     sourceType: "module",
     ecmaVersion: 2022,
-    project: ["tsconfig.vitest.json"],
+    project: ["tsconfig.vitest.json", "tsconfig.app.json", "tsconfig.dom.json"],
     extraFileExtensions: [".vue"],
   },
   "env": {
@@ -36,5 +36,15 @@ module.exports = {
     "@typescript-eslint/no-unsafe-argument": "warn",
     "@typescript-eslint/no-unsafe-return": "warn",
     "vue/first-attribute-linebreak": "off"
-  }
+  },
+  "overrides": [
+    // this will apply all config from enclosing block to more file extensions
+    {
+      files: ['**/*.ts', '**/*.vue'],
+      "rules": {
+        'no-undef': 'off', // see https://stackoverflow.com/questions/67437478/why-eslint-dont-see-global-typescript-types-in-vue-files-no-undef
+      }
+    }
+  ]
+
 }

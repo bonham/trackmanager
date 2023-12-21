@@ -12,7 +12,9 @@ import { useUserLoginStore } from '@/stores/userlogin'
 const userLoginStore = useUserLoginStore()
 
 onMounted(() => {
-  updateUser()
+  updateUser().catch((err) => {
+    console.error(err)
+  })
 })
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars

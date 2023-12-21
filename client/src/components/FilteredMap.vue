@@ -173,6 +173,8 @@ onMounted(() => {
     }
     mmap.value.map.setTarget('mapdiv')
     mmap.value.initPopup(popupdiv.value)
+  }).catch((err) => {
+    console.error("Error in nextTick", err)
   })
 })
 

@@ -32,12 +32,14 @@ describe('get config', () => {
 
     const pool = new pg.Pool()
     const mockedPool = jest.mocked(pool)
-    mockedPool.query.mockImplementation(() => {
-      return {
-        rows: [{ value: expectedconfigvalue }],
-        rowCount: 1
-      }
+    const mockQuery = jest.fn().mockResolvedValueOnce({
+      rows: [{ exists: true }],
+      rowCount: 1
+    }).mockResolvedValueOnce({
+      rows: [{ value: expectedconfigvalue }],
+      rowCount: 1
     })
+    mockedPool.query = mockQuery
 
   });
   test('config1', async () => {

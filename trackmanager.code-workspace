@@ -14,6 +14,7 @@
     "task.allowAutomaticTasks": "on",
     "jest.disabledWorkspaceFolders": ["client"],
     "testing.automaticallyOpenPeekView": "never",
-    "eslint.lintTask.enable": true
+    "eslint.lintTask.enable": true,
+    "eslint.workingDirectories": ["./client", "./server"]
   }
 }

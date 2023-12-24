@@ -23,6 +23,9 @@ jest.mock('pg', () => {
   return { Pool: jest.fn(() => mClient) };
 });
 
+const pool = new pg.Pool()
+const mockedPool = jest.mocked(pool)
+
 describe('get config', () => {
 
   const expectedconfigvalue = "MYCONFIGVALUE"
@@ -30,8 +33,11 @@ describe('get config', () => {
   beforeEach(() => {
     mockGetSchema.mockReset()
 
-    const pool = new pg.Pool()
-    const mockedPool = jest.mocked(pool)
+
+  });
+
+  test('config exists', async () => {
+
     const mockQuery = jest.fn().mockResolvedValueOnce({
       rows: [{ exists: true }],
       rowCount: 1
@@ -41,8 +47,6 @@ describe('get config', () => {
     })
     mockedPool.query = mockQuery
 
-  });
-  test('config1', async () => {
     mockGetSchema.mockResolvedValue('myschema');
     const response = await request(app)
       .get('/api/config/get/sid/anysid/schematype/anyconfigkey')
@@ -50,4 +54,43 @@ describe('get config', () => {
 
     expect(response.body).toEqual({ value: expectedconfigvalue })
   });
+
+  test('config value undefined', async () => {
+
+    const mockQuery = jest.fn()
+      .mockResolvedValueOnce({
+        rows: [{ exists: true }],
+        rowCount: 1
+      })
+      .mockResolvedValueOnce({
+        rows: [],
+        rowCount: 0
+      })
+    mockedPool.query = mockQuery
+
+    mockGetSchema.mockResolvedValue('myschema');
+    const response = await request(app)
+      .get('/api/config/get/sid/anysid/schematype/anyconfigkey')
+      .expect(200);
+
+    expect(response.body).toEqual({ value: undefined })
+  });
+
+  test('config table undefined', async () => {
+
+    const mockQuery = jest.fn()
+      .mockResolvedValueOnce({
+        rows: [{ exists: false }],
+        rowCount: 1
+      })
+    mockedPool.query = mockQuery
+
+    mockGetSchema.mockResolvedValue('myschema');
+    const response = await request(app)
+      .get('/api/config/get/sid/anysid/schematype/anyconfigkey')
+      .expect(200);
+
+    expect(response.body).toEqual({ value: undefined })
+  });
+
 });

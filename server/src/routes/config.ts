@@ -71,13 +71,17 @@ router.get(
       [conftype, confkey]
     );
 
-    if (queryResult.rowCount !== 1) {
-      throw Error(`Rowcount is ${queryResult.rowCount} but should be 1`)
+    if (queryResult.rowCount === null || queryResult.rowCount > 1) {
+      throw Error(`Rowcount issue: ${queryResult.rowCount}`)
+    } else if (queryResult.rowCount === 0) {
+      res.json({ value: undefined })
+      return
+    } else {
+      const { rows } = queryResult
+      const row: ResponseJson = rows[0]
+      res.json(row);
+      return
     }
-    const { rows } = queryResult
-    const row: ResponseJson = rows[0]
-    res.json(row);
-    return
   })
 );
 

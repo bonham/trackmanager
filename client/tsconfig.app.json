@@ -1,9 +1,6 @@
 {
   "extends": "@vue/tsconfig/tsconfig.dom.json",
-  "include": [
-    "env.d.ts",
-    "src/**/*"
-  ],
+  "include": ["env.d.ts", "src/**/*", "src/**/*.vue"],
   "exclude": [
     // exclude tests here if needed. ( don't know why )
     "dist"
@@ -14,10 +11,8 @@
     "module": "ESNext",
     "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "./src/*"
-      ]
+      "@/*": ["./src/*"]
     },
-    "allowJs": true, // do we need it?
+    "allowJs": true // do we need it?
   }
 }

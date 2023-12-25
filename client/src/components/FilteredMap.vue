@@ -9,7 +9,6 @@
 </template>
 <script lang="ts" setup>
 import { ref, watch, onMounted, nextTick } from 'vue'
-import type { Ref } from 'vue'
 import { BSpinner } from 'bootstrap-vue-next'
 import { ManagedMap } from '@/lib/mapservices/ManagedMap'
 import type { GeoJSONWithTrackId } from '@/lib/mapservices/ManagedMap'
@@ -23,6 +22,10 @@ const mapStateStore = useMapStateStore()
 import { useTracksStore } from '@/storepinia'
 const trackStore = useTracksStore()
 
+import { getConfig } from '@/lib/getconfig';
+import { StyleFactoryFixedColors } from '@/lib/mapStyles';
+
+
 const props = defineProps({
   sid: {
     type: String,
@@ -31,15 +34,14 @@ const props = defineProps({
 })
 
 // reactive data
-const popupdiv: Ref<(null | HTMLElement)> = ref(null) // template ref
+const popupdiv = ref<(null | HTMLElement)>(null) // template ref
 const loading = ref(false)
-const mmap: Ref<(null | ManagedMap)> = ref(null)
+const mmap = ref<null | ManagedMap>(null)
 
 
 // create map object
 // the callbackfunction is to react on 'select' events - e.g. setting data in a store or send events.
 mmap.value = new ManagedMap()
-
 
 // method is redrawing tracks AND resetting selection ! 
 // ( the latter might need to be factored out)
@@ -49,7 +51,29 @@ async function redrawTracks(zoomOut = false) {
     console.error("mmap not initalized")
     return
   }
-  const mm: ManagedMap = mmap.value
+  const mm = mmap.value
+
+
+
+  const TRACKSTYLE = await getConfig(props.sid, 'SCHEMA', 'TRACKSTYLE', 'THREE_BROWN')
+  if (TRACKSTYLE === 'THREE_BROWN') {
+    // all good
+  } else if (TRACKSTYLE === 'FIVE_COLORFUL') {
+    const tStyle = new StyleFactoryFixedColors([
+      '#ffa500',
+      '#a52a2a',
+      '#ff0000',
+      '#008000',
+      '#0000ff',
+    ])
+    mmap.value.setStyleFactory(tStyle)
+  } else {
+    throw Error(`Unknown TRACKSTYLE config value ${TRACKSTYLE}`)
+  }
+
+
+
+
 
   // reset selection and popups
   mm.clearSelection()
@@ -173,6 +197,8 @@ onMounted(() => {
     }
     mmap.value.map.setTarget('mapdiv')
     mmap.value.initPopup(popupdiv.value)
+  }).catch((err) => {
+    console.error("Error in nextTick", err)
   })
 })
 

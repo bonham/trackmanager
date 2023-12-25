@@ -3,7 +3,8 @@
   "include": ["tests/**/*", "src/**/*", "components.d.ts"],
   "compilerOptions": {
     "composite": true,
-    "lib": [],
-    "types": ["node", "jsdom"]
+    "types": ["node", "jsdom"],
+    "lib": ["es2022"],
+    "target": "es2022"
   }
 }

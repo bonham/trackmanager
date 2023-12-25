@@ -54,6 +54,8 @@ function makeEditable() {
     } else {
       (inputref.value).focus()
     }
+  }).catch((err) => {
+    console.error("Error in nextTick", err)
   })
 }
 

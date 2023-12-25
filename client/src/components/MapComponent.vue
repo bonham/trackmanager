@@ -3,53 +3,74 @@
   <div ref="popupdiv"></div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 import { getGeoJson, getTrackById } from '@/lib/trackServices'
 import { ManagedMap } from '@/lib/mapservices/ManagedMap'
+import { ref, onMounted, nextTick } from 'vue'
+import { getConfig } from '@/lib/getconfig';
+import { StyleFactoryFixedColors } from '@/lib/mapStyles';
 
-export default {
-  name: 'MapComponent',
-  props: {
-    trackId: {
-      type: Number,
-      required: true
-    },
-    sid: {
-      type: String,
-      default: ''
-    }
+const props = defineProps({
+  trackId: {
+    type: Number,
+    required: true
   },
-  data() {
-    return {
-      mmap: null as null | ManagedMap
-    }
-  },
-  created: function () {
-    this.mmap = new ManagedMap()
-    this.drawTrack() // async
-  },
-  mounted() {
-    this.$nextTick(() => {
-      if (!this.mmap) throw new Error("Managed map not initialized")
-      this.mmap.map.setTarget('mapdiv')
-      const popupDiv = this.$refs.popupdiv as HTMLElement
-      this.mmap.initPopup(popupDiv)
+  sid: {
+    type: String,
+    default: ''
+  }
+})
+
+const TRACKSTYLE = await getConfig(props.sid, 'SCHEMA', 'TRACKSTYLE', 'THREE_BROWN')
+
+const mmap = ref<null | ManagedMap>(null)
+
+mmap.value = new ManagedMap()
+if (TRACKSTYLE === 'THREE_BROWN') {
+  // all good
+} else if (TRACKSTYLE === 'FIVE_COLORFUL') {
+  const tStyle = new StyleFactoryFixedColors([
+    '#ffa500',
+    '#a52a2a',
+    '#ff0000',
+    '#008000',
+    '#0000ff',
+  ])
+  mmap.value.setStyleFactory(tStyle)
+} else {
+  throw Error(`Unknown TRACKSTYLE config value ${TRACKSTYLE}`)
+}
+
+await drawTrack() // async
+
+onMounted(() => {
+
+  nextTick(() => {
+    if (mmap.value === null) throw new Error("Managed map not initialized")
+    mmap.value.map.setTarget('mapdiv')
+    const popupDiv = ref<HTMLInputElement | null>(null)
+    if (popupDiv.value === null) {
+      throw new Error("Unexpected: popup div is null ?")
+    } else {
+      mmap.value.initPopup(popupDiv.value)
       console.log("map mounted")
-    })
-  },
-  methods: {
-
-    drawTrack: async function () {
-      const resultSet = await getGeoJson([this.trackId], this.sid)
-      const result = resultSet[0]
-      const track = await getTrackById(this.trackId, this.sid)
-      if (track === null) {
-        console.error(`Could not get track with id ${this.trackId}`)
-      } else {
-        this.mmap!.addTrackLayer({ geojson: result.geojson, track: track })
-        this.mmap!.setExtentAndZoomOut()
-      }
     }
+  }).catch(console.error)
+})
+
+async function drawTrack() {
+  if (mmap.value === null) {
+    console.error("No map found")
+    return
+  }
+  const resultSet = await getGeoJson([props.trackId], props.sid)
+  const result = resultSet[0]
+  const track = await getTrackById(props.trackId, props.sid)
+  if (track === null) {
+    console.error(`Could not get track with id ${props.trackId}`)
+  } else {
+    mmap.value.addTrackLayer({ geojson: result.geojson, track: track })
+    mmap.value.setExtentAndZoomOut()
   }
 }
 

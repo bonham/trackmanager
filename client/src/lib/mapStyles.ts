@@ -1,6 +1,11 @@
 import { Stroke, Style } from 'ol/style'
+import type { ColorLike } from 'ol/colorlike'
 
-class StyleFactory {
+interface StyleFactoryLike {
+  getNext(...args: unknown[]): Style
+}
+
+class StyleFactoryFixedColors implements StyleFactoryLike {
 
   count = 0
   rgbSetBrown = [
@@ -8,10 +13,19 @@ class StyleFactory {
     '#941b0c',
     '#bc3908'
   ]
+  rgbSet: ColorLike[]
+
+  constructor(rgbSetArg: (ColorLike[] | null) = null) {
+    if (rgbSetArg === null) {
+      this.rgbSet = this.rgbSetBrown
+    } else {
+      this.rgbSet = rgbSetArg
+    }
+  }
 
   getNext() {
-    const idx = this.count % this.rgbSetBrown.length
-    const color = this.rgbSetBrown[idx]
+    const idx = this.count % this.rgbSet.length
+    const color = this.rgbSet[idx]
     this.count++
 
     return new Style({
@@ -22,4 +36,6 @@ class StyleFactory {
     })
   }
 }
-export { StyleFactory }
+
+export { StyleFactoryFixedColors }
+export type { StyleFactoryLike }

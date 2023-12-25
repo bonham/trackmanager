@@ -175,7 +175,7 @@ async function cleanUpText(item: TableItem) {
 }
 function cleanAll() {
   tableItems.value.forEach(item => {
-    cleanUpText(item)
+    cleanUpText(item).catch(console.error)
   })
 }
 async function deleteTrackFromTable(item: TableItem) {
@@ -191,7 +191,7 @@ async function deleteTrackFromTable(item: TableItem) {
 
 function processUpdate(trackId: number, value: string) {
   console.log('in upper component:', trackId, value)
-  updateTrackById(trackId, { name: value }, props.sid)
+  updateTrackById(trackId, { name: value }, props.sid).catch(console.error)
 }
 
 

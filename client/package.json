@@ -7,7 +7,7 @@
     "dev": "vite --port 4000",
     "build": "vite build",
     "serve": "vite preview",
-    "lint": "eslint .",
+    "lint": "eslint --quiet .",
     "test": "vitest"
   },
   "dependencies": {
@@ -20,7 +20,7 @@
     "bootstrap-vue-next": "^0.15.5",
     "lodash": "^4.17.21",
     "luxon": "^3.3.0",
-    "ol": "^7.3.0",
+    "ol": "^8.2.0",
     "pinia": "^2.1.6",
     "portal-vue": "^3.0.0",
     "sprintf-js": "^1.1.2",
@@ -61,7 +61,7 @@
     "prettier": "^3.1.1",
     "sass": "^1.57.1",
     "typescript": "^5.3.3",
-    "unplugin-icons": "^0.16.6",
+    "unplugin-icons": "^0.18.1",
     "unplugin-vue-components": "^0.26.0",
     "vite": "^5.0.5",
     "vitest": "^1.0.1"

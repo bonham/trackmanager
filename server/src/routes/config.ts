@@ -60,7 +60,7 @@ router.get(
     }
 
     if (!await configExists(schema)) {
-      res.json({ value: undefined })
+      res.json({ value: null })
       return
     }
 
@@ -74,7 +74,7 @@ router.get(
     if (queryResult.rowCount === null || queryResult.rowCount > 1) {
       throw Error(`Rowcount issue: ${queryResult.rowCount}`)
     } else if (queryResult.rowCount === 0) {
-      res.json({ value: undefined })
+      res.json({ value: null })
       return
     } else {
       const { rows } = queryResult

@@ -73,7 +73,7 @@ describe('get config', () => {
       .get('/api/config/get/sid/anysid/schematype/anyconfigkey')
       .expect(200);
 
-    expect(response.body).toEqual({ value: undefined })
+    expect(response.body).toEqual({ value: null })
   });
 
   test('config table undefined', async () => {
@@ -90,7 +90,7 @@ describe('get config', () => {
       .get('/api/config/get/sid/anysid/schematype/anyconfigkey')
       .expect(200);
 
-    expect(response.body).toEqual({ value: undefined })
+    expect(response.body).toEqual({ value: null })
   });
 
 });

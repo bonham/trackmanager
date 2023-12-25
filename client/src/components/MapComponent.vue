@@ -7,6 +7,8 @@
 import { getGeoJson, getTrackById } from '@/lib/trackServices'
 import { ManagedMap } from '@/lib/mapservices/ManagedMap'
 import { ref, onMounted, nextTick } from 'vue'
+import { getConfig } from '@/lib/getconfig';
+import { StyleFactoryFixedColors } from '@/lib/mapStyles';
 
 const props = defineProps({
   trackId: {
@@ -19,12 +21,30 @@ const props = defineProps({
   }
 })
 
+const TRACKSTYLE = await getConfig(props.sid, 'SCHEMA', 'TRACKSTYLE', 'THREE_BROWN')
+
 const mmap = ref<null | ManagedMap>(null)
 
 mmap.value = new ManagedMap()
+if (TRACKSTYLE === 'THREE_BROWN') {
+  // all good
+} else if (TRACKSTYLE === 'FIVE_COLORFUL') {
+  const tStyle = new StyleFactoryFixedColors([
+    '#ffa500',
+    '#a52a2a',
+    '#ff0000',
+    '#008000',
+    '#0000ff',
+  ])
+  mmap.value.setStyleFactory(tStyle)
+} else {
+  throw Error(`Unknown TRACKSTYLE config value ${TRACKSTYLE}`)
+}
+
 await drawTrack() // async
 
 onMounted(() => {
+
   nextTick(() => {
     if (mmap.value === null) throw new Error("Managed map not initialized")
     mmap.value.map.setTarget('mapdiv')

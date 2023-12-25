@@ -24,8 +24,8 @@ class StyleFactoryFixedColors implements StyleFactoryLike {
   }
 
   getNext() {
-    const idx = this.count % this.rgbSetBrown.length
-    const color = this.rgbSetBrown[idx]
+    const idx = this.count % this.rgbSet.length
+    const color = this.rgbSet[idx]
     this.count++
 
     return new Style({

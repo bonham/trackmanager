@@ -13,7 +13,7 @@ import { BSpinner } from 'bootstrap-vue-next'
 import { ManagedMap } from '@/lib/mapservices/ManagedMap'
 import type { GeoJSONWithTrackId } from '@/lib/mapservices/ManagedMap'
 import { TrackVisibilityManager } from '@/lib/mapStateHelpers'
-import { getGeoJson, getTracksByExtent, getTracksByYear } from '@/lib/trackServices'
+import { getGeoJson, getTracksByExtent, getTracksByYear, getTrackById } from '@/lib/trackServices'
 import _ from 'lodash'
 
 import { useMapStateStore } from '@/stores/mapstate'
@@ -55,7 +55,7 @@ async function redrawTracks(zoomOut = false) {
 
 
 
-  const TRACKSTYLE = await getConfig(props.sid, 'SCHEMA', 'TRACKSTYLE', 'THREE_BROWN')
+  const TRACKSTYLE = await getConfig(props.sid, 'SCHEMA', 'TRACKSTYLE')
   if (TRACKSTYLE === 'THREE_BROWN') {
     // all good
   } else if (TRACKSTYLE === 'FIVE_COLORFUL') {
@@ -166,6 +166,10 @@ watch(
 
       command.completed = true
 
+    } else if (command.command === 'track') {
+      const id = command.payload
+      await loadSingleTrack(id)
+      await redrawTracks(!!command.zoomOut)
     }
   }
 )
@@ -184,6 +188,23 @@ async function loadTracksOfYear(year: number) {
   }
 }
 
+async function loadSingleTrack(trackId: number) {
+
+  const sid = props.sid
+  try {
+    loading.value = true
+    const track = await getTrackById(trackId, sid)
+    if (track === null) {
+      throw new Error(`Track is null for id ${trackId}`)
+    } else {
+      trackStore.setLoadedTracks([track])
+    }
+  } catch (e) {
+    console.error('Error loading track', e)
+  } finally {
+    loading.value = false
+  }
+}
 
 onMounted(() => {
   nextTick(() => {

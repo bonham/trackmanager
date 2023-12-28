@@ -28,10 +28,17 @@ interface LoadBboxRequest {
   zoomOut?: boolean
 }
 
+interface LoadSingleTrackRequest {
+  command: 'track',
+  payload: number
+  zoomOut?: boolean
+}
+
+
 interface InitialState {
   command: 'none'
 }
 
 export { useMapStateStore }
-export type LoadTracksRequest = LoadYearRequest | LoadBboxRequest | InitialState
+export type LoadTracksRequest = LoadYearRequest | LoadBboxRequest | LoadSingleTrackRequest | InitialState
 

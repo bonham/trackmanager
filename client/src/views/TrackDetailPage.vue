@@ -4,14 +4,18 @@
       <h1 class="mt-4 mb-4">
         Track {{ id }} Details
       </h1>
-      <MapComponent :track-id="Number.parseInt(id)" :sid="sid" />
+      <FilteredMap :sid="sid" />
     </div>
   </track-manager-nav-bar>
 </template>
 
 <script lang="ts" setup>
-import MapComponent from '@/components/MapComponent.vue'
+import FilteredMap from '@/components/FilteredMap.vue';
 import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'
+import { useMapStateStore } from '@/stores/mapstate'
+import { nextTick } from 'vue';
+
+const mapStateStore = useMapStateStore()
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const props = defineProps({
@@ -24,4 +28,14 @@ const props = defineProps({
     default: 'iddefault'
   }
 })
+
+nextTick(() => {
+  // send command to FilteredMap to load a single track
+  mapStateStore.loadCommand = {
+    command: 'track',
+    payload: Number.parseInt(props.id),
+    zoomOut: true
+  }
+
+}).catch((e) => { console.error(e) })
 </script>

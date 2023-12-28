@@ -18,7 +18,6 @@ declare module 'vue' {
     IBiTrash: typeof import('~icons/bi/trash')['default']
     LoginForm: typeof import('./src/components/auth/LoginForm.vue')['default']
     LogoutForm: typeof import('./src/components/auth/LogoutForm.vue')['default']
-    MapComponent: typeof import('./src/components/MapComponent.vue')['default']
     RegistrationForm: typeof import('./src/components/auth/RegistrationForm.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']

@@ -13,7 +13,7 @@
       </b-button>
     </div>
     <div class="d-flex flex-column flex-grow-1">
-      <filtered-map :sid="sid" />
+      <map-component sid="sid" />
     </div>
   </track-manager-nav-bar>
 </template>

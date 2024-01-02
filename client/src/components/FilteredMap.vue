@@ -71,10 +71,6 @@ async function redrawTracks(zoomOut = false) {
     throw Error(`Unknown TRACKSTYLE config value ${TRACKSTYLE}`)
   }
 
-
-
-
-
   // reset selection and popups
   mm.clearSelection()
   mm.popovermgr?.dispose()

@@ -9,10 +9,12 @@
     "develop": "nodemon -e ts,js,cjs,cts,mjs,mts,json --exec \"ts-node -P ./tsconfig-build.json src/index.ts\"",
     "start": "ts-node -P ./tsconfig-build.json --esm src/index.ts",
     "build": "tsc --build --clean && tsc -p ./tsconfig-build.json",
+    "typecheck": "tsc --noEmit -p ./tsconfig-build.json",
     "startbuild": "node ./dist/src/index.js",
     "test": "jest",
     "copyconfig": "ts-node -P ./tsconfig-build.json --esm ./src/bin/copyconfig.ts",
-    "lint": "eslint --quiet ."
+    "lint": "eslint --quiet .",
+    "lintwarn": "eslint ."
   },
   "dependencies": {
     "@garmin/fitsdk": "^21.126.0",

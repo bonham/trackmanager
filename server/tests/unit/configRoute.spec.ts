@@ -93,4 +93,36 @@ describe('get config', () => {
     expect(response.body).toEqual({ value: null })
   });
 
+  test('multiple config values from schema', async () => {
+
+    const rowData = [
+      {
+        key: "config1",
+        value: "value1"
+      },
+      {
+        key: "config1",
+        value: "value1"
+      }
+    ]
+
+    const mockQuery = jest.fn().mockResolvedValueOnce({
+      rows: [{ exists: true }],
+      rowCount: 1
+    }).mockResolvedValueOnce({
+      rows: rowData,
+      rowCount: 2
+    })
+    mockedPool.query = mockQuery
+
+    mockGetSchema.mockResolvedValue('myschema');
+    const response = await request(app)
+      .get('/api/config/get/sid/anysid/schematype')
+      .expect(200);
+
+    expect(response.body).toEqual(rowData)
+  })
+
+
 });
+

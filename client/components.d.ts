@@ -9,7 +9,6 @@ declare module 'vue' {
   export interface GlobalComponents {
     DropField: typeof import('./src/components/DropField.vue')['default']
     EditableText: typeof import('./src/components/EditableText.vue')['default']
-    FilteredMap: typeof import('./src/components/FilteredMap.vue')['default']
     IBiArrowDownCircleFill: typeof import('~icons/bi/arrow-down-circle-fill')['default']
     IBiArrowLeft: typeof import('~icons/bi/arrow-left')['default']
     IBiArrowRightCircle: typeof import('~icons/bi/arrow-right-circle')['default']

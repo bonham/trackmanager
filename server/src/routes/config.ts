@@ -33,7 +33,6 @@ async function configExists(schema: string): Promise<boolean> {
   ) as exists`
   const qresult = await pool.query<{ exists: boolean }>(sql, [schema])
   const exists = qresult.rows[0].exists
-  console.log("XXX", typeof exists)
   return exists
 }
 

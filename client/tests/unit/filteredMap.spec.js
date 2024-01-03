@@ -1,19 +1,19 @@
 import { render } from '@testing-library/vue'
 import { mount, DOMWrapper } from '@vue/test-utils'
 
-import MapComponent from '@/components/MapComponent.vue'
+import FilteredMap from '@/components/FilteredMap.vue'
 import { ManagedMap } from '@/lib/mapservices/ManagedMap'
 
 import { createTestingPinia } from '@pinia/testing'
 import { vi, test, beforeEach, describe, expect } from 'vitest'
 import ResizeObserverMock from './__mocks__/ResizeObserver'
 
-describe('Basic store test with MapComponent', () => {
+describe('Basic store test with FilteredMap', () => {
   beforeEach(() => {
     vi.stubGlobal('ResizeObserver', ResizeObserverMock)
   })
   test('Trivial mount', () => {
-    render(MapComponent, {
+    render(FilteredMap, {
       global: {
         plugins: [createTestingPinia()]
       }
@@ -22,7 +22,7 @@ describe('Basic store test with MapComponent', () => {
   })
 
   test('Low level', () => {
-    const wrapper = mount(MapComponent, {
+    const wrapper = mount(FilteredMap, {
       global: {
         plugins: [createTestingPinia()]
       }

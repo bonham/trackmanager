@@ -13,7 +13,7 @@
       </b-button>
     </div>
     <div class="d-flex flex-column flex-grow-1">
-      <map-component sid="sid" />
+      <filtered-map :sid="sid" />
     </div>
   </track-manager-nav-bar>
 </template>
@@ -21,7 +21,7 @@
 <script lang="ts" setup>
 import { BButton } from 'bootstrap-vue-next'
 import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'
-import MapComponent from '@/components/MapComponent.vue'
+import FilteredMap from '@/components/FilteredMap.vue'
 import { TrackCollection } from '@/lib/Track'
 import { getAllTracks } from '@/lib/trackServices'
 import { useMapStateStore } from '@/stores/mapstate'

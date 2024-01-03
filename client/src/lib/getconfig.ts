@@ -41,6 +41,9 @@ async function getConfig(sid: string, conftype: string, confkey: string): Promis
 
   const url = `/api/config/get/sid/${sid}/${conftype}/${confkey}`
   const r = await fetch(url)
+  if (!r.ok) {
+    throw Error("Retrieving config not successful", { cause: { url, status: r.status } })
+  }
   const rJson = await r.json() as unknown
 
   if (!!rJson && typeof (rJson) === 'object' && 'value' in rJson) {

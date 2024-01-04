@@ -107,7 +107,7 @@ router.get(
     }
 
     if (!await configExists(schema)) {
-      res.json({ value: null })
+      res.json([])
       return
     }
 

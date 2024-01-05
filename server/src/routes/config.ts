@@ -38,6 +38,7 @@ async function configExists(schema: string): Promise<boolean> {
 
 const sidValidationChain = createSidValidationChain(pool);
 
+// Get single config value for a conftype
 router.get(
   '/get/sid/:sid/:conftype/:confkey',
   sidValidationChain,
@@ -84,6 +85,48 @@ router.get(
   })
 );
 
+// Get all config values for conftype ( typically schema )
+router.get(
+  '/get/sid/:sid/:conftype',
+  sidValidationChain,
+  asyncWrapper(async (req: Request, res: Response) => {
+
+    interface KeyValuePair {
+      key: string,
+      value: string
+    }
+
+    const schema = req.schema
+    const { conftype } = req.params
+
+    if (schema === undefined) {
+      throw Error("Schema is undefined")
+    }
+    if (conftype === undefined) {
+      throw Error("conftype is undefined")
+    }
+
+    if (!await configExists(schema)) {
+      res.json([])
+      return
+    }
+
+    const sql = 'select key, value '
+      + `from ${schema}.config where conftype = $1`
+    const queryResult = await pool.query<KeyValuePair>(
+      sql,
+      [conftype]
+    );
+
+    if (queryResult.rowCount === null) {
+      throw Error(`Rowcount issue: ${queryResult.rowCount}`)
+    } else {
+      const rows: KeyValuePair[] = queryResult.rows
+      res.json(rows);
+      return
+    }
+  })
+);
 
 
 export default router;

@@ -15,23 +15,21 @@ import type { GeoJSONWithTrackId } from '@/lib/mapservices/ManagedMap'
 import { TrackVisibilityManager } from '@/lib/mapStateHelpers'
 import { getGeoJson, getTracksByExtent, getTracksByYear, getTrackById } from '@/lib/trackServices'
 import _ from 'lodash'
-
+import { useConfigStore } from '@/stores/configstore'
 import { useMapStateStore } from '@/stores/mapstate'
-const mapStateStore = useMapStateStore()
-
 import { useTracksStore } from '@/storepinia'
-const trackStore = useTracksStore()
-
-import { getConfig } from '@/lib/getconfig';
 import { StyleFactoryFixedColors } from '@/lib/mapStyles';
-
 
 const props = defineProps({
   sid: {
     type: String,
-    default: ''
+    required: true
   }
 })
+
+const mapStateStore = useMapStateStore()
+const trackStore = useTracksStore()
+const configStore = useConfigStore()
 
 // reactive data
 const popupdiv = ref<(null | HTMLElement)>(null) // template ref
@@ -53,9 +51,10 @@ async function redrawTracks(zoomOut = false) {
   }
   const mm = mmap.value
 
+  // trackstyle from configstore
+  await configStore.loadConfig(props.sid)
+  const TRACKSTYLE = configStore.get("TRACKSTYLE")
 
-
-  const TRACKSTYLE = await getConfig(props.sid, 'SCHEMA', 'TRACKSTYLE')
   if (TRACKSTYLE === 'THREE_BROWN') {
     // all good
   } else if (TRACKSTYLE === 'FIVE_COLORFUL') {

@@ -39,7 +39,7 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     coverage: {
-      enabled: true,
+      enabled: false,
       include: ['src/**/*'],
       reporter: 'html',
       all: true

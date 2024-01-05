@@ -5,7 +5,7 @@ import ResizeObserverMock from './__mocks__/ResizeObserver'
 import { mockFetch } from './mockResponse.js'
 import { Request, Response } from 'cross-fetch'
 import { createTestingPinia } from '@pinia/testing'
-
+import { useConfigStore } from '@/stores/configstore'
 
 
 describe('TrackMapPage - DOM testing', () => {
@@ -18,10 +18,16 @@ describe('TrackMapPage - DOM testing', () => {
   })
 
   test('Load Tracks of 2021', async () => {
+
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const testPinia = createTestingPinia()
+    const confstore = useConfigStore()
+    vi.spyOn(confstore, 'get').mockImplementation(() => "THREE_BROWN")
+
     const rresult = render(TrackMapPage, {
       props: { sid: 'abcd1234' },
       global: {
-        plugins: [createTestingPinia()],
+        plugins: [confstore],
       },
     })
 

@@ -18,7 +18,7 @@
   </track-manager-nav-bar>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 import { BButton } from 'bootstrap-vue-next'
 import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'
 import MapComponent from '@/components/MapComponent.vue'

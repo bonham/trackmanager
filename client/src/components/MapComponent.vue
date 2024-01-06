@@ -7,7 +7,7 @@
     <div ref="popupdiv"></div>
   </div>
 </template>
-<script lang="ts" setup>
+<script setup lang="ts">
 import { ref, watch, onMounted, nextTick } from 'vue'
 import { BSpinner } from 'bootstrap-vue-next'
 import { ManagedMap } from '@/lib/mapservices/ManagedMap'

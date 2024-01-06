@@ -29,7 +29,7 @@
   </b-card>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 
 import { Track } from '@/lib/Track'
 import {

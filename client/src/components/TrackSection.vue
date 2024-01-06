@@ -29,8 +29,9 @@
   </div>
 </template>
 
-<script lang="ts">
+<script setup lang="ts">
 // import TrackHeader from '@/components/TrackHeader.vue'
+import { ref, computed } from 'vue'
 import TrackCard from '@/components/TrackCard.vue'
 import { TrackCollection } from '@/lib/Track'
 import {
@@ -38,59 +39,39 @@ import {
   BRow, BCol, BButton, BCollapse
 } from 'bootstrap-vue-next'
 
-export default {
-  name: 'TrackSection',
-  components: {
-    TrackCard,
-    BCard,
-    BCardText,
-    BRow,
-    BCol,
-    BButton,
-    BCollapse
+const props = defineProps({
+  label: {
+    type: String,
+    default: 'No Section Label'
   },
-  props: {
-    label: {
-      type: String,
-      default: 'No Section Label'
-    },
-    coll: {
-      type: TrackCollection,
-      default: null
-    },
-    collapsed: {
-      type: Boolean,
-      default: false
-    },
-    sid: {
-      type: String,
-      default: ''
-    }
+  coll: {
+    type: TrackCollection,
+    default: null
   },
-  data() {
-    return {
-      myDataList: this.coll.members(),
-      expanded: !this.collapsed,
-      everVisible: !this.collapsed
-    }
+  initiallyCollapsed: {
+    type: Boolean,
+    default: false
   },
-  computed: {
-    expandIcon: function () {
-      return (this.expanded ? 'ArrowDownCircleFill' : 'ArrowRightCircleFill')
-    },
-    collapseId: function () {
-      const origLabel = this.label.replace(/\s+/, '-').toLowerCase()
-      return `toggle-${origLabel}`
-    }
-  },
-  methods: {
-    toggleMemberVisibility: function () {
-      const toBeValue = !(this.expanded)
-      // render if it was not rendered before, but never destroy again
-      this.everVisible = this.everVisible || toBeValue
-      // expand after rendering
-      this.expanded = toBeValue
-    }
+  sid: {
+    type: String,
+    default: ''
   }
+})
+
+const myDataList = ref(props.coll.members())
+const expanded = ref(!props.initiallyCollapsed) // initial state
+const everVisible = ref(!props.initiallyCollapsed) // initial state
+
+const collapseId = computed(() => {
+  const origLabel = props.label.replace(/\s+/, '-').toLowerCase()
+  return `toggle-${origLabel}`
+})
+
+function toggleMemberVisibility() {
+  const toBeValue = !(expanded.value)
+  // render if it was not rendered before, but never destroy again
+  everVisible.value = everVisible.value || toBeValue
+  // expand after rendering
+  expanded.value = toBeValue
 }
 </script>

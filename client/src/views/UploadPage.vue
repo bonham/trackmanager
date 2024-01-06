@@ -30,7 +30,7 @@
   </track-manager-nav-bar>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 
 import { BRow, BCol } from 'bootstrap-vue-next'
 import UploadItem from '@/components/UploadItem.vue'

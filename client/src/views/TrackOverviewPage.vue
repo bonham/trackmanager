@@ -10,13 +10,14 @@
       </div>
       <div>
         <TrackSection v-for="trCol in trackCollections" :key="trCol.year" :coll="trCol.collection"
-          :label="trCol.year === '0' ? 'No date' : trCol.year" :collapsed="isYearCollapsed(trCol.year)" :sid="sid" />
+          :label="trCol.year === '0' ? 'No date' : trCol.year" :initially-collapsed="isYearCollapsed(trCol.year)"
+          :sid="sid" />
       </div>
     </div>
   </track-manager-nav-bar>
 </template>
 
-<script lang="ts" setup>
+<script setup lang="ts">
 
 import TrackSection from '@/components/TrackSection.vue'
 import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'

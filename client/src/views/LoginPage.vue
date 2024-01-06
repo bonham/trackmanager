@@ -1,4 +1,4 @@
-<script lang="ts" setup>
+<script setup lang="ts">
 
 import RegistrationForm from '@/components/auth/RegistrationForm.vue';
 import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'

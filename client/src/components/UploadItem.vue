@@ -20,49 +20,37 @@
 </template>
 
 
-<script lang="ts">
+<script setup lang="ts">
 import { BCard, BCol, BRow } from 'bootstrap-vue-next'
-import { defineComponent } from 'vue'
 import type { PropType } from 'vue'
 import { UploadError } from '@/lib/uploadFile'
 import type { QueueStatus } from '@/lib/uploadFile'
+import { computed } from 'vue'
 
-/* vue instance */
-export default defineComponent({
-  name: 'UploadItem',
-  components: {
-    BCard,
-    BCol,
-    BRow
+const props = defineProps({
+  fname: {
+    type: String,
+    default: null
   },
-  props: {
-    fname: {
-      type: String,
-      default: null
-    },
-    status: {
-      type: String as PropType<QueueStatus>,
-      default: () => "Queued" as QueueStatus
-    },
-    error: {
-      type: UploadError as PropType<UploadError | null>,
-      default: null,
-      required: false
-    }
+  status: {
+    type: String as PropType<QueueStatus>,
+    default: () => "Queued" as QueueStatus
   },
-
-  computed: {
-    statusClass() {
-      const prefix = 'badge p-3 flex-fill'
-      const lookup: { [K in QueueStatus]: string } = {
-        Queued: 'bg-secondary text-light',
-        Processing: 'bg-warning',
-        Completed: 'bg-success text-light',
-        Failed: 'bg-danger text-light'
-      }
-      return prefix + ' ' + lookup[this.status]
-    }
+  error: {
+    type: UploadError as PropType<UploadError | null>,
+    default: null,
+    required: false
   }
+})
 
+const statusClass = computed(() => {
+  const prefix = 'badge p-3 flex-fill'
+  const lookup: { [K in QueueStatus]: string } = {
+    Queued: 'bg-secondary text-light',
+    Processing: 'bg-warning',
+    Completed: 'bg-success text-light',
+    Failed: 'bg-danger text-light'
+  }
+  return prefix + ' ' + lookup[props.status]
 })
 </script>

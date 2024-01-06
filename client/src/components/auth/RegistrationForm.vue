@@ -1,4 +1,4 @@
-<script lang="ts" setup>
+<script setup lang="ts">
 
 import { getWithCORS, sendJSONToServer, getErrorMessage } from '@/lib/httpHelpers';
 import { ref } from 'vue'

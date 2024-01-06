@@ -7,6 +7,7 @@
       <b-button class="placeholder bg-secondary flex-fill m-2"></b-button>
     </div>
     <div v-else class="year-navbar">
+      <b-button class="m-2 button-year-navbar" @click="loadAllTracks()">All</b-button>
       <b-button class="m-2 button-year-navbar" @click="loadAllTracksinView()">All in view</b-button>
       <b-button v-for="year in years" :key="year" class="m-2 button-year-navbar" @click="loadTracksOfYear(year, false)">
         {{ year === 0 ? "No date" : year }}
@@ -61,6 +62,20 @@ async function getYears() {
     .catch((e: Error) => { console.log("Error in getYears", e) })
 }
 
+function loadAllTracks() {
+  mapStateStore.loadCommand = {
+    command: 'all',
+    zoomOut: true
+  }
+}
+
+function loadAllTracksinView() {
+  mapStateStore.loadCommand = {
+    command: 'bbox',
+    completed: false
+  }
+}
+
 function loadTracksOfYear(year: number, zoomOut: boolean) {
   mapStateStore.loadCommand = {
     command: 'year',
@@ -68,16 +83,6 @@ function loadTracksOfYear(year: number, zoomOut: boolean) {
     zoomOut
   }
 }
-
-function loadAllTracksinView() {
-
-  mapStateStore.loadCommand = {
-    command: 'bbox',
-    completed: false
-  }
-
-}
-
 
 </script>
 <style>

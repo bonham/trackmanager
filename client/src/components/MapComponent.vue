@@ -14,7 +14,7 @@ import { ManagedMap } from '@/lib/mapservices/ManagedMap'
 import type { GeoJSONWithTrackId } from '@/lib/mapservices/ManagedMap'
 import type { GeoJsonObject } from 'geojson'
 import { TrackVisibilityManager } from '@/lib/mapStateHelpers'
-import { getGeoJson, getTracksByExtent, getTracksByYear, getTrackById } from '@/lib/trackServices'
+import { getGeoJson, getTracksByExtent, getTracksByYear, getTrackById, getAllTracks } from '@/lib/trackServices'
 import _ from 'lodash'
 import { useConfigStore } from '@/stores/configstore'
 import { useMapStateStore } from '@/stores/mapstate'
@@ -42,6 +42,110 @@ const mmap = ref<null | ManagedMap>(null)
 // create map object
 // the callbackfunction is to react on 'select' events - e.g. setting data in a store or send events.
 mmap.value = new ManagedMap()
+
+// watch if the viewport is resized and resize the map
+watch(
+  () => trackStore.resizeMap,
+
+  (newValue, oldValue) => {
+    if (newValue === true) {
+      if (oldValue === true) {
+        console.log('Triggered watch of updateSize while update was running')
+      }
+      if (mmap.value) {
+        mmap.value.map.updateSize()
+        trackStore.resizeMap = false
+      } else {
+        console.error("mmap was not initialized")
+      }
+    }
+  }
+)
+
+// watching different commands
+watch(
+  () => mapStateStore.loadCommand,
+  async (command) => {
+
+    if (command.command === 'all') {
+
+      console.log(`received all command`)
+      await loadAllTracks()
+      await redrawTracks(!!command.zoomOut)
+
+    } else if (command.command === 'year') {
+
+      const year = command.payload
+      console.log(`received year command ${year}`)
+      await loadTracksOfYear(year)
+      await redrawTracks(!!command.zoomOut)
+
+    } else if (command.command === 'bbox') {
+
+      if (command.completed) { return }
+
+      console.log("Received request to update extent")
+      const map = mmap.value as ManagedMap
+      const bbox = map.getMapViewBbox()
+      const tracks = await getTracksByExtent(bbox, props.sid)
+      console.log("tracks from extent call", tracks)
+      trackStore.setLoadedTracks(tracks)
+      await redrawTracks(!!command.zoomOut)
+
+      command.completed = true
+
+    } else if (command.command === 'track') {
+      const id = command.payload
+      await loadSingleTrack(id)
+      await redrawTracks(!!command.zoomOut)
+    }
+  }
+)
+
+async function loadAllTracks() {
+  const sid = props.sid
+  try {
+    loading.value = true
+    const tracks = await getAllTracks(sid)
+    trackStore.setLoadedTracks(tracks)
+  } catch (e) {
+    console.error('Error loading tracks by year', e)
+  } finally {
+    loading.value = false
+  }
+}
+
+async function loadTracksOfYear(year: number) {
+
+  const sid = props.sid
+  try {
+    loading.value = true
+    const tracks = await getTracksByYear(year, sid)
+    trackStore.setLoadedTracks(tracks)
+  } catch (e) {
+    console.error('Error loading tracks by year', e)
+  } finally {
+    loading.value = false
+  }
+}
+
+async function loadSingleTrack(trackId: number) {
+
+  const sid = props.sid
+  try {
+    loading.value = true
+    const track = await getTrackById(trackId, sid)
+    if (track === null) {
+      throw new Error(`Track is null for id ${trackId}`)
+    } else {
+      trackStore.setLoadedTracks([track])
+    }
+  } catch (e) {
+    console.error('Error loading track', e)
+  } finally {
+    loading.value = false
+  }
+}
 
 // method is redrawing tracks AND resetting selection ! 
 // ( the latter might need to be factored out)
@@ -127,95 +231,6 @@ async function redrawTracks(zoomOut = false) {
   loading.value = false
   if (zoomOut) {
     mm.setExtentAndZoomOut()
-  }
-}
-
-
-// watch if the viewport is resized and resize the map
-watch(
-  () => trackStore.resizeMap,
-
-  (newValue, oldValue) => {
-    if (newValue === true) {
-      if (oldValue === true) {
-        console.log('Triggered watch of updateSize while update was running')
-      }
-      if (mmap.value) {
-        mmap.value.map.updateSize()
-        trackStore.resizeMap = false
-      } else {
-        console.error("mmap was not initialized")
-      }
-    }
-  }
-)
-
-// watching different commands
-watch(
-  () => mapStateStore.loadCommand,
-  async (command) => {
-
-    // load year - will not be repeated if submitted twice
-    if (command.command === 'year') {
-
-      const year = command.payload
-      console.log(`received year command ${year}`)
-      await loadTracksOfYear(year)
-      await redrawTracks(!!command.zoomOut)
-
-
-      // Load extent - will aways be executed
-    } else if (command.command === 'bbox') {
-
-      if (command.completed) { return }
-
-      console.log("Received request to update extent")
-      const map = mmap.value as ManagedMap
-      const bbox = map.getMapViewBbox()
-      const tracks = await getTracksByExtent(bbox, props.sid)
-      console.log("tracks from extent call", tracks)
-      trackStore.setLoadedTracks(tracks)
-      await redrawTracks(!!command.zoomOut)
-
-      command.completed = true
-
-    } else if (command.command === 'track') {
-      const id = command.payload
-      await loadSingleTrack(id)
-      await redrawTracks(!!command.zoomOut)
-    }
-  }
-)
-
-async function loadTracksOfYear(year: number) {
-
-  const sid = props.sid
-  try {
-    loading.value = true
-    const tracks = await getTracksByYear(year, sid)
-    trackStore.setLoadedTracks(tracks)
-  } catch (e) {
-    console.error('Error loading tracks by year', e)
-  } finally {
-    loading.value = false
-  }
-}
-
-async function loadSingleTrack(trackId: number) {
-
-  const sid = props.sid
-  try {
-    loading.value = true
-    const track = await getTrackById(trackId, sid)
-    if (track === null) {
-      throw new Error(`Track is null for id ${trackId}`)
-    } else {
-      trackStore.setLoadedTracks([track])
-    }
-  } catch (e) {
-    console.error('Error loading track', e)
-  } finally {
-    loading.value = false
   }
 }
 

@@ -16,6 +16,11 @@ const useMapStateStore = defineStore('mapstate', () => {
 
 })
 
+interface LoadAllRequest {
+  command: 'all',
+  zoomOut?: boolean
+}
+
 interface LoadYearRequest {
   command: 'year',
   payload: number,
@@ -40,5 +45,5 @@ interface InitialState {
 }
 
 export { useMapStateStore }
-export type LoadTracksRequest = LoadYearRequest | LoadBboxRequest | LoadSingleTrackRequest | InitialState
+export type LoadTracksRequest = LoadAllRequest | LoadYearRequest | LoadBboxRequest | LoadSingleTrackRequest | InitialState
 

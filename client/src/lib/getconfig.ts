@@ -15,8 +15,8 @@ const configSchema: ConfigSchema = {
     default: "THREE_BROWN"
   },
   TRACKMAP_INITIALVIEW: {
-    values: ["THIS_YEAR", "ALL"],
-    default: "THIS_YEAR"
+    values: ["LATEST_YEAR", "ALL"],
+    default: "LATEST_YEAR"
   }
 }
 

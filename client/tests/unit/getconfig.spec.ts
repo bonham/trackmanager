@@ -17,14 +17,14 @@ describe("getSchemaConfig", () => {
       JSON.stringify(
         [
           { key: "TRACKSTYLE", value: "THREE_BROWN" },
-          { key: "TRACKMAP_INITIALVIEW", value: "THIS_YEAR" },
+          { key: "TRACKMAP_INITIALVIEW", value: "LATEST_YEAR" },
         ]
       )
     ))
 
     const expected = {
       TRACKSTYLE: "THREE_BROWN",
-      TRACKMAP_INITIALVIEW: "THIS_YEAR"
+      TRACKMAP_INITIALVIEW: "LATEST_YEAR"
     }
     await expect(getSchemaConfig(sid)).resolves.toEqual(expected)
   })
@@ -59,7 +59,7 @@ describe("getSchemaConfig", () => {
 
     const expected = {
       TRACKSTYLE: "THREE_BROWN",
-      TRACKMAP_INITIALVIEW: "THIS_YEAR"
+      TRACKMAP_INITIALVIEW: "LATEST_YEAR"
     }
     await expect(getSchemaConfig(sid)).resolves.toEqual(expected)
   })
@@ -74,7 +74,7 @@ describe("getSchemaConfig", () => {
 
     const expected = {
       TRACKSTYLE: "THREE_BROWN",
-      TRACKMAP_INITIALVIEW: "THIS_YEAR"
+      TRACKMAP_INITIALVIEW: "LATEST_YEAR"
     }
     await expect(getSchemaConfig(sid)).resolves.toEqual(expected)
   })
@@ -85,7 +85,7 @@ describe("getSchemaConfig", () => {
       JSON.stringify(
         [
           { key: "TRACKSTYLE", value: "WRONGVALUE" },
-          { key: "TRACKMAP_INITIALVIEW", value: "THIS_YEAR" },
+          { key: "TRACKMAP_INITIALVIEW", value: "LATEST_YEAR" },
         ]
       )
     ))
@@ -99,7 +99,7 @@ describe("getSchemaConfig", () => {
       JSON.stringify(
         [
           { key: "WRONGKEY", value: "ANYVALUE" },
-          { key: "TRACKMAP_INITIALVIEW", value: "THIS_YEAR" },
+          { key: "TRACKMAP_INITIALVIEW", value: "LATEST_YEAR" },
         ]
       )
     ))

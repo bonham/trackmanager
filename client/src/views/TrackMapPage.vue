@@ -7,8 +7,9 @@
       <b-button class="placeholder bg-secondary flex-fill m-2"></b-button>
     </div>
     <div v-else class="year-navbar">
-      <b-button class="m-2 button-year-navbar" @click="loadAllTracks()">All</b-button>
-      <b-button class="m-2 button-year-navbar" @click="loadAllTracksinView()">All in view</b-button>
+      <b-button v-if="buttonAll" class="m-2 button-year-navbar" @click="loadAllTracks()">All</b-button>
+      <b-button v-if="buttonAllInView" class="m-2 button-year-navbar" @click="loadAllTracksinView()">All in
+        view</b-button>
       <b-button v-for="year in years" :key="year" class="m-2 button-year-navbar" @click="loadTracksOfYear(year, false)">
         {{ year === 0 ? "No date" : year }}
       </b-button>
@@ -26,6 +27,8 @@ import MapComponent from '@/components/MapComponent.vue'
 import { TrackCollection } from '@/lib/Track'
 import { getAllTracks } from '@/lib/trackServices'
 import { useMapStateStore } from '@/stores/mapstate'
+import { useConfigStore } from '@/stores/configstore'
+
 import { ref } from 'vue'
 
 const mapStateStore = useMapStateStore()
@@ -41,8 +44,32 @@ const props = defineProps({
 // reactive data
 const years = ref<number[]>([])
 const buttonsLoading = ref(true)
+const buttonAllInView = ref(false)
+const buttonAll = ref(true)
 
 // initialization
+const configStore = useConfigStore()
+
+configStore.loadConfig(props.sid)
+  .then(async () => {
+    const initialState = configStore.get('TRACKMAP_INITIALVIEW')
+    if (initialState === "ALL") {
+
+      buttonsLoading.value = false
+      loadAllTracks()
+
+    } else if (initialState === "LATEST_YEAR") {
+
+      await getYears()
+      buttonsLoading.value = false
+      if (years.value.length > 0) {
+        const mostRecentYear = years.value[0]
+        loadTracksOfYear(mostRecentYear, true)
+      }
+    }
+  })
+  .catch((e) => console.error("Error when loading store", e))
+
 getYears()
   .then(() => {
     buttonsLoading.value = false

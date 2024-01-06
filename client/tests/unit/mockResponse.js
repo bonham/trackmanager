@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 import { Request, Response } from 'cross-fetch'
 import { vi } from 'vitest'
 

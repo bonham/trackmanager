@@ -12,6 +12,7 @@ import { ref, watch, onMounted, nextTick } from 'vue'
 import { BSpinner } from 'bootstrap-vue-next'
 import { ManagedMap } from '@/lib/mapservices/ManagedMap'
 import type { GeoJSONWithTrackId } from '@/lib/mapservices/ManagedMap'
+import type { GeoJsonObject } from 'geojson'
 import { TrackVisibilityManager } from '@/lib/mapStateHelpers'
 import { getGeoJson, getTracksByExtent, getTracksByYear, getTrackById } from '@/lib/trackServices'
 import _ from 'lodash'
@@ -19,6 +20,7 @@ import { useConfigStore } from '@/stores/configstore'
 import { useMapStateStore } from '@/stores/mapstate'
 import { useTracksStore } from '@/storepinia'
 import { StyleFactoryFixedColors } from '@/lib/mapStyles';
+import type { Track } from '@/lib/Track'
 
 const props = defineProps({
   sid: {
@@ -58,9 +60,10 @@ async function redrawTracks(zoomOut = false) {
   if (TRACKSTYLE === 'THREE_BROWN') {
     // all good
   } else if (TRACKSTYLE === 'FIVE_COLORFUL') {
+    // brown, orange, red, green, blue
     const tStyle = new StyleFactoryFixedColors([
-      '#ffa500',
       '#a52a2a',
+      '#ffa500',
       '#ff0000',
       '#008000',
       '#0000ff',
@@ -96,9 +99,24 @@ async function redrawTracks(zoomOut = false) {
   } else {
     resultSet = []
   }
-  resultSet.forEach(result => {
-    const tr = trackStore.tracksById[result.id]
-    mm.addTrackLayer({ track: tr, geojson: result.geojson })
+
+  // Tracks in managed map do not really have an order. But for some styling scenarios we want tracks ordered by date. 
+  // This is a dirty hack to maintain an order for the tracks newly added to mmap. This hack will not maintain overall track order when tracks
+  // are loaded in chunks/batches
+
+  const tmpList: { track: Track, geojson: GeoJsonObject }[] = resultSet.map((result) => {
+    return {
+      track: trackStore.tracksById[result.id],
+      geojson: result.geojson
+    }
+  })
+
+  tmpList.sort((a, b) => {
+    return a.track.secondsSinceEpoch() - b.track.secondsSinceEpoch()
+  })
+
+  tmpList.forEach(ele => {
+    mm.addTrackLayer(ele)
   })
 
   // B: tracks to hide

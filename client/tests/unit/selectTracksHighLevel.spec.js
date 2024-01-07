@@ -22,6 +22,7 @@ describe('TrackMapPage - DOM testing', () => {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const testPinia = createTestingPinia()
     const confstore = useConfigStore()
+    vi.spyOn(confstore, 'loadConfig').mockImplementation(() => Promise.resolve())
     vi.spyOn(confstore, 'get').mockImplementation(() => "THREE_BROWN")
 
     const rresult = render(TrackMapPage, {

@@ -57,7 +57,7 @@ router.get(
       const queryResult = await pool.query(
         'select id, name, length, src, '
         + 'time, timelength, ascent '
-        + `from ${schema}.tracks order by time`,
+        + `from ${schema}.tracks order by time desc`,
       );
 
       const { rows } = queryResult;
@@ -179,7 +179,7 @@ router.get(
 
     const query = 'select id, name, length, src,'
       + 'time, timelength, ascent '
-      + `from ${schema}.tracks where ${whereClause}`;
+      + `from ${schema}.tracks where ${whereClause} order by time desc`;
     console.log(query);
     try {
       const queryResult = await pool.query(query);

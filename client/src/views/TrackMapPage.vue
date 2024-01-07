@@ -70,16 +70,6 @@ configStore.loadConfig(props.sid)
   })
   .catch((e) => console.error("Error when loading store", e))
 
-getYears()
-  .then(() => {
-    buttonsLoading.value = false
-    if (years.value.length > 0) {
-      const mostRecentYear = years.value[0]
-      loadTracksOfYear(mostRecentYear, true)
-    }
-  })
-  .catch((error) => { console.error(error) })
-
 async function getYears() {
   await getAllTracks(props.sid)
     .then((trackList) => {

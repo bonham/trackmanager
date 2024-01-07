@@ -55,11 +55,16 @@ configStore.loadConfig(props.sid)
     const initialState = configStore.get('TRACKMAP_INITIALVIEW')
     if (initialState === "ALL") {
 
-      buttonsLoading.value = false
+      // async possible
+      getYears()
+        .then(() => { buttonsLoading.value = false })
+        .catch((e) => console.error("Error while loading years", e))
+
       loadAllTracks()
 
     } else if (initialState === "LATEST_YEAR") {
 
+      // not async pls
       await getYears()
       buttonsLoading.value = false
       if (years.value.length > 0) {

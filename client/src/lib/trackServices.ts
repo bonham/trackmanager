@@ -1,12 +1,15 @@
-import { Track } from '@/lib/Track'
-import type { TrackInitData, TrackPropertiesOptional } from '@/lib/Track'
+import { Track, isTrackDataServer } from '@/lib/Track'
+import type { TrackPropertiesOptional } from '@/lib/Track'
 import _ from 'lodash'
 import type { GeoJSONWithTrackId } from '@/lib/mapservices/ManagedMap'
 import type { Extent } from 'ol/extent'
 // /// Get all tracks
 async function getAllTracks(sid: string) {
   const response = await fetch(`/api/tracks/getall/sid/${sid}`)
-  const responseJson: TrackInitData[] = await response.json()
+  const responseJson = await response.json() as unknown
+
+  if (!Array.isArray(responseJson)) throw Error("not array")
+  if (!responseJson.every(isTrackDataServer)) throw Error("not array of trackdata")
 
   const trackArray = responseJson.map(t => new Track(t))
   return trackArray
@@ -29,7 +32,11 @@ async function getTracksByYear(year: number, sid: string) {
   }
 
   try {
-    const responseJson: TrackInitData[] = await response.json()
+    const responseJson = await response.json() as unknown
+
+    if (!Array.isArray(responseJson)) throw Error("not array")
+    if (!responseJson.every(isTrackDataServer)) throw Error("not array of trackdata")
+
     const trackArray = responseJson.map(t => new Track(t))
     return trackArray
   } catch (error) {
@@ -60,7 +67,11 @@ async function getTracksByExtent(extent: Extent, sid: string) {
   }
 
   try {
-    const responseJson: TrackInitData[] = await response.json()
+    const responseJson = await response.json() as unknown
+
+    if (!Array.isArray(responseJson)) throw Error("not array")
+    if (!responseJson.every(isTrackDataServer)) throw Error("not array of trackdata")
+
     const trackArray = responseJson.map(t => new Track(t))
     return trackArray
   } catch (error) {
@@ -85,7 +96,10 @@ async function getTrackById(id: number, sid: string) {
   }
 
   try {
-    const responseJson = await response.json()
+    const responseJson = await response.json() as unknown
+
+    if (!isTrackDataServer(responseJson)) throw Error("not trackdata")
+
     const track = new Track(responseJson)
     return track
   } catch (error) {

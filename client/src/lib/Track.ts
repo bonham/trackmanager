@@ -23,12 +23,12 @@ type TrackProperties = {
 
 type TrackInitData = {
   id: number,
-  name: string,
-  length: number,
-  src: string,
+  name: string | null,
+  length: number | null,
+  src: string | null,
   timelength: number | null,
   ascent: number,
-  geojson: GeoJsonObject | null,
+  geojson?: GeoJsonObject | null,
   time: string | null
 }
 type TrackPropertiesOptional = {
@@ -40,6 +40,40 @@ type TrackPropertiesOptional = {
   ascent?: number | null,
   geojson?: GeoJsonObject | null,
   time?: DateTime | null | undefined
+}
+
+interface TrackDataServerGetall {
+  id: number,
+  name: string | null,
+  length: number | null,
+  src: string | null,
+  time: string | null,
+  timelength: number | null,
+  ascent: number,
+}
+
+function isTrackDataServer(t: unknown): t is TrackDataServerGetall {
+  if (
+    typeof t === 'object' &&
+    !!t &&
+    "id" in t && (typeof t.id === 'number') &&
+    "name" in t && (typeof t.name === 'string' || t.name === null) &&
+    "length" in t && (typeof t.length === 'number' || t.length === null) &&
+    "src" in t && (typeof t.src === 'string' || t.src === null) &&
+    "time" in t && (typeof t.time === 'string' || t.time === null) &&
+    "timelength" in t && (typeof t.timelength === 'number' || t.timelength === null) &&
+    "ascent" in t && (typeof t.ascent === 'number' || t.ascent === null)
+  ) {
+    return true
+  } else {
+    return false
+  }
+}
+
+function isTrackDataServerArray(t: unknown[]): t is TrackDataServerGetall[] {
+  return t.every((ele) => {
+    return isTrackDataServer(ele)
+  })
 }
 
 class Track {
@@ -58,9 +92,9 @@ class Track {
     this.name = initData.name
     this.length = initData.length
     this.src = initData.src
-    this.timelength = (initData.timelength === null ? 0 : initData.timelength)
+    this.timelength = initData.timelength
     this.ascent = initData.ascent
-    this.geojson = ('geojson' in initData ? initData.geojson : null)
+    this.geojson = (('geojson' in initData && initData.geojson !== undefined) ? initData.geojson : null)
 
     if (!initData.time) {
       this.time = null
@@ -165,5 +199,5 @@ class TrackCollection {
   }
 }
 
-export { Track, TrackCollection }
-export type { TrackProperties, TrackPropertiesOptional, TrackInitData }
+export { Track, TrackCollection, isTrackDataServer, isTrackDataServerArray }
+export type { TrackProperties, TrackPropertiesOptional, TrackInitData, TrackDataServerGetall }

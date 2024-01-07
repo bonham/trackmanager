@@ -45,7 +45,7 @@ import {
 } from 'bootstrap-vue-next'
 import type { TableItem } from 'bootstrap-vue-next'
 import { getAllTracks, updateTrack, updateTrackById, deleteTrack } from '@/lib/trackServices'
-import type { Track } from '@/lib/Track'
+import { Track } from '@/lib/Track'
 import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'
 import EditableText from '@/components/EditableText.vue'
 import { ref } from 'vue'

@@ -127,9 +127,10 @@ async function loadTracks() {
   const tracks = await getAllTracks(props.sid)
   tracks.sort(
     (a, b) => {
-      if (!a.time) return -1
-      if (!b.time) return 1
-      return a.time < b.time ? -1 : 1
+      // undefined pease 
+      if (!a.time) return 1
+      if (!b.time) return -1
+      return b.secondsSinceEpoch() - a.secondsSinceEpoch()
     }
   )
   tracks.forEach((t) => {

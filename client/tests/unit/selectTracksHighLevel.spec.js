@@ -23,7 +23,11 @@ describe('TrackMapPage - DOM testing', () => {
     const testPinia = createTestingPinia()
     const confstore = useConfigStore()
     vi.spyOn(confstore, 'loadConfig').mockImplementation(() => Promise.resolve())
-    vi.spyOn(confstore, 'get').mockImplementation(() => "THREE_BROWN")
+    vi.spyOn(confstore, 'get').mockImplementation((a) => {
+      console.log("Confstore argument:", a)
+      if (a === "TRACKSTYLE") return "THREE_BROWN"
+      else return "LATEST_YEAR"
+    })
 
     const rresult = render(TrackMapPage, {
       props: { sid: 'abcd1234' },

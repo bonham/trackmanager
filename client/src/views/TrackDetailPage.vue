@@ -57,6 +57,13 @@ getTrackById(Number.parseInt(props.id), props.sid)
       // fill the cache
       trackStore.setLoadedTracks([track])
 
+      // set title
+      // const descEl = document.querySelector('head meta[name="description"]');
+      const titleEl = document.querySelector('head title');
+      if (titleEl !== null) {
+        titleEl.textContent = headline.value
+      }
+
     } else {
       trackDetails.value = "unknown"
     }

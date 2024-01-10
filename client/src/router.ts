@@ -48,4 +48,11 @@ const router = createRouter({
   ]
 })
 
+router.beforeEach(() => {
+  const titleEl = document.querySelector('head title');
+  if (titleEl !== null) {
+    titleEl.textContent = "Trackmanager"
+  }
+})
+
 export default router

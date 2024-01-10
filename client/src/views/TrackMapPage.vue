@@ -112,4 +112,20 @@ function loadTracksOfYear(year: number, zoomOut: boolean) {
   height: max-content;
   white-space: nowrap;
 }
+
+/* CSS for smaller screens */
+@media (max-width: 1000px) {
+  .button-year-navbar {
+    flex: 0 0 auto;
+    height: max-content;
+    white-space: nowrap;
+  }
+
+  .year-navbar {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    /* Enable horizontal scroll */
+  }
+}
 </style>

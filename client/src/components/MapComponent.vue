@@ -18,7 +18,7 @@ import { getGeoJson, getTracksByExtent, getTracksByYear, getTrackById, getAllTra
 import _ from 'lodash'
 import { useConfigStore } from '@/stores/configstore'
 import { useMapStateStore } from '@/stores/mapstate'
-import { useTracksStore } from '@/storepinia'
+import { useTrackStore } from '@/stores/trackStore'
 import { StyleFactoryFixedColors } from '@/lib/mapStyles';
 import type { Track } from '@/lib/Track'
 
@@ -30,7 +30,7 @@ const props = defineProps({
 })
 
 const mapStateStore = useMapStateStore()
-const trackStore = useTracksStore()
+const trackStore = useTrackStore()
 const configStore = useConfigStore()
 
 // reactive data

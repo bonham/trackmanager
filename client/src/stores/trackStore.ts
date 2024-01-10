@@ -8,7 +8,7 @@ import { Track, type TrackPropertiesOptional } from '@/lib/Track'
 type TrackArray = Track[]
 type LoadFunctionType = () => Promise<TrackArray>
 
-export const useTracksStore = defineStore('tracks', () => {
+export const useTrackStore = defineStore('tracks', () => {
   const loadedTracks: Ref<Track[]> = ref(markRaw([]))
   const tracksById: Ref<{ [index: number]: Track }> = ref({})
   const resizeMap = ref(false)

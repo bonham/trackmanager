@@ -2,11 +2,16 @@
   <track-manager-nav-bar :sid="sid">
     <div class="flex-grow-1 d-flex flex-column">
       <b-card class="m-2 bg-light">
-        <h5>
-          {{ headline }}
-        </h5>
-        <div>
-          {{ trackDetails }}
+        <div class="d-flex flex-row align-items-start">
+          <div class="flex-grow-1">
+            <h5>
+              {{ headline }}
+            </h5>
+            <div>
+              {{ trackDetails }}
+            </div>
+          </div>
+          <button type="button" class="btn-close" aria-label="Close" @click="closeMe"></button>
         </div>
       </b-card>
 
@@ -25,6 +30,7 @@ import { useTrackStore } from '@/stores/trackStore';
 import { useMapStateStore } from '@/stores/mapstate'
 import { nextTick, ref } from 'vue';
 import { getTrackById } from '@/lib/trackServices';
+import { useRouter } from 'vue-router'
 
 const mapStateStore = useMapStateStore()
 const trackStore = useTrackStore()
@@ -87,4 +93,10 @@ nextTick(() => {
   }
 
 }).catch((e) => { console.error(e) })
+
+const router = useRouter()
+
+const closeMe = () => {
+  router.back()
+}
 </script>

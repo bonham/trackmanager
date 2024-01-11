@@ -1,5 +1,5 @@
 <template>
-  <b-card class="my-2 clickable" :aria-label="ariaLinkLabel" role="link" @click="navigateToPage">
+  <b-card class="my-2 clickable bg-light" :aria-label="ariaLinkLabel" role="link" @click="navigateToPage">
     <b-card-text>
       <b-row class="align-items-center">
         <b-col cols="9">

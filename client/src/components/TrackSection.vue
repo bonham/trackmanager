@@ -1,12 +1,12 @@
 <!-- eslint-disable vue/first-attribute-linebreak -->
 <template>
   <div>
-    <b-card bg-variant="light" class="my-2">
+    <b-card bg-variant="light" class="my-2" @click="toggleMemberVisibility">
       <b-card-text>
         <b-row class="align-items-center">
           <b-col cols="9" class="d-flex flex-row align-items-center">
             <b-button :class="expanded ? null : 'collapsed'" :aria-expanded="expanded ? 'true' : 'false'"
-              :aria-controls="collapseId" @click="toggleMemberVisibility">
+              :aria-controls="collapseId">
               <i-bi-arrow-down-circle-fill v-if="expanded" />
               <i-bi-arrow-right-circle v-else />
             </b-button>

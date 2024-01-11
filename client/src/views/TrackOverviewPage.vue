@@ -1,17 +1,16 @@
 <template>
   <track-manager-nav-bar :sid="sid">
-    <h1 class="mt-4 mb-4">
-      Track Overview
-    </h1>
-    <div>
+    <div class="px-2">
       <div>
-        <span v-if="loading">Loading <b-spinner small />
-        </span>
-      </div>
-      <div>
-        <TrackSection v-for="trCol in trackCollections" :key="trCol.year" :coll="trCol.collection"
-          :label="trCol.year === '0' ? 'No date' : trCol.year" :initially-collapsed="isYearCollapsed(trCol.year)"
-          :sid="sid" />
+        <div>
+          <span v-if="loading">Loading <b-spinner small />
+          </span>
+        </div>
+        <div>
+          <TrackSection v-for="trCol in trackCollections" :key="trCol.year" :coll="trCol.collection"
+            :label="trCol.year === '0' ? 'No date' : trCol.year" :initially-collapsed="isYearCollapsed(trCol.year)"
+            :sid="sid" />
+        </div>
       </div>
     </div>
   </track-manager-nav-bar>

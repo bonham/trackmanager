@@ -1,33 +1,47 @@
 <!-- eslint-disable vue/first-attribute-linebreak -->
 <template>
-  <b-container id="root" class="d-flex flex-column vh-100">
+  <b-container id="root" class="d-flex flex-column vh-100 gx-0 border">
     <div class="bg-light d-flex flex-column vh-100">
-      <nav class="navbar navbar-expand-sm bg-success-subtle border-bottom">
+      <nav class="navbar navbar-expand bg-success-subtle border-bottom py-1">
         <div class="container-fluid">
-          <!-- <a class="navbar-brand" to="#">TrckM</a> -->
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup"
+          <!-- <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup"
             aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
-          </button>
-          <div id="navbarNavAltMarkup" class="collapse navbar-collapse">
-            <div class="navbar-nav">
-              <router-link class="nav-link m-2" :to="navPath('/trackmap')">
-                Map
-              </router-link>
-              <router-link class="nav-link m-2" :to="navPath('/toverview')">
-                By Year
-              </router-link>
-              <router-link v-if="userLoginStore.loggedIn" class="nav-link m-2" :to="navPath('/track_multi_edit')">
-                Edit
-              </router-link>
-              <router-link v-if="userLoginStore.loggedIn" class="nav-link m-2" :to="navPath('/upload')">
-                Upload
-              </router-link>
-              <router-link class="nav-link m-2" :to="navPath('/login')">
+          </button> -->
+          <!-- <div id="navbarNavAltMarkup" class="collapse navbar-collapse"> -->
+          <a class="navbar-brand" to="#"><i-bi-compass-fill /></a>
+          <div class="navbar-collapse">
+            <ul class="navbar-nav">
+              <li class="nav-item">
+                <router-link class="nav-link my-1" :to="navPath('/trackmap')">
+                  Map
+                </router-link>
+              </li>
+              <li class="nav-item">
+                <router-link class="nav-link my-1" :to="navPath('/toverview')">
+                  By Year
+                </router-link>
+              </li>
+              <li class="nav-item">
+                <router-link v-if="userLoginStore.loggedIn" class="nav-link my-1" :to="navPath('/track_multi_edit')">
+                  Edit
+                </router-link>
+              </li>
+              <li class="nav-item">
+                <router-link v-if="userLoginStore.loggedIn" class="nav-link my-1" :to="navPath('/upload')">
+                  Upload
+                </router-link>
+              </li>
+            </ul>
+          </div>
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <router-link class="nav-link my-1" :to="navPath('/login')">
                 Login
               </router-link>
-            </div>
-          </div>
+            </li>
+          </ul>
+          <!-- </div> -->
         </div>
       </nav>
       <slot></slot>
@@ -65,5 +79,11 @@ nav {
       color: #42b983;
     }
   }
+}
+
+.navbar-toggler-icon {
+  height: 1em !important;
+  width: 1em
+    /* Adjust this value to your preference */
 }
 </style>

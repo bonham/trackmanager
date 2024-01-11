@@ -6,7 +6,7 @@
       <b-button class="placeholder bg-secondary flex-fill m-2"></b-button>
       <b-button class="placeholder bg-secondary flex-fill m-2"></b-button>
     </div>
-    <div v-else class="year-navbar">
+    <div v-else class="year-navbar border-bottom border-top">
       <b-button v-if="buttonAll" class="m-2 button-year-navbar" @click="loadAllTracks()">All</b-button>
       <b-button v-if="buttonAllInView" class="m-2 button-year-navbar" @click="loadAllTracksinView()">All in
         view</b-button>

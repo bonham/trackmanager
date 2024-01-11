@@ -13,6 +13,7 @@ declare module 'vue' {
     IBiArrowLeft: typeof import('~icons/bi/arrow-left')['default']
     IBiArrowRightCircle: typeof import('~icons/bi/arrow-right-circle')['default']
     IBiChevronRight: typeof import('~icons/bi/chevron-right')['default']
+    IBiCompassFill: typeof import('~icons/bi/compass-fill')['default']
     IBiPencilFill: typeof import('~icons/bi/pencil-fill')['default']
     IBiTrash: typeof import('~icons/bi/trash')['default']
     LoginForm: typeof import('./src/components/auth/LoginForm.vue')['default']

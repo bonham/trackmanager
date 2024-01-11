@@ -1,18 +1,24 @@
 <template>
   <track-manager-nav-bar :sid="sid">
     <div class="flex-grow-1 d-flex flex-column">
-      <h1 class="mt-4 mb-4">
-        {{ headline }}
-      </h1>
-      <div class="mb-2">
-        {{ trackDetails }}
-      </div>
+      <b-card class="m-2 bg-light">
+        <h5>
+          {{ headline }}
+        </h5>
+        <div>
+          {{ trackDetails }}
+        </div>
+      </b-card>
+
       <MapComponent :sid="sid" />
     </div>
   </track-manager-nav-bar>
 </template>
 
 <script setup lang="ts">
+import {
+  BCard,
+} from 'bootstrap-vue-next'
 import MapComponent from '@/components/MapComponent.vue';
 import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'
 import { useTrackStore } from '@/stores/trackStore';

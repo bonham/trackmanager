@@ -1,9 +1,30 @@
 <script setup>
 import { RouterView } from 'vue-router'
+
+function keepThisAlive(c) {
+  const name = c?.type?.__name
+  console.log("Component:", name)
+  if (name === "TrackMapPage") {
+    console.log("false")
+    return false
+  } else {
+    return true
+  }
+
+}
 </script>
 
 <template>
-  <RouterView />
+  <router-view v-slot="{ Component }">
+    <div v-if="keepThisAlive(Component)">
+      <keep-alive>
+        <component :is="Component" />
+      </keep-alive>
+    </div>
+    <div v-else>
+      <component :is="Component" />
+    </div>
+  </router-view>
 </template>
 
 <style lang="scss">

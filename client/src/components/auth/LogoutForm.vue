@@ -37,8 +37,8 @@ async function handleLogout() {
 
 </script>
 <template>
-  <div class="border border-secondary-subtle p-3">
-    <button class="btn btn-secondary mb-2" @click="handleLogout">Logout</button>
+  <div class="border border-secondary-subtle p-3 mb-2 mt-2">
+    <button class="btn btn-secondary" @click="handleLogout">Logout</button>
     <div v-if="logoutstatus">Status: {{ logoutstatus }}</div>
   </div>
 </template>

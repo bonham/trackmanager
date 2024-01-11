@@ -94,8 +94,8 @@ async function handleLogin() {
 
 </script>
 <template>
-  <div class="border border-secondary-subtle p-3">
-    <button class="btn btn-secondary mb-2" @click="handleLogin">Sign in with passkey</button>
+  <div class="border border-secondary-subtle p-3 mb-2 mt-2">
+    <button class="btn btn-secondary" @click="handleLogin">Sign in with passkey</button>
     <div v-if="loginstatus" class="mt-2">Status: {{ loginstatus }}</div>
   </div>
 </template>

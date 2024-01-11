@@ -64,21 +64,16 @@ async function updateUser() {
 
 <template>
   <track-manager-nav-bar :sid="sid">
-    <h1 class="mt-4 mb-4">
-      Login
-    </h1>
-
-    <div class="container">
-      <nav class="p-2 navbar bg-dark border-bottom border-bottom-dark" data-bs-theme="dark">
-        <div class="navbar-brand">Webauthn</div>
-        <div class="d-flex">
-          <div class="mx-2 navbar-text">{{ userLoginStore.loggedIn ? userLoginStore.username : "Not signed in" }}</div>
-        </div>
-      </nav>
+    <div class="container mt-2">
+      <div v-if="userLoginStore.loggedIn" class="border border-secondary-subtle p-3 mb-2 mt-2">
+        {{ userLoginStore.loggedIn ? `Username: ${userLoginStore.username}` : "Not signed in " }}
+      </div>
       <div>
-        <RegistrationForm use-registration-key form-label="Register with registration key" place-holder="Key" />
         <LogoutForm v-if="userLoginStore.loggedIn" @changed="updateUser" />
         <LoginForm v-else @changed="updateUser" />
+      </div>
+      <div>
+        <RegistrationForm use-registration-key form-label="Register with registration key" place-holder="Key" />
       </div>
     </div>
   </track-manager-nav-bar>

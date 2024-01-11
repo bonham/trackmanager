@@ -118,6 +118,6 @@ async function handleCreate() {
         aria-label="Nickname" aria-describedby="button-addon2" autocomplete="off">
       <button id="button-addon2" class="btn btn-outline-secondary" type="button" @click="handleCreate">Register</button>
     </div>
-    <div class="mt-2">Status: {{ regstatus }}</div>
+    <div v-if="regstatus !== 'None'" class="mt-2">Status: {{ regstatus }}</div>
   </div>
 </template>

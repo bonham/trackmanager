@@ -18,7 +18,7 @@ describe('NavBar', () => {
       }
     })
 
-    expect(rresult.getByLabelText('Toggle navigation')).toBeInTheDocument();
+    expect(rresult.getByText('Login')).toBeInTheDocument();
   })
 
 })

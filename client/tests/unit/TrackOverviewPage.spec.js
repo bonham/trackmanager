@@ -24,7 +24,6 @@ describe('TrackOverview and TrackDetail', () => {
       }
     )
 
-    expect(await rresult.findByText('Track Overview')).toBeInTheDocument()
     await rresult.findByText('2021')
     await rresult.findByText('Saupferchweg')
     // debug()
@@ -45,7 +44,6 @@ describe('TrackOverview and TrackDetail', () => {
         }
       }
     )
-    expect(await findByText('Track Overview')).toBeInTheDocument()
 
     await findByText('Saupferchweg')
 

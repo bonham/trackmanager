@@ -19,7 +19,7 @@
               </li>
               <li class="nav-item">
                 <router-link class="nav-link my-1" :to="navPath('/toverview')">
-                  By Year
+                  List
                 </router-link>
               </li>
               <li class="nav-item">
@@ -71,13 +71,11 @@ function navPath(path: string) {
 </script>
 
 <style lang="scss">
-nav {
+a,
+a:visited {
 
-  a {
-
-    &.router-link-exact-active {
-      color: #42b983;
-    }
+  &.router-link-exact-active {
+    color: #42b983;
   }
 }
 

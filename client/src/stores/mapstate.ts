@@ -16,31 +16,32 @@ const useMapStateStore = defineStore('mapstate', () => {
 
 })
 
-interface LoadAllRequest {
-  command: 'all',
-  zoomOut?: boolean
+interface MapStateRequest {
+  command: string,
+  zoomOut?: boolean,
 }
 
-interface LoadYearRequest {
+interface LoadAllRequest extends MapStateRequest {
+  command: 'all',
+}
+
+interface LoadYearRequest extends MapStateRequest {
   command: 'year',
   payload: number,
-  zoomOut?: boolean
 }
 
-interface LoadBboxRequest {
+interface LoadBboxRequest extends MapStateRequest {
   command: 'bbox',
   completed: boolean
-  zoomOut?: boolean
 }
 
-interface LoadSingleTrackRequest {
+interface LoadSingleTrackRequest extends MapStateRequest {
   command: 'track',
   payload: number
-  zoomOut?: boolean
 }
 
 
-interface InitialState {
+interface InitialState extends MapStateRequest {
   command: 'none'
 }
 

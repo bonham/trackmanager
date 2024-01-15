@@ -1,18 +1,22 @@
 <template>
   <track-manager-nav-bar :sid="sid">
     <div v-if="buttonsLoading" class="placeholder-glow d-flex flex-row" style="width: 20em;">
-      <b-button class="placeholder bg-secondary flex-fill m-2"></b-button>
-      <b-button class="placeholder bg-secondary flex-fill m-2"></b-button>
-      <b-button class="placeholder bg-secondary flex-fill m-2"></b-button>
-      <b-button class="placeholder bg-secondary flex-fill m-2"></b-button>
+      <button class="btn placeholder btn-outline-secondary flex-fill m-2">..</button>
+      <button class="btn placeholder btn-outline-secondary flex-fill m-2">..</button>
+      <button class="btn placeholder btn-outline-secondary flex-fill m-2">..</button>
+      <button class="btn placeholder btn-outline-secondary flex-fill m-2">..</button>
     </div>
     <div v-else class="year-navbar border-bottom border-top">
-      <b-button v-if="buttonAll" class="m-2 button-year-navbar" @click="loadAllTracks()">All</b-button>
-      <b-button v-if="buttonAllInView" class="m-2 button-year-navbar" @click="loadAllTracksinView()">All in
-        view</b-button>
-      <b-button v-for="year in years" :key="year" class="m-2 button-year-navbar" @click="loadTracksOfYear(year, false)">
+      <button v-if="buttonAll" class="btn m-2 button-year-navbar" :class="activeClass(buttonAllActive)"
+        @click="loadAllTracks()">All</button>
+      <button v-if="buttonAllInView" class="btn m-2 button-year-navbar" :class="activeClass(buttonAllInViewActive)"
+        @click=" loadAllTracksinView()">All in
+        view</button>
+      <button v-for=" year  in  years " :key="year" class="btn m-2 button-year-navbar"
+        :class="year in buttonYActive ? activeClass(buttonYActive[year]) : activeClass(false)"
+        @click="loadTracksOfYear(year, false)">
         {{ year === 0 ? "No date" : year }}
-      </b-button>
+      </button>
     </div>
     <div class="d-flex flex-column flex-grow-1">
       <map-component :sid="sid" />
@@ -21,7 +25,6 @@
 </template>
 
 <script setup lang="ts">
-import { BButton } from 'bootstrap-vue-next'
 import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'
 import MapComponent from '@/components/MapComponent.vue'
 import { TrackCollection } from '@/lib/Track'
@@ -43,9 +46,17 @@ const props = defineProps({
 
 // reactive data
 const years = ref<number[]>([])
-const buttonsLoading = ref(true)
+const buttonsLoading = ref(false)
 const buttonAllInView = ref(false)
 const buttonAll = ref(true)
+
+// buttons active
+const buttonAllActive = ref(false)
+const buttonAllInViewActive = ref(false)
+const buttonYActive = ref<Record<number, boolean>>({})
+function activeClass(active: boolean) {
+  return active ? "btn-secondary" : "btn-outline-secondary"
+}
 
 // initialization
 const configStore = useConfigStore()
@@ -80,6 +91,10 @@ async function getYears() {
     .then((trackList) => {
       const tColl = new TrackCollection(trackList)
       years.value = tColl.yearList().sort((a, b) => b - a)
+      // button active state
+      years.value.forEach((y) => {
+        buttonYActive.value[y] = false
+      })
     })
     .catch((e: Error) => { console.log("Error in getYears", e) })
 }
@@ -89,6 +104,8 @@ function loadAllTracks() {
     command: 'all',
     zoomOut: true
   }
+  setAllButtonsInactive()
+  buttonAllActive.value = true
 }
 
 function loadAllTracksinView() {
@@ -96,6 +113,8 @@ function loadAllTracksinView() {
     command: 'bbox',
     completed: false
   }
+  setAllButtonsInactive()
+  buttonAllInViewActive.value = true
 }
 
 function loadTracksOfYear(year: number, zoomOut: boolean) {
@@ -104,6 +123,17 @@ function loadTracksOfYear(year: number, zoomOut: boolean) {
     payload: year,
     zoomOut
   }
+  setAllButtonsInactive()
+  buttonYActive.value[year] = true
+}
+
+function setAllButtonsInactive() {
+  buttonAllActive.value = false
+  buttonAllInViewActive.value = false
+  Object.keys(buttonYActive.value).forEach((p) => {
+    const keyNumber = Number.parseInt(p)
+    buttonYActive.value[keyNumber] = false
+  })
 }
 
 </script>

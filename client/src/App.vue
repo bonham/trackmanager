@@ -1,5 +1,10 @@
 <script setup>
 import { RouterView } from 'vue-router'
+import { useUserLoginStore } from '@/stores/userlogin'
+const userLoginStore = useUserLoginStore()
+userLoginStore.updateUser().catch((e) => {
+  console.log(e)
+})
 </script>
 
 <template>

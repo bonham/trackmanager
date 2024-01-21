@@ -4,18 +4,10 @@ import RegistrationForm from '@/components/auth/RegistrationForm.vue';
 import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'
 import LoginForm from '@/components/auth/LoginForm.vue';
 import LogoutForm from '@/components/auth/LogoutForm.vue';
-import { getWithCORS } from '@/lib/httpHelpers';
-
-import { onMounted } from 'vue'
 
 import { useUserLoginStore } from '@/stores/userlogin'
 const userLoginStore = useUserLoginStore()
 
-onMounted(() => {
-  updateUser().catch((err) => {
-    console.error(err)
-  })
-})
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const props = defineProps({
@@ -24,41 +16,6 @@ const props = defineProps({
     default: ''
   }
 })
-
-async function updateUser() {
-  try {
-    const res = await getWithCORS('/api/v1/auth/user')
-    if (res.ok) {
-      const ro = await res.json() as unknown
-
-      if (ro && typeof ro === 'object') {
-        if ("userid" in ro) {
-          userLoginStore.loggedIn = true
-          if (typeof ro.userid === "string") {
-            userLoginStore.username = ro.userid
-          } else {
-            throw Error("userid has wrong type: " + typeof ro.userid)
-          }
-        } else {
-          userLoginStore.loggedIn = false
-          userLoginStore.username = ""
-        }
-      } else {
-        userLoginStore.loggedIn = false
-        userLoginStore.username = ""
-        throw Error("Did not get back object from /api/v1/auth/user")
-      }
-    } else {
-      userLoginStore.loggedIn = false
-      userLoginStore.username = ""
-      throw Error(`response not ok: status: ${res.status}`)
-    }
-  } catch (error) {
-    userLoginStore.loggedIn = false
-    userLoginStore.username = ""
-    throw error
-  }
-}
 
 </script>
 
@@ -69,8 +26,8 @@ async function updateUser() {
         {{ userLoginStore.loggedIn ? `Username: ${userLoginStore.username}` : "Not signed in " }}
       </div>
       <div>
-        <LogoutForm v-if="userLoginStore.loggedIn" @changed="updateUser" />
-        <LoginForm v-else @changed="updateUser" />
+        <LogoutForm v-if="userLoginStore.loggedIn" />
+        <LoginForm v-else />
       </div>
       <div>
         <RegistrationForm use-registration-key form-label="Register with registration key" place-holder="Key" />

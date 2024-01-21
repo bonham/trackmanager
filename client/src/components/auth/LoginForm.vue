@@ -9,67 +9,47 @@ import type { VerifiedAuthenticationResponse, } from '@simplewebauthn/server'
 import { useUserLoginStore } from '@/stores/userlogin'
 const userLoginStore = useUserLoginStore()
 
-const emit = defineEmits(['changed'])
-
 const loginstatus = ref("")
 
 async function handleLogin() {
+  try {
+    await handleLoginWorker()
+  } catch (e) {
+    console.error("Error in authentication procedure", e)
+    loginstatus.value = getErrorMessage(e)
+  } finally {
+    await userLoginStore.updateUser()
+  }
+}
+
+async function handleLoginWorker() {
 
   loginstatus.value = ""
-  userLoginStore.loggedIn = false
-
   const authoptionsUrl = "/api/v1/auth/authoptions"
 
-  let resp: Response
-  try {
-    resp = await getWithCORS(authoptionsUrl);
-  } catch (error) {
-    loginstatus.value = getErrorMessage(error)
-    userLoginStore.loggedIn = false
-    emit('changed')
-    return
-  }
+  const resp = await getWithCORS(authoptionsUrl);
+
   if (!resp.ok) {
     const t = await resp.text()
     loginstatus.value = t
-    userLoginStore.loggedIn = false
-    emit('changed')
     return
   }
 
   const regoptions = await resp.json() as PublicKeyCredentialCreationOptionsJSON
 
-  let asseResp;
-  try {
-    // Pass the options to the authenticator and wait for a response
-    asseResp = await startAuthentication(regoptions);
-  } catch (error) {
-    // Some basic error handling
-    loginstatus.value = "Start Auth error: " + String(error);
-    userLoginStore.loggedIn = false
-
-    emit('changed')
-    return
-  }
+  // Pass the options to the authenticator and wait for a response
+  const asseResp = await startAuthentication(regoptions);
 
   // POST the response to the endpoint that calls
   // @simplewebauthn/server -> verifyAuthenticationResponse()
-  let verificationResp: Response
-  try {
-    verificationResp = await sendJSONToServer('/api/v1/auth/authentication', JSON.stringify(asseResp))
-    if (!verificationResp.ok) {
+  const verificationResp = await sendJSONToServer('/api/v1/auth/authentication', JSON.stringify(asseResp))
+  if (!verificationResp.ok) {
+    if (verificationResp.status === 401) {
+      loginstatus.value = "You are not authorized. Try another passkey"
+    } else {
+      loginstatus.value = `Sorry, something went wrong. Return status ${verificationResp.status}`
       console.log(`Verification failed with response:`, verificationResp)
-      loginstatus.value = "Failed"
-      userLoginStore.loggedIn = false
-      emit('changed')
-      return
     }
-  } catch (error) {
-    const msg = getErrorMessage(error);
-    console.log("Error when calling registration endpoint: " + msg);
-    loginstatus.value = "Failed"
-    userLoginStore.loggedIn = false
-    emit('changed')
     return
   }
 
@@ -81,15 +61,12 @@ async function handleLogin() {
   if (verificationJSON && verificationJSON.verified) {
 
     loginstatus.value = 'Success!';
-    userLoginStore.loggedIn = true
 
   } else {
     loginstatus.value = `Oh no, something went wrong! Response: ${JSON.stringify(
       verificationJSON,
     )}`;
-    userLoginStore.loggedIn = false
   }
-  emit('changed')
 };
 
 </script>

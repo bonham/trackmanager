@@ -36,7 +36,9 @@
           </div>
           <ul class="navbar-nav">
             <li class="nav-item">
-              <router-link class="nav-link my-1" :to="navPath('/login')">
+              <router-link v-if="userLoginStore.loggedIn" class="nav-link my-1" to="#"
+                @click="userLoginStore.logout()">Logout</router-link>
+              <router-link v-else class="nav-link my-1" :to="navPath('/login')">
                 Login
               </router-link>
             </li>

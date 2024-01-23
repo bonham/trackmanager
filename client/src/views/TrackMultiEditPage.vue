@@ -21,8 +21,7 @@
 
         <div v-else>
           <editable-text :textarea="false" :text-prop="stringOrEmpty(data.value)"
-            :set-local-value-from-prop="triggerUpdateEditableText"
-            :update-function="(value: string) => processUpdate(data.item, value)" />
+            :update-function="(value: string) => processNameUpdate(data.item, value)" />
         </div>
       </template>
 
@@ -48,7 +47,7 @@ import {
   BSpinner
 } from 'bootstrap-vue-next'
 import type { TableItem } from 'bootstrap-vue-next'
-import { getAllTracks, updateTrack, updateTrackById, deleteTrack } from '@/lib/trackServices'
+import { getAllTracks, updateTrackById, deleteTrack } from '@/lib/trackServices'
 import { Track } from '@/lib/Track'
 import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'
 import EditableText from '@/components/EditableText.vue'
@@ -122,7 +121,6 @@ const tableItems = ref<TableItem[]>([])
 const tableItemsByTrackId: Record<number, TableItem> = {}
 const tracksByTrackId = ref<{ [index: number]: Track }>({})
 const loading = ref(false)
-const triggerUpdateEditableText = ref(0)
 
 
 loadTracks().catch((e) => { console.error(e) })
@@ -176,9 +174,9 @@ async function cleanUpText(item: TableItem) {
   track.name = convertedName
 
   // Perform update in backend
-  const updateAttributes = ['name']
-  await updateTrack(track, updateAttributes, props.sid)
-  item.name = convertedName
+  await processNameUpdate(item, convertedName)
+
+  // changing value of item.loading makes sure editable text is re-rendered and prop name is put into dom element
   item.loading = false
 }
 function cleanAll() {
@@ -197,20 +195,23 @@ async function deleteTrackFromTable(item: TableItem) {
   }
 }
 
-function processUpdate(item: TableItem, updatedValue: string) {
+async function processNameUpdate(item: TableItem, updatedValue: string): Promise<boolean> {
   if (!isNumber(item.id)) throw Error("item.id not number")
   console.log('in upper component:', item.id, updatedValue)
-  updateTrackById(item.id, { name: updatedValue }, props.sid)
-    .then((success) => {
-      if (success) {
-        item.name = updatedValue
-      } else {
-        console.log(`Updating table item with track id was not successful:`, item.id)
-        // item.name is still on previous value, but dom text needs to be synchronized:
-        triggerUpdateEditableText.value++
-      }
-    })
-    .catch(console.error)
+  try {
+    const success = await updateTrackById(item.id, { name: updatedValue }, props.sid)
+    if (success) {
+      item.name = updatedValue
+      return true
+    } else {
+      console.log(`Updating table item with track id was not successful:`, item.id)
+      // item.name is still on previous value, but dom text needs to be synchronized:
+      return false
+    }
+  } catch (error) {
+    console.error(error)
+    return false
+  }
 }
 
 

@@ -20,7 +20,7 @@ import {
   BFormInput
 } from 'bootstrap-vue-next'
 
-import { ref, computed, nextTick, watch } from 'vue'
+import { ref, computed, nextTick } from 'vue'
 
 /*
 The value of form input or textarea dom elements can not be synchronized with a prop.
@@ -33,27 +33,29 @@ a) is the prop, b) is synchronized with the text value in the dom element ( inpu
 This is the  process:
 
 Component initialization: textLocal is initialized from textProp
-During component lifetime: But if parent component wants to set textLocal again from textProp, it needs
-to increment the value of `setLocalValueFromProp`.
+During runtime: dom text value change is managed by table item.name
 
 Value change of dom element from within EditableText is handled in `processValueChange` and calls props.updateFunction(v)
-The parent element is owning updateFunction() and is responsible to persist the new text value and handle success and failure.
-On failure to persist, the parent component needs to use setLocalValueFromProp to reset dom element text to old value.
+The parent element is owning updateFunction() and returns true for successful update and false for no success.
+On failure - editable text makes sure to set dom text value to prop value
+
+In other cases where parent element wants to update dom text from prop - there is a trick: set editing to true and then to false
+to force re-rendering
 */
+
+interface UpdateFunction {
+  (v: string): Promise<boolean>
+}
 
 const props = defineProps({
   textProp: {
     type: String,
     required: true
   },
-  setLocalValueFromProp: {
-    type: Number,
-    required: true,
-  },
   updateFunction: {
     type: Function,
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-    default: () => { },
+    // eslint-disable-next-line @typescript-eslint/no-empty-function, @typescript-eslint/no-unused-vars
+    default: async (v: string) => Promise.resolve(true),
     required: false
   },
   textarea: {
@@ -66,16 +68,8 @@ const props = defineProps({
 const editing = ref(false)
 
 // initial value of text field
+console.log("initialize textLocal")
 const textLocal = ref(props.textProp)
-
-// prepare for watch
-const setLocalValueFromProp = computed(() => props.setLocalValueFromProp)
-
-// trigger update of dom text by setting setLocalValueFromProp to nonzero
-watch(setLocalValueFromProp, () => {
-  console.log("Update of text value triggered")
-  textLocal.value = props.textProp
-})
 
 const inputref = ref<InstanceType<typeof BFormTextarea>>()
 
@@ -93,23 +87,39 @@ function makeEditable() {
   })
 }
 
-function processValueChange(value: string) {
-  const inputValue = value
-  console.log('change', inputValue)
-  // call the update function which was injected through props
-  props.updateFunction(inputValue)
+async function processValueChange(inputValue: string) {
+  try {
+    console.log('Process value change:', inputValue)
+
+    const valueNoWhiteSpace = inputValue.trim()
+
+    // call the update function which was injected through props
+    const success = await (props.updateFunction as UpdateFunction)(valueNoWhiteSpace) // dirty cast
+
+    if (success) {
+      // on success make sure dom text value is also trimmed
+      textLocal.value = valueNoWhiteSpace
+    } else {
+      // on failure, reset the dom element value
+      textLocal.value = props.textProp
+    }
+  } catch (e) {
+    console.error(e)
+  } finally {
+    editing.value = false
+  }
 }
 
-function processEnter(event: KeyboardEvent) {
-  const value = (event.target as HTMLInputElement).value
-  const valueNoWhiteSpace = value.trim()
-  processValueChange(valueNoWhiteSpace)
+// eslint-disable-next-line @typescript-eslint/require-await, @typescript-eslint/no-unused-vars
+async function processEnter(event: KeyboardEvent) {
+  console.log("Process Enter")
+  // In case user is not changing the value, then 'processValueChange will not be triggered
+  // Still we need to leave 'edit' mode
   editing.value = false
 }
 function processBlur() {
   console.log("Blur event. Localvalue", textLocal.value)
   editing.value = false
-  //processValueChange(localValue.value) // this does not work ;-(
 }
 
 // boolean value to decide if there is a text in the cell or not

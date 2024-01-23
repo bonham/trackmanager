@@ -8,11 +8,12 @@
       "webRoot": "${workspaceFolder}"
     },
     {
-      "name": "Launch Chrome workspace:src",
+      "name": "-> Launch Chrome workspace:src",
       "request": "launch",
       "type": "chrome",
       "url": "http://localhost:4000/tm/trackmap/sid/42trblax9",
-      "webRoot": "${workspaceFolder}/src"
+      "webRoot": "${workspaceFolder}/src",
+      "skipFiles": ["<node_internals>/**", "**/node_modules/**"]
     },
     {
       "type": "node",

@@ -18,22 +18,26 @@
         <div v-if="data.item.loading">
           <span class="cell-updating">Updating ..</span>
         </div>
-        <div v-else>
 
-          <editable-text :textarea="false" :initialtext="stringOrEmpty(data.value)"
-            :update-function="(value: string) => processUpdate(numberOrNegative1(data.item.id), value)" />
+        <div v-else>
+          <editable-text :textarea="false" :text-prop="stringOrEmpty(data.value)"
+            :set-local-value-from-prop="triggerUpdateEditableText"
+            :update-function="(value: string) => processUpdate(data.item, value)" />
         </div>
       </template>
+
       <template #cell(cbutton)="row">
         <b-button @click="cleanUpText(row.item)">
           <i-bi-arrow-left />
         </b-button>
       </template>
+
       <template #cell(dbutton)="row">
         <b-button aria-label="delete" @click="deleteTrackFromTable(row.item)">
           <i-bi-trash />
         </b-button>
       </template>
+
     </BTable>
   </track-manager-nav-bar>
 </template>
@@ -62,9 +66,9 @@ function isNumber(value: unknown): value is number {
   return typeof value === 'number';
 }
 
-function numberOrNegative1(u: unknown) {
-  return isNumber(u) ? u : -1
-}
+// function numberOrNegative1(u: unknown) {
+//   return isNumber(u) ? u : -1
+// }
 
 const trackTableFields = ref([
   {
@@ -115,8 +119,10 @@ const props = defineProps({
 })
 
 const tableItems = ref<TableItem[]>([])
+const tableItemsByTrackId: Record<number, TableItem> = {}
 const tracksByTrackId = ref<{ [index: number]: Track }>({})
 const loading = ref(false)
+const triggerUpdateEditableText = ref(0)
 
 
 loadTracks().catch((e) => { console.error(e) })
@@ -137,7 +143,7 @@ async function loadTracks() {
     // sort by track id
     tracksByTrackId.value[t.id] = t
 
-    const item = {} as TableItem
+    const item: TableItem = {}
     item.id = t.id
     item.name = t.name || ""
     item.src = t.src || ""
@@ -146,6 +152,7 @@ async function loadTracks() {
     item.loading = false
 
     tableItems.value.push(item)
+    tableItemsByTrackId[t.id] = item
   })
   loading.value = false
 }
@@ -190,9 +197,20 @@ async function deleteTrackFromTable(item: TableItem) {
   }
 }
 
-function processUpdate(trackId: number, value: string) {
-  console.log('in upper component:', trackId, value)
-  updateTrackById(trackId, { name: value }, props.sid).catch(console.error)
+function processUpdate(item: TableItem, updatedValue: string) {
+  if (!isNumber(item.id)) throw Error("item.id not number")
+  console.log('in upper component:', item.id, updatedValue)
+  updateTrackById(item.id, { name: updatedValue }, props.sid)
+    .then((success) => {
+      if (success) {
+        item.name = updatedValue
+      } else {
+        console.log(`Updating table item with track id was not successful:`, item.id)
+        // item.name is still on previous value, but dom text needs to be synchronized:
+        triggerUpdateEditableText.value++
+      }
+    })
+    .catch(console.error)
 }
 
 

@@ -20,7 +20,7 @@ import {
   BFormInput
 } from 'bootstrap-vue-next'
 
-import { ref, computed, nextTick } from 'vue'
+import { ref, computed, nextTick, watch } from 'vue'
 
 /*
 
@@ -37,7 +37,8 @@ a) is the prop, b) is synchronized with the text value in the dom element ( inpu
 This is the  process:
 
 - Component initialization: textLocal is initialized from textProp
-- In non edit mode, during runtime: dom text value change could happen because parent element is changing it through any dom-reference - table component
+
+- In non edit mode, during runtime:  textProp is changing
 
 - Edit mode from within EditableText
 
@@ -84,8 +85,17 @@ const editing = ref(false)
 // initial value of text field
 const textLocal = ref(props.textProp)
 
-const inputref = ref<InstanceType<typeof BFormTextarea>>()
+// all change of props should change textLocal
+watch(() => props.textProp, (newValue) => { // this is how to watch a property of an object - see https://vuejs.org/guide/essentials/watchers.html
+  if ((typeof newValue === 'string')) {
+    textLocal.value = newValue
+  } else {
+    console.error("Should not happen")
+    return
+  }
+})
 
+const inputref = ref<InstanceType<typeof BFormTextarea>>()
 function makeEditable() {
   editing.value = true
 

@@ -18,22 +18,25 @@
         <div v-if="data.item.loading">
           <span class="cell-updating">Updating ..</span>
         </div>
-        <div v-else>
 
-          <editable-text :textarea="false" :initialtext="stringOrEmpty(data.value)"
-            :update-function="(value: string) => processUpdate(numberOrNegative1(data.item.id), value)" />
+        <div v-else>
+          <editable-text :textarea="false" :text-prop="stringOrEmpty(data.value)"
+            :update-function="(value: string) => processNameUpdate(data.item, value)" />
         </div>
       </template>
+
       <template #cell(cbutton)="row">
         <b-button @click="cleanUpText(row.item)">
           <i-bi-arrow-left />
         </b-button>
       </template>
+
       <template #cell(dbutton)="row">
         <b-button aria-label="delete" @click="deleteTrackFromTable(row.item)">
           <i-bi-trash />
         </b-button>
       </template>
+
     </BTable>
   </track-manager-nav-bar>
 </template>
@@ -44,7 +47,7 @@ import {
   BSpinner
 } from 'bootstrap-vue-next'
 import type { TableItem } from 'bootstrap-vue-next'
-import { getAllTracks, updateTrack, updateTrackById, deleteTrack } from '@/lib/trackServices'
+import { getAllTracks, updateTrackById, deleteTrack } from '@/lib/trackServices'
 import { Track } from '@/lib/Track'
 import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'
 import EditableText from '@/components/EditableText.vue'
@@ -62,9 +65,9 @@ function isNumber(value: unknown): value is number {
   return typeof value === 'number';
 }
 
-function numberOrNegative1(u: unknown) {
-  return isNumber(u) ? u : -1
-}
+// function numberOrNegative1(u: unknown) {
+//   return isNumber(u) ? u : -1
+// }
 
 const trackTableFields = ref([
   {
@@ -115,6 +118,7 @@ const props = defineProps({
 })
 
 const tableItems = ref<TableItem[]>([])
+const tableItemsByTrackId: Record<number, TableItem> = {}
 const tracksByTrackId = ref<{ [index: number]: Track }>({})
 const loading = ref(false)
 
@@ -137,7 +141,7 @@ async function loadTracks() {
     // sort by track id
     tracksByTrackId.value[t.id] = t
 
-    const item = {} as TableItem
+    const item: TableItem = {}
     item.id = t.id
     item.name = t.name || ""
     item.src = t.src || ""
@@ -146,6 +150,7 @@ async function loadTracks() {
     item.loading = false
 
     tableItems.value.push(item)
+    tableItemsByTrackId[t.id] = item
   })
   loading.value = false
 }
@@ -169,9 +174,9 @@ async function cleanUpText(item: TableItem) {
   track.name = convertedName
 
   // Perform update in backend
-  const updateAttributes = ['name']
-  await updateTrack(track, updateAttributes, props.sid)
-  item.name = convertedName
+  await processNameUpdate(item, convertedName)
+
+  // changing value of item.loading makes sure editable text is re-rendered and prop name is put into dom element
   item.loading = false
 }
 function cleanAll() {
@@ -190,9 +195,23 @@ async function deleteTrackFromTable(item: TableItem) {
   }
 }
 
-function processUpdate(trackId: number, value: string) {
-  console.log('in upper component:', trackId, value)
-  updateTrackById(trackId, { name: value }, props.sid).catch(console.error)
+async function processNameUpdate(item: TableItem, updatedValue: string): Promise<boolean> {
+  if (!isNumber(item.id)) throw Error("item.id not number")
+  console.log('in upper component:', item.id, updatedValue)
+  try {
+    const success = await updateTrackById(item.id, { name: updatedValue }, props.sid)
+    if (success) {
+      item.name = updatedValue
+      return true
+    } else {
+      console.log(`Updating table item with track id was not successful:`, item.id)
+      // item.name is still on previous value, but dom text needs to be synchronized:
+      return false
+    }
+  } catch (error) {
+    console.error(error)
+    return false
+  }
 }
 
 

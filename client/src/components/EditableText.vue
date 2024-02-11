@@ -38,9 +38,9 @@ This is the  process:
 
 - Component initialization: textLocal is initialized from textProp
 
-- In non edit mode, during runtime:  textProp is changing
+- In non edit mode, during runtime:  textProp is changing, a watcher will update textLocal and thus update dom
 
-- Edit mode from within EditableText
+- Edit mode: Change from within EditableText
 
   When user klicks edit few things can happen
     a) User does not change text and klicks away -> Blur event only

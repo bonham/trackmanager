@@ -23,19 +23,30 @@ import {
 import { ref, computed, nextTick } from 'vue'
 
 /*
+
+Props and Refs:
+
 The value of form input or textarea dom elements can not be synchronized with a prop.
 Therefore there are two values
-a) textProp
-b) textLocal
+
+a) textProp ( initial value and during runtime, a 'to be' value)
+b) textLocal ( ref )
 
 a) is the prop, b) is synchronized with the text value in the dom element ( input or textarea )
 
 This is the  process:
 
-Component initialization: textLocal is initialized from textProp
-During runtime: dom text value change is managed by table item.name
+- Component initialization: textLocal is initialized from textProp
+- In non edit mode, during runtime: dom text value change could happen because parent element is changing it through any dom-reference - table component
 
-Value change of dom element from within EditableText is handled in `processValueChange` and calls props.updateFunction(v)
+- Edit mode from within EditableText
+
+  When user klicks edit few things can happen
+    a) User does not change text and klicks away -> Blur event only
+    b) User does not change text and press Enter -> Enter event and Blur Event
+    c) User changes text and press Enter -> Enter Event + Change event + Blur event
+    d) User changes text and klicks away  -> Change event + Blur Event
+  A value change of dom element from within EditableText is handled in `processValueChange` and calls props.updateFunction(v)
 The parent element is owning updateFunction() and returns true for successful update and false for no success.
 On failure - editable text makes sure to set dom text value to prop value
 
@@ -52,12 +63,15 @@ const props = defineProps({
     type: String,
     required: true
   },
+  // function injected from parent to persist the value change after 'enter' or moving focus somewhere else ( blur )
+  // The function provided, should return true if backend update was successful. false otherwise.
   updateFunction: {
     type: Function,
     // eslint-disable-next-line @typescript-eslint/no-empty-function, @typescript-eslint/no-unused-vars
     default: async (v: string) => Promise.resolve(true),
     required: false
   },
+  // specifies type of form field: true: textarea, false: input 
   textarea: {
     type: Boolean,
     default: false,
@@ -68,7 +82,6 @@ const props = defineProps({
 const editing = ref(false)
 
 // initial value of text field
-console.log("initialize textLocal")
 const textLocal = ref(props.textProp)
 
 const inputref = ref<InstanceType<typeof BFormTextarea>>()
@@ -114,8 +127,11 @@ async function processValueChange(inputValue: string) {
 async function processEnter(event: KeyboardEvent) {
   console.log("Process Enter")
   // In case user is not changing the value, then 'processValueChange will not be triggered
+  // Also Blur will not be triggered by itself.
+
   // Still we need to leave 'edit' mode
-  editing.value = false
+  editing.value = false // this will trigger blur event because dom element changing 
+
 }
 function processBlur() {
   console.log("Blur event. Localvalue", textLocal.value)

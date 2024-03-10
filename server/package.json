@@ -12,7 +12,7 @@
     "typecheck": "tsc --noEmit -p ./tsconfig-build.json",
     "startbuild": "node ./dist/src/index.js",
     "test": "jest",
-    "copyconfig": "ts-node -P ./tsconfig-build.json --esm ./src/bin/copyconfig.ts",
+    "copyconfig": "tsx --tsconfig ./tsconfig-build.json ./src/bin/copyconfig.ts",
     "lint": "eslint --quiet .",
     "lintwarn": "eslint ."
   },

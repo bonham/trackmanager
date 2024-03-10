@@ -1,8 +1,11 @@
+import type { NextFunction, Request, Response } from "express";
+import pg from 'pg';
+
 import * as expressvalidator from 'express-validator';
 import getSchema from './getSchema.js';
 const { param, validationResult } = expressvalidator
 
-const handleErrors = (req, res, next) => {
+const handleErrors = (req: Request, res: Response, next: NextFunction) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     console.log('Sid validation failed', errors.array());
@@ -12,7 +15,7 @@ const handleErrors = (req, res, next) => {
   return undefined;
 };
 
-function createSidValidationChain(pool) {
+function createSidValidationChain(pool: pg.Pool) {
   return [
     param('sid')
       .exists()
@@ -20,7 +23,7 @@ function createSidValidationChain(pool) {
       .isAlphanumeric()
       .withMessage('Sid is not alphanum')
       .bail()
-      .custom(async (value, { req }) => {
+      .custom(async (value: string, { req }) => {
         const sid = value;
         const schema = await getSchema(sid, pool);
         if (schema === null) {

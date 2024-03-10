@@ -11,11 +11,12 @@
       },
       "presentation": {
         "echo": true,
-        "reveal": "never",
+        "reveal": "silent",
         "focus": false,
         "panel": "new",
         "showReuseMessage": true,
-        "clear": false
+        "clear": false,
+        "close": false
       }
     },
     {
@@ -28,11 +29,12 @@
       },
       "presentation": {
         "echo": true,
-        "reveal": "never",
+        "reveal": "silent",
         "focus": false,
         "panel": "new",
         "showReuseMessage": true,
-        "clear": false
+        "clear": false,
+        "close": false
       }
     },
     {
@@ -44,12 +46,12 @@
       },
       "presentation": {
         "echo": true,
-        "reveal": "never",
+        "reveal": "silent",
         "focus": false,
         "panel": "shared",
         "showReuseMessage": true,
         "clear": false,
-        "close": true
+        "close": false
       }
     },
     {
@@ -62,12 +64,12 @@
       },
       "presentation": {
         "echo": true,
-        "reveal": "never",
+        "reveal": "silent",
         "focus": false,
         "panel": "shared",
         "showReuseMessage": true,
         "clear": false,
-        "close": true
+        "close": false
       }
     }
   ]

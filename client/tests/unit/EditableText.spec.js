@@ -1,4 +1,4 @@
-import { test, describe, vi } from 'vitest'
+import { test, describe, vi, expect } from 'vitest'
 import { render, screen } from '@testing-library/vue'
 import userEvent from '@testing-library/user-event'
 import EditableText from '@/components/EditableText.vue'
@@ -16,6 +16,7 @@ describe('EditableText', () => {
         textProp: 'hello text'
       }
     })
+    await screen.findByTitle('Pencil icon')
     const editableField = await screen.findByText('hello text')
     await user.click(editableField)
     await user.keyboard('{Control>}a{/Control}newvalue{Enter}')
@@ -38,5 +39,19 @@ describe('EditableText', () => {
     await user.keyboard('{Enter}')
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const editableFieldAfter = await screen.findByText('hello text')
+  })
+  test('No pencil', () => {
+    const mockUpdateFunc = vi.fn().mockReturnValue(true)
+    render(
+      EditableText, {
+      props: {
+        updateFunction: mockUpdateFunc,
+        textProp: 'hello text',
+        pencilVisible: false
+      }
+    })
+    const pencilIcon = screen.queryByTitle('Pencil icon')
+    expect(pencilIcon).toBeNull()
+
   })
 })

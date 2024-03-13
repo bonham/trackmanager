@@ -1,15 +1,16 @@
 <template>
   <div>
-    <div v-show="!editing" :class="{ 'editable-empty': valueIsEmptyOrWhitespace }" @click="makeEditable">
-      <i-bi-pencil-fill />
+    <div v-show="!editing" role="button" aria-label="Click to edit" state="readonly"
+      :class="{ 'editable-empty': valueIsEmptyOrWhitespace }" @click="makeEditable">
+      <i-bi-pencil-fill v-if="pencilVisible" class="editable-text-pencil" title="Pencil icon" />
       {{ valueOrEmptyPlaceholder }}
     </div>
-    <div v-show="editing">
+    <div v-show="editing" aria-label="Type text and press Enter or klick elsewhere to save">
       <b-form-textarea v-if="textarea" ref="inputref" v-model="textLocal" rows="2" max-rows="20" type="textarea"
         class="form-control overflow-hidden" @change="processValueChange" @blur="processBlur"
         @keydown.enter="processEnter" />
-      <b-form-input v-else ref="inputref" v-model="textLocal" type="text" @change="processValueChange" @blur="processBlur"
-        @keydown.enter="processEnter" />
+      <b-form-input v-else ref="inputref" v-model="textLocal" type="text" @change="processValueChange"
+        @blur="processBlur" @keydown.enter="processEnter" />
     </div>
   </div>
 </template>
@@ -51,8 +52,8 @@ This is the  process:
 The parent element is owning updateFunction() and returns true for successful update and false for no success.
 On failure - editable text makes sure to set dom text value to prop value
 
-In other cases where parent element wants to update dom text from prop - there is a trick: set editing to true and then to false
-to force re-rendering
+In other cases where parent element wants to update dom text from prop: we would need to implement 
+a new prop 'update' and watch for increment of that prop to copy prop to dom
 */
 
 interface UpdateFunction {
@@ -76,6 +77,13 @@ const props = defineProps({
   textarea: {
     type: Boolean,
     default: false,
+    required: false
+  },
+
+  // enables / disables pencil
+  pencilVisible: {
+    type: Boolean,
+    default: true,
     required: false
   }
 })

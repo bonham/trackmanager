@@ -1,32 +1,114 @@
 import type { EventFitMessage } from '@garmin/fitsdk';
+import { DateTime } from 'luxon';
 
 
-import fs from 'node:fs';
+
 import {
   RecordMessage, RecordMessageList,
   StartStopList,
   concatRecordMessageLists,
 } from '../../src/lib/fit/Messages.js';
 
+
 test('interval', () => {
-  fs.readFile(
-    './fitsdk1.json',
-    { encoding: 'utf-8' },
-    (err, jsonString) => {
-      if (err) throw err;
 
-      const messages = JSON.parse(jsonString);
-      const eventMessages = messages.eventMesgs as EventFitMessage[];
+  const eventMessages: EventFitMessage[] =
+    [
+      {
+        "timestamp": new Date("2023-10-08T08:08:17.000Z"),
+        "event": "timer",
+        "eventType": "start",
+        "data": 0,
+        "timerTrigger": "manual"
+      },
+      {
+        "timestamp": new Date("2023-10-08T08:08:17.000Z"),
+        "event": "timer",
+        "eventType": "stopAll",
+        "data": 1,
+        "timerTrigger": "auto"
+      },
+      {
+        "timestamp": new Date("2023-10-08T08:08:18.000Z"),
+        "event": "timer",
+        "eventType": "start",
+        "data": 1,
+        "timerTrigger": "auto"
+      },
+      {
+        "timestamp": new Date("2023-10-08T08:08:18.000Z"),
+        "event": "timer",
+        "eventType": "stopAll",
+        "data": 1,
+        "timerTrigger": "auto"
+      },
+      {
+        "timestamp": new Date("2023-10-08T08:08:59.000Z"),
+        "event": "timer",
+        "eventType": "start",
+        "data": 1,
+        "timerTrigger": "auto"
+      },
+      {
+        "timestamp": new Date("2023-10-08T08:09:22.000Z"),
+        "event": "timer",
+        "eventType": "stopAll",
+        "data": 1,
+        "timerTrigger": "auto"
+      },
+      {
+        "timestamp": new Date("2023-10-08T12:54:47.000Z"),
+        "event": "timer",
+        "eventType": "start",
+        "data": 1,
+        "timerTrigger": "auto"
+      },
+      {
+        "timestamp": new Date("2023-10-08T12:54:50.000Z"),
+        "event": "timer",
+        "eventType": "stopAll",
+        "data": 1,
+        "timerTrigger": "auto"
+      },
+      {
+        "timestamp": new Date("2023-10-08T12:54:56.000Z"),
+        "event": "timer",
+        "eventType": "stopAll",
+        "data": 0,
+        "timerTrigger": "manual"
+      },
+      {
+        "timestamp": new Date("2023-10-08T14:08:22.000Z"),
+        "event": "timer",
+        "eventType": "start",
+        "data": 1,
+        "timerTrigger": "auto"
+      },
+      {
+        "timestamp": new Date("2023-10-08T14:08:26.000Z"),
+        "event": "timer",
+        "eventType": "stopAll",
+        "data": 1,
+        "timerTrigger": "auto"
+      },
+      {
+        "timestamp": new Date("2023-10-08T14:08:52.000Z"),
+        "event": "timer",
+        "eventType": "stopAll",
+        "data": 0,
+        "timerTrigger": "manual"
+      }
+    ]
 
-      const eventMesgs = new StartStopList(eventMessages);
-      const intervals = eventMesgs.getIntervals();
+  // start of test
 
-      expect(intervals.length).toBeGreaterThan(0);
-      const firstInt = intervals[0];
-      expect(firstInt[0]).toEqual('2023-10-08T08:08:17.000Z');
-      expect(firstInt[1]).toEqual('2023-10-08T08:08:17.000Z');
-    },
-  );
+  const eventMesgs = new StartStopList(eventMessages);
+  const intervals = eventMesgs.getIntervals();
+
+  expect(intervals.length).toBeGreaterThan(0);
+  const firstInt = intervals[0];
+  expect(firstInt[0]).toEqual(DateTime.fromISO('2023-10-08T08:08:17.000Z'));
+  expect(firstInt[1]).toEqual(DateTime.fromISO('2023-10-08T08:08:17.000Z'));
 });
 
 test('type1', () => {

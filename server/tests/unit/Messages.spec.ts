@@ -10,7 +10,7 @@ import {
 
 test('interval', () => {
   fs.readFile(
-    './fitsdk1.json',
+    __dirname + '/fitsdk1.json',
     { encoding: 'utf-8' },
     (err, jsonString) => {
       if (err) throw err;

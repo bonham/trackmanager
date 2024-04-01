@@ -49,13 +49,16 @@ async function processFitFile(
 
     segment.getMessages().forEach((recordMessage) => {
       const [lat, lon] = recordMessage.getLatLon()
-      const elevation = recordMessage.getFitMessage().altitude
+      const fitMsg = recordMessage.getFitMessage()
+      const elevation = fitMsg.altitude
+      const point_time = fitMsg.timestamp
       if (elevation === undefined) throw Error("Elevation not defined")
 
       trackpts.push({
         lat,
         lon,
-        elevation
+        elevation,
+        point_time
       });
     });
     track.addSegment(trackpts);

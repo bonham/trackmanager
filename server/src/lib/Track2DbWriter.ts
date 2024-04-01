@@ -95,8 +95,8 @@ class Track2DbWriter {
   async insertPointList(trackId: number, segId: number, tpList: TrackPoint[]): Promise<void> {
     const sql =
       `insert into ${this.tablePoint} ` +
-      `( track_id, track_segment_id, segment_point_id, elevation, wkb_geometry) ` +
-      `VALUES($1, $2, $3, $4, ST_GeomFromText($5)) `
+      `( track_id, track_segment_id, segment_point_id, elevation, point_time, wkb_geometry) ` +
+      `VALUES($1, $2, $3, $4, $5, ST_GeomFromText($6)) `
 
     console.log(`Writing ${tpList.length} points for track id ${trackId}`)
 
@@ -107,6 +107,7 @@ class Track2DbWriter {
         segId,
         pointIndex,
         point.elevation,
+        point.point_time,
         `POINT(${point.lon} ${point.lat})`
       ]
       await this.pool.query(sql, parameters)

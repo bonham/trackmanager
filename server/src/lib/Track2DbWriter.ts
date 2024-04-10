@@ -7,6 +7,7 @@ const TRACK_TABLENAME = "tracks"
 const TRACK_SEQUENCENAME = "tracks_id"
 const SEGMENT_TABLENAME = "segments"
 const POINTS_TABLENAME = "track_points"
+const POINTS_TMP_TABLENAME = "track_points_tmp"
 
 
 interface DBOpts {
@@ -26,6 +27,7 @@ class Track2DbWriter {
   tableSegment: string;
   tableTrack: string;
   tablePoint: string;
+  tablePointTmp: string;
   sequenceTrack: string;
 
   constructor(dbOptions: DBOpts, fileBufferHash: string) {
@@ -35,6 +37,7 @@ class Track2DbWriter {
     this.tableTrack = `${this.dbOptions.dbSchema}.${TRACK_TABLENAME}`
     this.tableSegment = `${this.dbOptions.dbSchema}.${SEGMENT_TABLENAME}`
     this.tablePoint = `${this.dbOptions.dbSchema}.${POINTS_TABLENAME}`
+    this.tablePointTmp = `${this.dbOptions.dbSchema}.${POINTS_TMP_TABLENAME}`
     this.sequenceTrack = `${this.dbOptions.dbSchema}.${TRACK_SEQUENCENAME}`
 
     this.pool = new pg.Pool({
@@ -58,7 +61,8 @@ class Track2DbWriter {
 
       const segment = segmentList[segId]
       await this.insertSegment(trackId, segId)
-      await this.insertPointList(trackId, segId, segment)
+      await this.insertPointListForSegment(trackId, segId, segment)
+      await this.processAndSimplifyTrack(trackId)
     }
     await this.updateTrackWkbGeometry(trackId)
     return trackId;
@@ -89,16 +93,23 @@ class Track2DbWriter {
 
   async insertSegment(trackId: number, segId: number): Promise<void> {
     const sql = `insert into ${this.tableSegment} (track_id, track_segment_id) VALUES($1, $2)`
-    await this.pool.query(sql, [trackId, segId])
+    await this.pool.query(sql, [trackId, segId]) // ?
   }
 
-  async insertPointList(trackId: number, segId: number, tpList: TrackPoint[]): Promise<void> {
+  async insertPointListForSegment(trackId: number, segId: number, tpList: TrackPoint[]): Promise<void> {
+
+    // first insert into temp points table
+    // calculate length, timelength, speed
+    // then simplify and insert into real points table
+    // remove points from temp table
+
+    console.log(`Before simplify: ${tpList.length} points for track id ${trackId}, segment id ${segId}`)
+
+    // insert into temp table
     const sql =
-      `insert into ${this.tablePoint} ` +
+      `insert into ${this.tablePointTmp} ` +
       `( track_id, track_segment_id, segment_point_id, elevation, point_time, wkb_geometry) ` +
       `VALUES($1, $2, $3, $4, $5, ST_GeomFromText($6)) `
-
-    console.log(`Writing ${tpList.length} points for track id ${trackId}`)
 
     for (let pointIndex = 0; pointIndex < tpList.length; pointIndex++) {
       const point = tpList[pointIndex]
@@ -114,10 +125,54 @@ class Track2DbWriter {
     }
   }
 
+  async processAndSimplifyTrack(trackId: number) {
+    // calculate ascent
+
+    // create simplified points
+    await this.pool.query('begin transaction')
+    const sql_simplify = `
+
+      insert into ${this.tablePoint} ( track_id, track_segment_id, segment_point_id, elevation, point_time, wkb_geometry)
+      with simple1 as (
+        select track_id, track_segment_id,
+        ST_Simplify(ST_MakeLine(wkb_geometry order by id), 0.00001) as wkb_s
+        from ${this.tablePointTmp} tp
+        group by track_id, track_segment_id
+      ),
+      reducedpoints as (
+        select ST_DumpPoints(wkb_s) as dp
+        from simple1
+      ),
+      joinbase as (
+        select (dp).geom as wkb_geometry from reducedpoints
+      )
+      select
+      track_id, track_segment_id,
+      rank() OVER (PARTITION BY track_id, track_segment_id ORDER BY id) as segment_point_id,
+      elevation, point_time, wkb_geometry
+      from ${this.tablePointTmp}
+      where wkb_geometry in ( select wkb_geometry from joinbase)
+      and track_id = $1
+      order by id      
+    `
+    await this.pool.query(sql_simplify, [trackId])
+
+    await this.pool.query(`delete from ${this.tablePointTmp} where track_id = $1`, [trackId])
+    await this.pool.query('commit')
+
+
+
+    // calculate timelength / length
+
+    // create wkb geometry in tracks
+
+
+  }
+
   async updateTrackWkbGeometry(trackId: number): Promise<void> {
     // update geometry in track table
     const sql2 = `
-        UPDATE sch_elk.tracks
+        UPDATE ${this.dbOptions.dbSchema}.tracks
         SET wkb_geometry = subquery.wkb_geometry
         FROM (
           SELECT 
@@ -127,7 +182,7 @@ class Track2DbWriter {
                 track_segment_id,
                 ST_MakeLine(wkb_geometry ORDER BY segment_point_id) as line_geom
               FROM 
-                sch_elk.track_points
+                ${this.dbOptions.dbSchema}.track_points
               WHERE track_id = $1
               GROUP BY 
                   track_segment_id
@@ -135,7 +190,7 @@ class Track2DbWriter {
           ) AS line_subquery
         ) AS subquery
         WHERE 
-          sch_elk.tracks.id = $1
+          ${this.dbOptions.dbSchema}.tracks.id = $1
         `
     await this.pool.query(sql2, [trackId])
   }

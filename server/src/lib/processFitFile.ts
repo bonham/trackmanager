@@ -74,7 +74,11 @@ async function processFitFile(
   }, fileHash);
 
   const id: number = await dbw.write(track);
-  console.log(`Track created with id ${id}`);
+  if (id >= 0) {
+    console.log(`Track created with id ${id}`);
+  } else {
+    console.error("Error occurred. No track created")
+  }
 }
 
 export { processFitFile };

@@ -50,22 +50,32 @@ class Track2DbWriter {
   async write(t: Track): Promise<number> {
 
     const meta = t.getMetaData();
-    const trackId = await this.getNextTrackId()
 
-    await this.insertTrackMetadata(trackId, meta)
+    await this.pool.query('begin transaction')
+    try {
+      const trackId = await this.getNextTrackId()
 
-    const segmentList = t.getSegments()
-    console.log(`Writing ${segmentList.length} segments for track ${trackId}`)
+      await this.insertTrackMetadata(trackId, meta)
 
-    for (let segId = 0; segId < segmentList.length; segId++) {
+      const segmentList = t.getSegments()
+      console.log(`Writing ${segmentList.length} segments for track ${trackId}`)
 
-      const segment = segmentList[segId]
-      await this.insertSegment(trackId, segId)
-      await this.insertPointListForSegment(trackId, segId, segment)
-      await this.processAndSimplifyTrack(trackId)
+      for (let segId = 0; segId < segmentList.length; segId++) {
+
+        const segment = segmentList[segId]
+        await this.insertSegment(trackId, segId)
+        await this.insertPointListForSegment(trackId, segId, segment)
+        await this.processAndSimplifyTrack(trackId)
+      }
+      await this.updateTrackWkbGeometry(trackId)
+      await this.pool.query('commit')
+      return trackId;
+
+    } catch (e) {
+      console.error("Error during track creation. Rolling back", e)
+      await this.pool.query('rollback')
+      return -1
     }
-    await this.updateTrackWkbGeometry(trackId)
-    return trackId;
   }
 
   async insertTrackMetadata(id: number, tmeta: TrackMetadata): Promise<void> {
@@ -129,7 +139,6 @@ class Track2DbWriter {
     // calculate ascent
 
     // create simplified points
-    await this.pool.query('begin transaction')
     const sql_simplify = `
 
       insert into ${this.tablePoint} ( track_id, track_segment_id, segment_point_id, elevation, point_time, wkb_geometry)
@@ -158,14 +167,6 @@ class Track2DbWriter {
     await this.pool.query(sql_simplify, [trackId])
 
     await this.pool.query(`delete from ${this.tablePointTmp} where track_id = $1`, [trackId])
-    await this.pool.query('commit')
-
-
-
-    // calculate timelength / length
-
-    // create wkb geometry in tracks
-
 
   }
 

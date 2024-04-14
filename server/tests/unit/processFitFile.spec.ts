@@ -4,9 +4,12 @@ import { Pool } from 'pg';
 import { processFitFile } from '../../src/lib/processFitFile';
 
 jest.mock('pg');
+const mockQuery = jest.fn()
 jest.mock('pg', () => {
   const mClient = {
-    connect: jest.fn(),
+    connect: () => {
+      return { query: mockQuery, release: jest.fn() }
+    },
     query: jest.fn(),
     end: jest.fn(),
   };
@@ -23,7 +26,8 @@ describe('FitFile', () => {
   });
   test('processFitFile', async () => {
     const buf = readFileSync('tests/data/Activity.fit');
-    mockPool.query
+    mockQuery
+      .mockResolvedValueOnce('Transaction started')
       .mockResolvedValueOnce({ rows: [{ nextval: '77' }] })
       .mockResolvedValueOnce({ rowCount: 1 })
 

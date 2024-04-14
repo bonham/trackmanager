@@ -343,7 +343,7 @@ router.post(
 
         processFile(filePath, (req as ReqWSchema).schema, SIMPLIFY_DISTANCE)
           .then(() => res.json({ message: 'ok' }))
-          .catch(e => console.log("Could not parse form", e));
+          .catch(e => { throw e });
       }
     });
   }),

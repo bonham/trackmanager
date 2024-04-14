@@ -77,9 +77,8 @@ class Track2DbWriter {
       return trackId;
 
     } catch (e) {
-      console.error("Error during track creation. Rolling back", e)
       await client.query('rollback')
-      return -1
+      throw new Error("Error during track creation. Rolling back", { cause: e })
     } finally {
       client.release()
     }

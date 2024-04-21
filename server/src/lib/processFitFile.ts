@@ -71,9 +71,9 @@ async function processFitFile(
     dbSchema: schema,
     dbHost: 'localhost',
     dbUser: 'postgres',
-  }, fileHash);
+  });
 
-  const id: number = await dbw.write(track);
+  const id: number = await dbw.write(track, fileHash);
   if (id >= 0) {
     console.log(`Track created with id ${id}`);
   } else {

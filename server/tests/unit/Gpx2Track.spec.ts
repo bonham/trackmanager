@@ -55,5 +55,12 @@ describe("Convert gpx to geojson", () => {
     expect(trackMetadata).toHaveLength(1)
     expect(trackMetadata[0].ascent).toEqual(2089.209370)
     expect(trackMetadata[0].timelength).toEqual(8926)
+    expect(trackMetadata[0].time).toEqual(new Date('1984-05-23T22:06:07Z'))
+  })
+  test("Metadata Start time", async () => {
+    const f = await readFile(mFilePath, { encoding: 'utf-8' })
+    const gpt = new Gpx2Track(f)
+    const start = gpt.extractStartTimeFromMetadata()
+    expect(start).toEqual(new Date('2013-05-23T22:06:07+00:00'))
   })
 })

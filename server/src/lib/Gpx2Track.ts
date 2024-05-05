@@ -1,10 +1,26 @@
 import * as tj from "@tmcw/togeojson";
 import * as jsdom from 'jsdom';
+import { DateTime } from 'luxon';
+
 const JSDOM = jsdom.JSDOM
 
 interface TrackMetadata {
   ascent?: number,
   timelength?: number,
+  time?: Date
+}
+
+function getTextContentOfSingleElement(nList: NodeListOf<Element>): (string | undefined) {
+  const ar = Array.from(nList)
+  if (ar.length > 1) {
+    throw new Error("Array should not not contain more than one element")
+  } else if (ar.length === 1) {
+    const text = ar[0].textContent
+    return (text ?? undefined)
+  }
+  else {
+    return undefined
+  }
 }
 
 class Gpx2Track {
@@ -28,6 +44,18 @@ class Gpx2Track {
     return featureCollection
   }
 
+  extractStartTimeFromMetadata() {
+    const timeElements = this.doc.querySelectorAll(":scope > metadata > time")
+    const dateText = getTextContentOfSingleElement(timeElements)
+    if (dateText !== undefined) {
+      const startDate = DateTime.fromISO(dateText)
+      if (startDate.isValid) {
+        const startDateValid = (startDate as DateTime<true>)
+        return startDateValid.toJSDate()
+      }
+    }
+  }
+
   extractExtensions() {
 
     // get all tracks
@@ -38,27 +66,22 @@ class Gpx2Track {
 
       const trackMetaData: TrackMetadata = {}
 
-      const extensionElements = Array.from(trkEle.querySelectorAll(":scope > extensions"))
-      if (extensionElements.length > 1) throw Error("Multiple <extensions> elements in track")
-      else if (extensionElements.length === 1) {
+      const ascentTags = trkEle.querySelectorAll(":scope > extensions > totalascent")
+      const ascentText = getTextContentOfSingleElement(ascentTags)
+      trackMetaData.ascent = ascentText ? parseFloat(ascentText) : undefined
 
-        const extNode = extensionElements[0]
+      const timelengthTags = trkEle.querySelectorAll(':scope > extensions > timelength')
+      const timelengthText = getTextContentOfSingleElement(timelengthTags)
+      trackMetaData.timelength = timelengthText ? parseFloat(timelengthText) : undefined
 
-        const ascentTags = extNode.querySelectorAll(':scope > totalascent')
-        if (ascentTags.length > 1) throw Error(`Number of ascent tags is ${ascentTags.length}`)
-        else if (ascentTags.length === 1) {
-          const tmpVal = ascentTags[0].textContent
-          if (tmpVal !== null) {
-            trackMetaData.ascent = parseFloat(tmpVal)
-          }
-        }
-        const timelengthTags = Array.from(extNode.querySelectorAll(':scope >timelength'))
-        if (timelengthTags.length > 1) throw Error(`Number of timelengthTags tags is ${timelengthTags.length}`)
-        else if (timelengthTags.length === 1) {
-          const tmpVal = timelengthTags[0].textContent
-          if (tmpVal !== null) {
-            trackMetaData.timelength = parseFloat(tmpVal)
-          }
+      const timeTags = trkEle.querySelectorAll(':scope > extensions > time')
+      const timeText = getTextContentOfSingleElement(timeTags)
+
+      if (timeText !== undefined) {
+        const startDate = DateTime.fromISO(timeText)
+        if (startDate.isValid) {
+          const startDateValid = (startDate as DateTime<true>)
+          trackMetaData.time = startDateValid.toJSDate()
         }
       }
       metaDataList.push(trackMetaData)

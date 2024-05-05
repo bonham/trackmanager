@@ -1,11 +1,11 @@
 import { readFile } from 'node:fs/promises';
 import * as path from 'node:path';
-import { Gpx2Track } from "./Gpx2Track.js";
+import { Gpx2Track } from "../../src/lib/Gpx2Track.js";
 
-const mFilePath = path.join(__dirname, "./TwoSegments.gpx")
+const mFilePath = path.join(__dirname, "../data/TwoSegments.gpx")
 const gpxFileList = [
-  [path.join(__dirname, "./OneTrackOneSegment.gpx"), 1, 1, 387],
-  [path.join(__dirname, "./TwoSegments.gpx"), 1, 2, 519],
+  [path.join(__dirname, "../data/OneTrackOneSegment.gpx"), 1, 1, 387],
+  [path.join(__dirname, "../data/TwoSegments.gpx"), 1, 2, 519],
 ]
 
 describe("Convert gpx to geojson", () => {

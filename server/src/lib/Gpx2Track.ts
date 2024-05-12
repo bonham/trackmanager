@@ -1,13 +1,44 @@
 import * as tj from "@tmcw/togeojson";
+import type { Position } from "geojson";
 import * as jsdom from 'jsdom';
 import { DateTime } from 'luxon';
 
 const JSDOM = jsdom.JSDOM
 
 interface TrackMetadata {
+  name?: string,
   ascent?: number,
   timelength?: number,
   time?: Date
+}
+
+type TimeStringList = (string | undefined)[]
+interface ExtendedSegment {
+  positionList: Position[],
+  timeStringList: TimeStringList
+}
+
+interface PropsWithTimes {
+  coordinateProperties: {
+    times: (string[] | string[][])
+  }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function isPropsWithTimes(props: Record<string, any>): props is PropsWithTimes {
+  if (
+    (props !== null) &&
+    (typeof props === 'object') &&
+    Object.hasOwn(props, 'coordinateProperties') &&
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    Object.hasOwn(props.coordinateProperties, 'times') &&
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    Array.isArray(props.coordinateProperties.times)
+  ) {
+    return true
+  } else {
+    return false
+  }
 }
 
 function getTextContentOfSingleElement(nList: NodeListOf<Element>): (string | undefined) {
@@ -23,6 +54,9 @@ function getTextContentOfSingleElement(nList: NodeListOf<Element>): (string | un
   }
 }
 
+
+
+
 class Gpx2Track {
   s: string;
   doc: Document;
@@ -36,9 +70,75 @@ class Gpx2Track {
       }
     ))
     this.doc = parseResult.window.document
-
   }
 
+  parseCoordinates(): ExtendedSegment[][] {
+    const featureCollection = this.toGeoJson()
+    const features = featureCollection.features
+    const tracks: ExtendedSegment[][] = []
+
+    // Iterate over tracks
+    // eslint-disable-next-line @typescript-eslint/prefer-for-of
+    for (let trackNum = 0; trackNum < features.length; trackNum++) {
+      const eSegments: ExtendedSegment[] = []
+
+      const feature = features[trackNum]
+      const trackGeometry = feature.geometry
+
+      const props = feature.properties
+      // Identify segments
+      if (trackGeometry.type === "LineString") {
+        const co = trackGeometry.coordinates
+        let timeStringList: (string[] | undefined[])
+        // if (
+        //   (props !== null) &&
+        //   Object.hasOwn(props, 'coordinateProperties') &&
+        //   // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+        //   Object.hasOwn(props.coordinateProperties, 'times') &&
+        //   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        //   Array.isArray(props.coordinateProperties.times)
+        // ) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+        // timeStringList = props.coordinateProperties.times as string[]
+        if (props !== null && isPropsWithTimes(props)) {
+          timeStringList = (props.coordinateProperties.times as string[])
+        } else {
+          timeStringList = Array<undefined>(co.length).fill(undefined)
+        }
+        eSegments.push({ positionList: co, timeStringList })
+      } else if (trackGeometry.type === "MultiLineString") {
+        for (let segNum = 0; segNum < trackGeometry.coordinates.length; segNum++) {
+          const co = trackGeometry.coordinates[segNum]
+          let timeStringList: (string[] | undefined[])
+
+          if (props !== null && isPropsWithTimes(props)) {
+            timeStringList = (props.coordinateProperties.times[segNum] as string[])
+          } else {
+            timeStringList = Array<undefined>(co.length).fill(undefined)
+          }
+          eSegments.push({ positionList: co, timeStringList })
+
+        }
+      } else console.error(`Unexpected type ${trackGeometry.type} found`)
+      tracks.push(eSegments)
+    }
+    return tracks
+  }
+
+  trackElements() {
+    return this.doc.querySelectorAll(":scope > trk")
+  }
+
+  numTracks() {
+    const trackElements = this.trackElements()
+    return trackElements.length
+  }
+
+  /**
+   * Extract coordinates for tracks and segments
+   * 
+   * @returns Feature collection - each feature representing a track
+   */
   toGeoJson() {
     const featureCollection = tj.gpx(this.doc)
     return featureCollection
@@ -56,16 +156,22 @@ class Gpx2Track {
     }
   }
 
-  extractExtensions() {
+  extractMetadata() {
 
     // get all tracks
     const metaDataList: TrackMetadata[] = []
     // const trkElements = filterForTag(filterElements(this.doc.documentElement.childNodes), "trk")
-    const trkElements = this.doc.getElementsByTagName('trk')
+    const trkElements = this.trackElements()
     Array.from(trkElements).forEach((trkEle) => {
 
       const trackMetaData: TrackMetadata = {}
 
+      // <name> property of <trd>
+      const nameElements = trkEle.querySelectorAll(":scope > name")
+      const trackName = getTextContentOfSingleElement(nameElements)
+      trackMetaData.name = trackName
+
+      // <extensions>
       const ascentTags = trkEle.querySelectorAll(":scope > extensions > totalascent")
       const ascentText = getTextContentOfSingleElement(ascentTags)
       trackMetaData.ascent = ascentText ? parseFloat(ascentText) : undefined
@@ -89,47 +195,7 @@ class Gpx2Track {
     return metaDataList
   }
 
-  // toTrack() {
-
-  //   const featureCollection = this.toGeoJson()
-  //   const features = featureCollection.features
-
-  //   const realFeatures = features.filter((f) => f.type == "Feature")
-  //   // each feature is a track. Either with one segment ( Linestring ), or multiple segments ( MultiLineString )
-  //   const lineFeatures = realFeatures.filter((f) => (f.geometry.type == "MultiLineString" || f.geometry.type == "LineString"))
-
-  //   for (let feature of lineFeatures) {
-
-  //     const props = feature.properties
-  //     if (props === null) {
-  //       console.error("Could not find properties for xxx")
-  //       continue
-  //     }
-  //     const name = isString(props.name) ? props.name : undefined
-  //     const dateString = isString(props.time) ? props.time : undefined
-
-  //     const hasCoordinateTimes = (props.hasOwn('coordinateProperties') && props.coordinateProperties && props.coordinateProperties.hasOwn('times'))
-  //     return false
-
-
-
-
-  //     const track = new Track({
-  //       name,
-  //       source: undefined,
-  //       undefine,
-  //       totalDistance,
-  //       durationSeconds: totalTimerTime,
-  //       startTime,
-  //     });
-  //   }
-  // }
-
 }
 export { Gpx2Track };
-
-// function isString(x: unknown): x is string {
-//   return typeof x === 'string'
-// }
 
 

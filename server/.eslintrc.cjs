@@ -37,6 +37,7 @@ module.exports = {
     "@typescript-eslint/no-unsafe-return": "warn",
     "@typescript-eslint/no-import-type-side-effects": "error", // related to verbatimModuleSyntax
     "@typescript-eslint/no-unnecessary-type-assertion": "warn",
+    "@typescript-eslint/prefer-for-of": "off"
   }
 }
 

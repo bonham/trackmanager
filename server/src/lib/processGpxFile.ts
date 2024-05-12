@@ -1,35 +1,70 @@
-const GPX2DB_SCRIPT = process.env.GPX2DBSCRIPT;
-import { execFileSync } from 'node:child_process';
 
-function processGpxFile(
-  simplifyDistance: number,
-  filePath: string,
-  dbname: string,
+import { Gpx2Track } from './Gpx2Track.js';
+import type { Segment, TrackPoint } from './Track.js';
+import { Track } from './Track.js';
+import { writeTrack } from './trackWriteHelpers.js';
+
+
+
+async function processGpxFile(
+  fileBuffer: Buffer,
+  fileName: string,
+  database: string,
   schema: string,
 ) {
-  // build arguments
-  const args = [
-    '-s',
-    simplifyDistance.toString(),
-    filePath,
-    dbname,
-    schema,
-  ];
 
+  const gpx2t = new Gpx2Track(fileBuffer.toString('utf-8'))
 
-  // run child process - execute python executable to process the upload
-  let stdout = '';
-  try {
-    console.log('Command: ', GPX2DB_SCRIPT, args);
-    if (GPX2DB_SCRIPT === undefined) throw new Error("GPX2DB_SCRIPT config var not defined")
-    stdout = execFileSync(GPX2DB_SCRIPT, args, { encoding: 'utf-8' });
-    console.log(`Stdout >>${stdout}<<`);
-  } catch (err) {
-    console.log(`Stdout >>${stdout}<<`);
-    console.log('Child error', err);
-    const message = (err instanceof Error && 'message' in err) ? err.message : '';
-    console.log('Message', message);
-    throw (err);
+  // check if gpx file
+  if (gpx2t.numTracks() < 1) {
+    console.error(`Could not find any track in gpx file ${fileName} `)
+  }
+
+  const metadataStartTime = gpx2t.extractStartTimeFromMetadata()
+  const extensionList = gpx2t.extractMetadata()
+
+  const trackSegmentPoints = gpx2t.parseCoordinates()
+
+  // Iterate over tracks
+  for (let trackNum = 0; trackNum < trackSegmentPoints.length; trackNum++) {
+
+    // extract metadata for track
+    const { name, ascent, time: timeExt, timelength } = extensionList[trackNum]
+    const trackTime = timeExt ?? metadataStartTime
+
+    const track = new Track({
+      name: name,
+      source: fileName,
+      totalAscent: ascent,
+      startTime: trackTime ?? new Date(),
+      durationSeconds: timelength
+    })
+
+    const extSegments = trackSegmentPoints[trackNum]
+    for (const extSegment of extSegments) {
+
+      const { positionList, timeStringList } = extSegment
+      const segment: Segment = []
+      for (let segPointNum = 0; segPointNum < positionList.length; segPointNum++) {
+        const timeString = timeStringList[segPointNum]
+        const point_time = timeString ? new Date(timeString) : undefined
+        const position = positionList[segPointNum]
+        const tp: TrackPoint = {
+          lon: position[0],
+          lat: position[1],
+          elevation: position[2],
+          point_time
+        }
+        segment.push(tp)
+      }
+      track.addSegment(segment)
+    }
+    await writeTrack({
+      fileBuffer,
+      database,
+      schema,
+      track
+    })
   }
 }
 

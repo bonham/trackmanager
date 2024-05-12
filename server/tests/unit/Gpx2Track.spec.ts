@@ -2,10 +2,11 @@ import { readFile } from 'node:fs/promises';
 import * as path from 'node:path';
 import { Gpx2Track } from "../../src/lib/Gpx2Track.js";
 
-const mFilePath = path.join(__dirname, "../data/TwoSegments.gpx")
+const twoSegmentsFilePath = path.join(__dirname, "../data/TwoSegments.gpx")
+const oneTrackOneSegmentFilePath = path.join(__dirname, "../data/OneTrackOneSegment.gpx")
 const gpxFileList = [
-  [path.join(__dirname, "../data/OneTrackOneSegment.gpx"), 1, 1, 387],
-  [path.join(__dirname, "../data/TwoSegments.gpx"), 1, 2, 519],
+  [oneTrackOneSegmentFilePath, 1, 1, 385],
+  [twoSegmentsFilePath, 1, 2, 519],
 ]
 
 describe("Convert gpx to geojson", () => {
@@ -14,8 +15,15 @@ describe("Convert gpx to geojson", () => {
   test.each(gpxFileList)("gpx file %s", async (fpath, numTracks, numSegments, numPoints1stSeg) => {
     const f = await readFile(fpath as string, { encoding: 'utf-8' })
     const gpt = new Gpx2Track(f)
+
+    // check number of tracks
+    expect(gpt.numTracks()).toBe(numTracks)
+
+    // check geojson output
     const gj = gpt.toGeoJson()
     expect(gj).toHaveProperty("type", "FeatureCollection")
+
+    // each feature is a track
     const features = gj.features
     expect(Array.isArray(features)).toBeTruthy()
     expect(features.length).toBe(numTracks)
@@ -49,18 +57,47 @@ describe("Convert gpx to geojson", () => {
 
   })
   test("Extensions", async () => {
-    const f = await readFile(mFilePath, { encoding: 'utf-8' })
+    const f = await readFile(twoSegmentsFilePath, { encoding: 'utf-8' })
     const gpt = new Gpx2Track(f)
-    const trackMetadata = gpt.extractExtensions()
+    const trackMetadata = gpt.extractMetadata()
     expect(trackMetadata).toHaveLength(1)
-    expect(trackMetadata[0].ascent).toEqual(2089.209370)
-    expect(trackMetadata[0].timelength).toEqual(8926)
-    expect(trackMetadata[0].time).toEqual(new Date('1984-05-23T22:06:07Z'))
+    const tm = trackMetadata[0]
+    expect(tm.ascent).toEqual(2089.209370)
+    expect(tm.timelength).toEqual(8926)
+    expect(tm.time).toEqual(new Date('1984-05-23T22:06:07Z'))
+    expect(tm.name).toEqual('TwoSegmentsName')
   })
   test("Metadata Start time", async () => {
-    const f = await readFile(mFilePath, { encoding: 'utf-8' })
+    const f = await readFile(twoSegmentsFilePath, { encoding: 'utf-8' })
     const gpt = new Gpx2Track(f)
     const start = gpt.extractStartTimeFromMetadata()
     expect(start).toEqual(new Date('2013-05-23T22:06:07+00:00'))
   })
+
+  test("Lat Lon ele time onetrackoneseg", async () => {
+    const f = await readFile(oneTrackOneSegmentFilePath, { encoding: 'utf-8' })
+    const gpt = new Gpx2Track(f)
+    const x = gpt.parseCoordinates()
+    const eseg = x[0][0]
+    const pl = eseg.positionList[0]
+    expect(pl[1]).toEqual(49.177111)
+    expect(pl[0]).toEqual(7.799191)
+    expect(pl[2]).toEqual(134.977754)
+    const timeList = eseg.timeStringList
+    expect(timeList[0]).toEqual("1013-01-17T15:17:37Z")
+  })
+
+  test("Lat Lon ele time twosegs", async () => {
+    const f = await readFile(twoSegmentsFilePath, { encoding: 'utf-8' })
+    const gpt = new Gpx2Track(f)
+    const x = gpt.parseCoordinates()
+    const eseg = x[0][0]
+    const pl = eseg.positionList[0]
+    expect(pl[1]).toEqual(93.932797)
+    expect(pl[0]).toEqual(8.682082)
+    expect(pl[2]).toEqual(222.822990)
+    const timeList = eseg.timeStringList
+    expect(timeList[0]).toEqual("1984-05-23T22:06:07Z")
+  })
+
 })

@@ -20,6 +20,7 @@
     "@garmin/fitsdk": "^21.126.0",
     "@simplewebauthn/server": "^8.3.5",
     "@tmcw/togeojson": "^5.8.1",
+    "@types/geojson": "^7946.0.14",
     "connect-pg-simple": "^9.0.0",
     "cors": "^2.8.5",
     "debug": "^4.3.4",

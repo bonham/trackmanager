@@ -4,7 +4,7 @@
 		<time>1013-01-17T15:17:17Z</time>
 	</metadata>
 	<trk>
-		<name></name>
+		<name>OneTrackOneSegmentName</name>
 		<type>speed</type>
 		<desc></desc>
 		<link></link>
@@ -42,28 +42,6 @@
 			<BatteryMaxCapacity>0.000000</BatteryMaxCapacity>
 		</UserData>
 		<trkseg>
-			<trkpt lat="49.177071" lon="7.797313">
-				<ele>0.000000</ele>
-				<time>1013-01-17T15:17:17Z</time>
-				<extensions>
-					<distance>0.000000</distance>
-					<speed>0.000000</speed>
-					<course>114</course>
-					<acceleration>0.000000</acceleration>
-					<calories>1.734791</calories>
-				</extensions>
-			</trkpt>
-			<trkpt lat="49.177737" lon="7.797977">
-				<ele>135.717974</ele>
-				<time>1013-01-17T15:17:17Z</time>
-				<extensions>
-					<distance>53.335791</distance>
-					<speed>5.571137</speed>
-					<course>173</course>
-					<acceleration>0.395170</acceleration>
-					<calories>1.977191</calories>
-				</extensions>
-			</trkpt>
 			<trkpt lat="49.177111" lon="7.799191">
 				<ele>134.977754</ele>
 				<time>1013-01-17T15:17:37Z</time>

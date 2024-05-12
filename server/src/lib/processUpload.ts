@@ -10,7 +10,6 @@ const DATABASE = process.env.TM_DATABASE;
 async function processFile(
   filePath: string,
   schema: string,
-  simplifyDistance = 2,
 ) {
   if (DATABASE === undefined) throw Error('Database is undefined');
 
@@ -21,7 +20,7 @@ async function processFile(
   if (FitFile.isFit(fileBuffer)) {
     await processFitFile(fileBuffer, fileName, DATABASE, schema)
   } else {
-    processGpxFile(simplifyDistance, filePath, DATABASE, schema);
+    await processGpxFile(fileBuffer, fileName, DATABASE, schema)
   }
   try {
     rmSync(filePath)

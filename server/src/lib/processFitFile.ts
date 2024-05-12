@@ -1,21 +1,14 @@
 
-import { createHash } from 'node:crypto';
 import type { TrackPoint } from './Track.js';
 import { Track } from './Track.js';
-import { Track2DbWriter } from './Track2DbWriter.js';
 import { FitFile } from './fit/FitFile.js';
+import { writeTrack } from './trackWriteHelpers.js';
 
 // read metadata from fit session messages ( avg speed, start time, distance, ascent )
 
 // read all points with lat lon , time, ascent
 
 // calculate segments
-
-function hashBuffer(buffer: Buffer) {
-  const hash = createHash('sha256');
-  hash.update(buffer);
-  return hash.digest('hex');
-}
 
 async function processFitFile(
   fileBuffer: Buffer,
@@ -64,21 +57,13 @@ async function processFitFile(
     track.addSegment(trackpts);
   });
 
-  const fileHash = hashBuffer(fileBuffer);
+  await writeTrack({
+    fileBuffer,
+    database,
+    schema,
+    track
+  })
 
-  const dbw = new Track2DbWriter({
-    dbName: database,
-    dbSchema: schema,
-    dbHost: 'localhost',
-    dbUser: 'postgres',
-  });
-
-  const id: number = await dbw.write(track, fileHash);
-  if (id >= 0) {
-    console.log(`Track created with id ${id}`);
-  } else {
-    console.error("Error occurred. No track created")
-  }
 }
 
 export { processFitFile };

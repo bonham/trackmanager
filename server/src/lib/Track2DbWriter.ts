@@ -18,36 +18,55 @@ interface DBOpts {
 }
 
 class Track2DbWriter {
-  dbOptions: DBOpts;
+  dbOptionsVar: DBOpts | null = null;
+  clientVar: pg.Client | null = null;
 
-  client: pg.Client;
-
-  tableSegment: string;
-  tableTrack: string;
-  tablePoint: string;
-  tablePointTmp: string;
-  sequenceTrack: string;
-
-  constructor(dbOptions: DBOpts) {
-    this.dbOptions = dbOptions;
-
-    this.tableTrack = `${this.dbOptions.dbSchema}.${TRACK_TABLENAME}`
-    this.tableSegment = `${this.dbOptions.dbSchema}.${SEGMENT_TABLENAME}`
-    this.tablePoint = `${this.dbOptions.dbSchema}.${POINTS_TABLENAME}`
-    this.tablePointTmp = `${this.dbOptions.dbSchema}.${POINTS_TMP_TABLENAME}`
-    this.sequenceTrack = `${this.dbOptions.dbSchema}.${TRACK_SEQUENCENAME}`
-
-    this.client = new pg.Client({
+  async init(dbOptions: DBOpts) {
+    this.dbOptionsVar = dbOptions
+    const client = new pg.Client({
       database: dbOptions.dbName,
       host: dbOptions.dbHost,
       user: dbOptions.dbUser,
     });
+    await client.connect()
+    this.clientVar = client
+  }
+
+  dbOptions() {
+    if (this.dbOptionsVar === null) throw new Error("Dbwriter object was not initialized")
+    else return this.dbOptionsVar
+  }
+
+  client(): pg.Client {
+    if (this.clientVar === null) throw new Error("Client not initialized")
+    else return this.clientVar
+  }
+
+  schema(): string {
+    return this.dbOptions().dbSchema
+  }
+
+  tableSegment(): string {
+    return `${this.schema()}.${SEGMENT_TABLENAME}`
+  }
+  tableTrack(): string {
+    return `${this.schema()}.${TRACK_TABLENAME}`
+  }
+  tablePoint(): string {
+    return `${this.schema()}.${POINTS_TABLENAME}`
+  }
+  tablePointTmp(): string {
+    return `${this.schema()}.${POINTS_TMP_TABLENAME}`
+  }
+  sequenceTrack(): string {
+    return `${this.schema()}.${TRACK_SEQUENCENAME}`
   }
 
   async write(t: Track, fileBufferHash: string): Promise<number> {
 
     const meta = t.getMetaData();
-    await this.client.query('begin transaction')
+
+    await this.client().query('begin transaction')
     try {
       const trackId = await this.getNextTrackId()
       console.log("New track id: " + trackId)
@@ -68,11 +87,10 @@ class Track2DbWriter {
       await this.updateLengthTime(trackId)
       await this.updateAscentFromSimplifiedPoints(trackId)
       await this.deletePointsFromTmp(trackId)
-      await this.client.query('commit')
+      await this.client().query('commit')
       return trackId;
-
     } catch (e) {
-      await this.client.query('rollback')
+      await this.client().query('rollback')
       throw new Error("Error during track creation. Rolling back", { cause: e })
     }
   }
@@ -84,7 +102,7 @@ class Track2DbWriter {
     } = tmeta;
 
     const insert = `
-    INSERT INTO ${this.dbOptions.dbSchema}.tracks(
+    INSERT INTO ${this.schema()}.tracks(
       id,
       name, src, hash, "time", length, timelength, ascent)
       VALUES (
@@ -95,14 +113,14 @@ class Track2DbWriter {
       startTime, totalDistance, durationSeconds, totalAscent,
     ];
 
-    const res = await this.client.query(insert, values);
+    const res = await this.client().query(insert, values);
     if (res.rowCount !== 1) throw new Error('Insert rowcount is not equal to 1');
 
   }
 
   async insertSegment(trackId: number, segId: number): Promise<void> {
-    const sql = `insert into ${this.tableSegment} (track_id, track_segment_id) VALUES($1, $2)`
-    await this.client.query(sql, [trackId, segId]) // ?
+    const sql = `insert into ${this.tableSegment()} (track_id, track_segment_id) VALUES($1, $2)`
+    await this.client().query(sql, [trackId, segId]) // ?
   }
 
   async insertPointListForSegment(trackId: number, segId: number, tpList: TrackPoint[]): Promise<void> {
@@ -116,7 +134,7 @@ class Track2DbWriter {
 
     // insert into temp table
     const sql =
-      `insert into ${this.tablePointTmp} ` +
+      `insert into ${this.tablePointTmp()} ` +
       `( track_id, track_segment_id, segment_point_id, elevation, point_time, wkb_geometry) ` +
       `VALUES($1, $2, $3, $4, $5, ST_GeomFromText($6)) `
 
@@ -130,7 +148,7 @@ class Track2DbWriter {
         point.point_time,
         `POINT(${point.lon} ${point.lat})`
       ]
-      await this.client.query(sql, parameters)
+      await this.client().query(sql, parameters)
     }
   }
 
@@ -140,11 +158,11 @@ class Track2DbWriter {
     // create simplified points
     const sql_simplify = `
 
-      insert into ${this.tablePoint} ( track_id, track_segment_id, segment_point_id, elevation, point_time, wkb_geometry)
+      insert into ${this.tablePoint()} ( track_id, track_segment_id, segment_point_id, elevation, point_time, wkb_geometry)
       with simple1 as (
         select track_id, track_segment_id,
         ST_Simplify(ST_MakeLine(wkb_geometry order by id), 0.00001) as wkb_s
-        from ${this.tablePointTmp} tp
+        from ${this.tablePointTmp()} tp
         group by track_id, track_segment_id
       ),
       reducedpoints as (
@@ -158,24 +176,24 @@ class Track2DbWriter {
       track_id, track_segment_id,
       rank() OVER (PARTITION BY track_id, track_segment_id ORDER BY id) as segment_point_id,
       elevation, point_time, wkb_geometry
-      from ${this.tablePointTmp}
+      from ${this.tablePointTmp()}
       where wkb_geometry in ( select wkb_geometry from joinbase)
       and track_id = $1
       order by id      
     `
 
     // console.log(sql_simplify)
-    await this.client.query(sql_simplify, [trackId])
+    await this.client().query(sql_simplify, [trackId])
   }
 
   async deletePointsFromTmp(trackId: number) {
-    await this.client.query(`delete from ${this.tablePointTmp} where track_id = $1`, [trackId])
+    await this.client().query(`delete from ${this.tablePointTmp()} where track_id = $1`, [trackId])
   }
 
   async updateTrackWkbGeometry(trackId: number): Promise<void> {
     // update geometry in track table
     const sql2 = `
-        UPDATE ${this.dbOptions.dbSchema}.tracks
+        UPDATE ${this.schema()}.tracks
         SET wkb_geometry = subquery.wkb_geometry
         FROM (
           SELECT 
@@ -185,7 +203,7 @@ class Track2DbWriter {
                 track_segment_id,
                 ST_MakeLine(wkb_geometry ORDER BY segment_point_id) as line_geom
               FROM 
-                ${this.dbOptions.dbSchema}.track_points
+                ${this.schema()}.track_points
               WHERE track_id = $1
               GROUP BY 
                   track_segment_id
@@ -193,36 +211,36 @@ class Track2DbWriter {
           ) AS line_subquery
         ) AS subquery
         WHERE 
-          ${this.dbOptions.dbSchema}.tracks.id = $1
+          ${this.schema()}.tracks.id = $1
         `
-    await this.client.query(sql2, [trackId])
+    await this.client().query(sql2, [trackId])
   }
 
   async updateLengthTime(track_id: number, fromTmp = true): Promise<void> {
     const sourceView = fromTmp ? "calculated_track_stats_tmp" : "calculated_track_stats"
     const sql = `
-    update ${this.dbOptions.dbSchema}.tracks t
+    update ${this.schema()}.tracks t
     set (length_calc, timelength_calc) =
       (select length_calc, timelength_calc::integer
-      from ${this.dbOptions.dbSchema}.${sourceView} cst
+      from ${this.schema()}.${sourceView} cst
       where cst.track_id = t.id)
     where t.id = $1`
-    await this.client.query(sql, [track_id])
+    await this.client().query(sql, [track_id])
   }
 
   async updateAscentFromSimplifiedPoints(track_id: number): Promise<void> {
     const sql = `
-    update ${this.dbOptions.dbSchema}.tracks t
+    update ${this.schema()}.tracks t
     set (ascent_calc) =
       (select ascent_calc
-      from ${this.dbOptions.dbSchema}.calculated_track_stats cs
+      from ${this.schema()}.calculated_track_stats cs
       where cs.track_id = t.id)
     where t.id = $1`
-    await this.client.query(sql, [track_id])
+    await this.client().query(sql, [track_id])
   }
 
   async getNextTrackId(): Promise<number> {
-    const resTrackId = await this.client.query(`select nextval('${this.dbOptions.dbSchema}.tracks_id')`);
+    const resTrackId = await this.client().query(`select nextval('${this.schema()}.tracks_id')`);
     const nextValRow = resTrackId.rows[0] as (object | undefined)
     if (!isNextValQueryResult(nextValRow)) {
       throw Error("Query did not return correct nextval structure")

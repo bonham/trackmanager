@@ -16,12 +16,13 @@ export async function writeTrack(o: {
 }) {
   const fileHash = hashBuffer(o.fileBuffer);
 
-  const dbw = new Track2DbWriter({
+  const dbw = new Track2DbWriter();
+  await dbw.init({
     dbName: o.database,
     dbSchema: o.schema,
     dbHost: 'localhost',
     dbUser: 'postgres',
-  });
+  })
 
   const id: number = await dbw.write(o.track, fileHash);
   if (id >= 0) {

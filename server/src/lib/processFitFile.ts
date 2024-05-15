@@ -1,21 +1,14 @@
 
-import { createHash } from 'node:crypto';
 import type { TrackPoint } from './Track.js';
 import { Track } from './Track.js';
-import { Track2DbWriter } from './Track2DbWriter.js';
 import { FitFile } from './fit/FitFile.js';
+import { writeTrack } from './trackWriteHelpers.js';
 
 // read metadata from fit session messages ( avg speed, start time, distance, ascent )
 
 // read all points with lat lon , time, ascent
 
 // calculate segments
-
-function hashBuffer(buffer: Buffer) {
-  const hash = createHash('sha256');
-  hash.update(buffer);
-  return hash.digest('hex');
-}
 
 async function processFitFile(
   fileBuffer: Buffer,
@@ -49,29 +42,28 @@ async function processFitFile(
 
     segment.getMessages().forEach((recordMessage) => {
       const [lat, lon] = recordMessage.getLatLon()
-      const elevation = recordMessage.getFitMessage().altitude
+      const fitMsg = recordMessage.getFitMessage()
+      const elevation = fitMsg.altitude
+      const point_time = fitMsg.timestamp
       if (elevation === undefined) throw Error("Elevation not defined")
 
       trackpts.push({
         lat,
         lon,
-        elevation
+        elevation,
+        point_time
       });
     });
     track.addSegment(trackpts);
   });
 
-  const fileHash = hashBuffer(fileBuffer);
+  await writeTrack({
+    fileBuffer,
+    database,
+    schema,
+    track
+  })
 
-  const dbw = new Track2DbWriter({
-    dbName: database,
-    dbSchema: schema,
-    dbHost: 'localhost',
-    dbUser: 'postgres',
-  }, fileHash);
-
-  const id: number = await dbw.write(track);
-  console.log(`Track created with id ${id}`);
 }
 
 export { processFitFile };

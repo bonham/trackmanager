@@ -1,8 +1,9 @@
 import { readFileSync } from 'fs';
-import { FitFile } from './FitFile.js';
+import path from 'node:path';
+import { FitFile } from '../../src/lib/fit/FitFile.js';
 
 test('Fit File A', () => {
-  const buf = readFileSync('./tests/data/Activity.fit');
+  const buf = readFileSync(path.join(__dirname, '../data/Activity.fit'));
   expect(FitFile.isFit(buf)).toBeTruthy();
   const fitFile = new FitFile(buf);
   expect(fitFile.getFirstSessionMessage().timestamp).toBeDefined();

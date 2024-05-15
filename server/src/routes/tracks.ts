@@ -35,8 +35,6 @@ import createSidValidationChain from '../lib/sidResolverMiddleware.js';
 import trackIdValidationMiddleware from '../lib/trackIdValidationMiddleware.js';
 import yearValidation from '../lib/yearValidation.js';
 
-const SIMPLIFY_DISTANCE = 2;
-
 const database = process.env.TM_DATABASE;
 
 // sql query pool
@@ -341,9 +339,9 @@ router.post(
         if (files.newtrack === undefined) throw new Error('Expected form field not received: newtrack');
         const filePath = files.newtrack[0].filepath;
 
-        processFile(filePath, (req as ReqWSchema).schema, SIMPLIFY_DISTANCE)
+        processFile(filePath, (req as ReqWSchema).schema)
           .then(() => res.json({ message: 'ok' }))
-          .catch(e => console.log("Could not parse form", e));
+          .catch(e => { throw e });
       }
     });
   }),

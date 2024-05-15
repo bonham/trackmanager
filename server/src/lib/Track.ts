@@ -3,6 +3,7 @@ interface TrackPoint {
   lat: number;
   lon: number;
   elevation: number;
+  point_time?: Date
 }
 
 interface TrackMetadata {

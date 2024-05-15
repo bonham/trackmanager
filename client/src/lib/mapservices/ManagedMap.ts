@@ -266,6 +266,10 @@ export class ManagedMap {
     const track = geoJsonWithTrack.track
     const trackId = track.id
 
+    if (geojson === null) {
+      throw new Error(`Geojson object is null when trying to add track layer for track ${trackId}`)
+    }
+
     if (this.trackIdToLayerMap.has(trackId)) {
       console.log(`An attempt was made to add layer with track id ${trackId}, but a track with this id already exists in map layers`)
       return

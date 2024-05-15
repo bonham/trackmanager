@@ -1,33 +1,27 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+import { jest, test } from '@jest/globals';
 import { readFileSync } from 'node:fs';
-import { Pool } from 'pg';
-import { processFitFile } from '../../src/lib/processFitFile';
+import { processFitFile } from '../../src/lib/processFitFile.js';
 
-jest.mock('pg');
-jest.mock('pg', () => {
-  const mClient = {
-    connect: jest.fn(),
-    query: jest.fn(),
-    end: jest.fn(),
-  };
-  return { Pool: jest.fn(() => mClient) };
-});
+import { Track2DbWriter } from '../../src/lib/Track2DbWriter.js';
+jest.mock('../../src/lib/Track2DbWriter.js')
+
+type DbOpts = Parameters<InstanceType<typeof Track2DbWriter>['init']>[0];
+
+const mockInit = jest.fn<(o: DbOpts) => Promise<void>>();
+const mockWrite = jest.fn<() => Promise<number>>()
+jest.spyOn(Track2DbWriter.prototype, 'write').mockImplementation(mockWrite)
+jest.spyOn(Track2DbWriter.prototype, 'init').mockImplementation(mockInit)
 
 describe('FitFile', () => {
-  let mockPool: any;
-  beforeEach(() => {
-    mockPool = new Pool();
-  });
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-  test('processFitFile', async () => {
-    const buf = readFileSync('tests/data/Activity.fit');
-    mockPool.query
-      .mockResolvedValueOnce({ rows: [{ nextval: '77' }] })
-      .mockResolvedValueOnce({ rowCount: 1 })
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  beforeEach(() => {
+    jest.clearAllMocks();
+  })
+
+  test('processFitFile', async () => {
+    mockWrite.mockResolvedValue(77)
+    const buf = readFileSync('tests/data/Activity.fit');
     await processFitFile(buf, 'myfilename.fit', 'mydbname', 'myschema');
+    expect(mockWrite).toHaveBeenCalledTimes(1)
   });
 });

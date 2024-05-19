@@ -4,27 +4,25 @@ import { Gpx2Track } from "../../src/lib/Gpx2Track.js";
 
 const twoSegmentsFilePath = path.join(__dirname, "../data/TwoSegments.gpx")
 const oneTrackOneSegmentFilePath = path.join(__dirname, "../data/OneTrackOneSegment.gpx")
+const twoTracks = path.join(__dirname, "../data/TwoTracks.gpx")
 const gpxFileList = [
   [oneTrackOneSegmentFilePath, 1, 1, 385],
   [twoSegmentsFilePath, 1, 2, 519],
+  [twoTracks, 2, 1, 2],
 ]
 
 describe("Convert gpx to geojson", () => {
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  test.each(gpxFileList)("gpx file %s", async (fpath, numTracks, numSegments, numPoints1stSeg) => {
+  test.each(gpxFileList)("gpx file %s", async (fpath, numTracks, numSegments1stTrack, numPoints1stSeg) => {
     const f = await readFile(fpath as string, { encoding: 'utf-8' })
     const gpt = new Gpx2Track(f)
 
     // check number of tracks
     expect(gpt.numTracks()).toBe(numTracks)
 
-    // check geojson output
-    const gj = gpt.toGeoJson()
-    expect(gj).toHaveProperty("type", "FeatureCollection")
-
     // each feature is a track
-    const features = gj.features
+    const features = gpt.getTrackFeatures()
     expect(Array.isArray(features)).toBeTruthy()
     expect(features.length).toBe(numTracks)
 
@@ -49,7 +47,7 @@ describe("Convert gpx to geojson", () => {
         actualNumberOfSegments = 0
         actualNumPointsInFirstSegment = 0
       }
-      expect(actualNumberOfSegments).toEqual(numSegments)
+      expect(actualNumberOfSegments).toEqual(numSegments1stTrack)
       expect(actualNumPointsInFirstSegment).toEqual(numPoints1stSeg)
     }
 
@@ -59,9 +57,7 @@ describe("Convert gpx to geojson", () => {
   test("Extensions", async () => {
     const f = await readFile(twoSegmentsFilePath, { encoding: 'utf-8' })
     const gpt = new Gpx2Track(f)
-    const trackMetadata = gpt.extractMetadata()
-    expect(trackMetadata).toHaveLength(1)
-    const tm = trackMetadata[0]
+    const tm = gpt.trackMetadata(0)
     expect(tm.ascent).toEqual(2089.209370)
     expect(tm.timelength).toEqual(8926)
     expect(tm.time).toEqual(new Date('1984-05-23T22:06:07Z'))
@@ -77,7 +73,7 @@ describe("Convert gpx to geojson", () => {
   test("Lat Lon ele time onetrackoneseg", async () => {
     const f = await readFile(oneTrackOneSegmentFilePath, { encoding: 'utf-8' })
     const gpt = new Gpx2Track(f)
-    const x = gpt.parseCoordinates()
+    const x = gpt.getExtendedSegments()
     const eseg = x[0][0]
     const pl = eseg.positionList[0]
     expect(pl[1]).toEqual(49.177111)
@@ -90,7 +86,7 @@ describe("Convert gpx to geojson", () => {
   test("Lat Lon ele time twosegs", async () => {
     const f = await readFile(twoSegmentsFilePath, { encoding: 'utf-8' })
     const gpt = new Gpx2Track(f)
-    const x = gpt.parseCoordinates()
+    const x = gpt.getExtendedSegments()
     const eseg = x[0][0]
     const pl = eseg.positionList[0]
     expect(pl[1]).toEqual(93.932797)

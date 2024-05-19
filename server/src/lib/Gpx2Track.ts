@@ -1,5 +1,5 @@
 import * as tj from "@tmcw/togeojson";
-import type { Position } from "geojson";
+import type { Feature, GeoJsonProperties, Geometry, Position } from "geojson";
 import * as jsdom from 'jsdom';
 import { DateTime } from 'luxon';
 
@@ -60,6 +60,8 @@ function getTextContentOfSingleElement(nList: NodeListOf<Element>): (string | un
 class Gpx2Track {
   s: string;
   doc: Document;
+  trackFeatures: Feature<Geometry, GeoJsonProperties>[];
+  extendedSegments: ExtendedSegment[][]
 
   constructor(s: string) {
     this.s = s
@@ -70,11 +72,16 @@ class Gpx2Track {
       }
     ))
     this.doc = parseResult.window.document
+    this.trackFeatures = this._storeTrackFeatures()
+    this.extendedSegments = this._storeExtendedSegments()
+
+    if (this.trackFeatures.length !== this.numTracks()) throw Error(`Track features length '${this.trackFeatures.length} not matching ${this.numTracks()}`)
+    if (this.extendedSegments.length !== this.numTracks()) throw Error(`Track extendedSegments length '${this.extendedSegments.length} not matching ${this.numTracks()}`)
   }
 
-  parseCoordinates(): ExtendedSegment[][] {
-    const featureCollection = this.toGeoJson()
-    const features = featureCollection.features
+  _storeExtendedSegments(): ExtendedSegment[][] {
+
+    const features = this.trackFeatures
     const tracks: ExtendedSegment[][] = []
 
     // Iterate over tracks
@@ -116,6 +123,10 @@ class Gpx2Track {
     return tracks
   }
 
+  getExtendedSegments() {
+    return this.extendedSegments
+  }
+
   trackElements() {
     return this.doc.querySelectorAll(":scope > trk")
   }
@@ -123,16 +134,6 @@ class Gpx2Track {
   numTracks() {
     const trackElements = this.trackElements()
     return trackElements.length
-  }
-
-  /**
-   * Extract coordinates for tracks and segments
-   * 
-   * @returns Feature collection - each feature representing a track
-   */
-  toGeoJson() {
-    const featureCollection = tj.gpx(this.doc)
-    return featureCollection
   }
 
   extractStartTimeFromMetadata() {
@@ -149,48 +150,57 @@ class Gpx2Track {
 
   /**
    * Get extension metadata for all tracks
+   * @param trackNum track id
    * @returns List of objects containing extension data. Lenght of list should correspond to length of tracks.
    */
-  extractMetadata() {
+  trackMetadata(trackNum: number) {
 
-    // get all tracks
-    const metaDataList: TrackMetadata[] = []
-    // const trkElements = filterForTag(filterElements(this.doc.documentElement.childNodes), "trk")
-    const trkElements = this.trackElements()
-    Array.from(trkElements).forEach((trkEle) => {
+    const trackFt = this.trackFeatures[trackNum]
 
-      const trackMetaData: TrackMetadata = {}
+    // extract metadata for track
+    const props = trackFt.properties
+    const tm: TrackMetadata = {}
 
-      // <name> property of <trd>
-      const nameElements = trkEle.querySelectorAll(":scope > name")
-      const trackName = getTextContentOfSingleElement(nameElements)
-      trackMetaData.name = trackName
+    if (props !== null) {
+      tm.name = isString(props.name) ? props.name : undefined
 
-      // <extensions>
-      const ascentTags = trkEle.querySelectorAll(":scope > extensions > totalascent")
-      const ascentText = getTextContentOfSingleElement(ascentTags)
-      trackMetaData.ascent = ascentText ? parseFloat(ascentText) : undefined
-
-      const timelengthTags = trkEle.querySelectorAll(':scope > extensions > timelength')
-      const timelengthText = getTextContentOfSingleElement(timelengthTags)
-      trackMetaData.timelength = timelengthText ? parseFloat(timelengthText) : undefined
-
-      const timeTags = trkEle.querySelectorAll(':scope > extensions > time')
-      const timeText = getTextContentOfSingleElement(timeTags)
-
-      if (timeText !== undefined) {
-        const startDate = DateTime.fromISO(timeText)
-        if (startDate.isValid) {
-          const startDateValid = (startDate as DateTime<true>)
-          trackMetaData.time = startDateValid.toJSDate()
-        }
+      if (isString(props.time)) {
+        const tmpDate = new Date(props.time)
+        tm.time = tmpDate.toString() === "Invalid Date" ? undefined : tmpDate
       }
-      metaDataList.push(trackMetaData)
-    })
-    return metaDataList
+    }
+
+    // ascent
+    const trkElements = this.trackElements()
+    const trkEle = Array.from(trkElements)[trackNum]
+
+    const ascentTags = trkEle.querySelectorAll(":scope > extensions > totalascent")
+    const ascentText = getTextContentOfSingleElement(ascentTags)
+    tm.ascent = ascentText ? parseFloat(ascentText) : undefined
+
+    const timelengthTags = trkEle.querySelectorAll(':scope > extensions > timelength')
+    const timelengthText = getTextContentOfSingleElement(timelengthTags)
+    tm.timelength = timelengthText ? parseFloat(timelengthText) : undefined
+
+    return tm
   }
 
+  _storeTrackFeatures() {
+    const featureCollection = tj.gpx(this.doc)
+    return featureCollection.features.filter((ft) => ft.properties?._gpxType === 'trk')
+  }
+
+  getTrackFeatures() {
+    return this.trackFeatures
+  }
 }
+
+function isString(x: unknown): x is string {
+  return typeof (x) === 'string'
+}
+
 export { Gpx2Track };
+
+
 
 

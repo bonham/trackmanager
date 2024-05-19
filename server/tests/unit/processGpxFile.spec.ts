@@ -8,9 +8,11 @@ jest.mock('../../src/lib/Track2DbWriter.js')
 
 const twoSegmentsFilePath = path.join(__dirname, "../data/TwoSegments.gpx")
 const oneTrackOneSegmentFilePath = path.join(__dirname, "../data/OneTrackOneSegment.gpx")
+const twoTracks = path.join(__dirname, "../data/TwoTracks.gpx")
 const gpxFileList = [
   [oneTrackOneSegmentFilePath],
   [twoSegmentsFilePath],
+  [twoTracks],
 ]
 
 

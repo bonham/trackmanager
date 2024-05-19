@@ -1,4 +1,4 @@
-import { jest, test } from '@jest/globals';
+import { describe, jest, test } from '@jest/globals';
 import { readFileSync } from 'node:fs';
 import { processFitFile } from '../../src/lib/processFitFile.js';
 

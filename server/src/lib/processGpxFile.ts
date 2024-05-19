@@ -16,27 +16,28 @@ async function processGpxFile(
   const gpx2t = new Gpx2Track(fileBuffer.toString('utf-8'))
 
   // check if gpx file
-  if (gpx2t.numTracks() < 1) {
+  const numTracks = gpx2t.numTracks()
+  if (numTracks < 1) {
     console.error(`Could not find any track in gpx file ${fileName} `)
   }
 
   const metadataStartTime = gpx2t.extractStartTimeFromMetadata()
-  const extensionList = gpx2t.extractMetadata()
+  const trackSegmentPoints = gpx2t.getExtendedSegments()
 
-  const trackSegmentPoints = gpx2t.parseCoordinates()
 
   // Iterate over tracks
-  for (let trackNum = 0; trackNum < trackSegmentPoints.length; trackNum++) {
+  for (let trackNum = 0; trackNum < numTracks; trackNum++) {
 
     // extract metadata for track
-    const { name, ascent, time: timeExt, timelength } = extensionList[trackNum]
-    const trackTime = timeExt ?? metadataStartTime
+    const tm = gpx2t.trackMetadata(trackNum)
+    const { name, ascent, time, timelength } = tm
+    const startTime = time ?? metadataStartTime
 
     const track = new Track({
-      name: name,
+      name,
       source: fileName,
       totalAscent: ascent,
-      startTime: trackTime ?? new Date(),
+      startTime: startTime ?? new Date(),
       durationSeconds: timelength
     })
 

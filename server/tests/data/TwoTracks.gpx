@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-7" standalone="no"?>
+<gpx xmlns="http://www.topografix.com/GPX/1/1" version="1.1">
+	<metadata>
+		<time>1023-01-17T15:27:17Z</time>
+	</metadata>
+	<rte>
+		<name>MyRoute</name>
+		<rtept lat="49.001" lon="8.001"/>
+		<rtept lat="49.002" lon="8.002"/>
+	</rte>
+	<trk>
+		<name>Two Tracks 1</name>
+		<trkseg>
+			<trkpt lat="49.177111" lon="7.799191">
+				<ele>134.977754</ele>
+				<time>1013-01-17T15:17:37Z</time>
+			</trkpt>
+			<trkpt lat="49.177707" lon="7.799379">
+				<ele>134.175522</ele>
+				<time>1013-01-17T15:17:47Z</time>
+			</trkpt>
+		</trkseg>
+	</trk>
+	<trk>
+		<name>Two Tracks 2</name>
+		<type>speed</type>
+		<desc></desc>
+		<link></link>
+		<cmt></cmt>
+		<extensions>
+			<fileid>2017041500000444-4FFFE1E4-BA0A-AB49-2219-7C47D30F3B15</fileid>
+			<tracktype>1</tracktype>
+			<localTime>1013-01-17T17:17:57Z</localTime>
+			<profile>Rennrad</profile>
+			<time>1013-01-17T15:17:17Z</time>
+			<length>19737.779771</length>
+			<maxaltitude>114.954101</maxaltitude>
+			<totalascent>147.717117</totalascent>
+			<totaldescent>149.051117</totaldescent>
+			<calories>907.730597</calories>
+			<avggrade>1.037471</avggrade>
+		</extensions>
+		<trkseg>
+			<trkpt lat="47.177111" lon="8.799191">
+				<ele>234.977754</ele>
+				<time>2013-01-17T15:17:37Z</time>
+				<extensions>
+					<distance>111.515793</distance>
+					<speed>7.111114</speed>
+					<course>175</course>
+					<acceleration>0.191100</acceleration>
+					<calories>1.977191</calories>
+				</extensions>
+			</trkpt>
+			<trkpt lat="47.177707" lon="8.799379">
+				<ele>234.175511</ele>
+				<time>2013-01-17T15:17:47Z</time>
+				<extensions>
+					<distance>171.107031</distance>
+					<speed>5.759747</speed>
+					<course>157</course>
+					<acceleration>-0.171771</acceleration>
+					<calories>1.977191</calories>
+				</extensions>
+			</trkpt>
+		</trkseg>
+	</trk>
+</gpx>

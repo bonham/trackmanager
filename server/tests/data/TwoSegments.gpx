@@ -3,6 +3,21 @@
 	<metadata>
 		<time>2013-05-23T22:06:07Z</time>
 	</metadata>
+	<wpt lat="49.391097800" lon="6.497309494">
+		<name>label=Flügel, Winnenden,BW,Deutschland</name>
+		<cmt>label=Flügel, Winnenden,BW,Deutschland</cmt>
+		<desc>label=Flügel, Winnenden,BW,Deutschland</desc>
+	</wpt>
+	<wpt lat="49.483315943" lon="8.52008724">
+		<name>label=Sommerlinde, Winnenden,BW,Deutschland</name>
+		<cmt>label=Sommerlinde, Winnenden,BW,Deutschland</cmt>
+		<desc>label=Sommerlinde, Winnenden,BW,Deutschland</desc>
+	</wpt>
+	<wpt lat="41.980278446" lon="7.610913658">
+		<name>label=K 2233, Rostock,BW,Deutschland</name>
+		<cmt>label=K 2233, Rostock,BW,Deutschland</cmt>
+		<desc>label=K 2233, Rostock,BW,Deutschland</desc>
+	</wpt>
 	<trk>
 		<name>TwoSegmentsName</name>
 		<type>speed</type>

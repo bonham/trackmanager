@@ -90,16 +90,7 @@ class Gpx2Track {
       if (trackGeometry.type === "LineString") {
         const co = trackGeometry.coordinates
         let timeStringList: (string[] | undefined[])
-        // if (
-        //   (props !== null) &&
-        //   Object.hasOwn(props, 'coordinateProperties') &&
-        //   // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-        //   Object.hasOwn(props.coordinateProperties, 'times') &&
-        //   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        //   Array.isArray(props.coordinateProperties.times)
-        // ) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-        // timeStringList = props.coordinateProperties.times as string[]
+
         if (props !== null && isPropsWithTimes(props)) {
           timeStringList = (props.coordinateProperties.times as string[])
         } else {
@@ -156,6 +147,10 @@ class Gpx2Track {
     }
   }
 
+  /**
+   * Get extension metadata for all tracks
+   * @returns List of objects containing extension data. Lenght of list should correspond to length of tracks.
+   */
   extractMetadata() {
 
     // get all tracks

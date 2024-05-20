@@ -32,6 +32,18 @@ class Track2DbWriter {
     this.clientVar = client
   }
 
+  end() {
+    this.clientVar?.end()
+      .then(() => {
+        console.log("Db client disconnected")
+      })
+      .catch((e) => {
+        console.log("Disconnect failed", e)
+      })
+    this.clientVar = null
+    this.dbOptionsVar = null
+  }
+
   dbOptions() {
     if (this.dbOptionsVar === null) throw new Error("Dbwriter object was not initialized")
     else return this.dbOptionsVar

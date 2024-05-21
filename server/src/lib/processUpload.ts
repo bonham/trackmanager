@@ -7,7 +7,7 @@ import { processGpxFile } from './processGpxFile.js';
 const DATABASE = process.env.TM_DATABASE;
 
 /// // Create new track from file upload
-async function processFile(
+async function processUpload(
   filePath: string,
   schema: string,
 ) {
@@ -24,12 +24,9 @@ async function processFile(
   }
   try {
     rmSync(filePath)
-    console.log(`File removed: ${filePath}`)
   } catch (e) {
     console.warn(`could not remove ${filePath}`)
   }
 }
-
-
-export { processFile };
+export { processUpload };
 

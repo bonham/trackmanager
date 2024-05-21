@@ -34,11 +34,8 @@ class Track2DbWriter {
 
   end() {
     this.clientVar?.end()
-      .then(() => {
-        console.log("Db client disconnected")
-      })
       .catch((e) => {
-        console.log("Disconnect failed", e)
+        console.log("DB client disconnect failed", e)
       })
     this.clientVar = null
     this.dbOptionsVar = null
@@ -94,13 +91,20 @@ class Track2DbWriter {
       const segmentList = t.getSegments()
       console.log(`Writing ${segmentList.length} segments for track ${trackId}`)
 
+      let numPointsBeforeSimplify = 0
+
       for (let segId = 0; segId < segmentList.length; segId++) {
 
         const segment = segmentList[segId]
         await this.insertSegment(trackId, segId)
-        await this.insertPointListForSegment(trackId, segId, segment)
+        const numPointsInSegment = await this.insertPointListForSegment(trackId, segId, segment)
+        numPointsBeforeSimplify += numPointsInSegment
       }
-      await this.processAndSimplifyTrack(trackId)
+      console.log(`Before simplify: ${numPointsBeforeSimplify} points for track id ${trackId}`)
+
+      const numPointsAfterSimplify = await this.processAndSimplifyTrack(trackId)
+      console.log(`After simplify: ${numPointsAfterSimplify ?? "unknown"} points for track id ${trackId}`)
+
       await this.updateTrackWkbGeometry(trackId)
       await this.updateLengthTime(trackId)
       await this.updateAscentFromSimplifiedPoints(trackId)
@@ -149,14 +153,7 @@ class Track2DbWriter {
     await this.client().query(sql, [trackId, segId]) // ?
   }
 
-  async insertPointListForSegment(trackId: number, segId: number, tpList: TrackPoint[]): Promise<void> {
-
-    // first insert into temp points table
-    // calculate length, timelength, speed
-    // then simplify and insert into real points table
-    // remove points from temp table
-
-    console.log(`Before simplify: ${tpList.length} points for track id ${trackId}, segment id ${segId}`)
+  async insertPointListForSegment(trackId: number, segId: number, tpList: TrackPoint[]): Promise<number> {
 
     // insert into temp table
     const sql =
@@ -176,9 +173,10 @@ class Track2DbWriter {
       ]
       await this.client().query(sql, parameters)
     }
+    return tpList.length
   }
 
-  async processAndSimplifyTrack(trackId: number) {
+  async processAndSimplifyTrack(trackId: number): Promise<number | null> {
     // calculate ascent
 
     // create simplified points
@@ -209,7 +207,8 @@ class Track2DbWriter {
     `
 
     // console.log(sql_simplify)
-    await this.client().query(sql_simplify, [trackId])
+    const result = await this.client().query(sql_simplify, [trackId])
+    return result.rowCount
   }
 
   async deletePointsFromTmp(trackId: number) {

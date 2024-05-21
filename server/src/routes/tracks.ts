@@ -8,7 +8,7 @@ import { tmpdir } from 'node:os';
 import { basename, join } from 'node:path';
 import pkg from 'pg';
 import { asyncWrapper } from '../lib/asyncMiddlewareWrapper.js';
-import { processFile } from '../lib/processUpload.js';
+import { processUpload } from '../lib/processUpload.js';
 
 
 const { Pool } = pkg;
@@ -322,7 +322,7 @@ router.post(
     const form = new Formidable({
       uploadDir,
       filename: (name, ext, part) => {
-        console.log('name', name, 'ext', ext);
+        // console.log('name', name, 'ext', ext);
         if (part.originalFilename) {
           return part.originalFilename;
         }
@@ -341,7 +341,7 @@ router.post(
         const filePath = files.newtrack[0].filepath;
         const fileName = basename(filePath);
 
-        processFile(filePath, (req as ReqWSchema).schema)
+        processUpload(filePath, (req as ReqWSchema).schema)
           .then(() => res.json({ message: 'ok' }))
           .catch(e => {
             console.log(`Could not write ${fileName}`, e)

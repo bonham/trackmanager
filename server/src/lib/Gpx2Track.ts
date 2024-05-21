@@ -105,11 +105,32 @@ class Gpx2Track {
         }
         eSegments.push({ positionList: co, timeStringList })
       } else if (trackGeometry.type === "MultiLineString") {
+        // check if number of segments matching number of property array entries
+        const numCoordinateSegments = trackGeometry.coordinates.length
+        let validProperties = false
+        if (
+          props !== null &&
+          isPropsWithTimes(props)
+        ) {
+          const numPropertySegments = props.coordinateProperties.times.length
+
+          if (numPropertySegments === numCoordinateSegments) {
+            validProperties = true
+          } else {
+            console.error(`Coordinate segments: ${numCoordinateSegments} differ from property segments: ${numPropertySegments}. Skipping creation of times for points`)
+            validProperties = false
+          }
+        } else {
+          console.log("feature.properties is null or does not have 'times' property")
+          validProperties = false
+        }
+
+        // fill extended segments array
         for (let segNum = 0; segNum < trackGeometry.coordinates.length; segNum++) {
           const co = trackGeometry.coordinates[segNum]
           let timeStringList: (string[] | undefined[])
 
-          if (props !== null && isPropsWithTimes(props)) {
+          if (validProperties && props !== null && isPropsWithTimes(props)) {
             timeStringList = (props.coordinateProperties.times[segNum] as string[])
           } else {
             timeStringList = Array<undefined>(co.length).fill(undefined)

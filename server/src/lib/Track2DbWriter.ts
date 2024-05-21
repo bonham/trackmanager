@@ -76,6 +76,12 @@ class Track2DbWriter {
 
   async write(t: Track, fileBufferHash: string): Promise<number> {
 
+    const foundHash = await this.checkForHash(fileBufferHash)
+    if (foundHash) {
+      console.log(`Track ${t.getMetaData().source} already in DB ... skipping`)
+      return -1
+    }
+
     const meta = t.getMetaData();
 
     await this.client().query('begin transaction')
@@ -107,6 +113,14 @@ class Track2DbWriter {
     }
   }
 
+  async checkForHash(hash: string): Promise<boolean> {
+    const sql = `select count(*) from ${this.schema()}.${TRACK_TABLENAME} where hash = $1`
+    const r = await this.client().query(sql, [hash])
+    const row = r.rows[0] as { count: number }
+    const numFound = row.count
+    return (numFound > 0)
+  }
+
   async insertTrackMetadata(id: number, tmeta: TrackMetadata, fileBufferHash: string): Promise<void> {
     const {
       name, source, totalAscent, totalDistance,
@@ -114,7 +128,7 @@ class Track2DbWriter {
     } = tmeta;
 
     const insert = `
-    INSERT INTO ${this.schema()}.tracks(
+    INSERT INTO ${this.schema()}.${TRACK_TABLENAME}(
       id,
       name, src, hash, "time", length, timelength, ascent)
       VALUES (

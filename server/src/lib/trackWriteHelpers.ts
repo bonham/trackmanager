@@ -28,7 +28,7 @@ export async function writeTrack(o: {
   dbw.end()
   if (id >= 0) {
     console.log(`Track created with id ${id}`);
-  } else {
+  } else if (id < -1) {
     console.error("Error occurred. No track created")
   }
 

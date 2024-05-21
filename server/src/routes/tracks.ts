@@ -5,10 +5,11 @@ import { Formidable } from 'formidable';
 import _ from 'lodash';
 import { mkdtemp as mkdtempprom } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { basename, join } from 'node:path';
 import pkg from 'pg';
 import { asyncWrapper } from '../lib/asyncMiddlewareWrapper.js';
 import { processFile } from '../lib/processUpload.js';
+
 
 const { Pool } = pkg;
 
@@ -338,10 +339,14 @@ router.post(
 
         if (files.newtrack === undefined) throw new Error('Expected form field not received: newtrack');
         const filePath = files.newtrack[0].filepath;
+        const fileName = basename(filePath);
 
         processFile(filePath, (req as ReqWSchema).schema)
           .then(() => res.json({ message: 'ok' }))
-          .catch(e => { throw e });
+          .catch(e => {
+            console.log(`Could not write ${fileName}`, e)
+            res.status(500).json({ message: 'error', fileName })
+          });
       }
     });
   }),

@@ -127,15 +127,23 @@ class Gpx2Track {
 
         // fill extended segments array
         for (let segNum = 0; segNum < trackGeometry.coordinates.length; segNum++) {
-          const co = trackGeometry.coordinates[segNum]
-          let timeStringList: (string[] | undefined[])
+          const coordinatesOfSegment = trackGeometry.coordinates[segNum]
 
-          if (validProperties && props !== null && isPropsWithTimes(props)) {
+          let timeStringList: (string[] | undefined[])
+          const numPointsInSegment = coordinatesOfSegment.length
+
+          if (
+            validProperties &&
+            props !== null && isPropsWithTimes(props) &&
+            Array.isArray(props.coordinateProperties.times[segNum]) &&
+            props.coordinateProperties.times[segNum].length === numPointsInSegment
+          ) {
             timeStringList = (props.coordinateProperties.times[segNum] as string[])
           } else {
-            timeStringList = Array<undefined>(co.length).fill(undefined)
+            console.error(`Properties for segment ${segNum} are invalid.`)
+            timeStringList = Array<undefined>(coordinatesOfSegment.length).fill(undefined)
           }
-          eSegments.push({ positionList: co, timeStringList })
+          eSegments.push({ positionList: coordinatesOfSegment, timeStringList })
 
         }
       } else console.error(`Unexpected type ${trackGeometry.type} found`)

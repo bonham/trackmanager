@@ -204,7 +204,7 @@ export class ManagedMap {
       const dateopts: Intl.DateTimeFormatOptions = { weekday: 'short', month: 'short', day: '2-digit', year: '2-digit' }
       const title = `${track.localeDateShort(dateopts)}`
       let content = `${track.name}<br>Dist: ${(track.distance() / 1000).toFixed()} km`
-      content += track.ascentString() ? `<br>Ascent: ${track.ascentString()}` : ""
+      content += track.getAscent() ? `<br>Ascent: ${track.getAscent().toFixed()} m` : ""
 
       this.popovermgr.setNewPopover(coord, {
         animation: false,

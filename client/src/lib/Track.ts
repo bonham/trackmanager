@@ -52,6 +52,12 @@ interface TrackDataServerGetall {
   ascent_calc: number | null,
 }
 
+interface HMS {
+  hours: number;
+  minutes: number;
+  seconds: number;
+}
+
 function isTrackDataServer(t: unknown): t is TrackDataServerGetall {
   if (
     typeof t === 'object' &&
@@ -117,12 +123,20 @@ class Track {
     }
   }
 
-  ascentString() {
-    return this.ascent === null ? "" : this.ascent.toFixed() + " m"
+  getAscent() {
+    if (this.ascent_calc) {
+      return this.ascent_calc
+    } else {
+      return this.ascent ?? 0
+    }
   }
 
   distance() {
-    return (this.length ? this.length : 0)
+    if (this.length_calc) {
+      return this.length_calc
+    } else {
+      return this.length ?? 0
+    }
   }
 
   year() {
@@ -152,7 +166,7 @@ class Track {
   }
 
   secondsToHms(s: number) {
-    const hms = {
+    const hms: HMS = {
       hours: Math.floor(s / 3600),
       minutes: (s / 60) % 60,
       seconds: s % 60
@@ -160,11 +174,35 @@ class Track {
     return hms
   }
 
-  timeLengthHms() {
-    if (this.timelength === null) {
+  /**
+   * Get track duration
+   * @returns Duration of tracks in seconds
+   */
+  getTimeLength() {
+    if (this.timelength_calc) {
+      return this.timelength_calc
+    } else if (this.timelength === null) {
       return null
     } else {
-      return this.secondsToHms(this.timelength)
+      return this.timelength
+    }
+  }
+
+  speedKmh() {
+    const gtl = this.getTimeLength()
+    if ((gtl !== null) && gtl > 0) {
+      return (3.6 * this.distance() / gtl)
+    } else {
+      return null
+    }
+  }
+
+  timeLengthHms(): HMS | null {
+    const gtl = this.getTimeLength()
+    if (gtl === null) {
+      return null
+    } else {
+      return this.secondsToHms(gtl)
     }
   }
 

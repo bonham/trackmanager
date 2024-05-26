@@ -48,9 +48,7 @@ const initData1: TrackInitData = {
   length: 13.4,
   src: 'mysrc1',
   ascent: 134.5,
-  time: "2021-03-04",
-  timelength: null,
-  geojson: null
+  time: "2021-03-04"
 }
 
 
@@ -60,9 +58,7 @@ const initData2: TrackInitData = {
   length: 23.4,
   src: 'mysrc2',
   ascent: 234.5,
-  time: "2022-10-11 23:01:17",
-  geojson: null,
-  timelength: null
+  time: "2022-10-11 23:01:17"
 }
 
 const track1 = new Track(initData1)

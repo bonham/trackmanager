@@ -10,34 +10,31 @@ import { sprintf } from 'sprintf-js'
  * It can calculate properties etc
  */
 
-type TrackProperties = {
-  id: number,
-  name: string,
-  length: number,
-  src: string,
-  timelength: number,
-  ascent: number,
-  geojson: GeoJsonObject,
-  time: DateTime
-}
+
 
 type TrackInitData = {
   id: number,
-  name: string | null,
-  length: number | null,
-  src: string | null,
-  timelength: number | null,
-  ascent: number,
+  name?: string | null,
+  length?: number | null,
+  length_calc?: number | null,
+  src?: string | null,
+  timelength?: number | null,
+  timelength_calc?: number | null,
+  ascent?: number | null,
+  ascent_calc?: number | null,
   geojson?: GeoJsonObject | null,
-  time: string | null
+  time?: string | null
 }
 type TrackPropertiesOptional = {
   id?: number,
   name?: string | null,
   length?: number | null,
+  length_calc?: number | null,
   src?: string | null,
   timelength?: number | null,
+  timelength_calc?: number | null,
   ascent?: number | null,
+  ascent_calc?: number | null,
   geojson?: GeoJsonObject | null,
   time?: DateTime | null | undefined
 }
@@ -46,10 +43,13 @@ interface TrackDataServerGetall {
   id: number,
   name: string | null,
   length: number | null,
+  length_calc: number | null,
   src: string | null,
   time: string | null,
   timelength: number | null,
-  ascent: number,
+  timelength_calc: number | null,
+  ascent: number | null,
+  ascent_calc: number | null,
 }
 
 function isTrackDataServer(t: unknown): t is TrackDataServerGetall {
@@ -59,10 +59,13 @@ function isTrackDataServer(t: unknown): t is TrackDataServerGetall {
     "id" in t && (typeof t.id === 'number') &&
     "name" in t && (typeof t.name === 'string' || t.name === null) &&
     "length" in t && (typeof t.length === 'number' || t.length === null) &&
+    "length_calc" in t && (typeof t.length_calc === 'number' || t.length_calc === null) &&
     "src" in t && (typeof t.src === 'string' || t.src === null) &&
     "time" in t && (typeof t.time === 'string' || t.time === null) &&
     "timelength" in t && (typeof t.timelength === 'number' || t.timelength === null) &&
-    "ascent" in t && (typeof t.ascent === 'number' || t.ascent === null)
+    "timelength_calc" in t && (typeof t.timelength_calc === 'number' || t.timelength_calc === null) &&
+    "ascent" in t && (typeof t.ascent === 'number' || t.ascent === null) &&
+    "ascent_calc" in t && (typeof t.ascent_calc === 'number' || t.ascent_calc === null)
   ) {
     return true
   } else {
@@ -81,19 +84,25 @@ class Track {
   id: number
   name: string | null
   length: number | null
+  length_calc: number | null
   src: string | null
   timelength: number | null
+  timelength_calc: number | null
   ascent: number | null
+  ascent_calc: number | null
   geojson: GeoJsonObject | null
   time: DateTime | null | undefined
 
   constructor(initData: TrackInitData) { // id, name, length, src, time, timelength, ascent
     this.id = initData.id
-    this.name = initData.name
-    this.length = initData.length
-    this.src = initData.src
-    this.timelength = initData.timelength
-    this.ascent = initData.ascent
+    this.name = initData.name ?? null
+    this.length = initData.length ?? null
+    this.length_calc = initData.length_calc ?? null
+    this.src = initData.src ?? null
+    this.timelength = initData.timelength ?? null
+    this.timelength_calc = initData.timelength_calc ?? null
+    this.ascent = initData.ascent ?? null
+    this.ascent_calc = initData.ascent_calc ?? null
     this.geojson = (('geojson' in initData && initData.geojson !== undefined) ? initData.geojson : null)
 
     if (!initData.time) {
@@ -200,4 +209,4 @@ class TrackCollection {
 }
 
 export { Track, TrackCollection, isTrackDataServer, isTrackDataServerArray }
-export type { TrackProperties, TrackPropertiesOptional, TrackInitData, TrackDataServerGetall }
+export type { TrackPropertiesOptional, TrackInitData, TrackDataServerGetall }

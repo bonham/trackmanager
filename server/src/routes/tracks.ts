@@ -54,8 +54,8 @@ router.get(
     const { schema } = req as ReqWSchema
     try {
       const queryResult = await pool.query(
-        'select id, name, length, src, '
-        + 'time, timelength, ascent '
+        'select id, name, length, length_calc, src, '
+        + 'time, timelength, timelength_calc, ascent, ascent_calc '
         + `from ${schema}.tracks order by time desc`,
       );
 
@@ -135,8 +135,8 @@ router.get(
     const { schema } = req as ReqWSchema
     const { trackId } = req.params;
 
-    const query = 'select id, name, length, src,'
-      + 'time, timelength, ascent '
+    const query = 'select id, name, length, length_calc, src, '
+      + 'time, timelength, timelength_calc, ascent, ascent_calc '
       + `from ${schema}.tracks where id = '${trackId}'`;
 
     let rows;
@@ -176,8 +176,8 @@ router.get(
       whereClause = `extract(YEAR from time) = ${year}`;
     }
 
-    const query = 'select id, name, length, src,'
-      + 'time, timelength, ascent '
+    const query = 'select id, name, length, length_calc, src, '
+      + 'time, timelength, timelength_calc, ascent, ascent_calc '
       + `from ${schema}.tracks where ${whereClause} order by time desc`;
     console.log(query);
     try {
@@ -213,8 +213,8 @@ router.post(
         + `${bbox[0]}, ${bbox[1]}, ${bbox[2]}, ${bbox[3]}, '4326'))`;
 
 
-      query = 'select id, name, length, src,'
-        + 'time, timelength, ascent '
+      query = 'select id, name, length, length_calc, src, '
+        + 'time, timelength, timelength_calc, ascent, ascent_calc '
         + `from ${schema}.tracks where ${whereClause}`;
       console.log(query);
 

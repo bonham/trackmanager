@@ -20,7 +20,7 @@ type Segment = TrackPoint[]
 class Track {
   segments: Segment[] = [];
 
-  options: TrackMetadata = { startTime: new Date() }; // this is dummy value which will be overidden
+  options: TrackMetadata
 
   constructor(options: TrackMetadata) {
     this.options = options;
@@ -40,6 +40,14 @@ class Track {
 
   setSegmentList(segmentList: TrackPoint[][]) {
     this.segments = segmentList;
+  }
+
+  getStartTime(): Date {
+    return this.options.startTime
+  }
+
+  setStartTime(d: Date) {
+    this.options.startTime = d
   }
 }
 

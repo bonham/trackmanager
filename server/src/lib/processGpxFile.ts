@@ -61,7 +61,7 @@ async function processGpxFile(
       track.addSegment(segment)
     }
     // If date was not set above, then try to determine date from timestamp of first point of first segment of first track
-    if (track.getStartTime().getTime()) {
+    if (track.getStartTime().getTime() === 0) {
       const segments = track.getSegments()
       const timeOfFirstPoint = segments?.[0]?.[0]?.point_time // triple optional chaining - yeah
       if (timeOfFirstPoint !== undefined) {

@@ -123,6 +123,10 @@ class Track {
     }
   }
 
+  getNameOrSrc() {
+    return this.name?.trim() || (this.src ?? "")
+  }
+
   getAscent() {
     if (this.ascent_calc) {
       return this.ascent_calc

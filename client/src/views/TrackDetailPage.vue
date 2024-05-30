@@ -71,7 +71,7 @@ getTrackById(props.id, props.sid)
     if (track !== null) {
 
       // headline
-      headline.value = track.name ? track.name : ""
+      headline.value = track.getNameOrSrc()
 
       // details
       const part1: string = `${track.localeDateShort()} / `;

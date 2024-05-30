@@ -3,7 +3,7 @@ import preset from 'ts-jest/presets/index.js'
 const jestConfig = {
   ...preset.defaultsESM,
   testEnvironment: "node",
-  verbose: true,
+  verbose: false,
   rootDir: ".",
   extensionsToTreatAsEsm: [".ts"],
   transformIgnorePatterns: [

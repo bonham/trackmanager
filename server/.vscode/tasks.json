@@ -3,10 +3,9 @@
   "tasks": [
     {
       "type": "npm",
-      "script": "develop",
+      "script": "start",
       "problemMatcher": [],
-      "label": "develop",
-      "detail": "nodemon ts-node ./index.ts",
+      "label": "start",
       "runOptions": {
         "runOn": "folderOpen"
       },
@@ -38,43 +37,6 @@
         "clear": false,
         "close": false
       }
-    },
-    {
-      "type": "npm",
-      "script": "typecheck",
-      "problemMatcher": ["$tsc"],
-      "label": "typecheck folder",
-      "runOptions": {
-        "runOn": "folderOpen"
-      },
-      "presentation": {
-        "echo": true,
-        "reveal": "silent",
-        "revealProblems": "onProblem",
-        "focus": false,
-        "panel": "shared",
-        "showReuseMessage": true,
-        "clear": false,
-        "close": false
-      }
-    },
-    {
-      "type": "npm",
-      "script": "test",
-      "group": "test",
-      "presentation": {
-        "echo": true,
-        "reveal": "silent",
-        "focus": false,
-        "panel": "shared",
-        "showReuseMessage": true,
-        "clear": false,
-        "close": false,
-        "revealProblems": "onProblem"
-      },
-      "problemMatcher": [],
-      "label": "npm: test",
-      "detail": "jest"
     }
   ]
 }

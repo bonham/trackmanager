@@ -105,16 +105,45 @@ class Gpx2Track {
         }
         eSegments.push({ positionList: co, timeStringList })
       } else if (trackGeometry.type === "MultiLineString") {
-        for (let segNum = 0; segNum < trackGeometry.coordinates.length; segNum++) {
-          const co = trackGeometry.coordinates[segNum]
-          let timeStringList: (string[] | undefined[])
+        // check if number of segments matching number of property array entries
+        const numCoordinateSegments = trackGeometry.coordinates.length
+        let validProperties = false
+        if (
+          props !== null &&
+          isPropsWithTimes(props)
+        ) {
+          const numPropertySegments = props.coordinateProperties.times.length
 
-          if (props !== null && isPropsWithTimes(props)) {
+          if (numPropertySegments === numCoordinateSegments) {
+            validProperties = true
+          } else {
+            console.error(`Coordinate segments: ${numCoordinateSegments} differ from property segments: ${numPropertySegments}. Skipping creation of times for points`)
+            validProperties = false
+          }
+        } else {
+          console.log("feature.properties is null or does not have 'times' property")
+          validProperties = false
+        }
+
+        // fill extended segments array
+        for (let segNum = 0; segNum < trackGeometry.coordinates.length; segNum++) {
+          const coordinatesOfSegment = trackGeometry.coordinates[segNum]
+
+          let timeStringList: (string[] | undefined[])
+          const numPointsInSegment = coordinatesOfSegment.length
+
+          if (
+            validProperties &&
+            props !== null && isPropsWithTimes(props) &&
+            Array.isArray(props.coordinateProperties.times[segNum]) &&
+            props.coordinateProperties.times[segNum].length === numPointsInSegment
+          ) {
             timeStringList = (props.coordinateProperties.times[segNum] as string[])
           } else {
-            timeStringList = Array<undefined>(co.length).fill(undefined)
+            console.error(`Properties for segment ${segNum} are invalid.`)
+            timeStringList = Array<undefined>(coordinatesOfSegment.length).fill(undefined)
           }
-          eSegments.push({ positionList: co, timeStringList })
+          eSegments.push({ positionList: coordinatesOfSegment, timeStringList })
 
         }
       } else console.error(`Unexpected type ${trackGeometry.type} found`)

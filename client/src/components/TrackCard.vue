@@ -4,20 +4,19 @@
       <b-row class="align-items-center">
         <b-col cols="9">
           <h4>
-            {{ track.name || track.src }}
+            {{ track.getNameOrSrc() }}
           </h4>
           <div class="text-decoration-none">
             <span>
               {{ track.monthAndDay() }}
               / {{ (track.distance() / 1000).toFixed(1) }} km
-              / {{ track.ascent ? Math.round(track.ascent) : "-" }} m
+              / {{ track.getAscent() ? Math.round(track.getAscent()) : "-" }} m
             </span>
-            <span v-if="track.timelength">
+            <span v-if="track.getTimeLength()">
               / {{ track.timeLengthFormatted() }} h
             </span>
-            <span v-if="track.timelength && track.length">
-              / {{ track.timelength ? Math.round((3.6 * track.distance() / track.timelength) * 10) / 10 : "-" }} km/h
-              avg
+            <span v-if="track.speedKmh() !== null">
+              / {{ Math.round(track.speedKmh() as number * 10) / 10 }} km/h
             </span>
           </div>
         </b-col>

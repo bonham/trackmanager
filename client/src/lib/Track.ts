@@ -10,34 +10,31 @@ import { sprintf } from 'sprintf-js'
  * It can calculate properties etc
  */
 
-type TrackProperties = {
-  id: number,
-  name: string,
-  length: number,
-  src: string,
-  timelength: number,
-  ascent: number,
-  geojson: GeoJsonObject,
-  time: DateTime
-}
+
 
 type TrackInitData = {
   id: number,
-  name: string | null,
-  length: number | null,
-  src: string | null,
-  timelength: number | null,
-  ascent: number,
+  name?: string | null,
+  length?: number | null,
+  length_calc?: number | null,
+  src?: string | null,
+  timelength?: number | null,
+  timelength_calc?: number | null,
+  ascent?: number | null,
+  ascent_calc?: number | null,
   geojson?: GeoJsonObject | null,
-  time: string | null
+  time?: string | null
 }
 type TrackPropertiesOptional = {
   id?: number,
   name?: string | null,
   length?: number | null,
+  length_calc?: number | null,
   src?: string | null,
   timelength?: number | null,
+  timelength_calc?: number | null,
   ascent?: number | null,
+  ascent_calc?: number | null,
   geojson?: GeoJsonObject | null,
   time?: DateTime | null | undefined
 }
@@ -46,10 +43,19 @@ interface TrackDataServerGetall {
   id: number,
   name: string | null,
   length: number | null,
+  length_calc: number | null,
   src: string | null,
   time: string | null,
   timelength: number | null,
-  ascent: number,
+  timelength_calc: number | null,
+  ascent: number | null,
+  ascent_calc: number | null,
+}
+
+interface HMS {
+  hours: number;
+  minutes: number;
+  seconds: number;
 }
 
 function isTrackDataServer(t: unknown): t is TrackDataServerGetall {
@@ -59,10 +65,13 @@ function isTrackDataServer(t: unknown): t is TrackDataServerGetall {
     "id" in t && (typeof t.id === 'number') &&
     "name" in t && (typeof t.name === 'string' || t.name === null) &&
     "length" in t && (typeof t.length === 'number' || t.length === null) &&
+    "length_calc" in t && (typeof t.length_calc === 'number' || t.length_calc === null) &&
     "src" in t && (typeof t.src === 'string' || t.src === null) &&
     "time" in t && (typeof t.time === 'string' || t.time === null) &&
     "timelength" in t && (typeof t.timelength === 'number' || t.timelength === null) &&
-    "ascent" in t && (typeof t.ascent === 'number' || t.ascent === null)
+    "timelength_calc" in t && (typeof t.timelength_calc === 'number' || t.timelength_calc === null) &&
+    "ascent" in t && (typeof t.ascent === 'number' || t.ascent === null) &&
+    "ascent_calc" in t && (typeof t.ascent_calc === 'number' || t.ascent_calc === null)
   ) {
     return true
   } else {
@@ -81,19 +90,25 @@ class Track {
   id: number
   name: string | null
   length: number | null
+  length_calc: number | null
   src: string | null
   timelength: number | null
+  timelength_calc: number | null
   ascent: number | null
+  ascent_calc: number | null
   geojson: GeoJsonObject | null
   time: DateTime | null | undefined
 
   constructor(initData: TrackInitData) { // id, name, length, src, time, timelength, ascent
     this.id = initData.id
-    this.name = initData.name
-    this.length = initData.length
-    this.src = initData.src
-    this.timelength = initData.timelength
-    this.ascent = initData.ascent
+    this.name = initData.name ?? null
+    this.length = initData.length ?? null
+    this.length_calc = initData.length_calc ?? null
+    this.src = initData.src ?? null
+    this.timelength = initData.timelength ?? null
+    this.timelength_calc = initData.timelength_calc ?? null
+    this.ascent = initData.ascent ?? null
+    this.ascent_calc = initData.ascent_calc ?? null
     this.geojson = (('geojson' in initData && initData.geojson !== undefined) ? initData.geojson : null)
 
     if (!initData.time) {
@@ -108,12 +123,24 @@ class Track {
     }
   }
 
-  ascentString() {
-    return this.ascent === null ? "" : this.ascent.toFixed() + " m"
+  getNameOrSrc() {
+    return this.name?.trim() || (this.src ?? "")
+  }
+
+  getAscent() {
+    if (this.ascent_calc) {
+      return this.ascent_calc
+    } else {
+      return this.ascent ?? 0
+    }
   }
 
   distance() {
-    return (this.length ? this.length : 0)
+    if (this.length_calc) {
+      return this.length_calc
+    } else {
+      return this.length ?? 0
+    }
   }
 
   year() {
@@ -143,7 +170,7 @@ class Track {
   }
 
   secondsToHms(s: number) {
-    const hms = {
+    const hms: HMS = {
       hours: Math.floor(s / 3600),
       minutes: (s / 60) % 60,
       seconds: s % 60
@@ -151,11 +178,35 @@ class Track {
     return hms
   }
 
-  timeLengthHms() {
-    if (this.timelength === null) {
+  /**
+   * Get track duration
+   * @returns Duration of tracks in seconds
+   */
+  getTimeLength() {
+    if (this.timelength_calc) {
+      return this.timelength_calc
+    } else if (this.timelength === null) {
       return null
     } else {
-      return this.secondsToHms(this.timelength)
+      return this.timelength
+    }
+  }
+
+  speedKmh() {
+    const gtl = this.getTimeLength()
+    if ((gtl !== null) && gtl > 0) {
+      return (3.6 * this.distance() / gtl)
+    } else {
+      return null
+    }
+  }
+
+  timeLengthHms(): HMS | null {
+    const gtl = this.getTimeLength()
+    if (gtl === null) {
+      return null
+    } else {
+      return this.secondsToHms(gtl)
     }
   }
 
@@ -200,4 +251,4 @@ class TrackCollection {
 }
 
 export { Track, TrackCollection, isTrackDataServer, isTrackDataServerArray }
-export type { TrackProperties, TrackPropertiesOptional, TrackInitData, TrackDataServerGetall }
+export type { TrackPropertiesOptional, TrackInitData, TrackDataServerGetall }

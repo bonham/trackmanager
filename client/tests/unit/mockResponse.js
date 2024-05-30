@@ -6,10 +6,13 @@ const mockTrack = {
   id: 404,
   name: 'Saupferchweg',
   length: 46238.20565667874,
+  length_calc: 47777,
   src: '20210919_Muellerweg.gpx',
   time: '2021-09-19T14:35:14.000Z',
   timelength: 8470,
-  ascent: 866.7277609999995
+  timelength_calc: 8500,
+  ascent: 866.7277609999995,
+  ascent_calc: 877
 }
 const mockGeoJson = {
   id: 404,

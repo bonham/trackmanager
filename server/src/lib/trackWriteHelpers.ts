@@ -25,9 +25,10 @@ export async function writeTrack(o: {
   })
 
   const id: number = await dbw.write(o.track, fileHash);
+  dbw.end()
   if (id >= 0) {
     console.log(`Track created with id ${id}`);
-  } else {
+  } else if (id < -1) {
     console.error("Error occurred. No track created")
   }
 

@@ -32,6 +32,15 @@ class Track2DbWriter {
     this.clientVar = client
   }
 
+  end() {
+    this.clientVar?.end()
+      .catch((e) => {
+        console.log("DB client disconnect failed", e)
+      })
+    this.clientVar = null
+    this.dbOptionsVar = null
+  }
+
   dbOptions() {
     if (this.dbOptionsVar === null) throw new Error("Dbwriter object was not initialized")
     else return this.dbOptionsVar
@@ -64,6 +73,12 @@ class Track2DbWriter {
 
   async write(t: Track, fileBufferHash: string): Promise<number> {
 
+    const foundHash = await this.checkForHash(fileBufferHash)
+    if (foundHash) {
+      console.log(`Track ${t.getMetaData().source} already in DB ... skipping`)
+      return -1
+    }
+
     const meta = t.getMetaData();
 
     await this.client().query('begin transaction')
@@ -76,13 +91,20 @@ class Track2DbWriter {
       const segmentList = t.getSegments()
       console.log(`Writing ${segmentList.length} segments for track ${trackId}`)
 
+      let numPointsBeforeSimplify = 0
+
       for (let segId = 0; segId < segmentList.length; segId++) {
 
         const segment = segmentList[segId]
         await this.insertSegment(trackId, segId)
-        await this.insertPointListForSegment(trackId, segId, segment)
+        const numPointsInSegment = await this.insertPointListForSegment(trackId, segId, segment)
+        numPointsBeforeSimplify += numPointsInSegment
       }
-      await this.processAndSimplifyTrack(trackId)
+      console.log(`Before simplify: ${numPointsBeforeSimplify} points for track id ${trackId}`)
+
+      const numPointsAfterSimplify = await this.processAndSimplifyTrack(trackId)
+      console.log(`After simplify: ${numPointsAfterSimplify ?? "unknown"} points for track id ${trackId}`)
+
       await this.updateTrackWkbGeometry(trackId)
       await this.updateLengthTime(trackId)
       await this.updateAscentFromSimplifiedPoints(trackId)
@@ -95,6 +117,14 @@ class Track2DbWriter {
     }
   }
 
+  async checkForHash(hash: string): Promise<boolean> {
+    const sql = `select count(*) from ${this.schema()}.${TRACK_TABLENAME} where hash = $1`
+    const r = await this.client().query(sql, [hash])
+    const row = r.rows[0] as { count: number }
+    const numFound = row.count
+    return (numFound > 0)
+  }
+
   async insertTrackMetadata(id: number, tmeta: TrackMetadata, fileBufferHash: string): Promise<void> {
     const {
       name, source, totalAscent, totalDistance,
@@ -102,7 +132,7 @@ class Track2DbWriter {
     } = tmeta;
 
     const insert = `
-    INSERT INTO ${this.schema()}.tracks(
+    INSERT INTO ${this.schema()}.${TRACK_TABLENAME}(
       id,
       name, src, hash, "time", length, timelength, ascent)
       VALUES (
@@ -123,14 +153,7 @@ class Track2DbWriter {
     await this.client().query(sql, [trackId, segId]) // ?
   }
 
-  async insertPointListForSegment(trackId: number, segId: number, tpList: TrackPoint[]): Promise<void> {
-
-    // first insert into temp points table
-    // calculate length, timelength, speed
-    // then simplify and insert into real points table
-    // remove points from temp table
-
-    console.log(`Before simplify: ${tpList.length} points for track id ${trackId}, segment id ${segId}`)
+  async insertPointListForSegment(trackId: number, segId: number, tpList: TrackPoint[]): Promise<number> {
 
     // insert into temp table
     const sql =
@@ -150,9 +173,10 @@ class Track2DbWriter {
       ]
       await this.client().query(sql, parameters)
     }
+    return tpList.length
   }
 
-  async processAndSimplifyTrack(trackId: number) {
+  async processAndSimplifyTrack(trackId: number): Promise<number | null> {
     // calculate ascent
 
     // create simplified points
@@ -183,7 +207,8 @@ class Track2DbWriter {
     `
 
     // console.log(sql_simplify)
-    await this.client().query(sql_simplify, [trackId])
+    const result = await this.client().query(sql_simplify, [trackId])
+    return result.rowCount
   }
 
   async deletePointsFromTmp(trackId: number) {

@@ -71,14 +71,15 @@ getTrackById(props.id, props.sid)
     if (track !== null) {
 
       // headline
-      headline.value = track.name ? track.name : ""
+      headline.value = track.getNameOrSrc()
 
       // details
       const part1: string = `${track.localeDateShort()} / `;
       const part2: string = `${(track.distance() / 1000).toFixed(1)} km / `;
-      const part3: string = `${track.ascent ? Math.round(track.ascent) : "-"} m`;
-      const part4: string = track.timelength ? ` / ${track.timeLengthFormatted()} h / ${track.timelength ? Math.round((3.6 * track.distance() / track.timelength) * 10) / 10 : "-"} km/h` : "";
-      trackDetails.value = part1 + part2 + part3 + part4
+      const part3: string = track.getAscent() ? `${Math.round(track.getAscent())} m / ` : "- / "
+      const part4: string = track.getTimeLength() !== null ? `${track.timeLengthFormatted()} h / ` : "- / "
+      const part5: string = track.speedKmh() !== null ? ` / ${Math.round(track.speedKmh() as number * 10) / 10} km/h` : "-";
+      trackDetails.value = part1 + part2 + part3 + part4 + part5
 
       // fill the cache
       trackStore.setLoadedTracks([track])

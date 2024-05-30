@@ -5,10 +5,11 @@ import { Formidable } from 'formidable';
 import _ from 'lodash';
 import { mkdtemp as mkdtempprom } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { basename, join } from 'node:path';
 import pkg from 'pg';
 import { asyncWrapper } from '../lib/asyncMiddlewareWrapper.js';
-import { processFile } from '../lib/processUpload.js';
+import { processUpload } from '../lib/processUpload.js';
+
 
 const { Pool } = pkg;
 
@@ -53,8 +54,8 @@ router.get(
     const { schema } = req as ReqWSchema
     try {
       const queryResult = await pool.query(
-        'select id, name, length, src, '
-        + 'time, timelength, ascent '
+        'select id, name, length, length_calc, src, '
+        + 'time, timelength, timelength_calc, ascent, ascent_calc '
         + `from ${schema}.tracks order by time desc`,
       );
 
@@ -134,8 +135,8 @@ router.get(
     const { schema } = req as ReqWSchema
     const { trackId } = req.params;
 
-    const query = 'select id, name, length, src,'
-      + 'time, timelength, ascent '
+    const query = 'select id, name, length, length_calc, src, '
+      + 'time, timelength, timelength_calc, ascent, ascent_calc '
       + `from ${schema}.tracks where id = '${trackId}'`;
 
     let rows;
@@ -175,8 +176,8 @@ router.get(
       whereClause = `extract(YEAR from time) = ${year}`;
     }
 
-    const query = 'select id, name, length, src,'
-      + 'time, timelength, ascent '
+    const query = 'select id, name, length, length_calc, src, '
+      + 'time, timelength, timelength_calc, ascent, ascent_calc '
       + `from ${schema}.tracks where ${whereClause} order by time desc`;
     console.log(query);
     try {
@@ -212,8 +213,8 @@ router.post(
         + `${bbox[0]}, ${bbox[1]}, ${bbox[2]}, ${bbox[3]}, '4326'))`;
 
 
-      query = 'select id, name, length, src,'
-        + 'time, timelength, ascent '
+      query = 'select id, name, length, length_calc, src, '
+        + 'time, timelength, timelength_calc, ascent, ascent_calc '
         + `from ${schema}.tracks where ${whereClause}`;
       console.log(query);
 
@@ -321,7 +322,7 @@ router.post(
     const form = new Formidable({
       uploadDir,
       filename: (name, ext, part) => {
-        console.log('name', name, 'ext', ext);
+        // console.log('name', name, 'ext', ext);
         if (part.originalFilename) {
           return part.originalFilename;
         }
@@ -338,10 +339,14 @@ router.post(
 
         if (files.newtrack === undefined) throw new Error('Expected form field not received: newtrack');
         const filePath = files.newtrack[0].filepath;
+        const fileName = basename(filePath);
 
-        processFile(filePath, (req as ReqWSchema).schema)
+        processUpload(filePath, (req as ReqWSchema).schema)
           .then(() => res.json({ message: 'ok' }))
-          .catch(e => { throw e });
+          .catch(e => {
+            console.log(`Could not write ${fileName}`, e)
+            res.status(500).json({ message: 'error', fileName })
+          });
       }
     });
   }),

@@ -32,14 +32,15 @@ class FileUploadQueue {
 function performUpload(options: IQueuedItem, callback: AsyncResultCallback<number, UploadError>) {
   const { fileIdObject, setItemProcessingStatus } = options
   const thisKey = fileIdObject.key
-  console.log(`Queue function called for id ${thisKey}`)
+  // console.log(`Queue function called for id ${thisKey}`)
   setItemProcessingStatus(thisKey, 'Processing')
 
   // do the work in async way
   const url = `${UP_BASE_URL}/sid/${fileIdObject.sid}`
   uploadFile(fileIdObject, url, FORMPARAM)
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     .then(json => {
-      console.log(`Finished uploading key ${fileIdObject.key}, Message: ${json.message}`)
+      // console.log(`Finished uploading key ${fileIdObject.key}, Message: ${json.message}`)
       callback(null, thisKey)
     })
     .catch((err: UploadError) => {

@@ -112,17 +112,17 @@ function addItemToQueue(fileIdObject: QueuedFile) {
 
 
 function completedCallBack(err: CallbackArguments[0], key: CallbackArguments[1]): void {
-  console.log(`Finished processing ${key}`)
+  //console.log(`Finished processing ${key}`)
   if (key === null || key === undefined) throw Error("key is null")
   if (err) {
-    console.log('Error occured during queue processing: ', err.message)
-    console.log('Error cause: ', err)
+    console.error('Error occured during queue processing: ', err.message)
+    console.error('Error cause: ', err)
     setItemProcessingStatus(key, 'Failed')
   } else {
     setItemProcessingStatus(key, 'Completed' as QueueStatus)
     setTimeout(() => {
       setItemVisibility(key, false)
-      console.log(`Removed ${key}`)
+      // console.log(`Removed ${key}`)
     },
       1000)
   }

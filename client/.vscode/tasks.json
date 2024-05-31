@@ -38,7 +38,8 @@
       }
     },
     {
-      "type": "eslint",
+      "type": "npm",
+      "script": "lint",
       "problemMatcher": ["$eslint-stylish"],
       "label": "eslint: lint whole folder client",
       "runOptions": {

@@ -21,9 +21,9 @@
     },
     {
       "type": "npm",
-      "script": "lintwarn",
+      "script": "lint",
       "problemMatcher": ["$eslint-stylish"],
-      "label": "lint folder with warnings",
+      "label": "lint folder",
       "runOptions": {
         "runOn": "folderOpen"
       },

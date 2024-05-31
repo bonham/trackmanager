@@ -31,7 +31,8 @@ async function processGpxFile(
     // extract metadata for track
     const tm = gpx2t.trackMetadata(trackNum)
     const { name, ascent, time, timelength } = tm
-    const startTime = time ?? metadataStartTime
+    const startTime = time ?? metadataStartTime ?? extractTimestampFromFileName(fileName)
+
 
     const track = new Track({
       name,
@@ -76,6 +77,29 @@ async function processGpxFile(
       track
     })
   }
+}
+
+function extractTimestampFromFileName(fileName: string): null | Date {
+  // match something like 20190229 , with or without dots dash underscore and space as separator
+  const re1 = /((?:19|20|21)\d{2})[ _\-./]?(0[1-9]|1[0-2])[ _\-./]?(0[1-9]|[1-2][0-9]|3[0-1])/
+  const match1 = fileName.match(re1)
+  if (match1 !== null) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const [_fullString, year, mon, day] = match1
+    const date = new Date(`${year}-${mon}-${day}`)
+    return date
+  }
+
+  // reverse notation ( german ) 30-07-2021
+  const re2 = /(0[1-9]|[1-2][0-9]|3[0-1])[ _\-./]?(0[1-9]|1[0-2])[ _\-./]?((?:19|20|21)\d{2})/
+  const match2 = fileName.match(re2)
+  if (match2 !== null) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const [_fullString, day, mon, year] = match2
+    const date = new Date(`${year}-${mon}-${day}`)
+    return date
+  }
+  return null
 }
 
 export { processGpxFile };

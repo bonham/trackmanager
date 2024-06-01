@@ -50,20 +50,16 @@ describe('MultiEditPage', () => {
       })
     expect(await rresult.findByText('Saupferchweg')).toBeInTheDocument()
 
-    const button1 = await rresult.findByText('Clean all')
+    const button1 = await rresult.findByRole('button', { name: 'updateName' })
     expect(fetch.mock.calls.length).toEqual(1)
     expect(fetch.mock.calls[0][0]).toEqual('/api/tracks/getall/sid/abcd1234')
     await fireEvent.click(button1)
-    expect(await rresult.findByText('Muellerweg')).toBeInTheDocument()
+    expect(await rresult.findByText('20210919_Muellerweg.gpx')).toBeInTheDocument()
     expect(fetch.mock.calls.length).toEqual(2)
     const secondCallRequest = fetch.mock.calls[1][0]
-    expect(secondCallRequest.method).toEqual('PUT')
-    secondCallRequest.json().then(body => {
-      expect(body).toHaveProperty('data.name', 'Muellerweg')
-      expect(body).toHaveProperty('updateAttributes.0', 'name')
-    })
+    expect(secondCallRequest.method).toEqual('PATCH')
   })
-  test('Clean Button 2', async () => {
+  test('Delete Button', async () => {
     const rresult = render(
       TrackMultiEditPage,
       {

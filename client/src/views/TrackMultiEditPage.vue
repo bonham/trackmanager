@@ -23,7 +23,7 @@
       </template>
 
       <template #cell(cbutton)="row">
-        <b-button @click="nameFromSrc(row.item)">
+        <b-button aria-label="updateName" @click="nameFromSrc(row.item)">
           <i-bi-arrow-left />
         </b-button>
       </template>

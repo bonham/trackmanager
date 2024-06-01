@@ -8,7 +8,7 @@
     "build": "vite build",
     "serve": "vite preview",
     "lint": "eslint --quiet .",
-    "test": "vitest --run",
+    "test": "vitest",
     "typecheck": "vue-tsc --noEmit -p tsconfig.vitest.json --composite false"
   },
   "dependencies": {

@@ -6,14 +6,19 @@ interface TrackPoint {
   point_time?: Date
 }
 
-interface TrackMetadata {
+interface TrackMetadataOptionalStartDate {
   name?: string,
   source?: string,
   totalAscent?: number;
   totalDistance?: number;
   durationSeconds?: number;
-  startTime: Date;
+  startTime?: Date;
 }
+
+interface TrackMetadata extends TrackMetadataOptionalStartDate {
+  startTime: Date
+}
+
 
 type Segment = TrackPoint[]
 
@@ -52,5 +57,5 @@ class Track {
 }
 
 export { Track };
-export type { Segment, TrackMetadata, TrackPoint };
+export type { Segment, TrackMetadata, TrackMetadataOptionalStartDate, TrackPoint };
 

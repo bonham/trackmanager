@@ -80,7 +80,7 @@ async function getTracksByExtent(extent: Extent, sid: string) {
   }
 }
 
-async function getTrackById(id: number, sid: string) {
+async function getTrackById(id: number, sid: string): Promise<Track | null> {
   const url = `/api/tracks/byid/${id}/sid/${sid}`
   let response
   try {
@@ -185,6 +185,32 @@ async function updateTrackById(trackId: number, keyValuePairs: TrackPropertiesOp
   }
 }
 
+async function updateNameFromSource(id: number, sid: string): Promise<boolean> {
+  console.log("++")
+  const req = new Request(
+    `/api/tracks/namefromsrc/${id}/sid/${sid}`,
+    {
+      method: 'PATCH',
+    }
+  )
+  try {
+    console.log("++ do fetch")
+    const response = await fetch(req)
+    if (response.status === 204) {
+      console.log("yeah")
+      return true
+    } else {
+      console.error(`Unable to convert src to name for track ${id}. Response status ${response.status}`)
+      const body = await response.text()
+      console.error(`Body: ${body}`)
+      return false
+    }
+  } catch (err) {
+    console.error(err)
+    return false
+  }
+}
+
 async function deleteTrack(id: number, sid: string) {
   const req = new Request(
     `/api/tracks/byid/${id}/sid/${sid}`,
@@ -213,5 +239,6 @@ async function deleteTrack(id: number, sid: string) {
 export {
   getAllTracks, getTracksByYear, getGeoJson,
   updateTrack, updateTrackById,
-  deleteTrack, getTrackById, getTracksByExtent
+  deleteTrack, getTrackById, getTracksByExtent,
+  updateNameFromSource
 }

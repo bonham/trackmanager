@@ -1,5 +1,5 @@
 import pg from 'pg';
-import type { TrackMetadata, TrackPoint } from './Track.js';
+import type { TrackMetadata, TrackMetadataOptionalStartDate, TrackPoint } from './Track.js';
 import { Track } from './Track.js';
 import { isNextValQueryResult } from './typeguards.js';
 
@@ -71,6 +71,13 @@ class Track2DbWriter {
     return `${this.schema()}.${TRACK_SEQUENCENAME}`
   }
 
+  /**
+   * Creates new track in database, based on track object
+   * 
+   * @param t Track object
+   * @param fileBufferHash hash value from source file
+   * @returns Id of created track
+   */
   async write(t: Track, fileBufferHash: string): Promise<number> {
 
     const foundHash = await this.checkForHash(fileBufferHash)
@@ -125,6 +132,12 @@ class Track2DbWriter {
     return (numFound > 0)
   }
 
+  /**
+   * Inserts metadata for a track
+   * @param id Track id
+   * @param tmeta Track metadata
+   * @param fileBufferHash Hash from source file
+   */
   async insertTrackMetadata(id: number, tmeta: TrackMetadata, fileBufferHash: string): Promise<void> {
     const {
       name, source, totalAscent, totalDistance,
@@ -145,6 +158,34 @@ class Track2DbWriter {
 
     const res = await this.client().query(insert, values);
     if (res.rowCount !== 1) throw new Error('Insert rowcount is not equal to 1');
+
+  }
+
+  async updateMetaData(id: number, tmetaOpt: TrackMetadataOptionalStartDate): Promise<void> {
+
+    const t = `${this.schema()}.${TRACK_TABLENAME}`
+
+    await this.client().query('begin transaction')
+    try {
+
+      const {
+        name, source, totalAscent, totalDistance,
+        startTime, durationSeconds,
+      } = tmetaOpt;
+
+      if (name !== undefined) { await this.client().query(`UPDATE ${t} set name = $1 where id = $2`, [name, id]) }
+      if (source !== undefined) { await this.client().query(`UPDATE ${t} set src = $1 where id = $2`, [source, id]) }
+      if (totalAscent !== undefined) { await this.client().query(`UPDATE ${t} set ascent = $1 where id = $2`, [totalAscent, id]) }
+      if (totalDistance !== undefined) { await this.client().query(`UPDATE ${t} set length = $1 where id = $2`, [totalDistance, id]) }
+      if (startTime !== undefined) { await this.client().query(`UPDATE ${t} set "time" = $1 where id = $2`, [startTime, id]) }
+      if (durationSeconds !== undefined) { await this.client().query(`UPDATE ${t} set timelength = $1 where id = $2`, [durationSeconds, id]) }
+
+      await this.client().query('commit')
+
+    } catch (e) {
+      await this.client().query('rollback')
+      throw e
+    }
 
   }
 

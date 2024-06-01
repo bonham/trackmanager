@@ -7,9 +7,6 @@
       <b-spinner v-if="loading" />
     </div>
 
-    <b-button class="mb-3" @click="cleanAll">
-      Clean all
-    </b-button>
     <BTable id="tracktable" striped hover :items="tableItems" :fields="trackTableFields" primary-key="id">
       <!-- put following line into table lite tag for transitions in table -->
       <!-- :tbody-transition-props="transProps" -->
@@ -26,7 +23,7 @@
       </template>
 
       <template #cell(cbutton)="row">
-        <b-button @click="cleanUpText(row.item)">
+        <b-button @click="nameFromSrc(row.item)">
           <i-bi-arrow-left />
         </b-button>
       </template>
@@ -47,7 +44,7 @@ import {
   BSpinner
 } from 'bootstrap-vue-next'
 import type { TableItem } from 'bootstrap-vue-next'
-import { getAllTracks, updateTrackById, deleteTrack } from '@/lib/trackServices'
+import { getAllTracks, getTrackById, updateTrackById, deleteTrack, updateNameFromSource } from '@/lib/trackServices'
 import { Track } from '@/lib/Track'
 import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'
 import EditableText from '@/components/EditableText.vue'
@@ -64,10 +61,6 @@ function stringOrEmpty(u: unknown) {
 function isNumber(value: unknown): value is number {
   return typeof value === 'number';
 }
-
-// function numberOrNegative1(u: unknown) {
-//   return isNumber(u) ? u : -1
-// }
 
 const trackTableFields = ref([
   {
@@ -154,36 +147,43 @@ async function loadTracks() {
   })
   loading.value = false
 }
-async function cleanUpText(item: TableItem) {
+async function nameFromSrc(item: TableItem): Promise<boolean> {
+
   if (!isNumber(item.id)) throw Error("item.id not number")
   const id = item.id
   item.loading = true
-  let convertedName = stringOrEmpty(item.src)
-  const datePattern = /\d{8}/
-  const match = convertedName.match(datePattern)
-  if (match) {
-    // const date = match[0]
-    convertedName = convertedName.replace(datePattern, '')
+
+  // update name from source in backend
+  const updateSuccess = await updateNameFromSource(id, props.sid)
+  let updatedName: string | null = null
+
+  if (updateSuccess) {
+
+    const updatedTrack = await getTrackById(id, props.sid)
+    if (updatedTrack !== null) {
+      updatedName = updatedTrack.name
+      console.log(`Updated name ${updatedName}`)
+    } else {
+      console.error(`Could not read updated track with id ${id}`)
+      return false
+    }
+  } else {
+    console.error(`Updating name from source for track ${id} failed`)
+    return false
   }
-  convertedName = convertedName.replace(/[ \-_]+/g, ' ') // convert to space
-  convertedName = convertedName.replace(/\.gpx$/i, '') // strip file suffix
-  convertedName = convertedName.trim() // Trim space at begin or end
 
-  const track = tracksByTrackId.value[id]
-  // Update property in track item
-  track.name = convertedName
+  const tableItem = tableItemsByTrackId[id]
+  tableItem.name = updatedName
 
-  // Perform update in backend
-  await processNameUpdate(item, convertedName)
-
-  // changing value of item.loading makes sure editable text is re-rendered and prop name is put into dom element
+  // changing value of item.loading makes sure editable text is re-rendered and prop name is put into dom element ??
   item.loading = false
+  return true
 }
-function cleanAll() {
-  tableItems.value.forEach(item => {
-    cleanUpText(item).catch(console.error)
-  })
-}
+// function cleanAll() {
+//   tableItems.value.forEach(item => {
+//     cleanUpText(item).catch(console.error)
+//   })
+// }
 async function deleteTrackFromTable(item: TableItem) {
   if (!isNumber(item.id)) throw Error("item.id not number")
   const success = await deleteTrack(item.id, props.sid)

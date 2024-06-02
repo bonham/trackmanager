@@ -24,7 +24,7 @@ describe('TrackOverview and TrackDetail', () => {
       }
     )
 
-    await rresult.findByText('2021')
+    await rresult.findByText('2021 (1)')
     await rresult.findByText('Saupferchweg')
     // debug()
   })

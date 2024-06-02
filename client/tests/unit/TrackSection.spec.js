@@ -33,7 +33,7 @@ describe('TrackSection', () => {
       }
     )
 
-    expect(await findByText('Long list')).toBeInTheDocument()
+    expect(await findByText('Long list (1)')).toBeInTheDocument()
     expect(await findByText('Good track')).toBeInTheDocument()
     expect(await findByText('15. Mai / 0.0 km / 135 m')).toBeInTheDocument()
   })

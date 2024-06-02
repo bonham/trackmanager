@@ -11,10 +11,10 @@
               <i-bi-arrow-right-circle v-else />
             </b-button>
             <h4 class="mx-2 my-0">
-              {{ label }}
+              {{ label }} ({{ coll.tlist.length }})
             </h4>
             <div class="mx-2">
-              {{ Math.round(coll.distance() / 1000) }} km total
+              {{ Math.round(coll.distance() / 1000) }} km
             </div>
           </b-col>
           <b-col cols="3" />

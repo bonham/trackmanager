@@ -196,7 +196,6 @@ router.get(
     const query = 'select id, name, length, length_calc, src, '
       + 'time, timelength, timelength_calc, ascent, ascent_calc '
       + `from ${schema}.tracks where ${whereClause} order by time desc`;
-    console.log(query);
     try {
       const queryResult = await pool.query(query);
       res.json(queryResult.rows);

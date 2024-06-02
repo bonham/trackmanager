@@ -14,7 +14,7 @@ class DateStringMatcher {
 
   inputString: string
 
-  readonly regexInternational = /((?:19|20|21)\d{2})[ _\-./]?(0[1-9]|1[0-2])[ _\-./]?(0[1-9]|[1-2][0-9]|3[0-1])(?:[ _\-./]?\d{2}[:.-]?\d{2})?/
+  readonly regexInternational = /((?:19|20|21)\d{2})[ _\-./]?(0[1-9]|1[0-2])[ _\-./]?(0[1-9]|[1-2][0-9]|3[0-1])(?:[ _\-./]?\d{2}[:.-]?\d{2}(?:[ _\-./]?\d{1,2})?)?/ // with minutes / seconds
   readonly regexGerman = /(0[1-9]|[1-2][0-9]|3[0-1])[ _\-./]?(0[1-9]|1[0-2])[ _\-./]?((?:19|20|21)\d{2})/
 
   constructor(inputString: string) {

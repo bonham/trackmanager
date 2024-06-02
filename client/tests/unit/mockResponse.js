@@ -62,6 +62,8 @@ const mockFetch = vi.fn((reqOrUrl) => {
     return new Response(mockSingleTrackResponse)
   } else if (req.url.match('^/api/config/get/sid/abcd1234/SCHEMA/TRACKSTYLE')) {
     return new Response(JSON.stringify({ value: null }))
+  } else if (req.url.match('^/api/tracks/namefromsrc/404/sid/abcd1234')) {
+    return new Response()
   } else {
     throw new Error(`Url ${req.url} is not mocked`)
   }

@@ -2,16 +2,22 @@ import * as dotenv from 'dotenv';
 import type { Request as ExpressRequest, NextFunction, Response } from 'express';
 import express from 'express';
 import { Formidable } from 'formidable';
+import type { GeoJsonObject } from 'geojson';
 import _ from 'lodash';
 import { mkdtemp as mkdtempprom } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { basename, join } from 'node:path';
-import pkg from 'pg';
+import pg from 'pg';
+import { Track2DbWriter } from '../lib/Track2DbWriter.js';
+import { DateStringMatcher, StringCleaner } from '../lib/analyzeString.js';
 import { asyncWrapper } from '../lib/asyncMiddlewareWrapper.js';
 import { processUpload } from '../lib/processUpload.js';
+import createSidValidationChain from '../lib/sidResolverMiddleware.js';
+import trackIdValidationMiddleware from '../lib/trackIdValidationMiddleware.js';
+import yearValidation from '../lib/yearValidation.js';
 
 
-const { Pool } = pkg;
+const { Pool } = pg;
 
 
 
@@ -32,11 +38,11 @@ const TMP_BASE_DIR = process.env.UPLOAD_DIR ?? tmpdir();
 const router = express.Router();
 router.use(express.json()); // use builtin json body parser
 
-import createSidValidationChain from '../lib/sidResolverMiddleware.js';
-import trackIdValidationMiddleware from '../lib/trackIdValidationMiddleware.js';
-import yearValidation from '../lib/yearValidation.js';
 
 const database = process.env.TM_DATABASE;
+if (database === undefined) {
+  throw Error("Please define database in environment")
+}
 
 // sql query pool
 const poolOptions = {
@@ -78,12 +84,23 @@ router.get(
   })
 );
 
-/// // Get Geojson for a list of ids. Payload { ids: [..] }
 // result: { id: x.id, geojson: { .. } }
-function isIdsNumberArray(obj: any): obj is { ids: number[] } {
+function isIdsNumberArray(obj: unknown): obj is { ids: number[] } {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
-  return obj && Array.isArray(obj.ids) && obj.ids.every((item: any) => typeof item === 'number');
+
+  if (
+    obj &&
+    typeof obj === 'object' &&
+    'ids' in obj &&
+    Array.isArray(obj.ids) &&
+    obj.ids.every((item: unknown) => typeof item === 'number')
+  ) return true
+  else {
+    return false
+  }
 }
+
+/// // Get Geojson for a list of ids. Payload { ids: [..] }
 router.post(
   '/geojson/sid/:sid',
   sidValidationChain,
@@ -103,7 +120,7 @@ router.post(
         }
 
         // validate integer
-        const notIntegerList = _.reject(ids, (x: any) => (_.isInteger(x)));
+        const notIntegerList = _.reject(ids, (x) => (_.isInteger(x)));
         if (notIntegerList.length) throw Error('Found non integer elements in payload');
 
         const inClause = `(${ids.join()})`;
@@ -111,9 +128,9 @@ router.post(
           + `from ${schema}.tracks where id in ${inClause}`;
 
         const queryResult = await pool.query(query);
-        const { rows } = queryResult;
+        const { rows } = queryResult as { rows: { id: number, geojson: string }[] };
 
-        const rowsWGeoJson = _.map(rows, (x: any) => ({ id: x.id, geojson: JSON.parse(x.geojson) }));
+        const rowsWGeoJson = _.map(rows, (x) => ({ id: x.id, geojson: JSON.parse(x.geojson) as GeoJsonObject }));
 
         res.json(rowsWGeoJson);
       }
@@ -202,7 +219,7 @@ router.post(
       const { schema } = req as ReqWSchema;
 
       // get extent from payload
-      const bbox = req.body;
+      const bbox = req.body as unknown;
       if (!Array.isArray(bbox)) { throw Error('Payload is not array'); }
       if (bbox.length !== 4) { throw Error('BBox must have array length 4'); }
 
@@ -236,6 +253,7 @@ router.put(
     const { schema } = req as ReqWSchema;
     const { updateAttributes } = req.body;
     const { data } = req.body;
+    // SQL injection here
 
     // filter out attributes not in data object
     const existingAttributes = updateAttributes.filter((x: any) => (!(data[x] === undefined)));
@@ -267,6 +285,49 @@ router.put(
     }
   }),
 );
+
+/// // Update name from source for a track
+router.patch(
+  '/namefromsrc/:trackId/sid/:sid',
+  isAuthenticated,
+  sidValidationChain,
+  trackIdValidationMiddleware,
+  asyncWrapper(async (req: ExpressRequest, res: Response) => {
+    const { schema } = req as ReqWSchema;
+    const tidS: string = req.params.trackId
+    const tid = parseInt(tidS)
+
+    // get source file name from server
+    const queryResult = await pool.query(
+      `select src from ${schema}.tracks where id = $1`,
+      [tid]
+    );
+    if (queryResult.rowCount !== 1) { throw Error(`Got ${queryResult.rowCount} but expected 1`) }
+    const { src } = queryResult.rows[0] as { src: string }
+
+    // convert and write
+    const tdbw = new Track2DbWriter()
+    await tdbw.init({
+      dbHost: poolOptions.host,
+      dbName: poolOptions.database,
+      dbSchema: schema,
+      dbUser: poolOptions.user
+    })
+    try {
+      const dateStrMatch = new DateStringMatcher(src)
+      const fileNameWithoutDate = dateStrMatch.strippedString()
+
+      const cleaner = new StringCleaner(fileNameWithoutDate)
+      const cleanedFileName = cleaner.applyAll({ suffixList: ['gpx', 'fit'] })
+
+      await tdbw.updateMetaData(tid, { name: cleanedFileName })
+    } finally {
+      tdbw.end()
+    }
+    res.status(204)
+    res.end()
+  })
+)
 
 /// // Delete single track
 router.delete(
@@ -310,7 +371,6 @@ router.delete(
   }),
 );
 
-
 // POST route for handling gpx track file uploads.
 router.post(
   '/addtrack/sid/:sid',
@@ -351,6 +411,5 @@ router.post(
     });
   }),
 );
-
 
 export default router;

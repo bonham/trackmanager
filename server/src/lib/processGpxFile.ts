@@ -2,6 +2,7 @@
 import { Gpx2Track } from './Gpx2Track.js';
 import type { Segment, TrackPoint } from './Track.js';
 import { Track } from './Track.js';
+import { DateStringMatcher, StringCleaner } from './analyzeString.js';
 import { writeTrack } from './trackWriteHelpers.js';
 
 
@@ -31,10 +32,19 @@ async function processGpxFile(
     // extract metadata for track
     const tm = gpx2t.trackMetadata(trackNum)
     const { name, ascent, time, timelength } = tm
-    const startTime = time ?? metadataStartTime
+
+    const dateStrMatch = new DateStringMatcher(fileName)
+    const startTime = time ?? metadataStartTime ?? dateStrMatch.extractDate()
+
+    const fileNameWithoutDate = dateStrMatch.strippedString()
+    const cleaner = new StringCleaner(fileNameWithoutDate)
+    const cleanedFileName = cleaner.applyAll({ suffixList: ['gpx', 'fit'] })
+
+    // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
+    const finalName = name?.trim() || cleanedFileName
 
     const track = new Track({
-      name,
+      name: finalName,
       source: fileName,
       totalAscent: ascent,
       startTime: startTime ?? new Date(0), // epoch if not known
@@ -77,6 +87,7 @@ async function processGpxFile(
     })
   }
 }
+
 
 export { processGpxFile };
 

@@ -29,7 +29,7 @@
       },
       "presentation": {
         "echo": true,
-        "reveal": "silent",
+        "reveal": "always",
         "focus": false,
         "panel": "new",
         "showReuseMessage": true,
@@ -38,7 +38,8 @@
       }
     },
     {
-      "type": "eslint",
+      "type": "npm",
+      "script": "lint",
       "problemMatcher": ["$eslint-stylish"],
       "label": "eslint: lint whole folder client",
       "runOptions": {

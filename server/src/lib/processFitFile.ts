@@ -1,6 +1,7 @@
 
 import type { TrackPoint } from './Track.js';
 import { Track } from './Track.js';
+import { DateStringMatcher, StringCleaner } from './analyzeString.js';
 import { FitFile } from './fit/FitFile.js';
 import { writeTrack } from './trackWriteHelpers.js';
 
@@ -27,8 +28,16 @@ async function processFitFile(
 
   if (!startTime) throw new Error('Fit file does not have start time in session');
 
+  // mangling of filename 
+  const dateStrMatch = new DateStringMatcher(fileName)
+  const fileNameWithoutDate = dateStrMatch.strippedString()
+
+  const cleaner = new StringCleaner(fileNameWithoutDate)
+  const cleanedFileName = cleaner.applyAll({ suffixList: ['gpx', 'fit'] })
+
+
   const track = new Track({
-    name: undefined,
+    name: cleanedFileName,
     source: fileName,
     totalAscent,
     totalDistance,

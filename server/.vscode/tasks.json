@@ -5,13 +5,13 @@
       "type": "npm",
       "script": "start",
       "problemMatcher": [],
-      "label": "start",
+      "label": "backend server",
       "runOptions": {
         "runOn": "folderOpen"
       },
       "presentation": {
         "echo": true,
-        "reveal": "silent",
+        "reveal": "always",
         "focus": false,
         "panel": "new",
         "showReuseMessage": true,

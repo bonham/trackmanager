@@ -29,7 +29,7 @@
       },
       "presentation": {
         "echo": true,
-        "reveal": "silent",
+        "reveal": "always",
         "focus": false,
         "panel": "new",
         "showReuseMessage": true,

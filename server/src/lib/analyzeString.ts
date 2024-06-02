@@ -100,9 +100,9 @@ class StringCleaner {
 
   applyAll(opt: { suffixList?: string[] } = {}): string {
     const suffixList: string[] = opt.suffixList ?? []
-    this.replaceConnectorsWithSpace()
-    this.removeFileSuffix(suffixList)
     this.removeKarooPrefix()
+    this.removeFileSuffix(suffixList)
+    this.replaceConnectorsWithSpace()
     return this.getString()
   }
 

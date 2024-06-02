@@ -4,7 +4,7 @@ import { queue } from 'async'
 import type { QueueObject, AsyncResultCallback } from 'async'
 
 const FORMPARAM = 'newtrack'
-const WORKERS = 4
+const WORKERS = 10
 const UP_BASE_URL = '/api/tracks/addtrack'
 
 

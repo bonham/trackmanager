@@ -22,6 +22,12 @@ const router = createRouter({
       props: true
     },
     {
+      path: '/progress/sid/:sid',
+      name: 'ProgressChart',
+      component: () => import('./views/ProgressChart.vue'),
+      props: true
+    },
+    {
       path: '/upload/sid/:sid',
       name: 'UploadPage',
       component: () => import('./views/UploadPage.vue'),

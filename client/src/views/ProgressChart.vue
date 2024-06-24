@@ -36,12 +36,8 @@ const props = defineProps({
 
 
 const mydataSets = [{
-  label: "testdata",
-  data: [
-    { x: DateTime.fromISO('2024-01-02'), y: 7 },
-    { x: DateTime.fromISO('2024-01-02 20:44:55'), y: 6 },
-    { x: DateTime.fromISO('2024-01-06'), y: 8 },
-  ]
+  label: "Empty",
+  data: []
 }]
 let mychart: Chart<"line", { x: DateTime; y: number; }[], DateTime>
 
@@ -76,20 +72,20 @@ const progressDataSets = computed(() => {
     if (tracksByYear.value[year] !== undefined) {
 
       const dateAndLength = tracksByYear.value[year].map((t) => {
-        return { x: t.getTime(), y: t.distance() }
+        return { x: t.getTime(), y: t.distance(), name: t.getNameOrSrc() }
       })
 
       const dateAndLengthClean = dateAndLength.filter((e) => {
         return (e.x !== null)
-      }) as { x: DateTime<boolean>, y: number }[]
+      }) as { x: DateTime<boolean>, y: number, name: string }[]
 
       dateAndLengthClean.sort((a, b) => (a.x.toSeconds() - b.x.toSeconds()))
 
       let sum = 0
-      const datesAndCumulatedLength = dateAndLengthClean.map(({ x, y }) => {
+      const datesAndCumulatedLength = dateAndLengthClean.map(({ x, y, name }) => {
         sum += y / 1000
         const normDate = x.set({ year: 2024 })
-        return { x: normDate, y: sum }
+        return { x: normDate, y: sum, name }
       })
       const dataset: DSet = {
         label: year,
@@ -155,7 +151,6 @@ onMounted(() => {
         {
           type: 'line',
           data: {
-            labels: [DateTime.fromISO('2024-01-01'), DateTime.fromISO('2024-12-31')],
             datasets: mydataSets,
           },
           options: {
@@ -164,17 +159,39 @@ onMounted(() => {
               x: {
                 type: "time",
                 time: {
-                  tooltipFormat: 'DD T'
+                  tooltipFormat: 'ccc MMM d',
+                  displayFormats: {
+                    month: 'MMM',
+                    year: ''
+                  },
+                  unit: 'month'
                 },
+                min: '2024-01-01',
+                max: '2024-12-31 23:59',
                 title: {
                   display: true,
-                  text: "Date"
+                  text: "Day in year"
                 }
               },
               y: {
                 title: {
                   display: true,
-                  text: 'value'
+                  text: 'Mileage'
+                },
+                ticks: {
+                  callback: (value) => `${value} km`
+                }
+              }
+            },
+            plugins: {
+              tooltip: {
+                callbacks: {
+                  label: function (context) {
+                    return context.dataset.label + " " + Math.round(context.parsed.y) + " m"
+                  },
+                  afterLabel: function (context) {
+                    return (context.raw as { x: number, y: number, name: string }).name
+                  }
                 }
               }
             }

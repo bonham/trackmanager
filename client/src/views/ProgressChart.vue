@@ -13,10 +13,34 @@
 </template>
 
 <script setup lang="ts">
-import Chart from 'chart.js/auto';
-import 'chartjs-adapter-luxon';
 import _ from 'lodash'
 
+// chartjs
+import {
+  Chart,
+  LineController,
+  LineElement,
+  PointElement,
+  Colors,
+  TimeScale,
+  LinearScale,
+  Legend,
+  Tooltip
+} from 'chart.js'
+
+Chart.register(
+  LineController,
+  LineElement,
+  PointElement,
+  Colors,
+  TimeScale,
+  LinearScale,
+  Legend,
+  Tooltip
+);
+import 'chartjs-adapter-luxon';
+
+// internals
 import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'
 import { Track } from '@/lib/Track'
 import { getAllTracks } from '@/lib/trackServices'

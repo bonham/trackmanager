@@ -20,11 +20,10 @@ import 'chartjs-adapter-luxon';
 import _ from 'lodash'
 
 import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'
-import { Track, TrackCollection } from '@/lib/Track'
+import { Track } from '@/lib/Track'
 import { getAllTracks } from '@/lib/trackServices'
 import { BSpinner } from 'bootstrap-vue-next'
-import { ref, computed, onMounted, nextTick } from 'vue'
-import type { Ref } from 'vue'
+import { ref, onMounted, nextTick } from 'vue'
 import { DateTime } from 'luxon';
 
 const props = defineProps({
@@ -34,31 +33,19 @@ const props = defineProps({
   }
 })
 
-
-const mydataSets = [{
-  label: "Empty",
-  data: []
-}]
-let mychart: Chart<"line", { x: DateTime; y: number; }[], DateTime>
-
-
-const loadedTracks: Ref<Track[]> = ref([])
+// reactives and dom refs
 const loading = ref(true)
 const canvasref = ref<(null | HTMLCanvasElement)>(null)
 
-const tracksByYear = computed(() => {
-  const trackFlatList = _.values(loadedTracks.value)
-  return _.groupBy(trackFlatList, (x: Track) => x.year())
+// helper functions
+type TracksByYearDict = { [key: string]: Track[] };
 
-})
+function tracksByYear(loadedTracks: Track[]): TracksByYearDict {
+  const trackFlatList = _.values(loadedTracks)
+  return _.groupBy(trackFlatList, (x: Track) => x.year().toString())
+}
 
-const yearList = computed(() => {
-  const yl = _.keys(tracksByYear.value)
-  yl.sort().reverse()
-  return yl
-})
-
-const progressDataSets = computed(() => {
+function progressDataSets(tracksByYear: TracksByYearDict) {
 
   interface DSet {
     label: string,
@@ -67,11 +54,14 @@ const progressDataSets = computed(() => {
 
   const returnValue: DSet[] = []
 
-  for (const year of yearList.value) {
+  const yearList = _.keys(tracksByYear)
+  yearList.sort().reverse()
 
-    if (tracksByYear.value[year] !== undefined) {
+  for (const year of yearList) {
 
-      const dateAndLength = tracksByYear.value[year].map((t) => {
+    if (tracksByYear[year] !== undefined) {
+
+      const dateAndLength = tracksByYear[year].map((t) => {
         return { x: t.getTime(), y: t.distance(), name: t.getNameOrSrc() }
       })
 
@@ -95,63 +85,25 @@ const progressDataSets = computed(() => {
     }
   }
   return returnValue
-})
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const trackCollections = computed(() => {
-  const r: { year: string, collection: TrackCollection }[] = []
-  yearList.value.forEach(y => {
-    const tc = new TrackCollection(tracksByYear.value[y])
-    r.push({
-      year: y,
-      collection: tc
-    })
-  })
-  return r
-
-})
-
-
-async function runOnCreate() {
-  loadedTracks.value = await getAllTracks(props.sid)
-  loading.value = false
-
-  if (mychart !== undefined) {
-
-    const newdata = progressDataSets.value
-    console.log(newdata)
-
-    mychart.data.datasets = newdata
-    mychart.update()
-    console.log("data changed")
-  } else {
-    console.log('mychart is not defined')
-  }
-
-  // const dataset = somethingWithDate.value.map(e => { return { x: e.x, y: e.y } })
-
-
-  // if (chart) {
-  //   chart.data.datasets = [
-  //     { x: DateTime.now(), y: 7 }
-  //   ]
-  // }
-
 }
 
+// load tracks async
+const allTracksPromise = getAllTracks(props.sid)
+
+// generate empty chart
 onMounted(() => {
-  nextTick(() => {
-    console.log("In onMounted")
+  nextTick(async () => {
 
+    // should be defined after mount
     if (canvasref.value !== null) {
-      console.log("Canvas", canvasref.value)
 
-      mychart = new Chart(
+      // create and paint chart with no data
+      const mychart: Chart<"line", { x: DateTime; y: number; }[], DateTime> = new Chart(
         canvasref.value,
         {
           type: 'line',
           data: {
-            datasets: mydataSets,
+            datasets: [],
           },
           options: {
             maintainAspectRatio: false,
@@ -167,7 +119,7 @@ onMounted(() => {
                   unit: 'month'
                 },
                 min: '2024-01-01',
-                max: '2024-12-31 23:59',
+                max: '2025-01-02',
                 title: {
                   display: true,
                   text: "Day in year"
@@ -187,7 +139,7 @@ onMounted(() => {
               tooltip: {
                 callbacks: {
                   label: function (context) {
-                    return context.dataset.label + " " + Math.round(context.parsed.y) + " m"
+                    return context.dataset.label + " " + Math.round(context.parsed.y) + " km"
                   },
                   afterLabel: function (context) {
                     return (context.raw as { x: number, y: number, name: string }).name
@@ -198,6 +150,17 @@ onMounted(() => {
           }
         }
       )
+
+      // wait for loading of tracks to complete
+      const allTracks = await allTracksPromise
+      const tby = tracksByYear(allTracks)
+      const pgDs = progressDataSets(tby)
+
+      // update chart data
+      mychart.data.datasets = pgDs
+      mychart.update()
+      loading.value = false
+
     } else {
       console.log("Canvas null")
     }
@@ -205,7 +168,5 @@ onMounted(() => {
     console.error("Error in nextTick", err)
   })
 })
-
-runOnCreate().catch((error) => console.log(error))
 
 </script>

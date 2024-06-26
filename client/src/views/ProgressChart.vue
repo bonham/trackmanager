@@ -40,6 +40,9 @@ Chart.register(
 );
 import 'chartjs-adapter-luxon';
 
+import zoomPlugin from 'chartjs-plugin-zoom';
+Chart.register(zoomPlugin);
+
 // internals
 import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'
 import { Track } from '@/lib/Track'
@@ -159,7 +162,7 @@ onMounted(() => {
                   text: 'Mileage'
                 },
                 ticks: {
-                  callback: (value) => `${value} km`
+                  callback: (value) => `${Math.round(value as number)} km`
                 }
               }
             },
@@ -178,8 +181,20 @@ onMounted(() => {
                   }
                 }
               },
-              legend: {
-                position: 'chartArea'
+              zoom: {
+                zoom: {
+                  wheel: {
+                    enabled: true,
+                  },
+                  pinch: {
+                    enabled: true
+                  },
+                  mode: 'xy',
+                },
+                pan: {
+                  enabled: true,
+
+                }
               }
             }
           }

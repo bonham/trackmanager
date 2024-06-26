@@ -1,14 +1,12 @@
 <template>
   <track-manager-nav-bar :sid="sid">
-    <div class="px-2">
-      <div>
-        <div>
-          <span v-if="loading">Loading <b-spinner small />
-          </span>
-        </div>
-        <div class="d-flex flex-column flex-grow-1">
-          <canvas id="acquisitions" ref="canvasref"></canvas>
-        </div>
+    <div class="d-flex flex-column flex-grow-1 px-2">
+      <div class="d-flex flex-column">
+        <span v-if="loading">Loading <b-spinner small />
+        </span>
+      </div>
+      <div class="d-flex flex-column flex-grow-1">
+        <canvas id="acquisitions" ref="canvasref"></canvas>
       </div>
     </div>
   </track-manager-nav-bar>
@@ -62,20 +60,21 @@ function progressDataSets(tracksByYear: TracksByYearDict) {
     if (tracksByYear[year] !== undefined) {
 
       const dateAndLength = tracksByYear[year].map((t) => {
-        return { x: t.getTime(), y: t.distance(), name: t.getNameOrSrc() }
+        return { x: t.getTime(), delta: t.distance(), name: t.getNameOrSrc() }
       })
 
       const dateAndLengthClean = dateAndLength.filter((e) => {
         return (e.x !== null)
-      }) as { x: DateTime<boolean>, y: number, name: string }[]
+      }) as { x: DateTime<boolean>, delta: number, name: string }[]
 
       dateAndLengthClean.sort((a, b) => (a.x.toSeconds() - b.x.toSeconds()))
 
       let sum = 0
-      const datesAndCumulatedLength = dateAndLengthClean.map(({ x, y, name }) => {
-        sum += y / 1000
+      const datesAndCumulatedLength = dateAndLengthClean.map(({ x, delta, name }) => {
+        const step = delta / 1000
+        sum += step
         const normDate = x.set({ year: 2024 })
-        return { x: normDate, y: sum, name }
+        return { x: normDate, y: sum, step, name }
       })
       const dataset: DSet = {
         label: year,
@@ -98,6 +97,8 @@ onMounted(() => {
     if (canvasref.value !== null) {
 
       // create and paint chart with no data
+      interface ChartData { x: number, y: number, step: number, name: string }
+
       const mychart: Chart<"line", { x: DateTime; y: number; }[], DateTime> = new Chart(
         canvasref.value,
         {
@@ -137,14 +138,21 @@ onMounted(() => {
             },
             plugins: {
               tooltip: {
+                boxPadding: 10,
                 callbacks: {
+                  beforeLabel: function (context) {
+                    return context.dataset.label
+                  },
                   label: function (context) {
-                    return context.dataset.label + " " + Math.round(context.parsed.y) + " km"
+                    return Math.round((context.raw as ChartData).step) + " km"
                   },
                   afterLabel: function (context) {
-                    return (context.raw as { x: number, y: number, name: string }).name
+                    return (context.raw as ChartData).name
                   }
                 }
+              },
+              legend: {
+                position: 'chartArea'
               }
             }
           }

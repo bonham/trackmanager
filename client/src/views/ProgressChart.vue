@@ -36,25 +36,27 @@ const loading = ref(true)
 const canvasref = ref<(null | HTMLCanvasElement)>(null)
 
 // helper functions
-type TracksByYearDict = { [key: string]: Track[] };
+type TracksByYearDict = { [key: number]: Track[] };
 
 function tracksByYear(loadedTracks: Track[]): TracksByYearDict {
   const trackFlatList = _.values(loadedTracks)
-  return _.groupBy(trackFlatList, (x: Track) => x.year().toString())
+  return _.groupBy(trackFlatList, (x: Track) => x.year())
 }
 
 function progressDataSets(tracksByYear: TracksByYearDict) {
 
   interface DSet {
     label: string,
-    data: { x: DateTime, y: number }[]
+    data: { x: DateTime, y: number }[],
+    pointRadius: number
   }
 
   const returnValue: DSet[] = []
 
-  const yearList = _.keys(tracksByYear)
+  const yearList = _.keys(tracksByYear).map((ys) => Number.parseInt(ys))
   yearList.sort().reverse()
 
+  const maxYear = Math.max(...yearList)
   for (const year of yearList) {
 
     if (tracksByYear[year] !== undefined) {
@@ -77,8 +79,9 @@ function progressDataSets(tracksByYear: TracksByYearDict) {
         return { x: normDate, y: sum, step, name }
       })
       const dataset: DSet = {
-        label: year,
-        data: datesAndCumulatedLength
+        label: year.toString(),
+        data: datesAndCumulatedLength,
+        pointRadius: (year === maxYear) ? 5 : 3
       }
       returnValue.push(dataset)
     }

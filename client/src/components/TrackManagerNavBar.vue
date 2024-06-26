@@ -23,6 +23,11 @@
                 </router-link>
               </li>
               <li class="nav-item">
+                <router-link class="nav-link my-1" :to="navPath('/progress')">
+                  Progress
+                </router-link>
+              </li>
+              <li class="nav-item">
                 <router-link v-if="userLoginStore.loggedIn" class="nav-link my-1" :to="navPath('/track_multi_edit')">
                   Edit
                 </router-link>

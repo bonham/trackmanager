@@ -123,6 +123,10 @@ class Track {
     }
   }
 
+  getTime() {
+    return this.time ?? null
+  }
+
   getNameOrSrc() {
     return this.name?.trim() || (this.src ?? "")
   }

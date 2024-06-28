@@ -14,17 +14,27 @@ interface RowType {
 }
 
 function isRowType(obj: unknown): obj is RowType {
-  return (
-    obj !== null &&
-    typeof obj === 'object' &&
-    'credentialid' in obj &&
-    'credentialpublickey' in obj &&
-    'credentialdevicetype' in obj &&
-    'credentialbackedup' in obj &&
-    'counter' in obj &&
-    'transports' in obj &&
-    'userid' in obj
-  );
+  if (obj === null) { console.log("row is null"); return false }
+  if (typeof obj !== 'object') { console.log("row is not object"); return false }
+  if (!('credentialid' in obj)) { console.log("credentialid missing"); return false }
+  if (!('credentialpublickey' in obj)) { console.log("credentialpublickey missing"); return false }
+  if (!('credentialdevicetype' in obj)) { console.log("credentialdevicetype missing"); return false }
+  if (!('credentialbackedup' in obj)) { console.log("credentialbackedup missing"); return false }
+  if (!('counter' in obj)) { console.log("counter missing"); return false }
+  if (!('transports' in obj)) { console.log("transports missing"); return false }
+  if (!('userid' in obj)) { console.log("userid missing"); return false }
+  return true
+}
+
+function isRowTypeArray(obj: unknown): obj is RowType[] {
+  if (obj === null) { console.log("row is null"); return false }
+  if (!Array.isArray(obj)) { console.log("obj not array"); return false }
+
+  const allObjectsAreRows = obj.every((el) => {
+    return isRowType(el)
+  })
+  return allObjectsAreRows
+
 }
 
 
@@ -62,8 +72,8 @@ export class AutenticatorDb {
     };
     const res = await this.pgpool.query(query);
     const rows = res.rows
-    if (!isRowType(rows)) {
-      throw new Error("rows does not have expected type")
+    if (!isRowTypeArray(rows)) {
+      throw new Error("rows does not have expected type", { cause: rows })
     }
     return AutenticatorDb.authenticatorFromRows(rows);
   }
@@ -76,8 +86,8 @@ export class AutenticatorDb {
     try {
       const res = await this.pgpool.query(query);
       const rows = res.rows
-      if (!isRowType(rows)) {
-        throw new Error("rows does not have expected type")
+      if (!isRowTypeArray(rows)) {
+        throw new Error("rows does not have expected type", { cause: rows })
       }
       return AutenticatorDb.authenticatorFromRows(rows);
     } catch (e: unknown) {

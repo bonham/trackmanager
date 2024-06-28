@@ -1,4 +1,8 @@
-import type { AuthenticatorTransportFuture } from '@simplewebauthn/typescript-types';
+import type { AuthenticatorTransportFuture } from '@simplewebauthn/types';
+import type { Request } from 'express';
+import { Session } from 'express-session';
+
+
 
 /**
  *
@@ -27,3 +31,16 @@ export interface Authenticator {
 export interface RegCodeLookup {
   'regkey': string, 'username': string, 'created': Date, used: boolean
 };
+
+export interface SessionWChallenge extends Session {
+  challenge?: string;
+  user?: string;
+  reguser?: string;
+  regkey?: string;
+}
+
+export interface RequestWebauthn extends Request {
+  session: SessionWChallenge
+};
+
+

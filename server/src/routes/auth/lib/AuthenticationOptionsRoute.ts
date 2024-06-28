@@ -1,7 +1,7 @@
 import { generateAuthenticationOptions } from '@simplewebauthn/server';
 import { Router } from 'express';
 import { asyncWrapper } from '../../../lib/asyncMiddlewareWrapper.js';
-import type { Authenticator } from '../server.js';
+import type { Authenticator, RequestWebauthn } from '../server.js';
 import { AutenticatorDb } from './AuthenticatorDb.js';
 
 
@@ -10,7 +10,7 @@ const router = Router();
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function makeAuthenticationOptionsRoute(authdb: AutenticatorDb) {
   // call this route with /authoptions?authuser=myuserid
-  router.get('/authoptions', asyncWrapper(async (req, res) => {
+  router.get('/authoptions', asyncWrapper(async (req: RequestWebauthn, res) => {
     // Seems to make no sense to query user authenticators and send to client
     // client should discover himself
     // const authuser = req.params.authuser;
@@ -37,7 +37,7 @@ export function makeAuthenticationOptionsRoute(authdb: AutenticatorDb) {
         userVerification: 'preferred',
       });
 
-      (req.session as any).challenge = options.challenge;
+      req.session.challenge = options.challenge;
 
       res.json(options);
     } catch (error) {

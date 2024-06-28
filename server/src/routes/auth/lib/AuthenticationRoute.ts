@@ -1,15 +1,18 @@
 import type { RequestHandler } from 'express';
 import { Router } from 'express';
+import type { RequestWebauthn } from '../server.js';
 
 
 import { VerifiedAuthenticationResponse, verifyAuthenticationResponse } from '@simplewebauthn/server';
-import type { AuthenticationResponseJSON } from '@simplewebauthn/typescript-types';
+import type { AuthenticationResponseJSON } from '@simplewebauthn/types';
 import { AutenticatorDb } from './AuthenticatorDb.js';
 
 const router = Router();
 
+
+
 export function makeAuthenticationRoute(origin: string, rpID: string, authdb: AutenticatorDb) {
-  router.post('/authentication', (async (req, res, next) => {
+  router.post('/authentication', (async (req: RequestWebauthn, res, next) => {
     try {
       let body: AuthenticationResponseJSON
       if (isAuthResponseJSON(req.body)) {
@@ -19,8 +22,13 @@ export function makeAuthenticationRoute(origin: string, rpID: string, authdb: Au
         throw Error("Internal Error")
       }
 
-      const expectedChallenge = (req.session as any).challenge;
-      (req.session as any).challenge = undefined;
+      const expectedChallenge = req.session.challenge;
+      if (expectedChallenge === undefined) {
+        console.error("Did not receive challenge")
+        res.sendStatus(401)
+        return
+      }
+      req.session.challenge = undefined;
 
       // (Pseudocode} Retrieve an authenticator from the DB that
       // should match the `id` in the returned credential
@@ -47,11 +55,17 @@ export function makeAuthenticationRoute(origin: string, rpID: string, authdb: Au
         });
       } catch (error) {
         console.error('Auth verification failed', error);
-        res.status(401).send({ error: (error as any).message });
+        let msg = ""
+        if (error instanceof Error) {
+          msg = error.message
+        } else if (typeof error === 'string') {
+          msg = error
+        }
+        res.status(401).send({ error: msg });
         return
       }
       // success
-      (req.session as any).user = authenticators[0].userid;
+      req.session.user = authenticators[0].userid;
       console.log('Verification', verification);
       res.json(verification);
     } catch (error) {

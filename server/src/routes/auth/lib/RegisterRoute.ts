@@ -3,41 +3,60 @@ import { Router } from 'express';
 
 import type { VerifiedRegistrationResponse } from '@simplewebauthn/server';
 import { verifyRegistrationResponse } from '@simplewebauthn/server';
-import type { AuthenticatorTransportFuture, RegistrationResponseJSON } from '@simplewebauthn/typescript-types';
-import type { MySession } from '../authInterfaces.js';
-import type { Authenticator } from '../server.js';
+import type { AuthenticatorTransportFuture, RegistrationResponseJSON } from '@simplewebauthn/types';
+import type { Authenticator, RequestWebauthn } from '../server.js';
 
 import { AutenticatorDb } from './AuthenticatorDb.js';
 
 const router = Router();
 
+function isRegistrationResponse(obj: unknown): obj is RegistrationResponseJSON {
+  if (typeof obj !== "object" || obj === null) {
+    return false;
+  }
+
+  const keys = Object.keys(obj);
+  return (
+    "id" in obj &&
+    "rawId" in obj &&
+    "response" in obj &&
+    "clientExtensionResults" in obj &&
+    "type" in obj &&
+    keys.length === 5
+  );
+}
+
 export function makeRegisterRoute(origin: string, rpID: string, authdb: AutenticatorDb) {
-  router.post('/register', (async (req, res) => {
-    let myreq: any;
+  router.post('/register', (async (req: RequestWebauthn, res) => {
 
     if ('session' in req) {
-      myreq = req as (typeof req & MySession);
+      // ok
     } else {
       console.error('Request does not contain session');
       res.sendStatus(500);
       return;
     }
 
-    const expectedChallenge = myreq.session.challenge;
-    myreq.session.challenge = undefined;
+    const expectedChallenge = req.session.challenge;
+    req.session.challenge = undefined;
 
     if (expectedChallenge === undefined) {
       console.log('Current user challenge is undefined');
       res.sendStatus(401);
       return;
     }
-    const registrationuser = myreq.session.reguser;
+    const registrationuser = req.session.reguser;
     if (registrationuser === undefined) {
       console.log('Current user is undefined');
       res.sendStatus(401);
       return;
     }
-    const body: RegistrationResponseJSON = await req.body;
+    const body: unknown = await req.body;
+    if (!isRegistrationResponse(body)) {
+      console.log("Body was not registration response")
+      res.sendStatus(401)
+      return
+    }
     const transports: AuthenticatorTransportFuture[] = body.response.transports ?? [];
 
     let verification: VerifiedRegistrationResponse;
@@ -95,7 +114,7 @@ export function makeRegisterRoute(origin: string, rpID: string, authdb: Autentic
     }
 
     // mark registration key used
-    const { regkey } = (req.session as any);
+    const { regkey } = req.session;
     if (regkey !== undefined) {
       const markSuccess = authdb.markRegistrationCodeUsed(regkey);
       if (!(await markSuccess)) {
@@ -103,7 +122,7 @@ export function makeRegisterRoute(origin: string, rpID: string, authdb: Autentic
         res.sendStatus(401);
         return;
       }
-      (req.session as any).regkey = undefined;
+      req.session.regkey = undefined;
     }
 
     // Success !!

@@ -3,7 +3,7 @@
 import { ref } from 'vue'
 import { getWithCORS, sendJSONToServer, getErrorMessage } from '@/lib/httpHelpers';
 import { startAuthentication } from '@simplewebauthn/browser';
-import type { PublicKeyCredentialCreationOptionsJSON } from '@simplewebauthn/typescript-types'
+import type { PublicKeyCredentialCreationOptionsJSON } from '@simplewebauthn/types'
 import type { VerifiedAuthenticationResponse, } from '@simplewebauthn/server'
 
 import { useUserLoginStore } from '@/stores/userlogin'

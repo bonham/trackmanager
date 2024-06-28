@@ -4,7 +4,7 @@ import { getWithCORS, sendJSONToServer, getErrorMessage } from '@/lib/httpHelper
 import { ref } from 'vue'
 import { startRegistration } from '@simplewebauthn/browser';
 import type { VerifiedRegistrationResponse } from '@simplewebauthn/server'
-import type { RegistrationResponseJSON, PublicKeyCredentialCreationOptionsJSON } from '@simplewebauthn/typescript-types'
+import type { RegistrationResponseJSON, PublicKeyCredentialCreationOptionsJSON } from '@simplewebauthn/types'
 
 const props = defineProps({
   useRegistrationKey: Boolean,

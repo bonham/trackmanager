@@ -1,5 +1,32 @@
+import type { AuthenticatorTransportFuture } from '@simplewebauthn/types';
 import type { Pool, QueryConfig } from 'pg';
 import type { Authenticator, RegCodeLookup } from '../server.d.ts';
+
+
+interface RowType {
+  credentialid: string;
+  credentialpublickey: Uint8Array;
+  credentialdevicetype: string;
+  credentialbackedup: boolean;
+  counter: number;
+  transports: string;
+  userid: string;
+}
+
+function isRowType(obj: unknown): obj is RowType {
+  return (
+    obj !== null &&
+    typeof obj === 'object' &&
+    'credentialid' in obj &&
+    'credentialpublickey' in obj &&
+    'credentialdevicetype' in obj &&
+    'credentialbackedup' in obj &&
+    'counter' in obj &&
+    'transports' in obj &&
+    'userid' in obj
+  );
+}
+
 
 export class AutenticatorDb {
   pgpool: Pool;
@@ -8,12 +35,12 @@ export class AutenticatorDb {
     this.pgpool = pgpool;
   }
 
-  static authenticatorFromRows(rows: any[]): Authenticator[] {
+  static authenticatorFromRows(rows: RowType[]): Authenticator[] {
     const authenticators: Authenticator[] = rows.map((row) => {
       const credIDEncoded: string = row.credentialid;
       if ((credIDEncoded === undefined) || credIDEncoded.length === 0) throw new Error('Credential Id undefined');
       const credBuffer = Buffer.from(credIDEncoded, 'base64url');
-      const transportsArray = JSON.parse(row.transports);
+      const transportsArray = JSON.parse(row.transports) as AuthenticatorTransportFuture[]; // unsafe
 
       const a: Authenticator = {
         credentialID: credBuffer,
@@ -28,7 +55,7 @@ export class AutenticatorDb {
       const objEntries = Object.entries(a);
       objEntries.forEach((ele) => {
         const key = ele[0];
-        const value = ele[1];
+        const value = ele[1] as unknown;
         let ok = true;
 
         if (value === undefined) {
@@ -48,7 +75,11 @@ export class AutenticatorDb {
       values: [user],
     };
     const res = await this.pgpool.query(query);
-    return AutenticatorDb.authenticatorFromRows(res.rows);
+    const rows = res.rows
+    if (!isRowType(rows)) {
+      throw new Error("rows does not have expected type")
+    }
+    return AutenticatorDb.authenticatorFromRows(rows);
   }
 
   async getAuthenticatorsById(authenticatorId: string) {
@@ -58,7 +89,11 @@ export class AutenticatorDb {
     };
     try {
       const res = await this.pgpool.query(query);
-      return AutenticatorDb.authenticatorFromRows(res.rows);
+      const rows = res.rows
+      if (!isRowType(rows)) {
+        throw new Error("rows does not have expected type")
+      }
+      return AutenticatorDb.authenticatorFromRows(rows);
     } catch (e: unknown) {
       if ((e instanceof Error) && ('code' in e) && (e.code === '42P01')) {
         throw new Error(

@@ -1,6 +1,6 @@
 import type { AuthenticatorTransportFuture } from '@simplewebauthn/types';
 import type { Pool, QueryConfig } from 'pg';
-import type { Authenticator, RegCodeLookup } from '../server.d.ts';
+import type { Authenticator, RegCodeLookup } from '../interfaces/server.js';
 
 
 interface RowType {
@@ -38,11 +38,10 @@ export class AutenticatorDb {
   static authenticatorFromRows(rows: RowType[]): Authenticator[] {
     const authenticators: Authenticator[] = rows.map((row) => {
       const credIDEncoded: string = row.credentialid;
-      if ((credIDEncoded === undefined) || credIDEncoded.length === 0) throw new Error('Credential Id undefined');
       const credBuffer = Buffer.from(credIDEncoded, 'base64url');
       const transportsArray = JSON.parse(row.transports) as AuthenticatorTransportFuture[]; // unsafe
 
-      const a: Authenticator = {
+      const authenticator = {
         credentialID: credBuffer,
         credentialPublicKey: row.credentialpublickey,
         counter: row.counter,
@@ -51,20 +50,7 @@ export class AutenticatorDb {
         transports: transportsArray,
         userid: row.userid,
       };
-
-      const objEntries = Object.entries(a);
-      objEntries.forEach((ele) => {
-        const key = ele[0];
-        const value = ele[1] as unknown;
-        let ok = true;
-
-        if (value === undefined) {
-          ok = false;
-          console.error(`Prop ${key} is undefined`);
-        }
-        if (!ok) throw new Error('Authenticator has missing values. See error log');
-      });
-      return a;
+      return authenticator;
     });
     return authenticators;
   }

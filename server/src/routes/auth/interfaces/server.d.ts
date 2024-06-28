@@ -10,7 +10,7 @@ import { Session } from 'express-session';
  * how best to store data received during registration for use
  * in subsequent authentications.
  */
-export interface Authenticator {
+declare interface Authenticator {
   // SQL: Encode to base64url then store as `TEXT`. Index this column
   credentialID: Uint8Array;
   // SQL: Store raw bytes as `BYTEA`/`BLOB`/etc...
@@ -28,18 +28,18 @@ export interface Authenticator {
   userid?: string;
 }
 
-export interface RegCodeLookup {
+declare interface RegCodeLookup {
   'regkey': string, 'username': string, 'created': Date, used: boolean
 };
 
-export interface SessionWChallenge extends Session {
+declare interface SessionWChallenge extends Session {
   challenge?: string;
   user?: string;
   reguser?: string;
   regkey?: string;
 }
 
-export interface RequestWebauthn extends Request {
+declare interface RequestWebauthn extends Request {
   session: SessionWChallenge
 };
 

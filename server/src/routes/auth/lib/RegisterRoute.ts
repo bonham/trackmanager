@@ -4,7 +4,7 @@ import { Router } from 'express';
 import type { VerifiedRegistrationResponse } from '@simplewebauthn/server';
 import { verifyRegistrationResponse } from '@simplewebauthn/server';
 import type { AuthenticatorTransportFuture, RegistrationResponseJSON } from '@simplewebauthn/types';
-import type { Authenticator, RequestWebauthn } from '../server.js';
+import type { Authenticator, RequestWebauthn } from '../interfaces/server.js';
 
 import { AutenticatorDb } from './AuthenticatorDb.js';
 

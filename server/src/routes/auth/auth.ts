@@ -2,6 +2,7 @@ import * as dotenv from 'dotenv';
 import type { NextFunction, Request, Response } from 'express';
 import express from 'express';
 import pg from 'pg';
+import type { RequestWebauthn } from './interfaces/server.js';
 import { makeAuthenticationOptionsRoute } from './lib/AuthenticationOptionsRoute.js';
 import { makeAuthenticationRoute } from './lib/AuthenticationRoute.js';
 import { AutenticatorDb } from './lib/AuthenticatorDb.js';
@@ -9,7 +10,7 @@ import { makeLogoutRoute } from './lib/LogoutRoute.js';
 import { makeRegisterRoute } from './lib/RegisterRoute.js';
 import { makeRegistrationOptionsRoute } from './lib/RegistrationOptionsRoute.js';
 
-import type { RequestWebauthn } from './server.js';
+// import type { RequestWebauthn } from './server.js';
 
 const dotenvResult = dotenv.config();
 if (dotenvResult.error) {

@@ -1,7 +1,7 @@
 import { generateAuthenticationOptions } from '@simplewebauthn/server';
 import { Router } from 'express';
 import { asyncWrapper } from '../../../lib/asyncMiddlewareWrapper.js';
-import type { Authenticator, RequestWebauthn } from '../server.js';
+import type { Authenticator, RequestWebauthn } from '../interfaces/server.js';
 import { AutenticatorDb } from './AuthenticatorDb.js';
 
 

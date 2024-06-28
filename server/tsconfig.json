@@ -14,7 +14,8 @@
     "allowJs": true,
     "checkJs": false, // todo: set to true
     "verbatimModuleSyntax": false, // needed from jest https://github.com/kulshekhar/ts-jest/issues/4081
-    "rootDir": "./"
+    "rootDir": "./",
+    "typeRoots": ["types", "src/routes/auth/interfaces"]
   },
   "ts-node": {
     "esm": true,

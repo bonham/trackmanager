@@ -6,7 +6,7 @@ import { asyncWrapper } from '../../../lib/asyncMiddlewareWrapper.js';
 import { generateRegistrationOptions } from '@simplewebauthn/server';
 import { AutenticatorDb } from './AuthenticatorDb.js';
 
-import type { Authenticator, RequestWebauthn } from '../server.js';
+import type { Authenticator, RequestWebauthn } from '../interfaces/server.js';
 
 const MAX_REGCODE_AGE_MS = 1000 * 60 * 60 * 24; // 1 day
 // const MAX_REGCODE_AGE_MS = 1000 * 60 * 5; // 5 minutes
@@ -22,7 +22,7 @@ export function makeRegistrationOptionsRoute(rpName: string, rpID: string, authd
     // (Pseudocode) Retrieve any of the user's previously-
     // registered authenticators
     const userAuthenticatorsPromise = authdb.getUserAuthenticators(registrationuser);
-    const userAuthenticators: Authenticator[] = await userAuthenticatorsPromise;
+    const userAuthenticators = await userAuthenticatorsPromise;
 
     try {
       const options = await generateRegistrationOptions({
@@ -41,12 +41,14 @@ export function makeRegistrationOptionsRoute(rpName: string, rpID: string, authd
         // (Recommended for smoother UX)
         attestationType: 'none',
         // Prevent users from re-registering existing authenticators
-        excludeCredentials: userAuthenticators.map((authenticator) => ({
-          id: authenticator.credentialID,
-          type: 'public-key',
-          // Optional
-          transports: authenticator.transports,
-        })),
+        excludeCredentials: userAuthenticators.map((authenticator: Authenticator) => {
+          return {
+            id: authenticator.credentialID,
+            type: 'public-key',
+            // Optional
+            transports: authenticator.transports,
+          }
+        }),
       });
 
       // (Pseudocode) Remember the challenge for this user
@@ -58,9 +60,21 @@ export function makeRegistrationOptionsRoute(rpName: string, rpID: string, authd
     }
   };
 
-  router.get('/regoptions/regkey/:regkey', asyncWrapper(async (req: RequestWebauthn, res) => {
-    const lookup = await authdb.getUserByRegistrationCode(req.params.regkey);
-    req.session.regkey = req.params.regkey; // save to mark as unused later
+  interface ReqWithParams extends RequestWebauthn {
+    params: {
+      regkey?: string
+    }
+  }
+
+  router.get('/regoptions/regkey/:regkey', asyncWrapper(async (req: ReqWithParams, res) => {
+    const regkey = req.params.regkey
+    if (regkey === undefined) {
+      console.error("regkey undefined")
+      res.sendStatus(401)
+      return
+    }
+    const lookup = await authdb.getUserByRegistrationCode(regkey);
+    req.session.regkey = regkey; // save to mark as unused later
 
     if (lookup === null) {
       console.log('Regkey not found');

@@ -1,9 +1,10 @@
 import type { RequestHandler } from 'express';
 import { Router } from 'express';
-import type { RequestWebauthn } from '../server.js';
+import type { RequestWebauthn } from '../interfaces/server.js';
 
 
-import { VerifiedAuthenticationResponse, verifyAuthenticationResponse } from '@simplewebauthn/server';
+import type { VerifiedAuthenticationResponse } from '@simplewebauthn/server';
+import { verifyAuthenticationResponse } from '@simplewebauthn/server';
 import type { AuthenticationResponseJSON } from '@simplewebauthn/types';
 import { AutenticatorDb } from './AuthenticatorDb.js';
 

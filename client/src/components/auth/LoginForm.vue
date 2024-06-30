@@ -3,7 +3,7 @@
 import { ref } from 'vue'
 import { getWithCORS, sendJSONToServer, getErrorMessage } from '@/lib/httpHelpers';
 import { startAuthentication } from '@simplewebauthn/browser';
-import type { PublicKeyCredentialCreationOptionsJSON } from '@simplewebauthn/typescript-types'
+import type { PublicKeyCredentialCreationOptionsJSON } from '@simplewebauthn/types'
 import type { VerifiedAuthenticationResponse, } from '@simplewebauthn/server'
 
 import { useUserLoginStore } from '@/stores/userlogin'
@@ -35,10 +35,10 @@ async function handleLoginWorker() {
     return
   }
 
-  const regoptions = await resp.json() as PublicKeyCredentialCreationOptionsJSON
+  const authoptions = await resp.json() as PublicKeyCredentialCreationOptionsJSON
 
   // Pass the options to the authenticator and wait for a response
-  const asseResp = await startAuthentication(regoptions);
+  const asseResp = await startAuthentication(authoptions);
 
   // POST the response to the endpoint that calls
   // @simplewebauthn/server -> verifyAuthenticationResponse()

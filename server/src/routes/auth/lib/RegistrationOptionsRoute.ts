@@ -1,34 +1,36 @@
 import { Router } from 'express';
-import type { Request, Response } from 'express-serve-static-core';
+import type { Response } from 'express-serve-static-core';
+import { Duration } from 'luxon';
 import { asyncWrapper } from '../../../lib/asyncMiddlewareWrapper.js';
 
 // import { getRegistrationUserId } from './getRegistrationUserid.js';
 import { generateRegistrationOptions } from '@simplewebauthn/server';
+import { isoBase64URL } from '@simplewebauthn/server/helpers';
 import { AutenticatorDb } from './AuthenticatorDb.js';
 
-import type { Authenticator } from '../server.js';
+import type { Authenticator, RequestWebauthn } from '../interfaces/server.js';
 
-const MAX_REGCODE_AGE_MS = 1000 * 60 * 60 * 24; // 1 day
+const MAX_REGCODE_AGE_MS = 1000 * 60 * 60 * 24 * 7; // 7 days
 // const MAX_REGCODE_AGE_MS = 1000 * 60 * 5; // 5 minutes
 
 const router = Router();
 
 export function makeRegistrationOptionsRoute(rpName: string, rpID: string, authdb: AutenticatorDb) {
-  const handleRegistration = async (req: Request, res: Response, reguser: string) => {
+  const handleRegistration = async (req: RequestWebauthn, res: Response, reguser: string) => {
     // const registrationuser = getRegistrationUserId();
     const registrationuser = reguser;
-    (req.session as any).reguser = registrationuser;
+    req.session.reguser = registrationuser;
 
     // (Pseudocode) Retrieve any of the user's previously-
     // registered authenticators
     const userAuthenticatorsPromise = authdb.getUserAuthenticators(registrationuser);
-    const userAuthenticators: Authenticator[] = await userAuthenticatorsPromise;
+    const userAuthenticators = await userAuthenticatorsPromise;
 
     try {
       const options = await generateRegistrationOptions({
         rpName,
         rpID,
-        userID: registrationuser,
+        userID: Buffer.from(registrationuser),
         userName: registrationuser, // we do not want personal identifiable information
 
         // the following is for 'passkeys' usage
@@ -41,16 +43,18 @@ export function makeRegistrationOptionsRoute(rpName: string, rpID: string, authd
         // (Recommended for smoother UX)
         attestationType: 'none',
         // Prevent users from re-registering existing authenticators
-        excludeCredentials: userAuthenticators.map((authenticator) => ({
-          id: authenticator.credentialID,
-          type: 'public-key',
-          // Optional
-          transports: authenticator.transports,
-        })),
+        excludeCredentials: userAuthenticators.map((authenticator: Authenticator) => {
+          return {
+            id: isoBase64URL.fromBuffer(authenticator.credentialID),
+            type: 'public-key',
+            // Optional
+            transports: authenticator.transports,
+          }
+        }),
       });
 
       // (Pseudocode) Remember the challenge for this user
-      (req.session as any).challenge = options.challenge;
+      req.session.challenge = options.challenge;
       res.json(options);
     } catch (error) {
       console.error('Error in generating authentication options', error);
@@ -58,9 +62,21 @@ export function makeRegistrationOptionsRoute(rpName: string, rpID: string, authd
     }
   };
 
-  router.get('/regoptions/regkey/:regkey', asyncWrapper(async (req, res) => {
-    const lookup = await authdb.getUserByRegistrationCode(req.params.regkey);
-    (req.session as any).regkey = req.params.regkey; // save to mark as unused later
+  interface ReqWithParams extends RequestWebauthn {
+    params: {
+      regkey?: string
+    }
+  }
+
+  router.get('/regoptions/regkey/:regkey', asyncWrapper(async (req: ReqWithParams, res) => {
+    const regkey = req.params.regkey
+    if (regkey === undefined) {
+      console.error("regkey undefined")
+      res.sendStatus(401)
+      return
+    }
+    const lookup = await authdb.getUserByRegistrationCode(regkey);
+    req.session.regkey = regkey; // save to mark as unused later
 
     if (lookup === null) {
       console.log('Regkey not found');
@@ -79,7 +95,8 @@ export function makeRegistrationOptionsRoute(rpName: string, rpID: string, authd
     const age = nowMilisec - createdMilisec;
 
     if (age > MAX_REGCODE_AGE_MS) {
-      console.log(`Regkey too old: Age: ${age}`);
+      const ageObj = Duration.fromMillis(age)
+      console.log(`Regkey too old: Age: ${ageObj.as('days')} days`);
       res.sendStatus(401);
       return;
     }

@@ -1,5 +1,42 @@
+import type { AuthenticatorTransportFuture } from '@simplewebauthn/types';
 import type { Pool, QueryConfig } from 'pg';
-import type { Authenticator, RegCodeLookup } from '../server.d.ts';
+import type { Authenticator, RegCodeLookup } from '../interfaces/server.js';
+
+
+interface RowType {
+  credentialid: string;
+  credentialpublickey: Uint8Array;
+  credentialdevicetype: string;
+  credentialbackedup: boolean;
+  counter: number;
+  transports: string;
+  userid: string;
+}
+
+function isRowType(obj: unknown): obj is RowType {
+  if (obj === null) { console.log("row is null"); return false }
+  if (typeof obj !== 'object') { console.log("row is not object"); return false }
+  if (!('credentialid' in obj)) { console.log("credentialid missing"); return false }
+  if (!('credentialpublickey' in obj)) { console.log("credentialpublickey missing"); return false }
+  if (!('credentialdevicetype' in obj)) { console.log("credentialdevicetype missing"); return false }
+  if (!('credentialbackedup' in obj)) { console.log("credentialbackedup missing"); return false }
+  if (!('counter' in obj)) { console.log("counter missing"); return false }
+  if (!('transports' in obj)) { console.log("transports missing"); return false }
+  if (!('userid' in obj)) { console.log("userid missing"); return false }
+  return true
+}
+
+function isRowTypeArray(obj: unknown): obj is RowType[] {
+  if (obj === null) { console.log("row is null"); return false }
+  if (!Array.isArray(obj)) { console.log("obj not array"); return false }
+
+  const allObjectsAreRows = obj.every((el) => {
+    return isRowType(el)
+  })
+  return allObjectsAreRows
+
+}
+
 
 export class AutenticatorDb {
   pgpool: Pool;
@@ -8,15 +45,13 @@ export class AutenticatorDb {
     this.pgpool = pgpool;
   }
 
-  static authenticatorFromRows(rows: any[]): Authenticator[] {
+  static authenticatorFromRows(rows: RowType[]): Authenticator[] {
     const authenticators: Authenticator[] = rows.map((row) => {
       const credIDEncoded: string = row.credentialid;
-      if ((credIDEncoded === undefined) || credIDEncoded.length === 0) throw new Error('Credential Id undefined');
-      const credBuffer = Buffer.from(credIDEncoded, 'base64url');
-      const transportsArray = JSON.parse(row.transports);
+      const transportsArray = JSON.parse(row.transports) as AuthenticatorTransportFuture[]; // unsafe
 
-      const a: Authenticator = {
-        credentialID: credBuffer,
+      const authenticator = {
+        credentialID: credIDEncoded,
         credentialPublicKey: row.credentialpublickey,
         counter: row.counter,
         credentialDeviceType: row.credentialdevicetype,
@@ -24,20 +59,7 @@ export class AutenticatorDb {
         transports: transportsArray,
         userid: row.userid,
       };
-
-      const objEntries = Object.entries(a);
-      objEntries.forEach((ele) => {
-        const key = ele[0];
-        const value = ele[1];
-        let ok = true;
-
-        if (value === undefined) {
-          ok = false;
-          console.error(`Prop ${key} is undefined`);
-        }
-        if (!ok) throw new Error('Authenticator has missing values. See error log');
-      });
-      return a;
+      return authenticator;
     });
     return authenticators;
   }
@@ -48,7 +70,11 @@ export class AutenticatorDb {
       values: [user],
     };
     const res = await this.pgpool.query(query);
-    return AutenticatorDb.authenticatorFromRows(res.rows);
+    const rows = res.rows
+    if (!isRowTypeArray(rows)) {
+      throw new Error("rows does not have expected type", { cause: rows })
+    }
+    return AutenticatorDb.authenticatorFromRows(rows);
   }
 
   async getAuthenticatorsById(authenticatorId: string) {
@@ -58,7 +84,11 @@ export class AutenticatorDb {
     };
     try {
       const res = await this.pgpool.query(query);
-      return AutenticatorDb.authenticatorFromRows(res.rows);
+      const rows = res.rows
+      if (!isRowTypeArray(rows)) {
+        throw new Error("rows does not have expected type", { cause: rows })
+      }
+      return AutenticatorDb.authenticatorFromRows(rows);
     } catch (e: unknown) {
       if ((e instanceof Error) && ('code' in e) && (e.code === '42P01')) {
         throw new Error(

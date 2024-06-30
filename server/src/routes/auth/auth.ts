@@ -1,8 +1,8 @@
 import * as dotenv from 'dotenv';
 import type { NextFunction, Request, Response } from 'express';
 import express from 'express';
-import type { Session } from 'express-session';
 import pg from 'pg';
+import type { RequestWebauthn } from './interfaces/server.js';
 import { makeAuthenticationOptionsRoute } from './lib/AuthenticationOptionsRoute.js';
 import { makeAuthenticationRoute } from './lib/AuthenticationRoute.js';
 import { AutenticatorDb } from './lib/AuthenticatorDb.js';
@@ -10,7 +10,7 @@ import { makeLogoutRoute } from './lib/LogoutRoute.js';
 import { makeRegisterRoute } from './lib/RegisterRoute.js';
 import { makeRegistrationOptionsRoute } from './lib/RegistrationOptionsRoute.js';
 
-import type { MySession } from './authInterfaces.js';
+// import type { RequestWebauthn } from './server.js';
 
 const dotenvResult = dotenv.config();
 if (dotenvResult.error) {
@@ -58,7 +58,7 @@ const registrationOptionsRoute = makeRegistrationOptionsRoute(rpName, rpID, auth
 router.use(registrationOptionsRoute);
 
 // Route: /authoptions
-const authentiationOptionsRoute = makeAuthenticationOptionsRoute(authdb);
+const authentiationOptionsRoute = makeAuthenticationOptionsRoute(authdb, rpID);
 router.use(authentiationOptionsRoute);
 
 // Route: /authentication
@@ -75,8 +75,8 @@ function isAuthenticated(req: Request, res: Response, next: NextFunction) {
   else res.sendStatus(401);
 }
 
-router.get('/check', (req: (Request & { session: Session }), res) => {
-  const { user } = (req.session as MySession);
+router.get('/check', (req: RequestWebauthn, res) => {
+  const { user } = req.session;
   if (user === undefined) {
     res.send('Not logged on');
   } else {
@@ -89,8 +89,8 @@ router.get('/protected', isAuthenticated, (req, res) => {
 });
 
 // not protected
-router.get('/user', (req, res) => {
-  const userid = (req.session as any).user as (string | undefined);
+router.get('/user', (req: RequestWebauthn, res) => {
+  const userid = req.session.user
   res.json({ userid });
 });
 

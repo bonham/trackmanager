@@ -1,4 +1,8 @@
-import type { AuthenticatorTransportFuture } from '@simplewebauthn/typescript-types';
+import type { AuthenticatorTransportFuture } from '@simplewebauthn/types';
+import type { Request } from 'express';
+import { Session } from 'express-session';
+
+
 
 /**
  *
@@ -6,9 +10,9 @@ import type { AuthenticatorTransportFuture } from '@simplewebauthn/typescript-ty
  * how best to store data received during registration for use
  * in subsequent authentications.
  */
-export interface Authenticator {
+declare interface Authenticator {
   // SQL: Encode to base64url then store as `TEXT`. Index this column
-  credentialID: Uint8Array;
+  credentialID: Base64URLString;
   // SQL: Store raw bytes as `BYTEA`/`BLOB`/etc...
   credentialPublicKey: Uint8Array;
   // SQL: Consider `BIGINT` since some authenticators return atomic timestamps as counters
@@ -24,6 +28,19 @@ export interface Authenticator {
   userid?: string;
 }
 
-export interface RegCodeLookup {
+declare interface RegCodeLookup {
   'regkey': string, 'username': string, 'created': Date, used: boolean
 };
+
+declare interface SessionWChallenge extends Session {
+  challenge?: string;
+  user?: string;
+  reguser?: string;
+  regkey?: string;
+}
+
+declare interface RequestWebauthn extends Request {
+  session: SessionWChallenge
+};
+
+

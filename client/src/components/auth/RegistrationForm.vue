@@ -4,7 +4,7 @@ import { getWithCORS, sendJSONToServer, getErrorMessage } from '@/lib/httpHelper
 import { ref } from 'vue'
 import { startRegistration } from '@simplewebauthn/browser';
 import type { VerifiedRegistrationResponse } from '@simplewebauthn/server'
-import type { RegistrationResponseJSON, PublicKeyCredentialCreationOptionsJSON } from '@simplewebauthn/typescript-types'
+import type { RegistrationResponseJSON, PublicKeyCredentialCreationOptionsJSON } from '@simplewebauthn/types'
 
 const props = defineProps({
   useRegistrationKey: Boolean,
@@ -19,12 +19,13 @@ const props = defineProps({
 })
 
 const regstatus = ref("None")
-const registernickname = ref("")
+const registrationToken = ref("")
 const registerNicknameFieldInValid = ref(false)
 
 async function handleCreate() {
 
-  if (registernickname.value == "") {
+  // User pressing Enter without entering a registration key
+  if (registrationToken.value == "") {
     registerNicknameFieldInValid.value = true
     return
   }
@@ -33,9 +34,9 @@ async function handleCreate() {
   // @simplewebauthn/server -> generateRegistrationOptions()
   let regOptionsUrl: string
   if (props.useRegistrationKey) {
-    regOptionsUrl = '/api/v1/auth/regoptions/regkey/' + registernickname.value
+    regOptionsUrl = '/api/v1/auth/regoptions/regkey/' + registrationToken.value
   } else {
-    regOptionsUrl = '/api/v1/auth/regoptions/username/' + registernickname.value
+    regOptionsUrl = '/api/v1/auth/regoptions/username/' + registrationToken.value
   }
 
   let resp: Response
@@ -44,6 +45,7 @@ async function handleCreate() {
 
     if (!resp.ok) {
       regstatus.value = "Failed"
+      console.log(`Registration failed with status ${resp.status}`)
       return
     }
 
@@ -83,7 +85,11 @@ async function handleCreate() {
   try {
     verificationResp = await sendJSONToServer('/api/v1/auth/register', JSON.stringify(attResp));
     if (!verificationResp.ok) {
-      console.log(`Verification failed with response:`, verificationResp)
+      const st = verificationResp.status
+      const body = await verificationResp.text()
+
+      console.log(`Verification failed with status ${st} and body ${body}`)
+      console.log(`attResp: `, attResp)
       regstatus.value = "Failed"
       return
     }
@@ -113,7 +119,7 @@ async function handleCreate() {
   <div class="border border-secondary-subtle p-3 mb-2 mt-2">
     <label :for="placeHolder" class="form-label">{{ formLabel }}</label>
     <div class="input-group">
-      <input :id="placeHolder" v-model="registernickname" type="text"
+      <input :id="placeHolder" v-model="registrationToken" type="text"
         :class="{ 'is-invalid': registerNicknameFieldInValid }" class="form-control" :placeholder="placeHolder"
         aria-label="Nickname" aria-describedby="button-addon2" autocomplete="off">
       <button id="button-addon2" class="btn btn-outline-secondary" type="button" @click="handleCreate">Register</button>

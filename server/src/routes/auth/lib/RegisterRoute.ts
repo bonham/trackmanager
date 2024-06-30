@@ -15,15 +15,12 @@ function isRegistrationResponse(obj: unknown): obj is RegistrationResponseJSON {
     return false;
   }
 
-  const keys = Object.keys(obj);
   return (
     "id" in obj &&
     "rawId" in obj &&
     "response" in obj &&
     "clientExtensionResults" in obj &&
-    "type" in obj &&
-    keys.length === 5
-  );
+    "type" in obj);
 }
 
 export function makeRegisterRoute(origin: string, rpID: string, authdb: AutenticatorDb) {

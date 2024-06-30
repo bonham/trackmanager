@@ -1,14 +1,16 @@
 import { Router } from 'express';
 import type { Response } from 'express-serve-static-core';
+import { Duration } from 'luxon';
 import { asyncWrapper } from '../../../lib/asyncMiddlewareWrapper.js';
 
 // import { getRegistrationUserId } from './getRegistrationUserid.js';
 import { generateRegistrationOptions } from '@simplewebauthn/server';
+import { isoBase64URL } from '@simplewebauthn/server/helpers';
 import { AutenticatorDb } from './AuthenticatorDb.js';
 
 import type { Authenticator, RequestWebauthn } from '../interfaces/server.js';
 
-const MAX_REGCODE_AGE_MS = 1000 * 60 * 60 * 24; // 1 day
+const MAX_REGCODE_AGE_MS = 1000 * 60 * 60 * 24 * 7; // 7 days
 // const MAX_REGCODE_AGE_MS = 1000 * 60 * 5; // 5 minutes
 
 const router = Router();
@@ -28,7 +30,7 @@ export function makeRegistrationOptionsRoute(rpName: string, rpID: string, authd
       const options = await generateRegistrationOptions({
         rpName,
         rpID,
-        userID: registrationuser,
+        userID: Buffer.from(registrationuser),
         userName: registrationuser, // we do not want personal identifiable information
 
         // the following is for 'passkeys' usage
@@ -43,7 +45,7 @@ export function makeRegistrationOptionsRoute(rpName: string, rpID: string, authd
         // Prevent users from re-registering existing authenticators
         excludeCredentials: userAuthenticators.map((authenticator: Authenticator) => {
           return {
-            id: authenticator.credentialID,
+            id: isoBase64URL.fromBuffer(authenticator.credentialID),
             type: 'public-key',
             // Optional
             transports: authenticator.transports,
@@ -93,7 +95,8 @@ export function makeRegistrationOptionsRoute(rpName: string, rpID: string, authd
     const age = nowMilisec - createdMilisec;
 
     if (age > MAX_REGCODE_AGE_MS) {
-      console.log(`Regkey too old: Age: ${age}`);
+      const ageObj = Duration.fromMillis(age)
+      console.log(`Regkey too old: Age: ${ageObj.as('days')} days`);
       res.sendStatus(401);
       return;
     }

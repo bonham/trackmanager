@@ -48,11 +48,10 @@ export class AutenticatorDb {
   static authenticatorFromRows(rows: RowType[]): Authenticator[] {
     const authenticators: Authenticator[] = rows.map((row) => {
       const credIDEncoded: string = row.credentialid;
-      const credBuffer = Buffer.from(credIDEncoded, 'base64url');
       const transportsArray = JSON.parse(row.transports) as AuthenticatorTransportFuture[]; // unsafe
 
       const authenticator = {
-        credentialID: credBuffer,
+        credentialID: credIDEncoded,
         credentialPublicKey: row.credentialpublickey,
         counter: row.counter,
         credentialDeviceType: row.credentialdevicetype,

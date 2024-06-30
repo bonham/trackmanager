@@ -35,10 +35,10 @@ async function handleLoginWorker() {
     return
   }
 
-  const regoptions = await resp.json() as PublicKeyCredentialCreationOptionsJSON
+  const authoptions = await resp.json() as PublicKeyCredentialCreationOptionsJSON
 
   // Pass the options to the authenticator and wait for a response
-  const asseResp = await startAuthentication(regoptions);
+  const asseResp = await startAuthentication(authoptions);
 
   // POST the response to the endpoint that calls
   // @simplewebauthn/server -> verifyAuthenticationResponse()

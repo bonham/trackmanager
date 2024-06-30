@@ -15,7 +15,11 @@
     "checkJs": false, // todo: set to true
     "verbatimModuleSyntax": false, // needed from jest https://github.com/kulshekhar/ts-jest/issues/4081
     "rootDir": "./",
-    "typeRoots": ["types", "src/routes/auth/interfaces"]
+    "typeRoots": [
+      "./types",
+      "./src/routes/auth/interfaces",
+      "./node_modules/@types" // needed for jest globals
+    ]
   },
   "ts-node": {
     "esm": true,

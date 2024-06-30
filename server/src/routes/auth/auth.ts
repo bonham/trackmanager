@@ -58,7 +58,7 @@ const registrationOptionsRoute = makeRegistrationOptionsRoute(rpName, rpID, auth
 router.use(registrationOptionsRoute);
 
 // Route: /authoptions
-const authentiationOptionsRoute = makeAuthenticationOptionsRoute(authdb);
+const authentiationOptionsRoute = makeAuthenticationOptionsRoute(authdb, rpID);
 router.use(authentiationOptionsRoute);
 
 // Route: /authentication

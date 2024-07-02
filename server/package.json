@@ -6,7 +6,8 @@
     "node": "~20"
   },
   "scripts": {
-    "start": "node --watch --import=tsimp/import src/index.ts",
+    "start": "node --import=tsimp/import src/index.ts",
+    "startwatch": "node --watch --import=tsimp/import src/index.ts",
     "build": "tsc --build --clean && tsc -p ./tsconfig-build.json",
     "startbuild": "node ./dist/src/index.js",
     "test": "jest -w",

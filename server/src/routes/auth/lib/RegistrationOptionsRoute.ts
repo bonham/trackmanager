@@ -5,7 +5,6 @@ import { asyncWrapper } from '../../../lib/asyncMiddlewareWrapper.js';
 
 // import { getRegistrationUserId } from './getRegistrationUserid.js';
 import { generateRegistrationOptions } from '@simplewebauthn/server';
-import { isoBase64URL } from '@simplewebauthn/server/helpers';
 import { AutenticatorDb } from './AuthenticatorDb.js';
 
 import type { Authenticator, RequestWebauthn } from '../interfaces/server.js';
@@ -45,7 +44,7 @@ export function makeRegistrationOptionsRoute(rpName: string, rpID: string, authd
         // Prevent users from re-registering existing authenticators
         excludeCredentials: userAuthenticators.map((authenticator: Authenticator) => {
           return {
-            id: isoBase64URL.fromBuffer(authenticator.credentialID),
+            id: authenticator.credentialID,
             type: 'public-key',
             // Optional
             transports: authenticator.transports,

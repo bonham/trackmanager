@@ -3,7 +3,6 @@ import type { Response } from 'express-serve-static-core';
 import { Duration } from 'luxon';
 import { asyncWrapper } from '../../../lib/asyncMiddlewareWrapper.js';
 
-// import { getRegistrationUserId } from './getRegistrationUserid.js';
 import { generateRegistrationOptions } from '@simplewebauthn/server';
 import { AutenticatorDb } from './AuthenticatorDb.js';
 
@@ -22,14 +21,12 @@ export function makeRegistrationOptionsRoute(rpName: string, rpID: string, authd
 
     // (Pseudocode) Retrieve any of the user's previously-
     // registered authenticators
-    const userAuthenticatorsPromise = authdb.getUserAuthenticators(registrationuser);
-    const userAuthenticators = await userAuthenticatorsPromise;
+    const devices = await authdb.getUserAuthenticators(registrationuser);
 
     try {
       const options = await generateRegistrationOptions({
         rpName,
         rpID,
-        userID: Buffer.from(registrationuser),
         userName: registrationuser, // we do not want personal identifiable information
 
         // the following is for 'passkeys' usage
@@ -42,12 +39,12 @@ export function makeRegistrationOptionsRoute(rpName: string, rpID: string, authd
         // (Recommended for smoother UX)
         attestationType: 'none',
         // Prevent users from re-registering existing authenticators
-        excludeCredentials: userAuthenticators.map((authenticator: Authenticator) => {
+        excludeCredentials: devices.map((dev: Authenticator) => {
           return {
-            id: authenticator.credentialID,
+            id: dev.credentialID,
             type: 'public-key',
             // Optional
-            transports: authenticator.transports,
+            transports: dev.transports,
           }
         }),
       });

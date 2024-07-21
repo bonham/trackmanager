@@ -1,4 +1,4 @@
-import type { AuthenticatorTransportFuture } from '@simplewebauthn/types';
+import type { AuthenticatorTransportFuture, Base64URLString } from '@simplewebauthn/types';
 import type { Pool, QueryConfig } from 'pg';
 import type { Authenticator, RegCodeLookup } from '../interfaces/server.js';
 
@@ -47,11 +47,11 @@ export class AutenticatorDb {
 
   static authenticatorFromRows(rows: RowType[]): Authenticator[] {
     const authenticators: Authenticator[] = rows.map((row) => {
-      const credIDEncoded: string = row.credentialid;
       const transportsArray = JSON.parse(row.transports) as AuthenticatorTransportFuture[]; // unsafe
 
       const authenticator = {
-        credentialID: credIDEncoded,
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+        credentialID: row.credentialid as Base64URLString,
         credentialPublicKey: row.credentialpublickey,
         counter: row.counter,
         credentialDeviceType: row.credentialdevicetype,
@@ -102,8 +102,6 @@ export class AutenticatorDb {
   }
 
   async saveAuthenticator(auth: Authenticator, userid: string) {
-    const credIdBuf = Buffer.from(auth.credentialID);
-    const credIdEncoded = credIdBuf.toString('base64url');
     const transportsEncoded = JSON.stringify(auth.transports);
 
     const query: QueryConfig = {
@@ -111,7 +109,7 @@ export class AutenticatorDb {
         + '(credentialid, credentialpublickey, counter, credentialdevicetype, credentialbackedup, transports, userid, creationdate) '
         + 'VALUES ($1, $2, $3, $4, $5, $6, $7, $8);',
       values: [
-        credIdEncoded, auth.credentialPublicKey, auth.counter, auth.credentialDeviceType,
+        auth.credentialID, auth.credentialPublicKey, auth.counter, auth.credentialDeviceType,
         auth.credentialBackedUp, transportsEncoded, userid, new Date().toUTCString(),
       ],
     };

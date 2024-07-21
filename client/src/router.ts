@@ -44,12 +44,6 @@ const router = createRouter({
       name: 'TrackDetailPage',
       component: () => import('./views/TrackDetailPage.vue'),
       props: true
-    },
-    {
-      path: '/login/sid/:sid',
-      name: 'LoginPage',
-      component: () => import('./views/LoginPage.vue'),
-      props: true
     }
   ]
 })

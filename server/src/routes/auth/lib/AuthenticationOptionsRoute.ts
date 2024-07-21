@@ -15,7 +15,7 @@ export function makeAuthenticationOptionsRoute(authdb: AutenticatorDb, rpID: str
     // Seems to make no sense to query user authenticators and send to client
     // client should discover himself
     // const authuser = req.params.authuser;
-    // const userAuthenticators: Authenticator[] = await authdb.getUserAuthenticators(authuser);
+    // const userAuthenticators: Authenticator[] = await authdb.getUserAuthenticators(authuser); // TODO
     const userAuthenticators: Authenticator[] = [];
 
     // we could deny sending authentication options at this point, in case no authenticators could
@@ -28,6 +28,7 @@ export function makeAuthenticationOptionsRoute(authdb: AutenticatorDb, rpID: str
 
     try {
       const options = await generateAuthenticationOptions({
+        timeout: 60000,
         rpID,
         // Require users to use a previously-registered authenticator
         allowCredentials: userAuthenticators.map((authenticator: Authenticator) => {

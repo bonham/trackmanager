@@ -5,7 +5,8 @@ import type { VerifiedAuthenticationResponse, } from '@simplewebauthn/server'
 
 interface LoginHandlerStatus {
   success: boolean,
-  message: string
+  message: string,
+  errorId?: string
 }
 
 export async function performWebauthnLogin(): Promise<LoginHandlerStatus> {
@@ -61,8 +62,16 @@ export async function performWebauthnLogin(): Promise<LoginHandlerStatus> {
     }
     return returnStatus
   } catch (e) {
-    console.log("Error when trying to log in.", e)
+    console.log("Error when trying to log in:", e)
     returnStatus.success = false
+    if (
+      e &&
+      typeof e === 'object' &&
+      'name' in e &&
+      e.name === "NotAllowedError"
+    ) {
+      returnStatus.errorId = e.name
+    }
     returnStatus.message = getErrorMessage(e)
     return returnStatus
   }

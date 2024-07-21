@@ -59,8 +59,13 @@ async function startLogin() {
     loginFailureModalVisible.value = false
 
   } else {
+    if (loginResult.errorId === 'NotAllowedError') {
+      loginFailureMessage.value = "Login was aborted or is not allowed."
+    } else
     // when login fails, then show modal
-    loginFailureMessage.value = loginResult.message
+    {
+      loginFailureMessage.value = loginResult.message
+    }
     loginFailureModalVisible.value = true
   }
 }

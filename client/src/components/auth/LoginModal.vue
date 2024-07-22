@@ -1,12 +1,12 @@
 <template>
-  <BModal v-model="loginFailureModalVisible" title="Login failed">
+  <BModal v-model="userLoginStore.loginFailureModalVisible" title="Login failed">
     <div v-if="loginFailureMessage.length > 0">
       <div class="text-danger">{{ loginFailureMessage }}</div>
     </div>
     <template #footer>
       <BButton class="mx-1" @click="startLogin">Retry</BButton>
       <BButton class="mx-1" @click="openRegistrationModal">Register</BButton>
-      <BButton class="mx-1" @click="loginFailureModalVisible = false">Cancel</BButton>
+      <BButton class="mx-1" @click="userLoginStore.disableLoginFailureModal()">Cancel</BButton>
     </template>
   </BModal>
   <BModal v-model="registerModalVisible" title="Register" @ok.prevent @ok="processRegistration">
@@ -34,7 +34,6 @@ import { registerPasskey } from '@/lib/auth/registration';
 import { useUserLoginStore } from '@/stores/userlogin'
 const userLoginStore = useUserLoginStore()
 
-const loginFailureModalVisible = ref(false)
 const loginFailureMessage = ref("")
 const registerModalVisible = ref(false)
 const registrationKey = ref("")
@@ -56,7 +55,7 @@ watch(() => props.performLogin, async () => {
 async function startLogin() {
   const loginResult = await performWebauthnLogin()
   if (loginResult.success) {
-    loginFailureModalVisible.value = false
+    userLoginStore.disableLoginFailureModal()
 
   } else {
     if (loginResult.errorId === 'NotAllowedError') {
@@ -66,12 +65,12 @@ async function startLogin() {
     {
       loginFailureMessage.value = loginResult.message
     }
-    loginFailureModalVisible.value = true
+    userLoginStore.enableLoginFailureModal()
   }
 }
 
 function openRegistrationModal() {
-  loginFailureModalVisible.value = false
+  userLoginStore.disableLoginFailureModal()
   registerModalVisible.value = true
 }
 

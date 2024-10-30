@@ -131,7 +131,7 @@ function release() {
 async function processHeadlineUpdate(value: string): Promise<boolean> {
   console.log("Updating " + value)
   try {
-    const success = await updateTrackById(props.id, { name: value }, props.sid)
+    const success = await updateTrackById(props.id, { name: value }, props.sid) ?? false
     if (!success) console.error(`Updating track id ${props.id} was not successful`)
     return success
   } catch (e) {

@@ -22,6 +22,11 @@ export const useUserLoginStore = defineStore('userlogin', () => {
     loginFailureModalVisible.value = false
   }
 
+  const triggerLoginVar = ref(0)
+  function triggerLogin() {
+    triggerLoginVar.value++
+  }
+
   async function updateUser() {
     try {
       const res = await fetch('/api/v1/auth/user')
@@ -78,7 +83,9 @@ export const useUserLoginStore = defineStore('userlogin', () => {
     logout,
     loginFailureModalVisible,
     enableLoginFailureModal,
-    disableLoginFailureModal
+    disableLoginFailureModal,
+    triggerLoginVar,
+    triggerLogin
   }
 
 })

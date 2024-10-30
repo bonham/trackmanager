@@ -40,14 +40,20 @@ const registrationKey = ref("")
 const registrationKeyInvalid = ref(false)
 const registrationFailureMessage = ref("")
 
-const props = defineProps({
-  performLogin: {
-    type: Number,
-    required: true,
-  },
-})
+// const props = defineProps({
+//   performLogin: {
+//     type: Number,
+//     required: true,
+//   },
+// })
 
-watch(() => props.performLogin, async () => {
+// watch(() => props.performLogin, async () => {
+//   await startLogin()
+//   await userLoginStore.updateUser()
+// })
+
+watch(() => userLoginStore.triggerLoginVar, async () => {
+  console.log("triggerLoginVar changed")
   await startLogin()
   await userLoginStore.updateUser()
 })

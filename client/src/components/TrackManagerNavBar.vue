@@ -1,7 +1,7 @@
 <!-- eslint-disable vue/first-attribute-linebreak -->
 <template>
   <b-container id="root" class="d-flex flex-column vh-100 gx-0 border">
-    <login-modal :perform-login=triggerLogin />
+    <login-modal />
     <div class="bg-light d-flex flex-column vh-100">
       <nav class="navbar navbar-expand bg-success-subtle border-bottom py-1">
         <div class="container-fluid">
@@ -44,7 +44,7 @@
             <li class="nav-item">
               <router-link v-if="userLoginStore.loggedIn" class="nav-link my-1" to="#"
                 @click="userLoginStore.logout()">Logout</router-link>
-              <router-link v-else class="nav-link my-1" to="" @click="triggerLogin++">
+              <router-link v-else class="nav-link my-1" to="" @click="triggerLoginF()">
                 Login
               </router-link>
             </li>
@@ -61,7 +61,6 @@
 import { BContainer } from 'bootstrap-vue-next'
 import { useUserLoginStore } from '@/stores/userlogin'
 import LoginModal from '@/components/auth/LoginModal.vue'
-import { ref } from 'vue'
 const userLoginStore = useUserLoginStore()
 
 const props = defineProps({
@@ -78,7 +77,9 @@ function navPath(path: string) {
   }
 }
 
-const triggerLogin = ref(0)
+function triggerLoginF() {
+  userLoginStore.triggerLoginVar++
+}
 
 </script>
 

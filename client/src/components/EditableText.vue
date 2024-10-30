@@ -118,11 +118,24 @@ function makeEditable() {
   })
 }
 
-async function processValueChange(inputValue: string) {
+async function processValueChange(changeEvent: Event) {
   try {
-    console.log('Process value change:', inputValue)
+    console.log('Process value change:', changeEvent)
 
-    const valueNoWhiteSpace = inputValue.trim()
+    if (changeEvent.type === 'change') { console.log("Great a change event!") }
+    const target = changeEvent.target
+    let valueNoWhiteSpace: string
+    if (target !== null && 'value' in target) {
+      if (typeof target.value === 'string') {
+        valueNoWhiteSpace = target.value.trim()
+      } else {
+        console.error(`Target value is not string`)
+        return
+      }
+    } else {
+      console.error(`Target does not have expected event type. Target:`, target)
+      return
+    }
 
     // call the update function which was injected through props
     const success = await (props.updateFunction as UpdateFunction)(valueNoWhiteSpace) // dirty cast

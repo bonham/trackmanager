@@ -11,6 +11,22 @@ export const useUserLoginStore = defineStore('userlogin', () => {
     return (username.value.length > 0)
   })
 
+  // relay variable to trigger and listen to login requests. Should be incremented to trigger.
+  const loginFailureModalVisible = ref(false)
+
+  function enableLoginFailureModal() {
+    loginFailureModalVisible.value = true
+  }
+
+  function disableLoginFailureModal() {
+    loginFailureModalVisible.value = false
+  }
+
+  const triggerLoginVar = ref(0)
+  function triggerLogin() {
+    triggerLoginVar.value++
+  }
+
   async function updateUser() {
     try {
       const res = await fetch('/api/v1/auth/user')
@@ -64,7 +80,12 @@ export const useUserLoginStore = defineStore('userlogin', () => {
     loggedIn,
     username,
     updateUser,
-    logout
+    logout,
+    loginFailureModalVisible,
+    enableLoginFailureModal,
+    disableLoginFailureModal,
+    triggerLoginVar,
+    triggerLogin
   }
 
 })

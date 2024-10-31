@@ -25,7 +25,7 @@ async function processUpload(
   try {
     rmSync(filePath)
   } catch (e) {
-    console.warn(`could not remove ${filePath}`)
+    console.warn(`could not remove ${filePath}`, e)
   }
 }
 export { processUpload };

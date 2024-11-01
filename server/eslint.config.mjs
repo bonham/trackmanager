@@ -12,7 +12,6 @@ export default tseslint.config(
       "coverage/",
       "eslint.config.mjs",
       "jest.config.ts",
-      "**/.tsimp/"
     ]
   },
   eslint.configs.recommended,

@@ -3,17 +3,17 @@
   "version": "0.0.0",
   "type": "module",
   "engines": {
-    "node": "~20"
+    "node": "~22"
   },
   "scripts": {
-    "start": "node --import=tsimp/import src/index.ts",
-    "startwatch": "node --watch --import=tsimp/import src/index.ts",
+    "start": "tsx watch src/index.ts",
     "build": "tsc --build --clean && tsc -p ./tsconfig-build.json",
     "startbuild": "node ./dist/src/index.js",
     "test": "jest -w",
-    "copyconfig": "node --import=tsimp/import ./src/bin/copyconfig.ts",
+    "copyconfig": "tsx ./src/bin/copyconfig.ts",
     "lint": "eslint --quiet .",
-    "lintwarn": "eslint ."
+    "lintwarn": "eslint .",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@garmin/fitsdk": "^21.126.0",
@@ -36,7 +36,7 @@
     "luxon": "^3.4.4",
     "morgan": "^1.10.0",
     "pg": "^8.5.1",
-    "tsimp": "^2.0.11"
+    "tsx": "^4.19.2"
   },
   "devDependencies": {
     "@simplewebauthn/types": "^10.0.0",

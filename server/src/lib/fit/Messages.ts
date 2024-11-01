@@ -235,9 +235,7 @@ function concatRecordMessageLists(
 }
 
 export {
-  AbstractMessageList, BaseMessage, BaseMessageList,
-  EventMessage, EventMessageList, RecordMessage, RecordMessageList,
-  // eslint-disable-next-line @typescript-eslint/comma-dangle
-  StartStopList, concatRecordMessageLists
+  AbstractMessageList, BaseMessage, BaseMessageList, concatRecordMessageLists, EventMessage, EventMessageList, RecordMessage, RecordMessageList,
+  StartStopList
 };
 

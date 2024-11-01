@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/indent */
 import { DateTime } from 'luxon';
 import { RecordMessageList } from './Messages.js';
 import type { DateTimeInterval } from './types.js';

@@ -39,7 +39,7 @@ export async function registerPasskey(registrationKey: string): Promise<Registra
   let attResp: RegistrationResponseJSON;
   try {
     // Pass the options to the authenticator and wait for a response
-    attResp = await startRegistration(regoptions);
+    attResp = await startRegistration({ optionsJSON: regoptions });
   } catch (error) {
 
     if (error instanceof Error) {

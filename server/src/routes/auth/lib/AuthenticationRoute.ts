@@ -5,7 +5,7 @@ import type { RequestWebauthn } from '../interfaces/server.js';
 
 import type { VerifiedAuthenticationResponse } from '@simplewebauthn/server';
 import { verifyAuthenticationResponse } from '@simplewebauthn/server';
-import type { AuthenticationResponseJSON } from '@simplewebauthn/types';
+import type { AuthenticationResponseJSON, WebAuthnCredential } from '@simplewebauthn/types';
 import { AutenticatorDb } from './AuthenticatorDb.js';
 
 const router = Router();
@@ -42,6 +42,14 @@ export function makeAuthenticationRoute(origin: string, rpID: string, authdb: Au
         return;
       }
 
+      const aut = authenticators[0]
+      const credential: WebAuthnCredential = {
+
+        id: aut.credentialID,
+        publicKey: aut.credentialPublicKey,
+        counter: aut.counter,
+        transports: aut.transports
+      }
 
       let verification: VerifiedAuthenticationResponse;
       try {
@@ -50,7 +58,7 @@ export function makeAuthenticationRoute(origin: string, rpID: string, authdb: Au
           expectedChallenge,
           expectedOrigin: origin,
           expectedRPID: rpID,
-          authenticator: authenticators[0],
+          credential,
           // for passkeys:
           requireUserVerification: true,
         });

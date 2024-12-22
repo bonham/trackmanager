@@ -27,7 +27,7 @@ export async function performWebauthnLogin(): Promise<LoginHandlerStatus> {
     const authoptions = await resp.json() as PublicKeyCredentialCreationOptionsJSON
 
     // Pass the options to the authenticator and wait for a response
-    const asseResp = await startAuthentication(authoptions); // hier kommt cred id als binary in antwort ?? wirklich ?? QXfYW3y2xvMfXFfd1-QTWqCIeeF01x0FQ1puJ6J-ND8
+    const asseResp = await startAuthentication({ optionsJSON: authoptions }); // hier kommt cred id als binary in antwort ?? wirklich ?? QXfYW3y2xvMfXFfd1-QTWqCIeeF01x0FQ1puJ6J-ND8
 
     // POST the response to the endpoint that calls
     // @simplewebauthn/server -> verifyAuthenticationResponse()

@@ -6,9 +6,10 @@ const jestConfig = {
   verbose: false,
   rootDir: ".",
   extensionsToTreatAsEsm: [".ts"],
-  transformIgnorePatterns: [
-    '/node_modules/(?!(@garmin/fitsdk))',
-  ],
+  testPathIgnorePatterns: ['/dist/'],
+  // transformIgnorePatterns: [
+  //   '/node_modules/(?!(@garmin/fitsdk))',
+  // ],
   moduleNameMapper: {
     '^(\\.{1,2}/.*)\\.js$': '$1',
   },

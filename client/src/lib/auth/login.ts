@@ -1,7 +1,6 @@
 import { getWithCORS, sendJSONToServer, getErrorMessage } from '@/lib/httpHelpers';
 import { startAuthentication } from '@simplewebauthn/browser';
-import type { PublicKeyCredentialCreationOptionsJSON } from '@simplewebauthn/types'
-import type { VerifiedAuthenticationResponse, } from '@simplewebauthn/server'
+import type { PublicKeyCredentialCreationOptionsJSON } from '@simplewebauthn/browser'
 
 interface LoginHandlerStatus {
   success: boolean,
@@ -27,7 +26,7 @@ export async function performWebauthnLogin(): Promise<LoginHandlerStatus> {
     const authoptions = await resp.json() as PublicKeyCredentialCreationOptionsJSON
 
     // Pass the options to the authenticator and wait for a response
-    const asseResp = await startAuthentication(authoptions); // hier kommt cred id als binary in antwort ?? wirklich ?? QXfYW3y2xvMfXFfd1-QTWqCIeeF01x0FQ1puJ6J-ND8
+    const asseResp = await startAuthentication({ optionsJSON: authoptions }); // hier kommt cred id als binary in antwort ?? wirklich ?? QXfYW3y2xvMfXFfd1-QTWqCIeeF01x0FQ1puJ6J-ND8
 
     // POST the response to the endpoint that calls
     // @simplewebauthn/server -> verifyAuthenticationResponse()
@@ -45,11 +44,10 @@ export async function performWebauthnLogin(): Promise<LoginHandlerStatus> {
     }
 
     // Wait for the results of verification
-    const verificationJSON = await verificationResp.json() as VerifiedAuthenticationResponse;
-    // console.log("verificationJson:", verificationJSON)
+    const verificationJSON = await verificationResp.json() as unknown;
 
     // Show UI appropriate for the `verified` status
-    if (verificationJSON && verificationJSON.verified) {
+    if (verificationJSON && (typeof verificationJSON === 'object') && ('verified' in verificationJSON) && verificationJSON.verified) {
 
       returnStatus.success = true;
       returnStatus.message = ""

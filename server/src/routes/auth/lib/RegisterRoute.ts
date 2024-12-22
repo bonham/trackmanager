@@ -1,9 +1,8 @@
 import type { RequestHandler } from 'express';
 import { Router } from 'express';
 
-import type { VerifiedRegistrationResponse } from '@simplewebauthn/server';
+import type { RegistrationResponseJSON, VerifiedRegistrationResponse } from '@simplewebauthn/server';
 import { verifyRegistrationResponse } from '@simplewebauthn/server';
-import type { AuthenticatorTransportFuture, RegistrationResponseJSON } from '@simplewebauthn/types';
 import type { Authenticator, RequestWebauthn } from '../interfaces/server.js';
 
 import { AutenticatorDb } from './AuthenticatorDb.js';
@@ -54,7 +53,6 @@ export function makeRegisterRoute(origin: string, rpID: string, authdb: Autentic
       res.sendStatus(401)
       return
     }
-    const transports: AuthenticatorTransportFuture[] = body.response.transports ?? [];
 
     let verification: VerifiedRegistrationResponse;
     try {
@@ -92,15 +90,16 @@ export function makeRegisterRoute(origin: string, rpID: string, authdb: Autentic
     }
 
     const {
-      credentialPublicKey, credentialID, counter, credentialDeviceType, credentialBackedUp,
+      credential, credentialDeviceType, credentialBackedUp,
     } = registrationInfo;
+
     const newAuthenticator: Authenticator = {
-      credentialPublicKey,
-      credentialID,
-      counter,
+      credentialPublicKey: credential.publicKey,
+      credentialID: credential.id,
+      counter: credential.counter,
       credentialDeviceType,
       credentialBackedUp,
-      transports,
+      transports: credential.transports ?? [] // not sure if this is right ...
     };
 
     const saveSuccess = await authdb.saveAuthenticator(newAuthenticator, registrationuser);

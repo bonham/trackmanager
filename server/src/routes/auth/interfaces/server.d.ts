@@ -1,4 +1,4 @@
-import type { AuthenticatorTransportFuture, Base64URLString } from '@simplewebauthn/types';
+import type { AuthenticatorTransportFuture, Base64URLString } from '@simplewebauthn/server';
 import type { Request } from 'express';
 import { Session } from 'express-session';
 

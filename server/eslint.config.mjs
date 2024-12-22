@@ -12,6 +12,7 @@ export default tseslint.config(
       "coverage/",
       "eslint.config.mjs",
       "jest.config.ts",
+      "**/*.spec.*"
     ]
   },
   eslint.configs.recommended,

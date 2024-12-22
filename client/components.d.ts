@@ -7,7 +7,6 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
-    copy: typeof import('./src/components/TrackManagerNavBar copy.vue')['default']
     DropField: typeof import('./src/components/DropField.vue')['default']
     EditableText: typeof import('./src/components/EditableText.vue')['default']
     IBiArrowDownCircleFill: typeof import('~icons/bi/arrow-down-circle-fill')['default']
@@ -17,12 +16,9 @@ declare module 'vue' {
     IBiCompassFill: typeof import('~icons/bi/compass-fill')['default']
     IBiPencilFill: typeof import('~icons/bi/pencil-fill')['default']
     IBiTrash: typeof import('~icons/bi/trash')['default']
-    LoginComponent: typeof import('./src/components/auth/LoginComponent.vue')['default']
-    LoginForm: typeof import('./src/components/auth/LoginForm.vue')['default']
     LoginModal: typeof import('./src/components/auth/LoginModal.vue')['default']
     LogoutForm: typeof import('./src/components/auth/LogoutForm.vue')['default']
     MapComponent: typeof import('./src/components/MapComponent.vue')['default']
-    RegistrationForm: typeof import('./src/components/auth/RegistrationForm.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     TrackCard: typeof import('./src/components/TrackCard.vue')['default']

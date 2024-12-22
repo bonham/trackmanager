@@ -1,4 +1,4 @@
-import type { AuthenticatorTransportFuture, Base64URLString } from '@simplewebauthn/types';
+import type { AuthenticatorTransportFuture, Base64URLString } from '@simplewebauthn/server';
 import type { Pool, QueryConfig } from 'pg';
 import type { Authenticator, RegCodeLookup } from '../interfaces/server.js';
 
@@ -50,7 +50,7 @@ export class AutenticatorDb {
       const transportsArray = JSON.parse(row.transports) as AuthenticatorTransportFuture[]; // unsafe
 
       const authenticator = {
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+
         credentialID: row.credentialid as Base64URLString,
         credentialPublicKey: row.credentialpublickey,
         counter: row.counter,

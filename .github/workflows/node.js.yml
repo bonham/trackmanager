@@ -24,6 +24,8 @@ jobs:
           node-version: "~22"
       #          cache: "npm"
       #         cache-dependency-path: ./client/package-lock.json
+      - run: rm -rf node_modules package-lock.json
+        working-directory: ./client
       - run: npm install
         working-directory: ./client
       - run: npm test

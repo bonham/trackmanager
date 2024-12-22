@@ -17,8 +17,7 @@
   },
   "dependencies": {
     "@garmin/fitsdk": "^21.126.0",
-    "@simplewebauthn/browser": "^11.0.0",
-    "@simplewebauthn/server": "^11",
+    "@simplewebauthn/server": "^13",
     "@tmcw/togeojson": "^6.0.0",
     "@types/geojson": "^7946.0.14",
     "connect-pg-simple": "^10.0.0",
@@ -39,7 +38,6 @@
     "tsx": "^4.19.2"
   },
   "devDependencies": {
-    "@simplewebauthn/types": "^11",
     "@tsconfig/node20": "^20.1.4",
     "@types/connect-pg-simple": "^7.0.0",
     "@types/cors": "^2.8.13",

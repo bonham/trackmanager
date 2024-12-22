@@ -1,8 +1,7 @@
 
 import { getWithCORS, sendJSONToServer, getErrorMessage } from '@/lib/httpHelpers';
 import { startRegistration } from '@simplewebauthn/browser';
-import type { VerifiedRegistrationResponse } from '@simplewebauthn/server'
-import type { RegistrationResponseJSON, PublicKeyCredentialCreationOptionsJSON } from '@simplewebauthn/types'
+import type { RegistrationResponseJSON, PublicKeyCredentialCreationOptionsJSON } from '@simplewebauthn/browser'
 
 interface RegistrationHandlerStatus {
   success: boolean,
@@ -83,8 +82,8 @@ export async function registerPasskey(registrationKey: string): Promise<Registra
   }
 
   // Wait for the results of verification
-  const verificationJSON = await verificationResp.json() as VerifiedRegistrationResponse;
-  if (verificationJSON && verificationJSON.verified) {
+  const verificationJSON = await verificationResp.json() as unknown;
+  if (verificationJSON && (typeof verificationJSON === 'object') && ('verified' in verificationJSON) && verificationJSON.verified) {
     returnStatus.success = true
     returnStatus.message = ""
   } else {

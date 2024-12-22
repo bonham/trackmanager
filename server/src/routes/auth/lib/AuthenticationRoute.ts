@@ -3,9 +3,8 @@ import { Router } from 'express';
 import type { RequestWebauthn } from '../interfaces/server.js';
 
 
-import type { VerifiedAuthenticationResponse } from '@simplewebauthn/server';
+import type { AuthenticationResponseJSON, VerifiedAuthenticationResponse, WebAuthnCredential } from '@simplewebauthn/server';
 import { verifyAuthenticationResponse } from '@simplewebauthn/server';
-import type { AuthenticationResponseJSON, WebAuthnCredential } from '@simplewebauthn/types';
 import { AutenticatorDb } from './AuthenticatorDb.js';
 
 const router = Router();

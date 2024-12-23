@@ -35,7 +35,7 @@ export default defineConfig({
     }
   },
   test: {
-    setupFiles: ['tests/vitest-setupfiles/setup-jest-dom.js'],
+    setupFiles: ['tests/vitest-setupfiles/setup-jest-dom.js', 'jsdom-worker'],
     environment: 'jsdom',
     globals: true,
     coverage: {

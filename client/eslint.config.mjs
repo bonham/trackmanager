@@ -2,8 +2,8 @@ import eslint from '@eslint/js';
 import tseslint from 'typescript-eslint';
 import globals from "globals";
 
-// import eslintConfigPrettier from "eslint-config-prettier";
-// import pluginVue from 'eslint-plugin-vue'
+import eslintConfigPrettier from "eslint-config-prettier";
+import pluginVue from 'eslint-plugin-vue'
 
 export default tseslint.config(
   {
@@ -12,9 +12,12 @@ export default tseslint.config(
       "coverage/",
     ]
   },
-  eslint.configs.recommended,
-  tseslint.configs.recommendedTypeChecked,
   {
+    extends: [
+      eslint.configs.recommended,
+      tseslint.configs.recommendedTypeChecked,
+      eslintConfigPrettier
+    ],
     languageOptions: {
       globals: {
         ...globals.browser
@@ -23,6 +26,24 @@ export default tseslint.config(
         projectService: true,
         tsconfigRootDir: import.meta.dirname,
       }
+    }
+  },
+  {
+    files: ["*.vue", "**/*.vue"],
+    extends: [
+      eslint.configs.recommended,
+      tseslint.configs.recommendedTypeChecked,
+      pluginVue.configs['flat/recommended'],
+      eslintConfigPrettier
+    ],
+    languageOptions: {
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname,
+        parser: "@typescript-eslint/parser",
+        extraFileExtensions: [".vue"],
+      },
+
     }
   },
   {

@@ -10,7 +10,8 @@
     "dev": "vite --port 4000",
     "build": "vite build",
     "serve": "vite preview",
-    "lint": "eslint --quiet .",
+    "lint": "eslint --quiet",
+    "lintwarn": "sleep 10 && eslint",
     "test": "vitest",
     "typecheck": "vue-tsc --noEmit -p tsconfig.vitest.json --composite false"
   },

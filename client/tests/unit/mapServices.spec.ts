@@ -94,7 +94,7 @@ test('Add layer', () => {
   mm.addTrackLayer({ track: track1, geojson })
   mm.addTrackLayer({ track: track2, geojson })
   expect(mm.getTrackIds()).toEqual([1, 2])
-  // eslint-disable-next-line no-unused-vars
+   
   const l9 = mm.getTrackLayer(2)
   expect(l9).toBeDefined()
   mm.setInvisible(2)

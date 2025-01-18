@@ -112,7 +112,7 @@ const props = defineProps({
 
 const tableItems = ref<TableItem[]>([])
 const tableItemsByTrackId: Record<number, TableItem> = {}
-const tracksByTrackId = ref<{ [index: number]: Track }>({})
+const tracksByTrackId = ref<Record<number, Track>>({})
 const loading = ref(false)
 
 
@@ -136,8 +136,8 @@ async function loadTracks() {
 
     const item: TableItem = {}
     item.id = t.id
-    item.name = t.name || ""
-    item.src = t.src || ""
+    item.name = t.name ?? ""
+    item.src = t.src ?? ""
     item.length = (t.distance() / 1000).toFixed(0)
     item.time = t.localeDateShort()
     item.loading = false

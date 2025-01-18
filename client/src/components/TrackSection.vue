@@ -31,7 +31,7 @@
 
 <script setup lang="ts">
 // import TrackHeader from '@/components/TrackHeader.vue'
-import { ref, computed } from 'vue'
+import { toRef, ref, computed } from 'vue'
 import TrackCard from '@/components/TrackCard.vue'
 import { TrackCollection } from '@/lib/Track'
 import {
@@ -58,7 +58,8 @@ const props = defineProps({
   }
 })
 
-const myDataList = ref(props.coll.members())
+const collRef = toRef(props, 'coll')
+const myDataList = computed(() => collRef.value.members())
 const expanded = ref(!props.initiallyCollapsed) // initial state
 const everVisible = ref(!props.initiallyCollapsed) // initial state
 

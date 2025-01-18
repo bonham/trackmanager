@@ -7,7 +7,8 @@
           </span>
         </div>
         <div>
-          <TrackSection v-for="trCol in trackCollections" :key="trCol.year" :coll="trCol.collection"
+          <TrackSection
+v-for="trCol in trackCollections" :key="trCol.year" :coll="trCol.collection"
             :label="trCol.year === '0' ? 'No date' : trCol.year" :initially-collapsed="isYearCollapsed(trCol.year)"
             :sid="sid" />
         </div>
@@ -26,6 +27,7 @@ import { BSpinner } from 'bootstrap-vue-next'
 import _ from 'lodash'
 import { ref, computed } from 'vue'
 import type { Ref } from 'vue'
+import { useSearchStore } from '@/stores/search'
 
 const props = defineProps({
   sid: {
@@ -33,6 +35,8 @@ const props = defineProps({
     default: ''
   }
 })
+
+const searchStore = useSearchStore()
 
 const loadedTracks: Ref<Track[]> = ref([])
 const loading = ref(true)
@@ -52,7 +56,16 @@ const yearList = computed(() => {
 const trackCollections = computed(() => {
   const r: { year: string, collection: TrackCollection }[] = []
   yearList.value.forEach(y => {
-    const tc = new TrackCollection(tracksByYear.value[y])
+    let tracksToDisplay: Track[];
+
+    if (searchStore.searchText === '') {
+      tracksToDisplay = tracksByYear.value[y]
+    } else {
+      tracksToDisplay = tracksByYear.value[y].filter(t => (
+        (t.name ?? '').toLowerCase().includes(searchStore.searchText.toLowerCase())
+      ))
+    }
+    const tc = new TrackCollection(tracksToDisplay)
     r.push({
       year: y,
       collection: tc

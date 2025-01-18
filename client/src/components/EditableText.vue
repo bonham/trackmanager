@@ -1,15 +1,18 @@
 <template>
   <div>
-    <div v-show="!editing" role="button" aria-label="Click to edit" state="readonly"
+    <div
+v-show="!editing" role="button" aria-label="Click to edit" state="readonly"
       :class="{ 'editable-empty': valueIsEmptyOrWhitespace }" @click="makeEditable">
       <i-bi-pencil-fill v-if="pencilVisible" class="editable-text-pencil" title="Pencil icon" />
       {{ valueOrEmptyPlaceholder }}
     </div>
     <div v-show="editing" aria-label="Type text and press Enter or klick elsewhere to save">
-      <b-form-textarea v-if="textarea" ref="inputref" v-model="textLocal" rows="2" max-rows="20" type="textarea"
+      <b-form-textarea
+v-if="textarea" ref="inputref" v-model="textLocal" rows="2" max-rows="20" type="textarea"
         class="form-control overflow-hidden" @change="processValueChange" @blur="processBlur"
         @keydown.enter="processEnter" />
-      <b-form-input v-else ref="inputref" v-model="textLocal" type="text" @change="processValueChange"
+      <b-form-input
+v-else ref="inputref" v-model="textLocal" type="text" @change="processValueChange"
         @blur="processBlur" @keydown.enter="processEnter" />
     </div>
   </div>
@@ -56,9 +59,7 @@ In other cases where parent element wants to update dom text from prop: we would
 a new prop 'update' and watch for increment of that prop to copy prop to dom
 */
 
-interface UpdateFunction {
-  (v: string): Promise<boolean>
-}
+type UpdateFunction = (v: string) => Promise<boolean>
 
 const props = defineProps({
   textProp: {
@@ -69,7 +70,7 @@ const props = defineProps({
   // The function provided, should return true if backend update was successful. false otherwise.
   updateFunction: {
     type: Function,
-    // eslint-disable-next-line @typescript-eslint/no-empty-function, @typescript-eslint/no-unused-vars
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     default: async (v: string) => Promise.resolve(true),
     required: false
   },

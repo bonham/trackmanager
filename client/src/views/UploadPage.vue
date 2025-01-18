@@ -51,7 +51,7 @@ const props = defineProps({
   }
 })
 
-const uploadList: Ref<Array<QueuedFile>> = ref([])
+const uploadList: Ref<QueuedFile[]> = ref([])
 // uploadList: [{ key: -1, fname: 'One', status: 'Queued' }, { key: -2, fname: 'One', status: 'Queued' }, { key: -3, fname: 'One', status: 'Queued' }],
 
 const maxKey = ref(0)

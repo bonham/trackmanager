@@ -45,7 +45,7 @@ const props = defineProps({
 
 const statusClass = computed(() => {
   const prefix = 'badge p-3 flex-fill'
-  const lookup: { [K in QueueStatus]: string } = {
+  const lookup: Record<QueueStatus, string> = {
     Queued: 'bg-secondary text-light',
     Processing: 'bg-warning',
     Completed: 'bg-success text-light',

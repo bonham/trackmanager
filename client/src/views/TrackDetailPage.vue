@@ -5,7 +5,8 @@
         <div class="d-flex flex-row align-items-start">
           <div class="flex-grow-1">
             <h5>
-              <editable-text v-if="userLoginStore.loggedIn" :textarea="false" :text-prop="headline"
+              <editable-text
+v-if="userLoginStore.loggedIn" :textarea="false" :text-prop="headline"
                 :pencil-visible="true" :update-function="(value: string) => processHeadlineUpdate(value)" />
               <span v-else>
                 {{ headline }}
@@ -45,7 +46,7 @@ const userLoginStore = useUserLoginStore()
 const mapStateStore = useMapStateStore()
 const trackStore = useTrackStore()
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+ 
 const props = defineProps({
   sid: {
     type: String,
@@ -74,11 +75,11 @@ getTrackById(props.id, props.sid)
       headline.value = track.getNameOrSrc()
 
       // details
-      const part1: string = `${track.localeDateShort()} / `;
-      const part2: string = `${(track.distance() / 1000).toFixed(1)} km / `;
+      const part1 = `${track.localeDateShort()} / `;
+      const part2 = `${(track.distance() / 1000).toFixed(1)} km / `;
       const part3: string = track.getAscent() ? `${Math.round(track.getAscent())} m / ` : "- / "
       const part4: string = track.getTimeLength() !== null ? `${track.timeLengthFormatted()} h / ` : "- / "
-      const part5: string = track.speedKmh() !== null ? ` / ${Math.round(track.speedKmh() as number * 10) / 10} km/h` : "-";
+      const part5: string = track.speedKmh() !== null ? ` / ${Math.round(track.speedKmh()! * 10) / 10} km/h` : "-";
       trackDetails.value = part1 + part2 + part3 + part4 + part5
 
       // fill the cache

@@ -12,7 +12,7 @@ import { sprintf } from 'sprintf-js'
 
 
 
-type TrackInitData = {
+interface TrackInitData {
   id: number,
   name?: string | null,
   length?: number | null,
@@ -25,7 +25,7 @@ type TrackInitData = {
   geojson?: GeoJsonObject | null,
   time?: string | null
 }
-type TrackPropertiesOptional = {
+interface TrackPropertiesOptional {
   id?: number,
   name?: string | null,
   length?: number | null,
@@ -128,7 +128,7 @@ class Track {
   }
 
   getNameOrSrc() {
-    return this.name?.trim() || (this.src ?? "")
+    return this.name?.trim() ?? (this.src ?? "")
   }
 
   getAscent() {
@@ -165,7 +165,7 @@ class Track {
 
   localeDateShort(opts?: Intl.DateTimeFormatOptions) {
 
-    const ouropts = opts || DateTime.DATE_SHORT
+    const ouropts = opts ?? DateTime.DATE_SHORT
     return (
       this.time
         ? this.time.toLocaleString(ouropts)

@@ -25,10 +25,10 @@ import type { Coordinate } from 'ol/coordinate'
 
 
 
-type SelectionObject = { selected: number[], deselected: number[] }
-export type GeoJSONWithTrackId = { id: number, geojson: GeoJsonObject }
-export type GeoJsonWithTrack = { track: Track, geojson: GeoJsonObject }
-type FeatureIdMapMember = { vectorLayerId: string, trackId: number }
+interface SelectionObject { selected: number[], deselected: number[] }
+export interface GeoJSONWithTrackId { id: number, geojson: GeoJsonObject }
+export interface GeoJsonWithTrack { track: Track, geojson: GeoJsonObject }
+interface FeatureIdMapMember { vectorLayerId: string, trackId: number }
 
 
 /*
@@ -365,7 +365,7 @@ export class ManagedMap {
 
   getFeatureWithIdByFeatureId(featureId: string) {
     const featureWithId = this.featureIdMap.get(featureId)
-    return featureWithId || undefined
+    return featureWithId ?? undefined
   }
 
   getTrackIdByFeatureId(featureId: string) {

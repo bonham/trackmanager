@@ -1,3 +1,4 @@
+ 
 /* eslint-disable @typescript-eslint/unbound-method */
 import { render } from '@testing-library/vue'
 import userEvent from '@testing-library/user-event'
@@ -24,6 +25,7 @@ describe('UploadPage', () => {
     const file = new File(['hello'], 'hello.gpx', { type: 'text/xml' })
 
     await user.upload(input, file)
+    expect(input.files.length).toBe(1)
     expect(input.files[0]).toBe(file)
   })
 

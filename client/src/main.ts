@@ -10,6 +10,7 @@ import 'bootstrap-vue-next/dist/bootstrap-vue-next.css'
 // import './assets/main.css'
 
 const pinia = createPinia()
+// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
 const app = createApp(App)
 
 app.use(router)

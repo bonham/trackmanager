@@ -10,7 +10,7 @@ type LoadFunctionType = () => Promise<TrackArray>
 
 export const useTrackStore = defineStore('tracks', () => {
   const loadedTracks: Ref<Track[]> = ref(markRaw([]))
-  const tracksById: Ref<{ [index: number]: Track }> = ref({})
+  const tracksById: Ref<Record<number, Track>> = ref({})
   const resizeMap = ref(false)
   const redrawTracksOnMap = ref(false)
 

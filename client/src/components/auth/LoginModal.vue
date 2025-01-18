@@ -17,7 +17,8 @@
           <div class="text-danger">{{ registrationFailureMessage }}</div>
         </div>
         <label for="registration-key" class="col-form-label">Registration Key:</label>
-        <input id="registration-key" v-model="registrationKey" type="text" class="form-control"
+        <input
+id="registration-key" v-model="registrationKey" type="text" class="form-control"
           :class="{ 'is-invalid': registrationKeyInvalid }">
       </div>
     </form>

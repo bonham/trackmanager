@@ -1,6 +1,6 @@
 {
   "extends": "./tsconfig.app.json",
-  "include": ["tests/**/*", "src/**/*", "components.d.ts"],
+  "include": ["tests/**/*", "src/**/*", "components.d.ts", "eslint.config.mjs"],
   "compilerOptions": {
     "composite": true,
     "types": ["node", "jsdom"],

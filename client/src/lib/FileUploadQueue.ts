@@ -11,7 +11,7 @@ const UP_BASE_URL = '/api/tracks/addtrack'
 
 export type ICompletedCallback = (err: UploadError | null, key: number) => void
 export type IsetItemProcessingStatus = (key: number, status: QueueStatus) => void
-export type IQueuedItem = { fileIdObject: QueuedFile, setItemProcessingStatus: IsetItemProcessingStatus }
+export interface IQueuedItem { fileIdObject: QueuedFile, setItemProcessingStatus: IsetItemProcessingStatus }
 
 
 class FileUploadQueue {

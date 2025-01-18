@@ -63,7 +63,7 @@ const loading = ref(true)
 const canvasref = ref<(null | HTMLCanvasElement)>(null)
 
 // helper functions
-type TracksByYearDict = { [key: number]: Track[] };
+type TracksByYearDict = Record<number, Track[]>;
 
 function tracksByYear(loadedTracks: Track[]): TracksByYearDict {
   const trackFlatList = _.values(loadedTracks)
@@ -129,7 +129,7 @@ onMounted(() => {
       // create and paint chart with no data
       interface ChartData { x: number, y: number, step: number, name: string }
 
-      const mychart: Chart<"line", { x: DateTime; y: number; }[], DateTime> = new Chart(
+      const mychart = new Chart<"line", { x: DateTime; y: number; }[], DateTime>(
         canvasref.value,
         {
           type: 'line',

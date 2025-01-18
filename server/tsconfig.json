@@ -25,6 +25,12 @@
     "esm": true,
     "files": true
   },
-  "include": ["src/**/*", "types/**/*"],
+  "include": [
+    "src/**/*",
+    "types/**/*",
+    "jest.config.js",
+    "eslint.config.mjs",
+    "config.js"
+  ],
   "exclude": ["dist"]
 }

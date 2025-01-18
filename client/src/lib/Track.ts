@@ -12,7 +12,7 @@ import { sprintf } from 'sprintf-js'
 
 
 
-type TrackInitData = {
+interface TrackInitData {
   id: number,
   name?: string | null,
   length?: number | null,
@@ -25,7 +25,7 @@ type TrackInitData = {
   geojson?: GeoJsonObject | null,
   time?: string | null
 }
-type TrackPropertiesOptional = {
+interface TrackPropertiesOptional {
   id?: number,
   name?: string | null,
   length?: number | null,

@@ -17,7 +17,8 @@
         </div>
 
         <div v-else>
-          <editable-text :textarea="false" :text-prop="stringOrEmpty(data.value)"
+          <editable-text
+:textarea="false" :text-prop="stringOrEmpty(data.value)"
             :update-function="(value: string) => processNameUpdate(data.item, value)" />
         </div>
       </template>
@@ -112,7 +113,7 @@ const props = defineProps({
 
 const tableItems = ref<TableItem[]>([])
 const tableItemsByTrackId: Record<number, TableItem> = {}
-const tracksByTrackId = ref<{ [index: number]: Track }>({})
+const tracksByTrackId = ref<Record<number, Track>>({})
 const loading = ref(false)
 
 

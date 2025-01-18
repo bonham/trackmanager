@@ -365,7 +365,7 @@ export class ManagedMap {
 
   getFeatureWithIdByFeatureId(featureId: string) {
     const featureWithId = this.featureIdMap.get(featureId)
-    return featureWithId || undefined
+    return featureWithId ?? undefined
   }
 
   getTrackIdByFeatureId(featureId: string) {

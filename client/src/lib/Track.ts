@@ -128,7 +128,7 @@ class Track {
   }
 
   getNameOrSrc() {
-    return this.name?.trim() || (this.src ?? "")
+    return this.name?.trim() ?? (this.src ?? "")
   }
 
   getAscent() {
@@ -165,7 +165,7 @@ class Track {
 
   localeDateShort(opts?: Intl.DateTimeFormatOptions) {
 
-    const ouropts = opts || DateTime.DATE_SHORT
+    const ouropts = opts ?? DateTime.DATE_SHORT
     return (
       this.time
         ? this.time.toLocaleString(ouropts)

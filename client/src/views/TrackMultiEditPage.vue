@@ -17,8 +17,7 @@
         </div>
 
         <div v-else>
-          <editable-text
-:textarea="false" :text-prop="stringOrEmpty(data.value)"
+          <editable-text :textarea="false" :text-prop="stringOrEmpty(data.value)"
             :update-function="(value: string) => processNameUpdate(data.item, value)" />
         </div>
       </template>
@@ -137,8 +136,8 @@ async function loadTracks() {
 
     const item: TableItem = {}
     item.id = t.id
-    item.name = t.name || ""
-    item.src = t.src || ""
+    item.name = t.name ?? ""
+    item.src = t.src ?? ""
     item.length = (t.distance() / 1000).toFixed(0)
     item.time = t.localeDateShort()
     item.loading = false

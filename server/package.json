@@ -9,7 +9,7 @@
     "start": "tsx watch src/index.ts",
     "build": "tsc --build --clean && tsc -p ./tsconfig-build.json",
     "startbuild": "node ./dist/src/index.js",
-    "test": "jest -w",
+    "test": "jest --watch",
     "copyconfig": "tsx ./src/bin/copyconfig.ts",
     "lint": "eslint --quiet .",
     "lintwarn": "eslint .",

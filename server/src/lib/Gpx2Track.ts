@@ -1,9 +1,8 @@
 import * as tj from "@tmcw/togeojson";
+import { DOMParser, Document as XmlDomDocument } from "@xmldom/xmldom";
 import type { Feature, GeoJsonProperties, Geometry, Position } from "geojson";
-import * as jsdom from 'jsdom';
 import { DateTime } from 'luxon';
-
-const JSDOM = jsdom.JSDOM
+import xpath from "xpath";
 
 interface TrackMetadata {
   name?: string,
@@ -41,37 +40,26 @@ function isPropsWithTimes(props: Record<string, any>): props is PropsWithTimes {
   }
 }
 
-function getTextContentOfSingleElement(nList: NodeListOf<Element>): (string | undefined) {
-  const ar = Array.from(nList)
-  if (ar.length > 1) {
-    throw new Error("Array should not not contain more than one element")
-  } else if (ar.length === 1) {
-    const text = ar[0].textContent
-    return (text ?? undefined)
-  }
-  else {
-    return undefined
-  }
-}
-
-
-
 
 class Gpx2Track {
   s: string;
-  doc: Document;
+  doc: XmlDomDocument;
   trackFeatures: Feature<Geometry, GeoJsonProperties>[];
   extendedSegments: ExtendedSegment[][]
 
+  select: ReturnType<typeof xpath.useNamespaces>;
+
   constructor(s: string) {
     this.s = s
-    const parseResult = (new JSDOM(
-      this.s,
-      {
-        contentType: "text/xml"
-      }
-    ))
-    this.doc = parseResult.window.document
+
+    const parser = new DOMParser();
+    this.doc = parser.parseFromString(s, "text/xml");
+
+    this.select = xpath.useNamespaces({
+      'g': 'http://www.topografix.com/GPX/1/1'
+    });
+
+
     this.trackFeatures = this._storeTrackFeatures()
     this.extendedSegments = this._storeExtendedSegments()
 
@@ -79,13 +67,13 @@ class Gpx2Track {
     if (this.extendedSegments.length !== this.numTracks()) throw Error(`Track extendedSegments length '${this.extendedSegments.length} not matching ${this.numTracks()}`)
   }
 
+
   _storeExtendedSegments(): ExtendedSegment[][] {
 
     const features = this.trackFeatures
     const tracks: ExtendedSegment[][] = []
 
     // Iterate over tracks
-    // eslint-disable-next-line @typescript-eslint/prefer-for-of
     for (let trackNum = 0; trackNum < features.length; trackNum++) {
       const eSegments: ExtendedSegment[] = []
 
@@ -157,7 +145,10 @@ class Gpx2Track {
   }
 
   trackElements() {
-    return this.doc.querySelectorAll(":scope > trk")
+
+    const trkNodes = this.select("/g:gpx/g:trk", this.doc as unknown as Node) as Node[];
+    const trkNodesArray = Array.from(trkNodes)
+    return trkNodesArray
   }
 
   numTracks() {
@@ -166,9 +157,11 @@ class Gpx2Track {
   }
 
   extractStartTimeFromMetadata() {
-    const timeElements = this.doc.querySelectorAll(":scope > metadata > time")
-    const dateText = getTextContentOfSingleElement(timeElements)
-    if (dateText !== undefined) {
+    const timeElements = this.select("/g:gpx/g:metadata/g:time", this.doc as unknown as Node) as Node[];
+    const firstTimeElement = timeElements[0] as Node | undefined;
+    const dateText = firstTimeElement?.firstChild?.nodeValue;
+
+    if (dateText !== undefined && dateText !== null) {
       const startDate = DateTime.fromISO(dateText)
       if (startDate.isValid) {
         const startDateValid = (startDate as DateTime<true>)
@@ -201,21 +194,25 @@ class Gpx2Track {
 
     // ascent
     const trkElements = this.trackElements()
-    const trkEle = Array.from(trkElements)[trackNum]
+    const trkEle = trkElements[trackNum]
 
-    const ascentTags = trkEle.querySelectorAll(":scope > extensions > totalascent")
-    const ascentText = getTextContentOfSingleElement(ascentTags)
+
+
+    const ascentNodeList = this.select("./g:extensions/g:totalascent", trkEle) as Node[];
+    const firstAscentNode = ascentNodeList[0] as Node | undefined;
+    const ascentText = firstAscentNode?.firstChild?.nodeValue;
     tm.ascent = ascentText ? parseFloat(ascentText) : undefined
 
-    const timelengthTags = trkEle.querySelectorAll(':scope > extensions > timelength')
-    const timelengthText = getTextContentOfSingleElement(timelengthTags)
+    const timeLengthNodeList = this.select("./g:extensions/g:timelength", trkEle) as Node[];
+    const firstTimeLengthNode = timeLengthNodeList[0] as Node | undefined;
+    const timelengthText = firstTimeLengthNode?.firstChild?.nodeValue;
     tm.timelength = timelengthText ? parseFloat(timelengthText) : undefined
 
     return tm
   }
 
   _storeTrackFeatures() {
-    const featureCollection = tj.gpx(this.doc)
+    const featureCollection = tj.gpx(this.doc as unknown as Document)
     return featureCollection.features.filter((ft) => ft.properties?._gpxType === 'trk')
   }
 

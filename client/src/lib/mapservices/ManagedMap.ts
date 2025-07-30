@@ -6,7 +6,8 @@ import { ZoomToTracksControl } from './ZoomToTracksControl'
 import { Feature, Map as OlMap, View } from 'ol' // rename needed not to conflict with javascript native Map()
 import { transformExtent } from 'ol/proj'
 import type { Extent } from 'ol/extent'
-import { Layer, Tile as TileLayer } from 'ol/layer'
+import { Tile as TileLayer } from 'ol/layer'
+import VectorLayer from 'ol/layer/Vector.js';
 import { OSM, Vector as VectorSource } from 'ol/source'
 import { defaults as defaultControls } from 'ol/control'
 import Collection from 'ol/Collection'
@@ -59,7 +60,7 @@ export class ManagedMap {
 
   map: OlMap
   styleFactory: StyleFactoryLike
-  trackIdToLayerMap: Map<number, Layer>
+  trackIdToLayerMap: Map<number, VectorLayer<VectorSource<Feature<Geometry>>>> // ids are keys, values are layers>
   trackMap: Map<number, Track>
   featureIdMap: Map<string, FeatureIdMapMember>
   selectCollection: Collection<Feature<Geometry>>

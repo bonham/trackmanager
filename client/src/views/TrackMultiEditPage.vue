@@ -17,7 +17,8 @@
         </div>
 
         <div v-else>
-          <editable-text :textarea="false" :text-prop="stringOrEmpty(data.value)"
+          <editable-text
+:textarea="false" :text-prop="stringOrEmpty(data.value)"
             :update-function="(value: string) => processNameUpdate(data.item, value)" />
         </div>
       </template>

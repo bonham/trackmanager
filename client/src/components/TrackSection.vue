@@ -21,7 +21,7 @@
         </b-row>
       </b-card-text>
     </b-card>
-    <b-collapse :id="collapseId" :visible="expanded">
+    <b-collapse :id="collapseId" :visible="expanded" data-testid="testbcollapse">
       <div v-if="everVisible">
         <TrackCard v-for="item in myDataList" :key="item.id" :track="item" :sid="sid" />
       </div>

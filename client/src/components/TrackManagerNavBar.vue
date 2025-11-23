@@ -39,7 +39,6 @@
                 </router-link>
               </li>
             </ul>
-            <div><input v-model="searchStore.searchText"></div>
           </div>
           <ul class="navbar-nav">
             <li class="nav-item">
@@ -61,11 +60,9 @@
 <script setup lang="ts">
 import { BContainer } from 'bootstrap-vue-next'
 import { useUserLoginStore } from '@/stores/userlogin'
-import { useSearchStore } from '@/stores/search'
 import LoginModal from '@/components/auth/LoginModal.vue'
 
 const userLoginStore = useUserLoginStore()
-const searchStore = useSearchStore()
 
 const props = defineProps({
   sid: {

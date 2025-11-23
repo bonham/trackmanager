@@ -30,7 +30,7 @@ describe('TrackSection', () => {
         props: {
           label: 'Long list',
           coll: tc,
-          initiallyCollapsed: false
+          visible: true
         }
       }
     )
@@ -58,37 +58,35 @@ describe('TrackSection', () => {
 
   })
 
-  // // bbug in testing library if you ask me:
+  test('Collapsed', async () => {
 
-  //   test('Collapsed and click', async () => {
+    const mytrack = new Track(
+      initData1
+    )
+    const tc = new TrackCollection([mytrack])
 
-  //     const mytrack = new Track(
-  //       initData1
-  //     )
-  //     const tc = new TrackCollection([mytrack])
+    // eslint-disable-next-line @typescript-eslint/unbound-method
+    const { findByText, queryByText } = render(
+      TrackSection,
+      {
+        props: {
+          label: 'Long list',
+          coll: tc,
+          visible: false
+        }
+      }
+    )
 
-  //     // eslint-disable-next-line @typescript-eslint/unbound-method
-  //     const { findByText, queryByText } = render(
-  //       TrackSection,
-  //       {
-  //         props: {
-  //           label: 'Long list',
-  //           coll: tc,
-  //           initiallyCollapsed: true
-  //         }
-  //       }
-  //     )
+    const trackSection = await findByText('Long list (1)')
+    expect(trackSection).toBeInTheDocument()
 
-  //     const trackSection = await findByText('Long list (1)')
-  //     expect(trackSection).toBeInTheDocument()
+    const trackName = queryByText('Good track')
+    expect(trackName).not.toBeInTheDocument()
 
-  //     const trackName = queryByText('Good track')
-  //     expect(trackName).not.toBeInTheDocument()
+    // // the follow should work, but does not !!!!! Bad ( bug in testing library maybe )
+    // trackSection.click() // expand
+    // const trackNameAfterClick = await findByText('Good track')
+    // expect(trackNameAfterClick).toBeInTheDocument()
 
-  //     trackSection.click() // expand
-
-  //     const trackNameAfterClick = await findByText('Good track')
-  //     expect(trackNameAfterClick).toBeInTheDocument()
-
-  //   })
+  })
 })

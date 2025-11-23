@@ -1,7 +1,7 @@
 <!-- eslint-disable vue/first-attribute-linebreak -->
 <template>
   <div>
-    <b-card bg-variant="light" class="my-2" @click="toggle">
+    <b-card bg-variant="light" class="my-2" @click="visible = !visible">
       <b-card-text>
         <b-row class="align-items-center">
           <b-col cols="9" class="d-flex flex-row align-items-center">
@@ -29,13 +29,16 @@
 
 <script setup lang="ts">
 // import TrackHeader from '@/components/TrackHeader.vue'
-import { toRef, ref, computed, defineExpose } from 'vue'
+import { toRef, ref, computed, defineModel } from 'vue'
 import TrackCard from '@/components/TrackCard.vue'
 import { TrackCollection } from '@/lib/Track'
 import {
   BCard, BCardText,
   BRow, BCol, BButton, BCollapse
 } from 'bootstrap-vue-next'
+
+// component model
+const visible = defineModel<boolean>('visible', { default: false, required: true })
 
 const props = defineProps({
   label: {
@@ -45,10 +48,6 @@ const props = defineProps({
   coll: {
     type: TrackCollection,
     default: null
-  },
-  initiallyCollapsed: {
-    type: Boolean,
-    default: false
   },
   sid: {
     type: String,
@@ -60,21 +59,11 @@ const props = defineProps({
 // This is used to control the collapse programmatically if needed
 const myCollapse = ref<InstanceType<typeof BCollapse> | null>(null)
 
-const show = () => myCollapse.value?.show()
-const hide = () => myCollapse.value?.hide()
-const toggle = () => myCollapse.value?.toggle()
 
-// Expose methods to the parent component
-defineExpose({
-  show,
-  hide,
-  toggle
-})
 
-// needed for v-model binding
-const visible = ref(!props.initiallyCollapsed) // initial state
 
-//??
+
+// Data of the section ( the tracks )
 const collRef = toRef(props, 'coll')
 const myDataList = computed(() => collRef.value.members())
 
@@ -83,6 +72,5 @@ const collapseId = computed(() => {
   const origLabel = props.label.replace(/\s+/, '-').toLowerCase()
   return `toggle-${origLabel}`
 })
-
 
 </script>

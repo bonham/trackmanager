@@ -1,5 +1,13 @@
 <template>
   <track-manager-nav-bar :sid="sid">
+    <div class="border-top border-bottom border-0">
+      <div class="d-flex flex-row">
+        <button type="button" class="btn btn-outline-secondary m-2">Expand</button>
+        <form>
+          <input v-model="searchStore.searchText" class="form-control m-2" placeholder="Search tracks..." />
+        </form>
+      </div>
+    </div>
     <div class="px-2">
       <div>
         <div>
@@ -7,9 +15,8 @@
           </span>
         </div>
         <div>
-          <TrackSection
-v-for="trCol in trackCollections" :key="trCol.year" :coll="trCol.collection"
-            :label="trCol.year === '0' ? 'No date' : trCol.year" :initially-collapsed="isYearCollapsed(trCol.year)"
+          <TrackSection v-for="trCol in trackCollections" :key="trCol.year" :coll="trCol.collection"
+            :label="trCol.year === 0 ? 'No date' : trCol.year.toString()" :visible="trCol.year === maxYear"
             :sid="sid" />
         </div>
       </div>
@@ -48,13 +55,16 @@ const tracksByYear = computed(() => {
 })
 
 const yearList = computed(() => {
-  const yl = _.keys(tracksByYear.value)
+  const ylStrings = _.keys(tracksByYear.value)
+  const yl = ylStrings.map(e => parseInt(e))
   yl.sort().reverse()
   return yl
 })
 
+const maxYear = computed(() => Math.max(...yearList.value))
+
 const trackCollections = computed(() => {
-  const r: { year: string, collection: TrackCollection }[] = []
+  const r: { year: number, collection: TrackCollection }[] = []
   yearList.value.forEach(y => {
     let tracksToDisplay: Track[];
 
@@ -75,10 +85,7 @@ const trackCollections = computed(() => {
 
 })
 
-function isYearCollapsed(thisYear: string) {
-  const firstYearInCollection = trackCollections.value[0].year
-  return thisYear !== firstYearInCollection
-}
+
 
 async function runOnCreate() {
   loadedTracks.value = await getAllTracks(props.sid)
@@ -88,3 +95,13 @@ async function runOnCreate() {
 runOnCreate().catch((error) => console.log(error))
 
 </script>
+
+<style lang="css" scoped>
+.filter {
+  margin: 0rem;
+  padding: 0.875rem 0.75rem !important;
+  font-size: 1rem;
+  border: var(--bs-border-width) var(--bs-border-style) var(--bs-border-color);
+
+}
+</style>

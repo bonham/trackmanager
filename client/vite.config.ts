@@ -5,12 +5,14 @@ import Icons from 'unplugin-icons/vite'
 import Components from 'unplugin-vue-components/vite'
 import IconsResolve from 'unplugin-icons/resolver'
 import path from 'path'
+import vueDevTools from 'vite-plugin-vue-devtools'
 
 // https://vitejs.dev/config/
 export default defineConfig({
   base: "/tm",
   plugins: [
     vue(),
+    vueDevTools(),
     Components({
       resolvers: [IconsResolve()],
       dts: true

@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { RouterView } from 'vue-router'
 import { useUserLoginStore } from '@/stores/userlogin'
 const userLoginStore = useUserLoginStore()

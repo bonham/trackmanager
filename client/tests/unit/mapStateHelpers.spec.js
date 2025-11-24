@@ -14,7 +14,7 @@ test('TrackVisibilityManager', () => {
   const toBeLoaded = [2]
   const loadedButDoNotToggle = [3, 10, 12]
 
-  // eslint-disable-next-line no-unused-vars
+   
   const tvm = new TrackVisibilityManager(currentlyVisible, toBeVisible, alreadyLoaded)
 
   expect(tvm.deltaToBeEnabled()).toEqual(deltaToBeEnabled)

@@ -14,7 +14,8 @@ async function processGpxFile(
   schema: string,
 ) {
 
-  const gpx2t = new Gpx2Track(fileBuffer.toString('utf-8'))
+  const buf = fileBuffer.toString('utf-8')
+  const gpx2t = new Gpx2Track(buf)
 
   // check if gpx file
   const numTracks = gpx2t.numTracks()

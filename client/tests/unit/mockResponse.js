@@ -52,17 +52,17 @@ const mockSingleTrackResponse = JSON.stringify(mockTrack)
 const mockFetch = vi.fn((reqOrUrl) => {
   const req = new Request(reqOrUrl)
 
-  if (req.url.match('^/api/tracks/getall/sid/[A-Za-z0-9]+')) {
+  if (/^\/api\/tracks\/getall\/sid\/[A-Za-z0-9]+/.exec(req.url)) {
     return new Response(mockTrackListResponse)
-  } else if (req.url.match('^/api/tracks/byyear/\\d+/sid/[A-Za-z0-9]+')) {
+  } else if (/^\/api\/tracks\/byyear\/\d+\/sid\/[A-Za-z0-9]+/.exec(req.url)) {
     return new Response(mockTrackListResponse)
-  } else if (req.url.match('^/api/tracks/geojson/sid/[A-Za-z0-9]+')) {
+  } else if (/^\/api\/tracks\/geojson\/sid\/[A-Za-z0-9]+/.exec(req.url)) {
     return new Response(mockGeoJsonListResponse)
-  } else if (req.url.match('^/api/tracks/byid/404/sid/[A-Za-z0-9]+')) {
+  } else if (/^\/api\/tracks\/byid\/404\/sid\/[A-Za-z0-9]+/.exec(req.url)) {
     return new Response(mockSingleTrackResponse)
-  } else if (req.url.match('^/api/config/get/sid/abcd1234/SCHEMA/TRACKSTYLE')) {
+  } else if (/^\/api\/config\/get\/sid\/abcd1234\/SCHEMA\/TRACKSTYLE/.exec(req.url)) {
     return new Response(JSON.stringify({ value: null }))
-  } else if (req.url.match('^/api/tracks/namefromsrc/404/sid/abcd1234')) {
+  } else if (/^\/api\/tracks\/namefromsrc\/404\/sid\/abcd1234/.exec(req.url)) {
     return new Response()
   } else {
     throw new Error(`Url ${req.url} is not mocked`)

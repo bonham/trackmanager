@@ -7,12 +7,15 @@
       <button class="btn placeholder btn-outline-secondary flex-fill m-2">..</button>
     </div>
     <div v-else class="year-navbar border-bottom border-top">
-      <button v-if="buttonAll" class="btn m-2 button-year-navbar" :class="activeClass(buttonAllActive)"
+      <button
+v-if="buttonAll" class="btn m-2 button-year-navbar" :class="activeClass(buttonAllActive)"
         @click="loadAllTracks()">All</button>
-      <button v-if="buttonAllInView" class="btn m-2 button-year-navbar" :class="activeClass(buttonAllInViewActive)"
+      <button
+v-if="buttonAllInView" class="btn m-2 button-year-navbar" :class="activeClass(buttonAllInViewActive)"
         @click=" loadAllTracksinView()">All in
         view</button>
-      <button v-for=" year  in  years " :key="year" class="btn m-2 button-year-navbar"
+      <button
+v-for=" year  in  years " :key="year" class="btn m-2 button-year-navbar"
         :class="year in buttonYActive ? activeClass(buttonYActive[year]) : activeClass(false)"
         @click="loadTracksOfYear(year, false)">
         {{ year === 0 ? "No date" : year }}

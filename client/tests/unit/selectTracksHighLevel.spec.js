@@ -12,8 +12,8 @@ describe('TrackMapPage - DOM testing', () => {
   beforeEach(() => {
     vi.stubGlobal('ResizeObserver', ResizeObserverMock)
     vi.stubGlobal('fetch', mockFetch)
-    vi.stubGlobal('Request', Request) // eslint-disable-line no-undef
-    vi.stubGlobal('Response', Response) // eslint-disable-line no-undef
+    vi.stubGlobal('Request', Request)  
+    vi.stubGlobal('Response', Response)  
 
   })
 

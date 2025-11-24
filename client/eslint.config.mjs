@@ -1,7 +1,7 @@
-// @ts-check
-
 import eslint from '@eslint/js';
 import tseslint from 'typescript-eslint';
+import globals from "globals";
+
 import eslintConfigPrettier from "eslint-config-prettier";
 import pluginVue from 'eslint-plugin-vue'
 
@@ -10,27 +10,57 @@ export default tseslint.config(
     ignores: [
       "dist/",
       "coverage/",
-      "vite.config.ts",
-      "eslint.config.mjs"
     ]
   },
-  eslint.configs.recommended,
-  ...tseslint.configs.recommended,
   {
-    plugins: {
-      'typescript-eslint': tseslint.plugin,
-    },
+    extends: [
+      eslint.configs.recommended,
+      tseslint.configs.recommendedTypeChecked,
+      tseslint.configs.stylisticTypeChecked,
+      eslintConfigPrettier
+    ],
+    languageOptions: {
+      globals: {
+        ...globals.browser
+      },
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname,
+      }
+    }
+  },
+  {
+    files: ["*.vue", "**/*.vue"],
+    extends: [
+      eslint.configs.recommended,
+      tseslint.configs.recommendedTypeChecked,
+      pluginVue.configs['flat/recommended'],
+      eslintConfigPrettier
+    ],
     languageOptions: {
       parserOptions: {
-        parser: tseslint.parser,
-        project: ['tsconfig.vitest.json'],
-        ecmaVersion: 2022,
-        extraFileExtensions: ['.vue'],
-        sourceType: 'module'
-      }
-    },
-  },
-  ...pluginVue.configs['flat/recommended'],
-  eslintConfigPrettier,
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname,
+        parser: "@typescript-eslint/parser",
+        extraFileExtensions: [".vue"],
+      },
 
+    }
+  },
+  {
+    rules: {
+      "@typescript-eslint/no-unsafe-argument": "warn",
+      "@typescript-eslint/no-unsafe-assignment": "warn",
+      "@typescript-eslint/no-unsafe-member-access": "warn",
+      "vue/first-attribute-linebreak": "off",
+    }
+  },
+  {
+    files: ["tests/**/*.spec.js"],
+    rules: {
+      "@typescript-eslint/no-unsafe-assignment": "off",
+      "@typescript-eslint/no-unsafe-member-access": "off",
+    }
+  }
+  // pluginVue.configs['flat/recommended'],
 );

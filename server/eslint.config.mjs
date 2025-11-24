@@ -1,5 +1,3 @@
-// @ts-check
-
 import eslint from '@eslint/js';
 import eslintConfigPrettier from "eslint-config-prettier";
 import globals from 'globals';
@@ -10,26 +8,24 @@ export default tseslint.config(
     ignores: [
       "dist/",
       "coverage/",
-      "eslint.config.mjs",
-      "jest.config.ts",
       "**/*.spec.*"
     ]
   },
-  eslint.configs.recommended,
-  ...tseslint.configs.recommendedTypeChecked,
-  ...tseslint.configs.stylisticTypeChecked,
   {
-    plugins: {
-      'typescript-eslint': tseslint.plugin,
-    },
+    extends: [
+      eslint.configs.recommended,
+      tseslint.configs.recommendedTypeChecked,
+      tseslint.configs.stylisticTypeChecked,
+      eslintConfigPrettier
+    ],
     languageOptions: {
       globals: {
         ...globals.node,
         ...globals.jest
       },
       parserOptions: {
-        parser: tseslint.parser,
-        project: ['tsconfig-eslint.json']
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname,
       }
     },
     rules: {
@@ -43,7 +39,5 @@ export default tseslint.config(
       "@typescript-eslint/no-unnecessary-type-assertion": "warn",
       "@typescript-eslint/prefer-for-of": "off"
     }
-  },
-  eslintConfigPrettier,
-
+  }
 );

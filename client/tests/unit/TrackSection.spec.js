@@ -1,4 +1,4 @@
-import { render, waitFor } from '@testing-library/vue'
+import { render, waitFor, screen } from '@testing-library/vue'
 import { Track, TrackCollection } from '@/lib/Track'
 import TrackSection from '@/components/TrackSection.vue'
 import { DateTime } from 'luxon'
@@ -66,7 +66,7 @@ describe('TrackSection', () => {
     const tc = new TrackCollection([mytrack])
 
     // eslint-disable-next-line @typescript-eslint/unbound-method
-    const { findByText, queryByText } = render(
+    const { findByText, getByTestId, } = render(
       TrackSection,
       {
         props: {
@@ -80,13 +80,8 @@ describe('TrackSection', () => {
     const trackSection = await findByText('Long list (1)')
     expect(trackSection).toBeInTheDocument()
 
-    const trackName = queryByText('Good track')
-    expect(trackName).not.toBeInTheDocument()
-
-    // // the follow should work, but does not !!!!! Bad ( bug in testing library maybe )
-    // trackSection.click() // expand
-    // const trackNameAfterClick = await findByText('Good track')
-    // expect(trackNameAfterClick).toBeInTheDocument()
+    const trackName = getByTestId('testbcollapse')
+    expect(trackName).toHaveStyle({ display: 'none' });
 
   })
 })

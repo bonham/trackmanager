@@ -1,4 +1,4 @@
-import { render, waitFor, screen } from '@testing-library/vue'
+import { render, waitFor } from '@testing-library/vue'
 import { Track, TrackCollection } from '@/lib/Track'
 import TrackSection from '@/components/TrackSection.vue'
 import { DateTime } from 'luxon'

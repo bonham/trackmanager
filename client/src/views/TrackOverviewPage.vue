@@ -5,7 +5,8 @@
         <button type="button" class="btn btn-outline-secondary m-2 expandbutton" @click="toggleFullExpand">
           {{ expandPressed ? "Collapse" : "Expand" }}</button>
         <form @submit.prevent>
-          <input v-model="searchStore.searchText" v-focus class="form-control m-2" placeholder="Search tracks..." />
+          <input v-model="searchStore.searchText" v-focus class="form-control m-2" placeholder="Search tracks..."
+            @keyup.enter="toggleFullExpand" />
         </form>
       </div>
     </div>

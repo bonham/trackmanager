@@ -2,7 +2,7 @@
   <track-manager-nav-bar :sid="sid">
     <div class="border-top border-bottom border-0">
       <div class="d-flex flex-row">
-        <button type="button" class="btn btn-outline-secondary m-2">Expand</button>
+        <button type="button" class="btn btn-outline-secondary m-2" @click="expandAll">Expand</button>
         <form>
           <input v-model="searchStore.searchText" class="form-control m-2" placeholder="Search tracks..." />
         </form>
@@ -15,9 +15,8 @@
           </span>
         </div>
         <div>
-          <TrackSection v-for="trCol in trackCollections" :key="trCol.year" :coll="trCol.collection"
-            :label="trCol.year === 0 ? 'No date' : trCol.year.toString()" :visible="trCol.year === maxYear"
-            :sid="sid" />
+          <TrackSection v-for="trCol in trackCollections" :key="trCol.year" v-model:visible="expandedState[trCol.year]"
+            :coll="trCol.collection" :label="trCol.year === 0 ? 'No date' : trCol.year.toString()" :sid="sid" />
         </div>
       </div>
     </div>
@@ -47,6 +46,16 @@ const searchStore = useSearchStore()
 
 const loadedTracks: Ref<Track[]> = ref([])
 const loading = ref(true)
+
+type YearState = Record<number, boolean>;
+const expandedState = ref<YearState>({})
+
+function expandAll() {
+  yearList.value.forEach(y => {
+    console.log('expanding', y)
+    expandedState.value[y] = true
+  })
+}
 
 const tracksByYear = computed(() => {
   const trackFlatList = _.values(loadedTracks.value)
@@ -90,6 +99,13 @@ const trackCollections = computed(() => {
 async function runOnCreate() {
   loadedTracks.value = await getAllTracks(props.sid)
   loading.value = false
+
+  // initial expand/collapse state
+  const my = maxYear.value
+
+  yearList.value.forEach(y => {
+    expandedState.value[y] = (y === my) // only expand the max year initially
+  })
 }
 
 runOnCreate().catch((error) => console.log(error))

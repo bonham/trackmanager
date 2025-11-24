@@ -1,7 +1,7 @@
 <!-- eslint-disable vue/first-attribute-linebreak -->
 <template>
   <div>
-    <b-card bg-variant="light" class="my-2" @click="visible = !visible">
+    <b-card bg-variant="light" class="my-2" @click="toggleVisible">
       <b-card-text>
         <b-row class="align-items-center">
           <b-col cols="9" class="d-flex flex-row align-items-center">
@@ -21,7 +21,8 @@
         </b-row>
       </b-card-text>
     </b-card>
-    <b-collapse :id="collapseId" ref="myCollapse" v-model="visible" data-testid="testbcollapse" :lazy="true">
+    <b-collapse :id="collapseId" ref="myCollapse" v-model="visible" data-testid="testbcollapse" :lazy="false"
+      :no-animation="false">
       <TrackCard v-for="item in myDataList" :key="item.id" :track="item" :sid="sid" />
     </b-collapse>
   </div>
@@ -38,7 +39,7 @@ import {
 } from 'bootstrap-vue-next'
 
 // component model
-const visible = defineModel<boolean>('visible', { default: false, required: true })
+const visible = defineModel<boolean>('visible')
 
 const props = defineProps({
   label: {
@@ -60,7 +61,9 @@ const props = defineProps({
 const myCollapse = ref<InstanceType<typeof BCollapse> | null>(null)
 
 
-
+function toggleVisible() {
+  visible.value = !visible.value
+}
 
 
 // Data of the section ( the tracks )

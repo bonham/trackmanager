@@ -7,7 +7,7 @@
   },
   "scripts": {
     "start": "tsx watch src/index.ts",
-    "build": "tsc --build --clean && tsc -p ./tsconfig-build.json",
+    "build": "tsc --build --clean && tsc",
     "startbuild": "node ./dist/src/index.js",
     "test": "vitest run",
     "copyconfig": "tsx ./src/bin/copyconfig.ts",

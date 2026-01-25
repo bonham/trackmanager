@@ -61,7 +61,6 @@
     "cross-fetch": "^4.1.0",
     "eslint": "^9.32.0",
     "eslint-config-prettier": "^10.1.8",
-    "jest-fetch-mock": "^3.0.3",
     "jsdom": "^26.1.0",
     "mutationobserver-shim": "^0.3.7",
     "portal-vue": "^3.0.0",

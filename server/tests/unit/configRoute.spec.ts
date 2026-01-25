@@ -3,7 +3,7 @@ import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
 vi.mock('pg', () => {
   const Pool = vi.fn(class FakePool {
     connect = vi.fn()
-    query = vi.fn().mockResolvedValue([{ "col": "val" }])
+    query = vi.fn()
     end = vi.fn()
   })
   return { default: { Pool }, Pool }
@@ -14,56 +14,35 @@ import request from 'supertest';
 
 import app from '../../src/app.js';
 import getSchema from '../../src/lib/getSchema.js';
-import { isAuthenticated } from '../../src/routes/auth/auth.js';
 
 
 
 vi.mock('../../src/routes/auth/auth');
 vi.mock('../../src/lib/getSchema.js')
 
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const dummy = isAuthenticated;
-
 const mockGetSchema = vi.mocked(getSchema)
-
-//const PoolMock = 
-
 
 describe('get config', () => {
 
   const expectedconfigvalue = "MYCONFIGVALUE"
-  const MockedPool = vi.mocked(pg.Pool, { deep: true })
-
-  let q2: ReturnType<typeof MockedPool.prototype.query>
-
-  const qFun = vi.fn<() => Promise<any>>(() => Promise.resolve("initial"))
+  const mockQuery = vi.fn<() => Promise<any>>(() => Promise.resolve("initial"))
 
   beforeAll(() => {
     const MockedPool = vi.mocked(pg.Pool, { deep: true })
     MockedPool.mock.instances.forEach((poolInstance) => {
-      const mockQuery = vi.mocked(poolInstance.query)
-      mockQuery.mockImplementation(() => qFun())
-      // mockQuery
-      //   .mockImplementationOnce(() => Promise.resolve({
-      //     rows: [{ exists: true }],
-      //     rowCount: 1
-      //   }))
-      //   .mockImplementationOnce(() => Promise.resolve({
-      //     rows: [{ value: expectedconfigvalue }],
-      //     rowCount: 1
-      //   }))
+      const tmpMock = vi.mocked(poolInstance.query)
+      tmpMock.mockImplementation(() => mockQuery())
     })
   })
 
   beforeEach(() => {
     mockGetSchema.mockReset()
-    qFun.mockReset()
+    mockQuery.mockReset()
   });
 
   test('config exists', async () => {
 
-    qFun
+    mockQuery
       .mockImplementationOnce(() => Promise.resolve({
         rows: [{ exists: true }],
         rowCount: 1
@@ -84,7 +63,7 @@ describe('get config', () => {
 
   test('config value undefined', async () => {
 
-    qFun
+    mockQuery
       .mockResolvedValueOnce({
         rows: [{ exists: true }],
         rowCount: 1
@@ -104,7 +83,7 @@ describe('get config', () => {
 
   test('config table undefined', async () => {
 
-    qFun
+    mockQuery
       .mockResolvedValueOnce({
         rows: [{ exists: false }],
         rowCount: 1
@@ -131,7 +110,7 @@ describe('get config', () => {
       }
     ]
 
-    qFun
+    mockQuery
       .mockResolvedValueOnce({
         rows: [{ exists: true }],
         rowCount: 1

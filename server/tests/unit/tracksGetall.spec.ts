@@ -1,17 +1,20 @@
-import pg from 'pg';
-import request from 'supertest';
-import { beforeEach, describe, expect, test, vi } from 'vitest';
+import pg from 'pg'
+import request from 'supertest'
+import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest'
+vi.mock('pg', () => {
+  const Pool = vi.fn(class FakePool {
+    connect = vi.fn()
+    query = vi.fn()
+    end = vi.fn()
+  })
+  return { default: { Pool }, Pool }
+})
 
-import app from '../../src/app.js';
-import getSchema from '../../src/lib/getSchema.js';
-import { isAuthenticated } from '../../src/routes/auth/auth.js';
+import app from '../../src/app.js'
+import getSchema from '../../src/lib/getSchema.js'
 
 vi.mock('../../src/routes/auth/auth');
 vi.mock('../../src/lib/getSchema.js')
-
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const dummy = isAuthenticated;
 
 const mockTrack1 = {
   id: '2',
@@ -22,33 +25,31 @@ const mockTrack1 = {
   ascent: 3,
 };
 
-
 const mockGetSchema = vi.mocked(getSchema)
-
-vi.mock('pg', () => {
-  const mClient = {
-    connect: vi.fn(),
-    query: vi.fn().mockResolvedValue([77]),
-    end: vi.fn(),
-  };
-  const Pool = vi.fn(() => mClient);
-  return { default: { Pool }, Pool };
-});
 
 describe('tracks - getall', () => {
 
+  const mockQuery = vi.fn<() => Promise<any>>(() => Promise.resolve("initial"))
+
+  beforeAll(() => {
+    const MockedPool = vi.mocked(pg.Pool, { deep: true })
+    MockedPool.mock.instances.forEach((poolInstance) => {
+      const tmpMock = vi.mocked(poolInstance.query)
+      tmpMock.mockImplementation(() => mockQuery())
+    })
+  })
+
   beforeEach(() => {
     mockGetSchema.mockReset()
-
-    const pool = new pg.Pool()
-    const mockedPool = vi.mocked(pool)
-    mockedPool.query.mockImplementation((): any => {
+    mockQuery.mockReset()
+    mockQuery.mockImplementation((): any => {
       return {
         rows: [mockTrack1]
       }
     })
 
   });
+
   test('correctsid', async () => {
     mockGetSchema.mockResolvedValue('myschema');
     const response = await request(app)

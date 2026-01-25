@@ -1,4 +1,14 @@
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
+import { afterEach, beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
+
+vi.mock('pg', () => {
+  const Pool = vi.fn(class FakePool {
+    connect = vi.fn()
+    query = vi.fn()
+    end = vi.fn()
+  })
+  return { default: { Pool }, Pool }
+})
+
 import app from '../../src/app.js';
 
 import * as pg from 'pg';
@@ -12,16 +22,6 @@ const { Pool } = pg
 
 const mockGetSchema = vi.mocked(getSchema)
 
-vi.mock('pg', () => {
-  const mClient = {
-    connect: vi.fn(),
-    query: vi.fn(),
-    end: vi.fn(),
-  };
-  const Pool = vi.fn(() => mClient);
-  return { default: { Pool }, Pool };
-});
-
 const mockTrack1 = {
   id: '2',
   name: 'firsttrack',
@@ -32,16 +32,29 @@ const mockTrack1 = {
 };
 
 describe('tracks - byYear', () => {
-  let mockPool: any;
+
+  const mockQuery = vi.fn<() => Promise<any>>(() => Promise.resolve("initial"))
+
+  beforeAll(() => {
+    const MockedPool = vi.mocked(pg.Pool, { deep: true })
+    MockedPool.mock.instances.forEach((poolInstance) => {
+      const tmpMock = vi.mocked(poolInstance.query)
+      tmpMock.mockImplementation(() => mockQuery())
+    })
+  })
+
+
   beforeEach(() => {
     mockGetSchema.mockReset();
-    mockPool = new Pool();
+    mockQuery.mockReset()
   });
+
   afterEach(() => {
     vi.clearAllMocks();
   });
+
   test('happy path', async () => {
-    mockPool.query.mockResolvedValue({ rows: [mockTrack1] });
+    mockQuery.mockResolvedValue({ rows: [mockTrack1] });
     mockGetSchema.mockResolvedValue('myschema');
     const response = await request(app)
       .get('/api/tracks/byyear/2021/sid/correct')

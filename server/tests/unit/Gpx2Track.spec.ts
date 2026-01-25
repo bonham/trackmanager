@@ -1,5 +1,6 @@
 import { readFile } from 'node:fs/promises';
 import * as path from 'node:path';
+import { describe, expect, test } from 'vitest';
 import { Gpx2Track } from "../../src/lib/Gpx2Track.js";
 
 const twoSegmentsFilePath = path.join(__dirname, "../data/TwoSegments.gpx")

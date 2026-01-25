@@ -1,12 +1,13 @@
 import pg from 'pg';
 import request from 'supertest';
+import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import app from '../../src/app.js';
 import getSchema from '../../src/lib/getSchema.js';
 import { isAuthenticated } from '../../src/routes/auth/auth.js';
 
-jest.mock('../../src/routes/auth/auth');
-jest.mock('../../src/lib/getSchema.js')
+vi.mock('../../src/routes/auth/auth');
+vi.mock('../../src/lib/getSchema.js')
 
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -22,15 +23,16 @@ const mockTrack1 = {
 };
 
 
-const mockGetSchema = jest.mocked(getSchema)
+const mockGetSchema = vi.mocked(getSchema)
 
-jest.mock('pg', () => {
+vi.mock('pg', () => {
   const mClient = {
-    connect: jest.fn(),
-    query: jest.fn().mockResolvedValue([77]),
-    end: jest.fn(),
+    connect: vi.fn(),
+    query: vi.fn().mockResolvedValue([77]),
+    end: vi.fn(),
   };
-  return { Pool: jest.fn(() => mClient) };
+  const Pool = vi.fn(() => mClient);
+  return { default: { Pool }, Pool };
 });
 
 describe('tracks - getall', () => {
@@ -39,7 +41,7 @@ describe('tracks - getall', () => {
     mockGetSchema.mockReset()
 
     const pool = new pg.Pool()
-    const mockedPool = jest.mocked(pool)
+    const mockedPool = vi.mocked(pool)
     mockedPool.query.mockImplementation((): any => {
       return {
         rows: [mockTrack1]

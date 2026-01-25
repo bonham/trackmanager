@@ -1,8 +1,9 @@
-import getSchema from '../../src/lib/getSchema.js';
+import { describe, expect, test, vi } from 'vitest';
+import getSchema from '../../src/lib/getSchema.ts';
 
 describe('getSchema', () => {
   test('happypath', async () => {
-    const mockQuery = jest.fn();
+    const mockQuery = vi.fn();
     mockQuery.mockResolvedValue({ rows: [{ schema: 'myschema' }] });
     const mockPool = { query: mockQuery };
 
@@ -11,7 +12,7 @@ describe('getSchema', () => {
   });
 
   test('sql exception', async () => {
-    const mockQuery = jest.fn();
+    const mockQuery = vi.fn();
     mockQuery.mockRejectedValue('SQL Error');
     const mockPool = { query: mockQuery };
 
@@ -19,7 +20,7 @@ describe('getSchema', () => {
     expect(r).toBe(null);
   });
   test('empty result', async () => {
-    const mockQuery = jest.fn();
+    const mockQuery = vi.fn();
     mockQuery.mockResolvedValue({ rows: [] });
     const mockPool = { query: mockQuery };
 

@@ -1,5 +1,6 @@
 import type { EventFitMessage } from '@garmin/fitsdk';
 import { DateTime } from 'luxon';
+import { expect, test } from 'vitest';
 
 
 

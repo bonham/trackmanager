@@ -1,5 +1,6 @@
 import { readFileSync } from 'fs';
 import path from 'node:path';
+import { expect, test } from 'vitest';
 import { FitFile } from '../../src/lib/fit/FitFile.js';
 
 test('Fit File A', () => {

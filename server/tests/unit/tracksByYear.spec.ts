@@ -1,23 +1,25 @@
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import app from '../../src/app.js';
 
 import * as pg from 'pg';
 import request from 'supertest';
 
 import getSchema from '../../src/lib/getSchema.js';
-jest.mock('../../src/lib/getSchema.js')
+vi.mock('../../src/lib/getSchema.js')
 
 const { Pool } = pg
 
 
-const mockGetSchema = jest.mocked(getSchema)
+const mockGetSchema = vi.mocked(getSchema)
 
-jest.mock('pg', () => {
+vi.mock('pg', () => {
   const mClient = {
-    connect: jest.fn(),
-    query: jest.fn(),
-    end: jest.fn(),
+    connect: vi.fn(),
+    query: vi.fn(),
+    end: vi.fn(),
   };
-  return { Pool: jest.fn(() => mClient) };
+  const Pool = vi.fn(() => mClient);
+  return { default: { Pool }, Pool };
 });
 
 const mockTrack1 = {
@@ -36,7 +38,7 @@ describe('tracks - byYear', () => {
     mockPool = new Pool();
   });
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
   test('happy path', async () => {
     mockPool.query.mockResolvedValue({ rows: [mockTrack1] });

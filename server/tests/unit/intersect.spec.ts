@@ -1,5 +1,6 @@
 import type { RecordFitMessage } from '@garmin/fitsdk';
 import { DateTime } from 'luxon';
+import { expect, test } from 'vitest';
 import { RecordMessageList } from '../../src/lib/fit/Messages.js';
 import { intersectRecordMessages } from '../../src/lib/fit/intersect.js';
 import type { DateTimeInterval } from '../../src/lib/fit/types.js';

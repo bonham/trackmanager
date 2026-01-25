@@ -13,13 +13,8 @@
     "sourceMap": true,
     "allowJs": true,
     "checkJs": false, // todo: set to true
-    "verbatimModuleSyntax": false, // needed from jest https://github.com/kulshekhar/ts-jest/issues/4081
     "rootDir": "./",
-    "typeRoots": [
-      "./types",
-      "./src/routes/auth/interfaces",
-      "./node_modules/@types" // needed for jest globals
-    ]
+    "typeRoots": ["./types", "./src/routes/auth/interfaces"]
   },
   "ts-node": {
     "esm": true,
@@ -28,7 +23,7 @@
   "include": [
     "src/**/*",
     "types/**/*",
-    "jest.config.js",
+    "vitest.config.ts",
     "eslint.config.mjs",
     "config.js"
   ],

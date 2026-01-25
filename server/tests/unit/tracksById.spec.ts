@@ -37,12 +37,6 @@ const mockTrack1 = {
   ascent: 3,
 };
 
-// eslint-disable-next-line no-unused-vars
-// const queryMock = jest
-//   .spyOn(Pool.prototype, 'query')
-//   .mockResolvedValue({
-//     rows: [mockTrack1]
-//   })
 
 describe('Track byid', () => {
   let mockPool: any;

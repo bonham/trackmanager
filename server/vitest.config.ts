@@ -6,8 +6,5 @@ export default defineConfig({
     globals: true,
     root: '.',
     exclude: ['node_modules', 'dist'],
-    transformMode: {
-      web: [/\.[jt]sx?$/],
-    },
   },
 });

@@ -14,7 +14,7 @@ declare interface Authenticator {
   // SQL: Encode to base64url then store as `TEXT`. Index this column
   credentialID: Base64URLString;
   // SQL: Store raw bytes as `BYTEA`/`BLOB`/etc...
-  credentialPublicKey: Uint8Array;
+  credentialPublicKey: Uint8Array<ArrayBuffer>;
   // SQL: Consider `BIGINT` since some authenticators return atomic timestamps as counters
   counter: number;
   // SQL: `VARCHAR(32)` or similar, longest possible value is currently 12 characters

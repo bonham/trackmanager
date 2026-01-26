@@ -34,6 +34,9 @@ async function getConfig(sid: string, conftype: string, confkey: string): Promis
 
   const defaultValue = getDefault(confkey)
   const thisConfigSpec = configSchema[confkey]
+  if (thisConfigSpec === undefined) {
+    throw Error(`configSchema value for key ${confkey} is undefined`)
+  }
 
   const url = `/api/config/get/sid/${sid}/${conftype}/${confkey}`
   const r = await fetch(url)
@@ -42,18 +45,18 @@ async function getConfig(sid: string, conftype: string, confkey: string): Promis
   }
   const rJson = await r.json() as unknown
 
-  if (!!rJson && typeof (rJson) === 'object' && 'value' in rJson) {
-
+  if (typeof rJson === 'object' && rJson !== null && 'value' in rJson) {
 
     const v = rJson.value
     if (v === null) {
       return defaultValue
-    } else if (typeof v === 'string')
+    } else if (typeof v === 'string') {
       if (thisConfigSpec.values.includes(v)) {
         return v
       } else {
         throw Error(`Not allowed value ${v}`, { cause: thisConfigSpec })
       }
+    }
   }
   throw Error("Got wrong type from r.json()", { cause: rJson })
 }
@@ -90,8 +93,12 @@ async function getSchemaConfig(sid: string): Promise<Record<string, string>> {
   // merge defaults with data from DB
   const retVal: Record<string, string> = {}
   Object.keys(configSchema).forEach((defaultKey) => {
+
     if (defaultKey in dbKeyValues) {
-      retVal[defaultKey] = dbKeyValues[defaultKey]
+      const val = dbKeyValues[defaultKey]
+      if (val !== undefined) {
+        retVal[defaultKey] = val
+      }
     } else {
       retVal[defaultKey] = getDefault(defaultKey)
     }
@@ -103,6 +110,9 @@ async function getSchemaConfig(sid: string): Promise<Record<string, string>> {
 function getDefault(key: string): string {
   validateConfigSchemaKey(key)
   const thisConfigSpec = configSchema[key]
+  if (thisConfigSpec === undefined) {
+    throw Error(`configSchema value for key ${key} is undefined`)
+  }
   const defaultValue = thisConfigSpec.default
   return defaultValue
 }
@@ -115,7 +125,11 @@ function validateConfigSchemaKey(key: string): void {
 
 function validateConfigSchemaKeyValue({ key, value }: KeyValuePair): void {
   validateConfigSchemaKey(key)
-  const allowedValues = configSchema[key].values
+  const thisConfigSpec = configSchema[key]
+  if (thisConfigSpec === undefined) {
+    throw Error(`configSchema value for key ${key} is undefined`)
+  }
+  const allowedValues = thisConfigSpec.values
   if (allowedValues.includes(value)) {
     return
   } else {

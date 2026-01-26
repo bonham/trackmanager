@@ -208,12 +208,14 @@ async function redrawTracks(zoomOut = false) {
   // This is a dirty hack to maintain an order for the tracks newly added to mmap. This hack will not maintain overall track order when tracks
   // are loaded in chunks/batches
 
-  const tmpList: { track: Track, geojson: GeoJsonObject }[] = resultSet.map((result) => {
-    return {
-      track: trackStore.tracksById[result.id],
-      geojson: result.geojson
-    }
-  })
+  const tmpList: { track: Track, geojson: GeoJsonObject }[] = resultSet
+    .map((result) => {
+      return {
+        track: trackStore.tracksById[result.id],
+        geojson: result.geojson
+      }
+    })
+    .filter((item): item is { track: Track, geojson: GeoJsonObject } => item.track !== undefined)
 
   tmpList.sort((a, b) => {
     return a.track.secondsSinceEpoch() - b.track.secondsSinceEpoch()

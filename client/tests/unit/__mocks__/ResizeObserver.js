@@ -1,14 +1,9 @@
 import { vi } from 'vitest'
 
-const ResizeObserverMock = vi.fn(() => {
-  return {
-    default: vi.fn(() => {
-      return {}
-    }),
-    observe: vi.fn(),
-    unobserve: vi.fn(),
-    disconnect: vi.fn()
-  }
+const ResizeObserverMock = vi.fn(class {
+  observe = vi.fn()
+  unobserve = vi.fn()
+  disconnect = vi.fn()
 })
 
 // class ResizeObserverMock {

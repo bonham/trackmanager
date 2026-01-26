@@ -12,8 +12,8 @@ describe('TrackMapPage - DOM testing', () => {
   beforeEach(() => {
     vi.stubGlobal('ResizeObserver', ResizeObserverMock)
     vi.stubGlobal('fetch', mockFetch)
-    vi.stubGlobal('Request', Request)  
-    vi.stubGlobal('Response', Response)  
+    vi.stubGlobal('Request', Request)
+    vi.stubGlobal('Response', Response)
 
   })
 

@@ -5,8 +5,7 @@
         <div class="d-flex flex-row align-items-start">
           <div class="flex-grow-1">
             <h5>
-              <editable-text
-v-if="userLoginStore.loggedIn" :textarea="false" :text-prop="headline"
+              <editable-text v-if="userLoginStore.loggedIn" :textarea="false" :text-prop="headline"
                 :pencil-visible="true" :update-function="(value: string) => processHeadlineUpdate(value)" />
               <span v-else>
                 {{ headline }}
@@ -32,7 +31,6 @@ import {
 import MapComponent from '@/components/MapComponent.vue';
 import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'
 import EditableText from '@/components/EditableText.vue'
-import { useTrackStore } from '@/stores/trackStore';
 import { useMapStateStore } from '@/stores/mapstate'
 import { nextTick, ref } from 'vue';
 import { getTrackById } from '@/lib/trackServices';
@@ -44,9 +42,8 @@ const userLoginStore = useUserLoginStore()
 
 
 const mapStateStore = useMapStateStore()
-const trackStore = useTrackStore()
 
- 
+
 const props = defineProps({
   sid: {
     type: String,
@@ -81,9 +78,6 @@ getTrackById(props.id, props.sid)
       const part4: string = track.getTimeLength() !== null ? `${track.timeLengthFormatted()} h / ` : "- / "
       const part5: string = track.speedKmh() !== null ? ` / ${Math.round(track.speedKmh()! * 10) / 10} km/h` : "-";
       trackDetails.value = part1 + part2 + part3 + part4 + part5
-
-      // fill the cache
-      trackStore.setLoadedTracks([track])
 
       // set title
       // const descEl = document.querySelector('head meta[name="description"]');

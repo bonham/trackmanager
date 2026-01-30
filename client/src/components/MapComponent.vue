@@ -18,9 +18,9 @@ import { getGeoJson, getTracksByExtent, getTracksByYear, getTrackById, getAllTra
 import _ from 'lodash'
 import { useConfigStore } from '@/stores/configstore'
 import { useMapStateStore } from '@/stores/mapstate'
-import { useTrackStore } from '@/stores/trackStore'
 import { StyleFactoryFixedColors } from '@/lib/mapStyles';
 import type { Track } from '@/lib/Track'
+import { TrackBag } from '@/lib/TrackBag'
 
 const props = defineProps({
   sid: {
@@ -30,7 +30,6 @@ const props = defineProps({
 })
 
 const mapStateStore = useMapStateStore()
-const trackStore = useTrackStore()
 const configStore = useConfigStore()
 
 // reactive data
@@ -43,26 +42,29 @@ const mmap = ref<null | ManagedMap>(null)
 // the callbackfunction is to react on 'select' events - e.g. setting data in a store or send events.
 mmap.value = new ManagedMap()
 
-// watch if the viewport is resized and resize the map
-watch(
-  () => trackStore.resizeMap,
+// tracks
+const trackBag = new TrackBag()
 
-  (newValue, oldValue) => {
-    if (newValue === true) {
-      if (oldValue === true) {
-        console.log('Triggered watch of updateSize while update was running')
-      }
-      if (mmap.value) {
-        mmap.value.map.updateSize()
-        trackStore.resizeMap = false
-      } else {
-        console.error("mmap was not initialized")
-      }
-    }
-  }
-)
+// // watch if the viewport is resized and resize the map
+// watch(
+//   () => mapStateStore.resizeMap,
 
-// watching different commands
+//   (newValue, oldValue) => {
+//     if (newValue === true) {
+//       if (oldValue === true) {
+//         console.log('Triggered watch of updateSize while update was running')
+//       }
+//       if (mmap.value) {
+//         mmap.value.map.updateSize()
+//         mapStateStore.resizeMap = false
+//       } else {
+//         console.error("mmap was not initialized")
+//       }
+//     }
+//   }
+// )
+
+// watching mapStateStore commands
 watch(
   () => mapStateStore.loadCommand,
   async (command) => {
@@ -89,7 +91,7 @@ watch(
       const bbox = map.getMapViewBbox()
       const tracks = await getTracksByExtent(bbox, props.sid)
       console.log("tracks from extent call", tracks)
-      trackStore.setLoadedTracks(tracks)
+      trackBag.setLoadedTracks(tracks)
       await redrawTracks(!!command.zoomOut)
 
       command.completed = true
@@ -107,7 +109,7 @@ async function loadAllTracks() {
   try {
     loading.value = true
     const tracks = await getAllTracks(sid)
-    trackStore.setLoadedTracks(tracks)
+    trackBag.setLoadedTracks(tracks)
   } catch (e) {
     console.error('Error loading tracks by year', e)
   } finally {
@@ -121,7 +123,7 @@ async function loadTracksOfYear(year: number) {
   try {
     loading.value = true
     const tracks = await getTracksByYear(year, sid)
-    trackStore.setLoadedTracks(tracks)
+    trackBag.setLoadedTracks(tracks)
   } catch (e) {
     console.error('Error loading tracks by year', e)
   } finally {
@@ -138,7 +140,7 @@ async function loadSingleTrack(trackId: number) {
     if (track === null) {
       throw new Error(`Track is null for id ${trackId}`)
     } else {
-      trackStore.setLoadedTracks([track])
+      trackBag.setLoadedTracks([track])
     }
   } catch (e) {
     console.error('Error loading track', e)
@@ -183,7 +185,7 @@ async function redrawTracks(zoomOut = false) {
 
   const tvm = new TrackVisibilityManager(
     mm.getTrackIdsVisible(),
-    trackStore.getLoadedTrackIds,
+    trackBag.getLoadedTrackIds(),
     mm.getTrackIds()
   )
 
@@ -211,7 +213,7 @@ async function redrawTracks(zoomOut = false) {
   const tmpList: { track: Track, geojson: GeoJsonObject }[] = resultSet
     .map((result) => {
       return {
-        track: trackStore.tracksById[result.id],
+        track: trackBag.getTrackById(result.id),
         geojson: result.geojson
       }
     })

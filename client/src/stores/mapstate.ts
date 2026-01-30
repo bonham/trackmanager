@@ -3,6 +3,9 @@ import { ref } from 'vue'
 
 const useMapStateStore = defineStore('mapstate', () => {
 
+  // command to resize the map
+  //const resizeMap = ref(false)
+
   // command to load tracks
   const loadCommand = ref<LoadTracksRequest>({ command: 'none' })
 
@@ -10,8 +13,9 @@ const useMapStateStore = defineStore('mapstate', () => {
   const processComand = ref(false)
 
   return {
+    //  resizeMap,
     loadCommand,
-    processComand
+    processComand,
   }
 
 })

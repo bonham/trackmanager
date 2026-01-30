@@ -47,7 +47,7 @@ const props = defineProps({
 // reactive data
 const years = ref<number[]>([])
 const buttonsLoading = ref(false)
-const buttonAllInView = ref(false)
+const buttonAllInView = ref(true)
 const buttonAll = ref(true)
 
 // buttons active

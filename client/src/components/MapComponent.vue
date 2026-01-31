@@ -56,14 +56,13 @@ const loading = ref(false)
 // Object to interact with openlayers
 const mmap = new ManagedMap()
 
-
-
 // tracks
 const trackBag = new TrackBag()
 
 // watching mapStateStore commands
 watch(
   () => mapStateStore.loadCommand,
+
   async (command) => {
 
     if (command.command === 'all') {
@@ -81,16 +80,12 @@ watch(
 
     } else if (command.command === 'bbox') {
 
-      if (command.completed) { return }
-
       console.log("Received request to update extent")
       const bbox = mmap.getMapViewBbox()
       const tracks = await getTracksByExtent(bbox, props.sid)
       console.log("tracks from extent call", tracks)
       trackBag.setLoadedTracks(tracks)
       await redrawTracks(!!command.zoomOut)
-
-      command.completed = true
 
     } else if (command.command === 'track') {
       const id = command.payload

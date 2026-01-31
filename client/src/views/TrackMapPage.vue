@@ -119,8 +119,7 @@ function loadAllTracks() {
 
 function loadAllTracksinView() {
   mapStateStore.loadCommand = {
-    command: 'bbox',
-    completed: false
+    command: 'bbox'
   }
   setAllButtonsInactive()
   buttonAllInViewActive.value = true

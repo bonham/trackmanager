@@ -35,8 +35,7 @@ interface LoadYearRequest extends MapStateRequest {
 }
 
 interface LoadBboxRequest extends MapStateRequest {
-  command: 'bbox',
-  completed: boolean
+  command: 'bbox'
 }
 
 interface LoadSingleTrackRequest extends MapStateRequest {

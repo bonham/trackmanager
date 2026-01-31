@@ -20,6 +20,24 @@ import { useMapStateStore } from '@/stores/mapstate'
 import { StyleFactoryFixedColors } from '@/lib/mapStyles';
 import { TrackBag } from '@/lib/TrackBag'
 
+
+/**
+ * This component provides a div anchor with the openlayers map attached to it.
+ * It is using javascript class ManagedMap to interact with openlayers library.
+ * It is setting from default styles for track coloring.
+ * It can receive commands to draw tracks on the map. Commands are coming from TracksMapPage or other pages.
+ *
+ *  Commands are:
+ * - load track from a calendar year
+ * - load all tracks in DB
+ * - load tracks in a certain extent
+ * - load a single track by id
+ * 
+ * It will dynamically decide to fetch geojson structure from backend if they have not been fetched before.
+ * It has optimization to toggle track visibility in OL vector layers for tracks which are already loaded but shot not be show or shown again. 
+ * 
+ */
+
 const props = defineProps({
   sid: {
     type: String,
@@ -36,31 +54,11 @@ const loading = ref(false)
 const mmap = ref<null | ManagedMap>(null)
 
 
-// create map object
-// the callbackfunction is to react on 'select' events - e.g. setting data in a store or send events.
+// Object to interact with openlayers
 mmap.value = new ManagedMap()
 
 // tracks
 const trackBag = new TrackBag()
-
-// // watch if the viewport is resized and resize the map
-// watch(
-//   () => mapStateStore.resizeMap,
-
-//   (newValue, oldValue) => {
-//     if (newValue === true) {
-//       if (oldValue === true) {
-//         console.log('Triggered watch of updateSize while update was running')
-//       }
-//       if (mmap.value) {
-//         mmap.value.map.updateSize()
-//         mapStateStore.resizeMap = false
-//       } else {
-//         console.error("mmap was not initialized")
-//       }
-//     }
-//   }
-// )
 
 // watching mapStateStore commands
 watch(

@@ -69,14 +69,12 @@ watch(
 
       console.log(`received all command`)
       await loadAllTracks()
-      await redrawTracks(!!command.zoomOut)
 
     } else if (command.command === 'year') {
 
       const year = command.payload
       console.log(`received year command ${year}`)
       await loadTracksOfYear(year)
-      await redrawTracks(!!command.zoomOut)
 
     } else if (command.command === 'bbox') {
 
@@ -85,13 +83,18 @@ watch(
       const tracks = await getTracksByExtent(bbox, props.sid)
       console.log("tracks from extent call", tracks)
       trackBag.setLoadedTracks(tracks)
-      await redrawTracks(!!command.zoomOut)
 
     } else if (command.command === 'track') {
+
       const id = command.payload
       await loadSingleTrack(id)
-      await redrawTracks(!!command.zoomOut)
+
     }
+
+    // finally redraw
+    await redrawTracks(!!command.zoomOut)
+
+
   }
 )
 

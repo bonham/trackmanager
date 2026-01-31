@@ -5,19 +5,26 @@ interface StyleFactoryLike {
   getNext(...args: unknown[]): Style
 }
 
+const THREE_BROWN_COLORSTYLE: ColorLike[] = [
+  '#621708',
+  '#941b0c',
+  '#bc3908'
+]
+const FIVE_COLORFUL_COLORSTYLE: ColorLike[] = [
+  '#a52a2a',
+  '#ffa500',
+  '#ff0000',
+  '#008000',
+  '#0000ff',
+]
 class StyleFactoryFixedColors implements StyleFactoryLike {
 
   count = 0
-  rgbSetBrown = [
-    '#621708',
-    '#941b0c',
-    '#bc3908'
-  ]
   rgbSet: ColorLike[]
 
   constructor(rgbSetArg: (ColorLike[] | null) = null) {
     if (rgbSetArg === null) {
-      this.rgbSet = this.rgbSetBrown
+      this.rgbSet = THREE_BROWN_COLORSTYLE // default
     } else {
       this.rgbSet = rgbSetArg
     }
@@ -37,5 +44,6 @@ class StyleFactoryFixedColors implements StyleFactoryLike {
   }
 }
 
-export { StyleFactoryFixedColors }
+export { StyleFactoryFixedColors, THREE_BROWN_COLORSTYLE, FIVE_COLORFUL_COLORSTYLE }
 export type { StyleFactoryLike }
+

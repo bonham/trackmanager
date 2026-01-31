@@ -17,7 +17,7 @@ import { getGeoJson, getTracksByExtent, getTracksByYear, getTrackById, getAllTra
 import _ from 'lodash'
 import { useConfigStore } from '@/stores/configstore'
 import { useMapStateStore } from '@/stores/mapstate'
-import { StyleFactoryFixedColors } from '@/lib/mapStyles';
+import { StyleFactoryFixedColors, THREE_BROWN_COLORSTYLE, FIVE_COLORFUL_COLORSTYLE } from '@/lib/mapStyles';
 import { TrackBag } from '@/lib/TrackBag'
 import { Track } from '@/lib/Track'
 
@@ -46,27 +46,56 @@ const props = defineProps({
   }
 })
 
-// stores
-const mapStateStore = useMapStateStore()
-const configStore = useConfigStore()
-
 // reactive data
 const popupdiv = ref<(null | HTMLElement)>(null) // template ref
 const loading = ref(false)
 
-// Object to interact with openlayers
+// stores
+const mapStateStore = useMapStateStore()
+const configStore = useConfigStore()
+
+// ------------ Initialize map and set trackstyle from configstore
 const mmap = new ManagedMap()
+configStore.loadConfig(props.sid)
+  .then(() => {
+    const TRACKSTYLE = configStore.get("TRACKSTYLE")
 
-// tracks
-const trackBag = new TrackBag()
+    if (TRACKSTYLE === 'THREE_BROWN') {
+      mmap.setStyleFactory(new StyleFactoryFixedColors(THREE_BROWN_COLORSTYLE))
+    } else if (TRACKSTYLE === 'FIVE_COLORFUL') {
+      mmap.setStyleFactory(new StyleFactoryFixedColors(FIVE_COLORFUL_COLORSTYLE))
+    } else {
+      throw Error(`Unknown TRACKSTYLE config value ${TRACKSTYLE}`)
+    }
+  })
+  .catch((e) => console.error("Could not load config", e))
 
-// watching and execute incoming commands
+
+// ------------ Mount map and popup to dom
+onMounted(() => {
+  nextTick(() => {
+    if (mmap === null) {
+      console.error("mmap not initalized")
+      return
+    }
+    if (popupdiv.value === null) {
+      console.error("popupdiv not initialized")
+      return
+    }
+    mmap.map.setTarget('mapdiv')
+    mmap.initPopup(popupdiv.value)
+  }).catch((err) => {
+    console.error("Error in nextTick", err)
+  })
+})
+
+
+// ------------ Watch and execute loading commands
 type TrackLoadFunction = (() => Promise<Track[]>)
 watch(
   () => mapStateStore.loadCommand, async (command) => {
 
     // calculate the load function based on command and args
-
     let loadFunc: TrackLoadFunction
     console.log(`received command ${command.command}`)
 
@@ -104,39 +133,21 @@ watch(
     loading.value = true
     const tracks = await loadFunc()
     // put in bag ;-)
+    const trackBag = new TrackBag()
     trackBag.setLoadedTracks(tracks)
 
     // finally redraw
-    await redrawTracks(!!command.zoomOut)
+    await drawTracks(!!command.zoomOut, trackBag)
     loading.value = false
   }
 )
 
-// method is redrawing tracks AND resetting selection ! 
-// ( the latter might need to be factored out)
-async function redrawTracks(zoomOut = false) {
+// ------------ Draw tracks , reset selection, zoomOut
+// ( clearselection might need to be factored out)
+async function drawTracks(zoomOut = false, tbag: TrackBag) {
   if (mmap === null) {
     console.error("mmap not initalized")
     return
-  }
-  // trackstyle from configstore
-  await configStore.loadConfig(props.sid)
-  const TRACKSTYLE = configStore.get("TRACKSTYLE")
-
-  if (TRACKSTYLE === 'THREE_BROWN') {
-    // all good
-  } else if (TRACKSTYLE === 'FIVE_COLORFUL') {
-    // brown, orange, red, green, blue
-    const tStyle = new StyleFactoryFixedColors([
-      '#a52a2a',
-      '#ffa500',
-      '#ff0000',
-      '#008000',
-      '#0000ff',
-    ])
-    mmap.setStyleFactory(tStyle)
-  } else {
-    throw Error(`Unknown TRACKSTYLE config value ${TRACKSTYLE}`)
   }
 
   // reset selection and popups
@@ -145,7 +156,7 @@ async function redrawTracks(zoomOut = false) {
 
   const tvm = new TrackVisibilityManager(
     mmap.getTrackIdsVisible(),
-    trackBag.getLoadedTrackIds(),
+    tbag.getLoadedTrackIds(),
     mmap.getTrackIds()
   )
 
@@ -172,7 +183,7 @@ async function redrawTracks(zoomOut = false) {
 
   const tmpList = resultSet.map((result) => {
     return {
-      track: trackBag.getTrackById(result.id),
+      track: tbag.getTrackById(result.id),
       geojson: result.geojson
     }
   })
@@ -194,23 +205,6 @@ async function redrawTracks(zoomOut = false) {
     mmap.setExtentAndZoomOut()
   }
 }
-
-onMounted(() => {
-  nextTick(() => {
-    if (mmap === null) {
-      console.error("mmap not initalized")
-      return
-    }
-    if (popupdiv.value === null) {
-      console.error("popupdiv not initialized")
-      return
-    }
-    mmap.map.setTarget('mapdiv')
-    mmap.initPopup(popupdiv.value)
-  }).catch((err) => {
-    console.error("Error in nextTick", err)
-  })
-})
 
 </script>
 

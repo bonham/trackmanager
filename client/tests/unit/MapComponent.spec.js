@@ -14,8 +14,22 @@ describe('Basic store test with MapComponent', () => {
   })
   test('Trivial mount', () => {
     render(MapComponent, {
+      props: {
+        sid: 'test-sid'
+      },
       global: {
-        plugins: [createTestingPinia()]
+        plugins: [createTestingPinia({
+          initialState: {
+            configstore: {
+              loaded: true,
+              schemaConfig: {
+                TRACKSTYLE: 'THREE_BROWN'
+              }
+            }
+          },
+          createSpy: vi.fn,
+          stubActions: false
+        })]
       }
     })
     // it is not possible to test anything visible here as it contains of <div>  only
@@ -23,8 +37,22 @@ describe('Basic store test with MapComponent', () => {
 
   test('Low level', () => {
     const wrapper = mount(MapComponent, {
+      props: {
+        sid: 'test-sid'
+      },
       global: {
-        plugins: [createTestingPinia()]
+        plugins: [createTestingPinia({
+          initialState: {
+            configstore: {
+              loaded: true,
+              schemaConfig: {
+                TRACKSTYLE: 'THREE_BROWN'
+              }
+            }
+          },
+          createSpy: vi.fn,
+          stubActions: false
+        })]
       }
     })
     const mapdiv = wrapper.find('[id="mapdiv"]')

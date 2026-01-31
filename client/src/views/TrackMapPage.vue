@@ -34,6 +34,11 @@ import { useConfigStore } from '@/stores/configstore'
 
 import { ref } from 'vue'
 
+// Config ----------------------------
+// Todo: move to config.js
+const SHOW_BUTTON_ALL_IN_VIEW = false
+// Config ----------------------------
+
 const mapStateStore = useMapStateStore()
 
 
@@ -47,7 +52,7 @@ const props = defineProps({
 // reactive data
 const years = ref<number[]>([])
 const buttonsLoading = ref(false)
-const buttonAllInView = ref(true)
+const buttonAllInView = ref(SHOW_BUTTON_ALL_IN_VIEW)
 const buttonAll = ref(true)
 
 // buttons active
@@ -88,7 +93,7 @@ configStore.loadConfig(props.sid)
       }
     }
   })
-  .catch((e) => console.error("Error when loading store", e))
+  .catch((e) => console.error("Error when loading config store", e))
 
 async function getYears() {
   await getAllTracks(props.sid)

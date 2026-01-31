@@ -12,14 +12,12 @@ import { ref, watch, onMounted, nextTick } from 'vue'
 import { BSpinner } from 'bootstrap-vue-next'
 import { ManagedMap } from '@/lib/mapservices/ManagedMap'
 import type { GeoJSONWithTrackId } from '@/lib/mapservices/ManagedMap'
-import type { GeoJsonObject } from 'geojson'
 import { TrackVisibilityManager } from '@/lib/mapStateHelpers'
 import { getGeoJson, getTracksByExtent, getTracksByYear, getTrackById, getAllTracks } from '@/lib/trackServices'
 import _ from 'lodash'
 import { useConfigStore } from '@/stores/configstore'
 import { useMapStateStore } from '@/stores/mapstate'
 import { StyleFactoryFixedColors } from '@/lib/mapStyles';
-import type { Track } from '@/lib/Track'
 import { TrackBag } from '@/lib/TrackBag'
 
 const props = defineProps({
@@ -210,14 +208,12 @@ async function redrawTracks(zoomOut = false) {
   // This is a dirty hack to maintain an order for the tracks newly added to mmap. This hack will not maintain overall track order when tracks
   // are loaded in chunks/batches
 
-  const tmpList: { track: Track, geojson: GeoJsonObject }[] = resultSet
-    .map((result) => {
-      return {
-        track: trackBag.getTrackById(result.id),
-        geojson: result.geojson
-      }
-    })
-    .filter((item): item is { track: Track, geojson: GeoJsonObject } => item.track !== undefined)
+  const tmpList = resultSet.map((result) => {
+    return {
+      track: trackBag.getTrackById(result.id),
+      geojson: result.geojson
+    }
+  })
 
   tmpList.sort((a, b) => {
     return a.track.secondsSinceEpoch() - b.track.secondsSinceEpoch()

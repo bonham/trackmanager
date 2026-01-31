@@ -19,7 +19,12 @@ class TrackBag {
   }
 
   getTrackById(id: number) {
-    return this.loadedTracks[id]
+    const t = this.tracksById[id]
+    if (t === undefined) {
+      throw new Error(`Track with id ${id} does not exist in trackbag`)
+    } else {
+      return t
+    }
   }
 }
 

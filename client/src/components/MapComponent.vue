@@ -45,17 +45,18 @@ const props = defineProps({
   }
 })
 
+// stores
 const mapStateStore = useMapStateStore()
 const configStore = useConfigStore()
 
 // reactive data
 const popupdiv = ref<(null | HTMLElement)>(null) // template ref
 const loading = ref(false)
-const mmap = ref<null | ManagedMap>(null)
-
 
 // Object to interact with openlayers
-mmap.value = new ManagedMap()
+const mmap = new ManagedMap()
+
+
 
 // tracks
 const trackBag = new TrackBag()
@@ -83,8 +84,7 @@ watch(
       if (command.completed) { return }
 
       console.log("Received request to update extent")
-      const map = mmap.value as ManagedMap
-      const bbox = map.getMapViewBbox()
+      const bbox = mmap.getMapViewBbox()
       const tracks = await getTracksByExtent(bbox, props.sid)
       console.log("tracks from extent call", tracks)
       trackBag.setLoadedTracks(tracks)
@@ -149,12 +149,10 @@ async function loadSingleTrack(trackId: number) {
 // ( the latter might need to be factored out)
 async function redrawTracks(zoomOut = false) {
   loading.value = true
-  if (mmap.value === null) {
+  if (mmap === null) {
     console.error("mmap not initalized")
     return
   }
-  const mm = mmap.value
-
   // trackstyle from configstore
   await configStore.loadConfig(props.sid)
   const TRACKSTYLE = configStore.get("TRACKSTYLE")
@@ -170,26 +168,26 @@ async function redrawTracks(zoomOut = false) {
       '#008000',
       '#0000ff',
     ])
-    mmap.value.setStyleFactory(tStyle)
+    mmap.setStyleFactory(tStyle)
   } else {
     throw Error(`Unknown TRACKSTYLE config value ${TRACKSTYLE}`)
   }
 
   // reset selection and popups
-  mm.clearSelection()
-  mm.popovermgr?.dispose()
+  mmap.clearSelection()
+  mmap.popovermgr?.dispose()
 
   const tvm = new TrackVisibilityManager(
-    mm.getTrackIdsVisible(),
+    mmap.getTrackIdsVisible(),
     trackBag.getLoadedTrackIds(),
-    mm.getTrackIds()
+    mmap.getTrackIds()
   )
 
   // A1: set existing visible
   const toggleIds = tvm.toggleToVisible()
   console.log('Toggle: ', toggleIds)
 
-  _.forEach(toggleIds, function (id) { mm.setVisible(id) })
+  _.forEach(toggleIds, function (id) { mmap.setVisible(id) })
 
   // A2: load missing and add vector layer to map
   const toBeLoaded = tvm.toBeLoaded()
@@ -218,23 +216,23 @@ async function redrawTracks(zoomOut = false) {
   })
 
   tmpList.forEach(ele => {
-    mm.addTrackLayer(ele)
+    mmap.addTrackLayer(ele)
   })
 
   // B: tracks to hide
   const toHide = tvm.toBeHidden()
   console.log('To be hidden: ', toHide)
-  _.forEach(toHide, function (id) { mm.setInvisible(id) })
+  _.forEach(toHide, function (id) { mmap.setInvisible(id) })
 
   loading.value = false
   if (zoomOut) {
-    mm.setExtentAndZoomOut()
+    mmap.setExtentAndZoomOut()
   }
 }
 
 onMounted(() => {
   nextTick(() => {
-    if (mmap.value === null) {
+    if (mmap === null) {
       console.error("mmap not initalized")
       return
     }
@@ -242,8 +240,8 @@ onMounted(() => {
       console.error("popupdiv not initialized")
       return
     }
-    mmap.value.map.setTarget('mapdiv')
-    mmap.value.initPopup(popupdiv.value)
+    mmap.map.setTarget('mapdiv')
+    mmap.initPopup(popupdiv.value)
   }).catch((err) => {
     console.error("Error in nextTick", err)
   })

@@ -50,4 +50,4 @@ interface InitialState extends MapStateRequest {
 
 export { useMapStateStore }
 export type LoadTracksRequest = LoadAllRequest | LoadYearRequest | LoadBboxRequest | LoadSingleTrackRequest | InitialState
-
+export type LoadTracksCommand = LoadTracksRequest['command']

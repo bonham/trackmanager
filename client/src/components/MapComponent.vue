@@ -19,6 +19,7 @@ import { useConfigStore } from '@/stores/configstore'
 import { useMapStateStore } from '@/stores/mapstate'
 import { StyleFactoryFixedColors } from '@/lib/mapStyles';
 import { TrackBag } from '@/lib/TrackBag'
+import { Track } from '@/lib/Track'
 
 
 /**
@@ -59,94 +60,61 @@ const mmap = new ManagedMap()
 // tracks
 const trackBag = new TrackBag()
 
-// watching mapStateStore commands
+// watching and execute incoming commands
+type TrackLoadFunction = (() => Promise<Track[]>)
 watch(
-  () => mapStateStore.loadCommand,
+  () => mapStateStore.loadCommand, async (command) => {
 
-  async (command) => {
+    // calculate the load function based on command and args
+
+    let loadFunc: TrackLoadFunction
+    console.log(`received command ${command.command}`)
 
     if (command.command === 'all') {
 
-      console.log(`received all command`)
-      await loadAllTracks()
+      loadFunc = () => getAllTracks(props.sid)
 
     } else if (command.command === 'year') {
 
       const year = command.payload
-      console.log(`received year command ${year}`)
-      await loadTracksOfYear(year)
+      loadFunc = () => getTracksByYear(year, props.sid)
 
     } else if (command.command === 'bbox') {
 
-      console.log("Received request to update extent")
       const bbox = mmap.getMapViewBbox()
-      const tracks = await getTracksByExtent(bbox, props.sid)
-      console.log("tracks from extent call", tracks)
-      trackBag.setLoadedTracks(tracks)
+      loadFunc = () => getTracksByExtent(bbox, props.sid)
 
     } else if (command.command === 'track') {
 
       const id = command.payload
-      await loadSingleTrack(id)
-
+      loadFunc = async () => {
+        const singleTrack = await getTrackById(id, props.sid)
+        if (singleTrack === null) {
+          console.error(`Could not fetch track with id ${id}`)
+          return []
+        } else {
+          return [singleTrack]
+        }
+      }
+    } else {
+      loadFunc = () => Promise.resolve([])
     }
+
+    // execute the load function
+    loading.value = true
+    const tracks = await loadFunc()
+    // put in bag ;-)
+    trackBag.setLoadedTracks(tracks)
 
     // finally redraw
     await redrawTracks(!!command.zoomOut)
-
-
+    loading.value = false
   }
 )
-
-async function loadAllTracks() {
-  const sid = props.sid
-  try {
-    loading.value = true
-    const tracks = await getAllTracks(sid)
-    trackBag.setLoadedTracks(tracks)
-  } catch (e) {
-    console.error('Error loading tracks by year', e)
-  } finally {
-    loading.value = false
-  }
-}
-
-async function loadTracksOfYear(year: number) {
-
-  const sid = props.sid
-  try {
-    loading.value = true
-    const tracks = await getTracksByYear(year, sid)
-    trackBag.setLoadedTracks(tracks)
-  } catch (e) {
-    console.error('Error loading tracks by year', e)
-  } finally {
-    loading.value = false
-  }
-}
-
-async function loadSingleTrack(trackId: number) {
-
-  const sid = props.sid
-  try {
-    loading.value = true
-    const track = await getTrackById(trackId, sid)
-    if (track === null) {
-      throw new Error(`Track is null for id ${trackId}`)
-    } else {
-      trackBag.setLoadedTracks([track])
-    }
-  } catch (e) {
-    console.error('Error loading track', e)
-  } finally {
-    loading.value = false
-  }
-}
 
 // method is redrawing tracks AND resetting selection ! 
 // ( the latter might need to be factored out)
 async function redrawTracks(zoomOut = false) {
-  loading.value = true
   if (mmap === null) {
     console.error("mmap not initalized")
     return
@@ -222,7 +190,6 @@ async function redrawTracks(zoomOut = false) {
   console.log('To be hidden: ', toHide)
   _.forEach(toHide, function (id) { mmap.setInvisible(id) })
 
-  loading.value = false
   if (zoomOut) {
     mmap.setExtentAndZoomOut()
   }

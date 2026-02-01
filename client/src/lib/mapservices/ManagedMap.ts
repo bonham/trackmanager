@@ -157,6 +157,9 @@ export class ManagedMap {
     if (numselected === 1) {
 
       const trackId = trackIdSelectObject.selected[0]
+      if (trackId === undefined) {
+        throw Error("Track id is undefined")
+      }
       const coord = event.mapBrowserEvent.coordinate
       this.showPopover(trackId, coord)
       return
@@ -307,6 +310,9 @@ export class ManagedMap {
     if (selected.length === 0) return
 
     const trackId = selected[0]
+    if (trackId === undefined) {
+      throw Error("Track id is undefined")
+    }
     const layer = this.getTrackLayer(trackId)
     if (layer === undefined) { console.error("Could not get layer"); return }
 
@@ -318,7 +324,7 @@ export class ManagedMap {
       console.error('No feature in layer', layer)
     } else if (features.length > 1) {
       console.log(`Not exactly 1 feature in layer, but: ${features.length}`)
-    } else {
+    } else if (features[0] !== undefined) {
       this.setZIndex(features[0], this.ZINDEX_SELECTED)
       this.selectCollection.push(features[0])
     }

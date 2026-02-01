@@ -92,7 +92,8 @@ function getNextKey(): number {
 // Queue new files
 function processDragDrop(files: FileList) {
   // take files from input
-  for (const thisFile of files) {
+  for (const thisFile of Array.from<File>(files)) {
+
     const key = getNextKey()
     const fileIdObject = makeFileIdObject(key, thisFile, props.sid)
     addItemToQueue(fileIdObject)

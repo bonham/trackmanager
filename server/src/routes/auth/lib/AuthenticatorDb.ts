@@ -52,7 +52,7 @@ export class AutenticatorDb {
       const authenticator = {
 
         credentialID: row.credentialid as Base64URLString,
-        credentialPublicKey: row.credentialpublickey,
+        credentialPublicKey: row.credentialpublickey as Uint8Array<ArrayBuffer>,
         counter: row.counter,
         credentialDeviceType: row.credentialdevicetype,
         credentialBackedUp: row.credentialbackedup,

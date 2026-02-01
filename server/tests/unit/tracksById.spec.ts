@@ -1,3 +1,13 @@
+import { afterEach, beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
+vi.mock('pg', () => {
+  const Pool = vi.fn(class FakePool {
+    connect = vi.fn()
+    query = vi.fn()
+    end = vi.fn()
+  })
+  return { default: { Pool }, Pool }
+})
+
 import * as pg from 'pg';
 import request from 'supertest';
 
@@ -5,26 +15,12 @@ import app from '../../src/app.js';
 import getSchema from '../../src/lib/getSchema.js';
 import { isAuthenticated } from '../../src/routes/auth/auth.js';
 
-jest.mock('../../src/routes/auth/auth');
-jest.mock('../../src/lib/getSchema.js')
+vi.mock('../../src/routes/auth/auth');
+vi.mock('../../src/lib/getSchema.js')
 
-const mockedIsAuthenticated = jest.mocked(isAuthenticated);
-
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const dummy = isAuthenticated;
-
-const mockGetSchema = jest.mocked(getSchema)
-
+const mockedIsAuthenticated = vi.mocked(isAuthenticated);
+const mockGetSchema = vi.mocked(getSchema)
 const { Pool } = pg
-jest.mock('pg', () => {
-  const mClient = {
-    connect: jest.fn(),
-    query: jest.fn(),
-    end: jest.fn(),
-  };
-  return { Pool: jest.fn(() => mClient) };
-});
 
 const mockTrack1 = {
   id: '2',
@@ -35,29 +31,33 @@ const mockTrack1 = {
   ascent: 3,
 };
 
-// eslint-disable-next-line no-unused-vars
-// const queryMock = jest
-//   .spyOn(Pool.prototype, 'query')
-//   .mockResolvedValue({
-//     rows: [mockTrack1]
-//   })
-
 describe('Track byid', () => {
-  let mockPool: any;
+
+  const mockQuery = vi.fn<() => Promise<any>>(() => Promise.resolve("initial"))
+
+  beforeAll(() => {
+    const MockedPool = vi.mocked(pg.Pool, { deep: true })
+    MockedPool.mock.instances.forEach((poolInstance) => {
+      const tmpMock = vi.mocked(poolInstance.query)
+      tmpMock.mockImplementation(() => mockQuery())
+    })
+  })
   beforeEach(() => {
-    mockPool = new Pool();
     mockGetSchema.mockReset();
+    mockQuery.mockReset();
 
     // disable the authentication
     mockedIsAuthenticated.mockImplementation((req: any, res: any, next: any): any => {
       next();
     });
   });
+
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
+
   test('GET happy path', async () => {
-    mockPool.query.mockResolvedValue({ rows: [mockTrack1] });
+    mockQuery.mockResolvedValue({ rows: [mockTrack1] });
     mockGetSchema.mockResolvedValue('myschema');
     const response = await request(app)
       .get('/api/tracks/byid/123/sid/correct')
@@ -66,6 +66,7 @@ describe('Track byid', () => {
     expect(response.body).toEqual(mockTrack1);
     expect(mockGetSchema).toHaveBeenCalled();
   });
+
   test('GET is sid validation active', async () => {
     mockGetSchema.mockResolvedValue('myschema');
     await request(app)
@@ -79,20 +80,23 @@ describe('Track byid', () => {
       .get('/api/tracks/byid//sid/correct')
       .expect(404);
   });
+
   test('GET missing track id 2', async () => {
     mockGetSchema.mockResolvedValue('myschema');
     await request(app)
       .get('/api/tracks/byid/sid/correct')
       .expect(404);
   });
+
   test('GET wrong track id format', async () => {
     mockGetSchema.mockResolvedValue('myschema');
     await request(app)
       .get('/api/tracks/byid/abc/sid/correct')
       .expect(400);
   });
+
   test('Update Track 200', async () => {
-    mockPool.query.mockResolvedValue({ rowCount: 1 });
+    mockQuery.mockResolvedValue({ rowCount: 1 });
     mockGetSchema.mockResolvedValue('myschema');
 
     await request(app)
@@ -105,8 +109,9 @@ describe('Track byid', () => {
       )
       .expect(200);
   });
+
   test('Update Track 500', async () => {
-    mockPool.query.mockResolvedValue({ rowCount: 0 });
+    mockQuery.mockResolvedValue({ rowCount: 0 });
     mockGetSchema.mockResolvedValue('myschema');
 
     await request(app)
@@ -119,18 +124,21 @@ describe('Track byid', () => {
       )
       .expect(404);
   });
+
   test('Delete Track 200', async () => {
-    mockPool.query.mockResolvedValue({ rowCount: 1 });
+    mockQuery.mockResolvedValue({ rowCount: 1 });
     mockGetSchema.mockResolvedValue('myschema');
     await request(app)
       .delete('/api/tracks/byid/88/sid/abcsid')
       .expect(200);
   });
+
   test('Delete Track 500', async () => {
-    mockPool.query.mockResolvedValue({ rowCount: 0 });
+    mockQuery.mockResolvedValue({ rowCount: 0 });
     mockGetSchema.mockResolvedValue('myschema');
     await request(app)
       .delete('/api/tracks/byid/88/sid/abcsid')
       .expect(404);
   });
+
 });

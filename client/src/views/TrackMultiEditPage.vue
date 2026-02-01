@@ -17,8 +17,7 @@
         </div>
 
         <div v-else>
-          <editable-text
-:textarea="false" :text-prop="stringOrEmpty(data.value)"
+          <editable-text :textarea="false" :text-prop="stringOrEmpty(data.value)"
             :update-function="(value: string) => processNameUpdate(data.item, value)" />
         </div>
       </template>
@@ -174,7 +173,7 @@ async function nameFromSrc(item: TableItem): Promise<boolean> {
   }
 
   const tableItem = tableItemsByTrackId[id]
-  tableItem.name = updatedName
+  if (tableItem !== undefined) tableItem.name = updatedName
 
   // changing value of item.loading makes sure editable text is re-rendered and prop name is put into dom element ??
   item.loading = false

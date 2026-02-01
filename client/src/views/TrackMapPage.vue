@@ -7,16 +7,13 @@
       <button class="btn placeholder btn-outline-secondary flex-fill m-2">..</button>
     </div>
     <div v-else class="year-navbar border-bottom border-top">
-      <button
-v-if="buttonAll" class="btn m-2 button-year-navbar" :class="activeClass(buttonAllActive)"
+      <button v-if="buttonAll" class="btn m-2 button-year-navbar" :class="activeClass(buttonAllActive)"
         @click="loadAllTracks()">All</button>
-      <button
-v-if="buttonAllInView" class="btn m-2 button-year-navbar" :class="activeClass(buttonAllInViewActive)"
+      <button v-if="buttonAllInView" class="btn m-2 button-year-navbar" :class="activeClass(buttonAllInViewActive)"
         @click=" loadAllTracksinView()">All in
         view</button>
-      <button
-v-for=" year  in  years " :key="year" class="btn m-2 button-year-navbar"
-        :class="year in buttonYActive ? activeClass(buttonYActive[year]) : activeClass(false)"
+      <button v-for="year in years" :key="year" class="btn m-2 button-year-navbar"
+        :class="year in buttonYActive ? activeClass(buttonYActive[year] ?? false) : activeClass(false)"
         @click="loadTracksOfYear(year, false)">
         {{ year === 0 ? "No date" : year }}
       </button>
@@ -37,9 +34,12 @@ import { useConfigStore } from '@/stores/configstore'
 
 import { ref } from 'vue'
 
-const mapStateStore = useMapStateStore()
+// Config ----------------------------
+// Todo: move to config.js
+const SHOW_BUTTON_ALL_IN_VIEW = false
+// Config ----------------------------
 
-
+// props
 const props = defineProps({
   sid: {
     type: String,
@@ -47,10 +47,13 @@ const props = defineProps({
   }
 })
 
+// store
+const mapStateStore = useMapStateStore()
+
 // reactive data
 const years = ref<number[]>([])
 const buttonsLoading = ref(false)
-const buttonAllInView = ref(false)
+const buttonAllInView = ref(SHOW_BUTTON_ALL_IN_VIEW)
 const buttonAll = ref(true)
 
 // buttons active
@@ -83,11 +86,15 @@ configStore.loadConfig(props.sid)
       buttonsLoading.value = false
       if (years.value.length > 0) {
         const mostRecentYear = years.value[0]
-        loadTracksOfYear(mostRecentYear, true)
+        if (mostRecentYear !== undefined) {
+          loadTracksOfYear(mostRecentYear, true)
+        } else {
+          console.log("mostRecentYear is undefined")
+        }
       }
     }
   })
-  .catch((e) => console.error("Error when loading store", e))
+  .catch((e) => console.error("Error when loading config store", e))
 
 async function getYears() {
   await getAllTracks(props.sid)
@@ -113,8 +120,7 @@ function loadAllTracks() {
 
 function loadAllTracksinView() {
   mapStateStore.loadCommand = {
-    command: 'bbox',
-    completed: false
+    command: 'bbox'
   }
   setAllButtonsInactive()
   buttonAllInViewActive.value = true

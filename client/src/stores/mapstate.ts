@@ -3,6 +3,9 @@ import { ref } from 'vue'
 
 const useMapStateStore = defineStore('mapstate', () => {
 
+  // command to resize the map
+  //const resizeMap = ref(false)
+
   // command to load tracks
   const loadCommand = ref<LoadTracksRequest>({ command: 'none' })
 
@@ -10,8 +13,9 @@ const useMapStateStore = defineStore('mapstate', () => {
   const processComand = ref(false)
 
   return {
+    //  resizeMap,
     loadCommand,
-    processComand
+    processComand,
   }
 
 })
@@ -31,8 +35,7 @@ interface LoadYearRequest extends MapStateRequest {
 }
 
 interface LoadBboxRequest extends MapStateRequest {
-  command: 'bbox',
-  completed: boolean
+  command: 'bbox'
 }
 
 interface LoadSingleTrackRequest extends MapStateRequest {
@@ -47,4 +50,4 @@ interface InitialState extends MapStateRequest {
 
 export { useMapStateStore }
 export type LoadTracksRequest = LoadAllRequest | LoadYearRequest | LoadBboxRequest | LoadSingleTrackRequest | InitialState
-
+export type LoadTracksCommand = LoadTracksRequest['command']

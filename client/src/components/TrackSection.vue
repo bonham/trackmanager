@@ -30,7 +30,7 @@
 
 <script setup lang="ts">
 // import TrackHeader from '@/components/TrackHeader.vue'
-import { toRef, ref, computed, defineModel } from 'vue'
+import { toRef, ref, computed } from 'vue'
 import TrackCard from '@/components/TrackCard.vue'
 import { TrackCollection } from '@/lib/Track'
 import {

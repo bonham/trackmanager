@@ -1,24 +1,26 @@
+import { afterEach, beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
+
+vi.mock('pg', () => {
+  const Pool = vi.fn(class FakePool {
+    connect = vi.fn()
+    query = vi.fn()
+    end = vi.fn()
+  })
+  return { default: { Pool }, Pool }
+})
+
 import app from '../../src/app.js';
 
 import * as pg from 'pg';
 import request from 'supertest';
 
 import getSchema from '../../src/lib/getSchema.js';
-jest.mock('../../src/lib/getSchema.js')
+vi.mock('../../src/lib/getSchema.js')
 
 const { Pool } = pg
 
 
-const mockGetSchema = jest.mocked(getSchema)
-
-jest.mock('pg', () => {
-  const mClient = {
-    connect: jest.fn(),
-    query: jest.fn(),
-    end: jest.fn(),
-  };
-  return { Pool: jest.fn(() => mClient) };
-});
+const mockGetSchema = vi.mocked(getSchema)
 
 const mockTrack1 = {
   id: '2',
@@ -30,16 +32,29 @@ const mockTrack1 = {
 };
 
 describe('tracks - byYear', () => {
-  let mockPool: any;
+
+  const mockQuery = vi.fn<() => Promise<any>>(() => Promise.resolve("initial"))
+
+  beforeAll(() => {
+    const MockedPool = vi.mocked(pg.Pool, { deep: true })
+    MockedPool.mock.instances.forEach((poolInstance) => {
+      const tmpMock = vi.mocked(poolInstance.query)
+      tmpMock.mockImplementation(() => mockQuery())
+    })
+  })
+
+
   beforeEach(() => {
     mockGetSchema.mockReset();
-    mockPool = new Pool();
+    mockQuery.mockReset()
   });
+
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
+
   test('happy path', async () => {
-    mockPool.query.mockResolvedValue({ rows: [mockTrack1] });
+    mockQuery.mockResolvedValue({ rows: [mockTrack1] });
     mockGetSchema.mockResolvedValue('myschema');
     const response = await request(app)
       .get('/api/tracks/byyear/2021/sid/correct')

@@ -24,7 +24,12 @@ const useConfigStore = defineStore('configstore', () => {
     if (!(key in schemaConfig.value)) {
       throw new Error(`Property ${key} does not exist in store`);
     }
-    return schemaConfig.value[key]
+    const r = schemaConfig.value[key]
+    if (r === undefined) {
+      throw Error(`Property ${key} is undefined in store`);
+    } else {
+      return r
+    }
   }
 
   return {

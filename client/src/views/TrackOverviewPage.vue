@@ -86,9 +86,9 @@ const trackCollections = computed(() => {
     let tracksToDisplay: Track[];
 
     if (searchStore.searchText === '') {
-      tracksToDisplay = tracksByYear.value[y]
+      tracksToDisplay = tracksByYear.value[y] ?? []
     } else {
-      tracksToDisplay = tracksByYear.value[y].filter(t => (
+      tracksToDisplay = (tracksByYear.value[y] ?? []).filter(t => (
         (t.name ?? '').toLowerCase().includes(searchStore.searchText.toLowerCase())
       ))
     }

@@ -97,6 +97,9 @@ configStore.loadConfig(props.sid)
   })
   .catch((e) => console.error("Error when loading config store", e))
 
+/**
+ * Fetch available years for tracks and initialize button states
+ */
 async function getYears() {
 
   const yearList = await getTrackYears(props.sid)

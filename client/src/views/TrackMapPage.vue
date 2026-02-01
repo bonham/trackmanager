@@ -39,15 +39,16 @@ import { ref } from 'vue'
 const SHOW_BUTTON_ALL_IN_VIEW = false
 // Config ----------------------------
 
-const mapStateStore = useMapStateStore()
-
-
+// props
 const props = defineProps({
   sid: {
     type: String,
     default: ''
   }
 })
+
+// store
+const mapStateStore = useMapStateStore()
 
 // reactive data
 const years = ref<number[]>([])

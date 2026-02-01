@@ -3,6 +3,8 @@ import type { TrackPropertiesOptional } from '@/lib/Track'
 import _ from 'lodash'
 import type { GeoJSONWithTrackId } from '@/lib/mapservices/ManagedMap'
 import type { Extent } from 'ol/extent'
+import * as z from 'zod'
+
 // /// Get all tracks
 async function getAllTracks(sid: string) {
   const response = await fetch(`/api/tracks/getall/sid/${sid}`)
@@ -13,6 +15,33 @@ async function getAllTracks(sid: string) {
 
   const trackArray = responseJson.map(t => new Track(t))
   return trackArray
+}
+
+// /// Get years of all tracks
+async function getTrackYears(sid: string): Promise<number[]> {
+  const url = `/api/tracks/trackyears/sid/${sid}`
+  let response: Response
+  try {
+    response = await fetch(url)
+  } catch (error) {
+    console.error('Error when fetching years of tracks', error)
+    return []
+  }
+  if (!response.ok) {
+    console.error('Response not ok when fetching tracks by year', response)
+    return []
+  }
+
+  try {
+    const responseJson = await response.json() as unknown
+    const YearList = z.array(z.coerce.number());
+    const years = YearList.parse(responseJson)
+    return years
+
+  } catch (error) {
+    console.error('Error when processing result from http call', error)
+    return []
+  }
 }
 
 // /// Get tracks by year
@@ -45,7 +74,7 @@ async function getTracksByYear(year: number, sid: string) {
   }
 }
 
-// /// Get tracks by year
+// /// Get tracks by extent
 async function getTracksByExtent(extent: Extent, sid: string) {
 
   const url = `/api/tracks/byextent/sid/${sid}`
@@ -237,7 +266,7 @@ async function deleteTrack(id: number, sid: string) {
 }
 
 export {
-  getAllTracks, getTracksByYear, getGeoJson,
+  getAllTracks, getTrackYears, getTracksByYear, getGeoJson,
   updateTrack, updateTrackById,
   deleteTrack, getTrackById, getTracksByExtent,
   updateNameFromSource

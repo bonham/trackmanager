@@ -27,8 +27,7 @@
 <script setup lang="ts">
 import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'
 import MapComponent from '@/components/MapComponent.vue'
-import { TrackCollection } from '@/lib/Track'
-import { getAllTracks } from '@/lib/trackServices'
+import { getTrackYears } from '@/lib/trackServices'
 import { useMapStateStore } from '@/stores/mapstate'
 import { useConfigStore } from '@/stores/configstore'
 
@@ -77,6 +76,8 @@ configStore.loadConfig(props.sid)
         .then(() => { buttonsLoading.value = false })
         .catch((e) => console.error("Error while loading years", e))
 
+
+
       loadAllTracks()
 
     } else if (initialState === "LATEST_YEAR") {
@@ -97,16 +98,14 @@ configStore.loadConfig(props.sid)
   .catch((e) => console.error("Error when loading config store", e))
 
 async function getYears() {
-  await getAllTracks(props.sid)
-    .then((trackList) => {
-      const tColl = new TrackCollection(trackList)
-      years.value = tColl.yearList().sort((a, b) => b - a)
-      // button active state
-      years.value.forEach((y) => {
-        buttonYActive.value[y] = false
-      })
-    })
-    .catch((e: Error) => { console.log("Error in getYears", e) })
+
+  const yearList = await getTrackYears(props.sid)
+  years.value = yearList.sort((a, b) => b - a)
+
+  // initialize button active state
+  years.value.forEach((y) => {
+    buttonYActive.value[y] = false
+  })
 }
 
 function loadAllTracks() {

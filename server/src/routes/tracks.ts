@@ -8,6 +8,7 @@ import { mkdtemp as mkdtempprom } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { basename, join } from 'node:path';
 import pg from 'pg';
+import * as z from 'zod';
 import { Track2DbWriter } from '../lib/Track2DbWriter.js';
 import { DateStringMatcher, StringCleaner } from '../lib/analyzeString.js';
 import { asyncWrapper } from '../lib/asyncMiddlewareWrapper.js';
@@ -166,6 +167,34 @@ router.get(
         const row = rows[0];
         res.json(row);
       }
+
+    } catch (err) {
+      console.trace('Exception handling trace');
+      console.error(err);
+      if (err instanceof Error && 'message' in err) res.status(500).send(err.message);
+      else res.status(500);
+    }
+
+  })
+);
+
+// Get years for existing tracks
+router.get(
+  '/trackyears/sid/:sid',
+  sidValidationChain,
+  asyncWrapper(async (req: ExpressRequest, res: Response) => {
+    const { schema } = req as ReqWSchema
+
+    const query = "select distinct to_char(time, 'YYYY') as year "
+      + `from ${schema}.tracks`;
+
+    const SQLResult = z.array(z.object({ year: z.string() }));
+    try {
+      const queryResult = await pool.query(query);
+      const tmpResult = queryResult.rows as unknown; // [ [5], [7], [9], ...]
+
+      const rows = SQLResult.parse(tmpResult);
+      res.json(rows.map((r) => r.year));
 
     } catch (err) {
       console.trace('Exception handling trace');

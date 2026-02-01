@@ -38,27 +38,44 @@ class TrackVisibilityManager {
     this.alreadyLoaded = _.uniq(alreadyLoaded)
   }
 
-  // ids which need to be enabled, regardless if loaded or not
+
+  /**
+   * Provides ids which need to be enabled, regardless if loaded or not
+   * @returns List of numbers
+   */
   deltaToBeEnabled() {
     return _.difference(this.toBeVisible, this.currentlyVisible)
   }
 
-  // ids which should be loaded and are already visible
+  /**
+   * Provides ids which should be loaded and are already visible
+   * @returns List of numbers
+   */
   alreadyVisible() {
     return _.intersection(this.toBeVisible, this.currentlyVisible)
   }
 
-  // ids which are visible and should not be in future
+  /**
+   * Provides ids which are visible and should be toggled invisible.
+   * @returns List of numbers
+   */
   toBeHidden() {
     return _.difference(this.currentlyVisible, this.toBeVisible)
   }
 
-  // ids which need to be enabled and should be loaded
+
+  /**
+   * Calculates list of ids which need to be loaded and added
+   * @returns List of numbers
+   */
   toBeLoaded() {
     return _.difference(this.deltaToBeEnabled(), this.alreadyLoaded)
   }
 
-  // ids which need to be enabled and are already loaded
+  /**
+   * Provides list of id's  which are loaded but need to be toggled to be visible
+   * @returns List of numbers
+   */
   toggleToVisible() {
     return _.intersection(this.deltaToBeEnabled(), this.alreadyLoaded)
   }

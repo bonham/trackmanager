@@ -143,7 +143,13 @@ watch(
 )
 
 // ------------ Draw tracks , reset selection, zoomOut
-// ( clearselection might need to be factored out)
+/**
+ * This method calculates which geojson structures to be loaded from DB and manipulates ManagedMap object
+ * to modify appearance of map.
+ * 
+ * @param zoomOut Specify if map should be zoomed to extent of all tracks after drawing
+ * @param tbag Track metadata information
+ */
 async function drawTracks(zoomOut = false, tbag: TrackBag) {
   if (mmap === null) {
     console.error("mmap not initalized")
@@ -155,15 +161,14 @@ async function drawTracks(zoomOut = false, tbag: TrackBag) {
   mmap.popovermgr?.dispose()
 
   const tvm = new TrackVisibilityManager(
-    mmap.getTrackIdsVisible(),
-    tbag.getLoadedTrackIds(),
-    mmap.getTrackIds()
+    mmap.getTrackIdsVisible(), // currently visible
+    tbag.getLoadedTrackIds(), // to be visible
+    mmap.getTrackIds() // already loaded
   )
 
-  // A1: set existing visible
+  // A1: Set tracks already loaded to be visible
   const toggleIds = tvm.toggleToVisible()
   console.log('Toggle: ', toggleIds)
-
   _.forEach(toggleIds, function (id) { mmap.setVisible(id) })
 
   // A2: load missing and add vector layer to map
@@ -176,22 +181,18 @@ async function drawTracks(zoomOut = false, tbag: TrackBag) {
   } else {
     resultSet = []
   }
-
   // Tracks in managed map do not really have an order. But for some styling scenarios we want tracks ordered by date. 
   // This is a dirty hack to maintain an order for the tracks newly added to mmap. This hack will not maintain overall track order when tracks
   // are loaded in chunks/batches
-
   const tmpList = resultSet.map((result) => {
     return {
       track: tbag.getTrackById(result.id),
       geojson: result.geojson
     }
   })
-
   tmpList.sort((a, b) => {
     return a.track.secondsSinceEpoch() - b.track.secondsSinceEpoch()
   })
-
   tmpList.forEach(ele => {
     mmap.addTrackLayer(ele)
   })

@@ -72,19 +72,16 @@ configStore.loadConfig(props.sid)
     if (initialState === "ALL") {
 
       // async possible
-      getYears()
-        .then(() => { buttonsLoading.value = false })
-        .catch((e) => console.error("Error while loading years", e))
-
-
-
+      await makeYearButtons()
+      buttonsLoading.value = false
       loadAllTracks()
 
     } else if (initialState === "LATEST_YEAR") {
 
       // not async pls
-      await getYears()
+      await makeYearButtons()
       buttonsLoading.value = false
+      // calc and load most recent year
       if (years.value.length > 0) {
         const mostRecentYear = years.value[0]
         if (mostRecentYear !== undefined) {
@@ -95,12 +92,12 @@ configStore.loadConfig(props.sid)
       }
     }
   })
-  .catch((e) => console.error("Error when loading config store", e))
+  .catch((e) => console.error("Error on initial load", e))
 
 /**
  * Fetch available years for tracks and initialize button states
  */
-async function getYears() {
+async function makeYearButtons() {
 
   const yearList = await getTrackYears(props.sid)
   years.value = yearList.sort((a, b) => b - a)

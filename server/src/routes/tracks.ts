@@ -178,6 +178,67 @@ router.get(
   })
 );
 
+/// // Get track metadata ids for list of tracks
+router.post(
+  '/bylist/sid/:sid',
+  sidValidationChain,
+  asyncWrapper(async (req: ExpressRequest, res: Response) => {
+    const { schema } = req as ReqWSchema
+
+    // validate body. expect list of integers ( track ids )
+    const body = req.body;
+
+    let idList: number[];
+    try {
+      idList = z.array(z.number().int().nonnegative()).parse(body);
+    } catch (e) {
+      console.error('Error parsing track id list', e);
+      console.error('Received body:', body);
+      res.status(400).send('Bad request: Could not parse body as list of track ids');
+      return;
+    }
+
+    // empty list shortcut
+    if (idList.length === 0) {
+      res.json([]);
+      return;
+    }
+
+    // compose query
+    const inClause = `(${idList.join(',')})`;
+
+    const query = 'select id, name, length, length_calc, src, '
+      + 'time, timelength, timelength_calc, ascent, ascent_calc '
+      + `from ${schema}.tracks where id in ${inClause}`;
+
+    try {
+      const queryResult = await pool.query(query);
+      const qResult = queryResult.rows;
+      const rows = z.array(z.object({
+        id: z.number().int().nonnegative(),
+        name: z.string().nullable(),
+        length: z.number().nullable(),
+        src: z.string().nullable(),
+        time: z.date().nullable(),
+        ascent: z.number().nullable()
+      })).parse(qResult);
+
+      if (rows.length === 0) {
+        res.json([]);
+      } else {
+        res.json(rows);
+      }
+
+    } catch (err) {
+      console.trace('Exception handling trace');
+      console.error(err);
+      if (err instanceof Error && 'message' in err) res.status(500).send(err.message);
+      else res.status(500);
+    }
+
+  })
+);
+
 // Get years for existing tracks
 router.get(
   '/trackyears/sid/:sid',

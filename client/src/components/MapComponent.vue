@@ -126,7 +126,7 @@ watch(
         }
       }
     } else {
-      loadFunc = () => Promise.resolve([])
+      loadFunc = () => Promise.resolve([]) // empty
     }
 
     // execute the load function

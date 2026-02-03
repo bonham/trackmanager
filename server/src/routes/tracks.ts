@@ -352,10 +352,6 @@ router.post(
         return;
       }
 
-      const whereClause = 'ST_Intersects(wkb_geometry, ST_MakeEnvelope('
-        + `${bbox[0]}, ${bbox[1]}, ${bbox[2]}, ${bbox[3]}, '4326'))`;
-
-
       const query =
       {
         name: 'Get track ids by extent and time',
@@ -373,7 +369,7 @@ router.post(
         )
         select id from g order by intersects asc , time desc
       `,
-        values: [8.712158, 49.271837, 8.760910, 49.291098],
+        values: bbox,
       }
       const queryResult = await pool.query(query);
       const validatedResult = z.array(z.object({ id: z.number().int().nonnegative() })).parse(queryResult.rows);

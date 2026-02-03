@@ -178,7 +178,7 @@ router.get(
   })
 );
 
-/// // Get track metadata ids for list of tracks
+/// // Get track metadata objects for list of tracks
 router.post(
   '/bylist/sid/:sid',
   sidValidationChain,
@@ -326,6 +326,59 @@ router.post(
 
       const queryResult = await pool.query(query);
       res.json(queryResult.rows);
+    } catch (err) {
+      next(err);
+    }
+  })
+);
+
+/// // Get list of track ids by extent (bounding box) and time 
+// This is to have a priority for fetching in batches
+router.post(
+  '/idlist/byextentbytime/sid/:sid',
+  sidValidationChain,
+  asyncWrapper(async (req: ExpressRequest, res: Response, next: NextFunction) => {
+    try {
+      const { schema } = req as ReqWSchema;
+
+      // get extent from payload
+      let bbox: number[]
+      try {
+        bbox = z.array(z.number()).length(4).parse(req.body);
+      } catch (e) {
+        console.error('Error parsing bounding box from payload', e);
+        console.error('Payload for bounding box is not array of 4 numbers');
+        next(e);
+        return;
+      }
+
+      const whereClause = 'ST_Intersects(wkb_geometry, ST_MakeEnvelope('
+        + `${bbox[0]}, ${bbox[1]}, ${bbox[2]}, ${bbox[3]}, '4326'))`;
+
+
+      const query =
+      {
+        name: 'Get track ids by extent and time',
+        text: `
+      with g as (
+        select
+        id,
+        time,
+        case when
+          ST_Intersects(wkb_geometry, ST_MakeEnvelope($1,$2,$3,$4, '4326'))
+          then 1
+          else 2
+        end as intersects
+        from ${schema}.tracks  
+        )
+        select id from g order by intersects asc , time desc
+      `,
+        values: [8.712158, 49.271837, 8.760910, 49.291098],
+      }
+      const queryResult = await pool.query(query);
+      const validatedResult = z.array(z.object({ id: z.number().int().nonnegative() })).parse(queryResult.rows);
+      const idList = validatedResult.map((r) => r.id);
+      res.json(idList);
     } catch (err) {
       next(err);
     }

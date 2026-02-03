@@ -68,7 +68,7 @@ describe('Endpoints related to track metadata', () => {
       .get('/api/tracks/byid/123/sid/correct')
       .expect(200);
 
-    expect(response.body).toEqual(mockTrack1);
+    expect(response.body).toEqual({ ...mockTrack1, time: mockTrack1.time.toISOString() });
     expect(mockGetSchema).toHaveBeenCalled();
   });
 

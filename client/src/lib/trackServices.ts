@@ -1,9 +1,92 @@
+/* eslint-disable @typescript-eslint/no-misused-promises */
 import { Track, isTrackDataServer } from '@/lib/Track'
 import type { TrackPropertiesOptional } from '@/lib/Track'
 import _ from 'lodash'
-import type { GeoJSONWithTrackId } from '@/lib/mapservices/ManagedMap'
+import type { GeoJSONWithTrackId, GeoJsonWithTrack } from '@/lib/mapservices/ManagedMap'
 import type { Extent } from 'ol/extent'
+import { queue } from 'async';
+import type { AsyncWorker } from 'async'
+
 import * as z from 'zod'
+
+type IdList = number[]
+
+/**
+ * Gets a list of all track ids of map. First the tracks in the view are returned, newest first
+ * then the other tracks , newest first
+ * @param extent Map extent number[]
+ * @param sid schema id
+ * @returns Array of ids
+ */
+async function getIdListByExtentAndTime(extent: Extent, sid: string): Promise<number[]> {
+
+  const idListResponse = await fetch(
+    `/api/tracks/idlist/byextentbytime/sid/${sid}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(extent)
+    })
+  const idListResponseJson = await idListResponse.json() as unknown
+  const idList = z.array(z.number().int().nonnegative()).parse(idListResponseJson)
+  return idList
+}
+
+
+/**
+ * Loads tracks in batches and performs add function
+ * @param idList List of ids
+ * @param addToLayerFunction Function with signature f(number[], (gwt)=>void)
+ */
+function loadTracksNew(
+  idList: number[],
+  addToLayerFunction: (gwt: GeoJsonWithTrack) => void,
+  sid: string
+) {
+
+  const worker: AsyncWorker<IdList> = async (idListTask: IdList) => {
+
+    // ----
+    const trackMetadataList = await getTracksByIdList(idListTask, sid)
+    if (trackMetadataList === null) {
+      throw Error("Track metadata list could not be loaded")
+    }
+    const trackMetadataMap = new Map<number, Track>()
+    trackMetadataList.forEach((track) => trackMetadataMap.set(track.id, track))
+
+    // ----
+    const geoJsonList = await getGeoJson(idListTask, sid)
+    const geoJsonMap = new Map<number, GeoJSONWithTrackId>()
+    geoJsonList.forEach((gwt) => geoJsonMap.set(gwt.id, gwt))
+
+    // ----
+    idListTask.forEach((id) => {
+      const track = trackMetadataMap.get(id)
+      if (track === undefined) throw Error(`Track for id ${id} is undefined`)
+
+      const geoJsonWithId = geoJsonMap.get(id)
+      if (geoJsonWithId === undefined) throw Error(`GeoJson for id ${id} is undefined`)
+
+      const geoJsonWithTrack: GeoJsonWithTrack = {
+        track,
+        geojson: geoJsonWithId.geojson
+      }
+      addToLayerFunction(geoJsonWithTrack)
+    })
+  }
+
+  const addQueue = queue(worker, 4)
+
+  const batchSize = 5
+  for (let i = 0; i < idList.length; i += batchSize) {
+    const batchIds = idList.slice(i, i + batchSize)
+    addQueue.push<IdList>([batchIds], (err, retVal) => {
+      if (err) console.error("Error in worker", err)
+      if (retVal) console.log("Return value from worker", retVal)
+    }
+    )
+  }
+}
 
 // /// Get all tracks
 async function getAllTracks(sid: string) {
@@ -131,6 +214,48 @@ async function getTrackById(id: number, sid: string): Promise<Track | null> {
 
     const track = new Track(responseJson)
     return track
+  } catch (error) {
+    console.error('Error when processing result from http call', error)
+    return null
+  }
+}
+
+async function getTracksByIdList(idList: number[], sid: string): Promise<Track[] | null> {
+
+  const url = `/api/tracks/bylist/sid/${sid}`
+  let response
+  try {
+    response = await fetch(url,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(idList)
+      }
+    )
+  } catch (error) {
+    console.error('Error when fetching tracks by year', error)
+    return null
+  }
+  if (!response.ok) {
+    const errText = await response.text()
+    console.error(`Response code ${response.status} after fetching to ${url}, error: ${errText}`)
+    return null
+  }
+
+  try {
+    const responseJson = await response.json() as unknown
+    const trackDataGetall = z.array(z.object({
+      id: z.number().int().nonnegative(),
+      name: z.string().nullable(),
+      length: z.number().nullable(),
+      src: z.string().nullable(),
+      time: z.string().nullable(),
+      ascent: z.number().nullable()
+    })).parse(responseJson)
+
+    const trackList = trackDataGetall.map(td => new Track(td))
+    return trackList
+
   } catch (error) {
     console.error('Error when processing result from http call', error)
     return null
@@ -266,8 +391,9 @@ async function deleteTrack(id: number, sid: string) {
 }
 
 export {
-  getAllTracks, getTrackYears, getTracksByYear, getGeoJson,
+  getAllTracks, getTrackYears, getTracksByYear, getGeoJson, getTracksByIdList as getTrackByIdList,
   updateTrack, updateTrackById,
   deleteTrack, getTrackById, getTracksByExtent,
-  updateNameFromSource
+  updateNameFromSource,
+  getIdListByExtentAndTime, loadTracksNew
 }

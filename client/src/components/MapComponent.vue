@@ -11,16 +11,15 @@
 import { ref, watch, onMounted, nextTick } from 'vue'
 import { BSpinner } from 'bootstrap-vue-next'
 import { ManagedMap } from '@/lib/mapservices/ManagedMap'
-import type { GeoJSONWithTrackId } from '@/lib/mapservices/ManagedMap'
+import type { GeoJsonWithTrack, GeoJSONWithTrackId } from '@/lib/mapservices/ManagedMap'
 import { TrackVisibilityManager } from '@/lib/mapStateHelpers'
-import { getGeoJson, getTracksByExtent, getTracksByYear, getTrackById, getAllTracks } from '@/lib/trackServices'
+import { getIdListByExtentAndTime, getGeoJson, getTracksByExtent, getTracksByYear, getTrackById, loadTracksNew } from '@/lib/trackServices'
 import _ from 'lodash'
 import { useConfigStore } from '@/stores/configstore'
 import { useMapStateStore } from '@/stores/mapstate'
 import { StyleFactoryFixedColors, THREE_BROWN_COLORSTYLE, FIVE_COLORFUL_COLORSTYLE } from '@/lib/mapStyles';
 import { TrackBag } from '@/lib/TrackBag'
 import { Track } from '@/lib/Track'
-
 
 /**
  * This component provides a div anchor with the openlayers map attached to it.
@@ -99,9 +98,45 @@ watch(
     let loadFunc: TrackLoadFunction
     console.log(`received command ${command.command}`)
 
+
+    mmap.clearSelection()
+    mmap.popovermgr?.dispose()
+
+
     if (command.command === 'all') {
 
-      loadFunc = () => getAllTracks(props.sid)
+      loading.value = true
+
+      const bbox = mmap.getMapViewBbox()
+      const allIds: number[] = await getIdListByExtentAndTime(bbox, props.sid)
+
+      const tvm = new TrackVisibilityManager(
+        mmap.getTrackIdsVisible(), // currently visible
+        allIds, // to be visible
+        mmap.getTrackIds() // already loaded
+      )
+
+      // A1: Set tracks already loaded to be visible
+      const toggleIds = tvm.toggleToVisible()
+      console.log('Toggle: ', toggleIds)
+      _.forEach(toggleIds, function (id) { mmap.setVisible(id) })
+
+      // B: tracks to hide
+      const toHide = tvm.toBeHidden()
+      console.log('To be hidden: ', toHide)
+      _.forEach(toHide, function (id) { mmap.setInvisible(id) })
+
+      // A2: load missing and add vector layer to map
+      const toBeLoaded = tvm.toBeLoaded()
+      console.log('To be loaded: ', toBeLoaded)
+
+      // process toBeLoaded list. push it to queue in chunks
+      // need a function which adds a track to the layer
+      const addLayerFunc = (gwt: GeoJsonWithTrack) => mmap.addTrackLayer(gwt)
+      loadTracksNew(toBeLoaded, addLayerFunc, props.sid)
+
+      loading.value = false
+      return // done here
 
     } else if (command.command === 'year') {
 

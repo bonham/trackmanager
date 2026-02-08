@@ -372,7 +372,7 @@ router.post(
         values: bbox,
       }
       const queryResult = await pool.query(query);
-      const validatedResult = z.array(z.object({ id: z.number().int().nonnegative() })).parse(queryResult.rows);
+      const validatedResult = z.array(z.object({ id: z.number().int() })).parse(queryResult.rows);
       const idList = validatedResult.map((r) => r.id);
       res.json(idList);
     } catch (err) {

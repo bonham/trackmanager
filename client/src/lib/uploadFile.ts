@@ -1,4 +1,6 @@
 
+import * as z from 'zod'
+
 // Takes care to upload a file to backend
 
 type QueueStatus = 'Queued' | 'Processing' | 'Failed' | 'Completed'
@@ -24,13 +26,11 @@ interface QueuedFile {
   visible: boolean
 }
 
-interface UploadResponse {
-  // Define the expected structure of the response here
-  // For example:
-  success: boolean;
-  message: string;
-  // Add other fields as needed
-}
+const UploadResponseSchema = z.object({
+  message: z.coerce.string(),
+  fileName: z.coerce.string().optional()
+})
+type UploadResponse = z.infer<typeof UploadResponseSchema>
 
 async function uploadFile(fileIdObject: QueuedFile, uploadUrl: string, formParameter: string): Promise<UploadResponse> {
   // construct body
@@ -47,9 +47,10 @@ async function uploadFile(fileIdObject: QueuedFile, uploadUrl: string, formParam
     let errcause = ''
     try {
       const j = JSON.parse(errDetail) as unknown
-      if (j !== null && typeof j === 'object' && 'message' in j && typeof j.message === 'string') {
-        errcause = j.message.toString()
-      } else {
+      try {
+        const uploadResponse = UploadResponseSchema.parse(j)
+        errcause = uploadResponse.message
+      } catch {
         errcause = errDetail
       }
     } catch {
@@ -57,22 +58,21 @@ async function uploadFile(fileIdObject: QueuedFile, uploadUrl: string, formParam
     }
     throw new UploadError('HTTP error, status = ' + response.status, errcause)
   }
-  const jsonResponse = await response.json() as unknown;
 
-  if (isUploadResponse(jsonResponse)) {
+  try {
+    const tmpjsonResponse = await response.json() as unknown;
+    const jsonResponse = UploadResponseSchema.parse(tmpjsonResponse)
     return jsonResponse;
-  } else {
-    throw new UploadError('Invalid response structure', 'Response does not match UploadResponse type');
+  } catch (e) {
+    let errstring: string
+    try {
+      errstring = z.instanceof(Error).parse(e).message
+    } catch {
+      errstring = z.string().parse(e)
+    }
+    throw new UploadError(`Invalid response structure', 'Response does not match UploadResponse type: Error`, errstring);
   }
 
-}
-
-function isUploadResponse(response: unknown): response is UploadResponse {
-  if (response !== null && typeof response === 'object' && 'success' in response && 'message' in response) {
-    return typeof response.success === 'boolean' && typeof response.message === 'string';
-  } else {
-    return false;
-  }
 }
 
 export { uploadFile, UploadError }

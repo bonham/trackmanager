@@ -172,7 +172,7 @@ describe('Endpoints related to track metadata', () => {
   });
 
   test('Get list of ids', async () => {
-    const testArray = [1, 4, 7, 9]
+    const testArray = [-11, 4, 7, 9]
     mockQuery.mockResolvedValue(
       {
         rows: testArray.map((id) => ({ id }))

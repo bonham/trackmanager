@@ -1,4 +1,4 @@
-import { getTrackYears, getIdListByExtentAndTime, getTrackByIdList } from '@/lib/trackServices'
+import { getTrackYears, getIdListByExtentAndTime, getTracksByIdList } from '@/lib/trackServices'
 import { Track } from '@/lib/Track'
 import { describe, vi, test, expect, beforeEach } from "vitest"
 
@@ -68,7 +68,7 @@ describe('trackServices', () => {
       )
     ))
 
-    const resultList = await getTrackByIdList([1, 2], sid)
+    const resultList = await getTracksByIdList([1, 2], sid)
     expect(resultList).not.toBeNull()
     expect(resultList).toHaveLength(2)
     expect(resultList![0]).toBeInstanceOf(Track)

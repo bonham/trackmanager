@@ -1,15 +1,13 @@
-/* eslint-disable @typescript-eslint/no-misused-promises */
+
 import { Track, isTrackDataServer } from '@/lib/Track'
 import type { TrackPropertiesOptional } from '@/lib/Track'
 import _ from 'lodash'
-import type { GeoJSONWithTrackId, GeoJsonWithTrack } from '@/lib/mapservices/ManagedMap'
+import type { GeoJSONWithTrackId } from '@/lib/mapservices/ManagedMap'
 import type { Extent } from 'ol/extent'
-import { queue } from 'async';
-import type { AsyncWorker } from 'async'
+
 
 import * as z from 'zod'
 
-type IdList = number[]
 
 /**
  * Gets a list of all track ids of map. First the tracks in the view are returned, newest first
@@ -30,62 +28,6 @@ async function getIdListByExtentAndTime(extent: Extent, sid: string): Promise<nu
   const idListResponseJson = await idListResponse.json() as unknown
   const idList = z.array(z.number().int().nonnegative()).parse(idListResponseJson)
   return idList
-}
-
-
-/**
- * Loads tracks in batches and performs add function
- * @param idList List of ids
- * @param addToLayerFunction Function with signature f(number[], (gwt)=>void)
- */
-function loadTracksNew(
-  idList: number[],
-  addToLayerFunction: (gwt: GeoJsonWithTrack) => void,
-  sid: string
-) {
-
-  const worker: AsyncWorker<IdList> = async (idListTask: IdList) => {
-
-    // ----
-    const trackMetadataList = await getTracksByIdList(idListTask, sid)
-    if (trackMetadataList === null) {
-      throw Error("Track metadata list could not be loaded")
-    }
-    const trackMetadataMap = new Map<number, Track>()
-    trackMetadataList.forEach((track) => trackMetadataMap.set(track.id, track))
-
-    // ----
-    const geoJsonList = await getGeoJson(idListTask, sid)
-    const geoJsonMap = new Map<number, GeoJSONWithTrackId>()
-    geoJsonList.forEach((gwt) => geoJsonMap.set(gwt.id, gwt))
-
-    // ----
-    idListTask.forEach((id) => {
-      const track = trackMetadataMap.get(id)
-      if (track === undefined) throw Error(`Track for id ${id} is undefined`)
-
-      const geoJsonWithId = geoJsonMap.get(id)
-      if (geoJsonWithId === undefined) throw Error(`GeoJson for id ${id} is undefined`)
-
-      const geoJsonWithTrack: GeoJsonWithTrack = {
-        track,
-        geojson: geoJsonWithId.geojson
-      }
-      addToLayerFunction(geoJsonWithTrack)
-    })
-  }
-
-  const addQueue = queue(worker, 4)
-
-  const batchSize = 5
-  for (let i = 0; i < idList.length; i += batchSize) {
-    const batchIds = idList.slice(i, i + batchSize)
-    addQueue.push<IdList>([batchIds], (err, retVal) => {
-      if (err) console.error("Error in worker", err)
-      if (retVal) console.log("Return value from worker", retVal)
-    }
-    )
-  }
 }
 
 // /// Get all tracks
@@ -391,9 +333,9 @@ async function deleteTrack(id: number, sid: string) {
 }
 
 export {
-  getAllTracks, getTrackYears, getTracksByYear, getGeoJson, getTracksByIdList as getTrackByIdList,
+  getAllTracks, getTrackYears, getTracksByYear, getGeoJson, getTracksByIdList,
   updateTrack, updateTrackById,
   deleteTrack, getTrackById, getTracksByExtent,
   updateNameFromSource,
-  getIdListByExtentAndTime, loadTracksNew
+  getIdListByExtentAndTime,
 }

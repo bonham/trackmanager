@@ -13,14 +13,18 @@ import { BSpinner } from 'bootstrap-vue-next'
 import { ManagedMap } from '@/lib/mapservices/ManagedMap'
 import type { GeoJsonWithTrack, GeoJSONWithTrackId } from '@/lib/mapservices/ManagedMap'
 import { TrackVisibilityManager } from '@/lib/mapStateHelpers'
-import { getIdListByExtentAndTime, getGeoJson, getTracksByExtent, getTracksByYear, getTrackById, loadTracksNew } from '@/lib/trackServices'
+import { getIdListByExtentAndTime, getGeoJson, getTracksByExtent, getTracksByYear, getTrackById } from '@/lib/trackServices'
 import _ from 'lodash'
 import { useConfigStore } from '@/stores/configstore'
 import { useMapStateStore } from '@/stores/mapstate'
 import { StyleFactoryFixedColors, THREE_BROWN_COLORSTYLE, FIVE_COLORFUL_COLORSTYLE } from '@/lib/mapStyles';
 import { TrackBag } from '@/lib/TrackBag'
 import { Track } from '@/lib/Track'
+import { queue } from 'async'
+import { createTrackLoadingAsyncWorker, type IdList } from '@/lib/trackLoadAsyncWorker'
 
+const NUMWORKERS = 4
+const BATCHSIZE = 5
 /**
  * This component provides a div anchor with the openlayers map attached to it.
  * It is using javascript class ManagedMap to interact with openlayers library.
@@ -105,8 +109,6 @@ watch(
 
     if (command.command === 'all') {
 
-      loading.value = true
-
       const bbox = mmap.getMapViewBbox()
       const allIds: number[] = await getIdListByExtentAndTime(bbox, props.sid)
 
@@ -127,15 +129,33 @@ watch(
       _.forEach(toHide, function (id) { mmap.setInvisible(id) })
 
       // A2: load missing and add vector layer to map
-      const toBeLoaded = tvm.toBeLoaded()
-      console.log('To be loaded: ', toBeLoaded)
+      const trackIdsToBeLoaded = tvm.toBeLoaded()
+      console.log('To be loaded: ', trackIdsToBeLoaded)
 
-      // process toBeLoaded list. push it to queue in chunks
       // need a function which adds a track to the layer
       const addLayerFunc = (gwt: GeoJsonWithTrack) => mmap.addTrackLayer(gwt)
-      loadTracksNew(toBeLoaded, addLayerFunc, props.sid)
 
-      loading.value = false
+      const loaderWorker = createTrackLoadingAsyncWorker(
+        addLayerFunc,
+        props.sid
+      )
+      const loaderQueue = queue(loaderWorker, NUMWORKERS)
+      loaderQueue.drain(() => loading.value = false)
+
+      // process toBeLoaded list. push it to queue in chunks
+      const listOfChunks: IdList[] = []
+      for (let i = 0; i < trackIdsToBeLoaded.length; i += BATCHSIZE) {
+        const batch: IdList = trackIdsToBeLoaded.slice(i, i + BATCHSIZE)
+        listOfChunks.push(batch)
+      }
+
+      if (listOfChunks.length > 0) {
+        loading.value = true
+        loaderQueue.push<IdList>(listOfChunks, (err, retVal) => {
+          if (err) console.error("Error in worker", err)
+          if (retVal) console.log("Return value from worker", retVal)
+        })
+      }
       return // done here
 
     } else if (command.command === 'year') {

@@ -13,14 +13,14 @@ import { BSpinner } from 'bootstrap-vue-next'
 import { ManagedMap } from '@/lib/mapservices/ManagedMap'
 import type { GeoJsonWithTrack, GeoJSONWithTrackId } from '@/lib/mapservices/ManagedMap'
 import { TrackVisibilityManager } from '@/lib/mapStateHelpers'
-import { getIdListByExtentAndTime, getGeoJson, getTracksByExtent, getTracksByYear, getTrackById } from '@/lib/trackServices'
+import { getIdListByExtentAndTime, getGeoJson, getTracksByExtent, getTrackIdsByYear, getTrackById } from '@/lib/trackServices'
 import _ from 'lodash'
 import { useConfigStore } from '@/stores/configstore'
 import { useMapStateStore } from '@/stores/mapstate'
 import { StyleFactoryFixedColors, THREE_BROWN_COLORSTYLE, FIVE_COLORFUL_COLORSTYLE } from '@/lib/mapStyles';
 import { TrackBag } from '@/lib/TrackBag'
 import { Track } from '@/lib/Track'
-import { queue } from 'async'
+import { queue, type QueueObject } from 'async'
 import { createTrackLoadingAsyncWorker, type IdList } from '@/lib/trackLoadAsyncWorker'
 
 const NUMWORKERS = 4
@@ -59,6 +59,8 @@ const configStore = useConfigStore()
 
 // ------------ Initialize map and set trackstyle from configstore
 const mmap = new ManagedMap()
+
+// load config
 configStore.loadConfig(props.sid)
   .then(() => {
     const TRACKSTYLE = configStore.get("TRACKSTYLE")
@@ -72,6 +74,17 @@ configStore.loadConfig(props.sid)
     }
   })
   .catch((e) => console.error("Could not load config", e))
+
+// Initialize loading worker and queue
+const addLayerFunc = (gwt: GeoJsonWithTrack) => mmap.addTrackLayer(gwt)
+
+// worker function and queue
+const loaderWorker = createTrackLoadingAsyncWorker(
+  addLayerFunc,
+  props.sid
+)
+const loaderQueue = queue(loaderWorker, NUMWORKERS)
+
 
 
 // ------------ Mount map and popup to dom
@@ -92,6 +105,47 @@ onMounted(() => {
   })
 })
 
+function makeVisible(ids: IdList, mmap: ManagedMap, queue: QueueObject<IdList>) {
+
+  const tvm = new TrackVisibilityManager(
+    mmap.getTrackIdsVisible(), // currently visible
+    ids, // to be visible
+    mmap.getTrackIds() // already loaded
+  )
+
+  // A: Set tracks already loaded to be visible
+  const toggleIds = tvm.toggleToVisible()
+  console.log('Toggle: ', toggleIds)
+  _.forEach(toggleIds, function (id) { mmap.setVisible(id) })
+
+  // B: tracks to hide
+  const toHide = tvm.toBeHidden()
+  console.log('To be hidden: ', toHide)
+  _.forEach(toHide, function (id) { mmap.setInvisible(id) })
+
+  // C: load missing tracks and add vector layers to map
+  const trackIdsToBeLoaded = tvm.toBeLoaded()
+  console.log('To be loaded: ', trackIdsToBeLoaded)
+
+  // stop spinner when queue empty ( one time promise)
+  queue.drain().then(() => loading.value = false).catch(() => console.error("what??"))
+
+  // process toBeLoaded list and cut it in chunks
+  const listOfChunks: IdList[] = []
+  for (let i = 0; i < trackIdsToBeLoaded.length; i += BATCHSIZE) {
+    const batch: IdList = trackIdsToBeLoaded.slice(i, i + BATCHSIZE)
+    listOfChunks.push(batch)
+  }
+
+  // push chunks to queue
+  if (listOfChunks.length > 0) {
+    loading.value = true
+    queue.push<IdList>(listOfChunks, (err, retVal) => {
+      if (err) console.error("Error in worker", err)
+      if (retVal) console.log("Return value from worker", retVal)
+    })
+  }
+}
 
 // ------------ Watch and execute loading commands
 type TrackLoadFunction = (() => Promise<Track[]>)
@@ -111,57 +165,15 @@ watch(
 
       const bbox = mmap.getMapViewBbox()
       const allIds: number[] = await getIdListByExtentAndTime(bbox, props.sid)
+      makeVisible(allIds, mmap, loaderQueue)
 
-      const tvm = new TrackVisibilityManager(
-        mmap.getTrackIdsVisible(), // currently visible
-        allIds, // to be visible
-        mmap.getTrackIds() // already loaded
-      )
 
-      // A1: Set tracks already loaded to be visible
-      const toggleIds = tvm.toggleToVisible()
-      console.log('Toggle: ', toggleIds)
-      _.forEach(toggleIds, function (id) { mmap.setVisible(id) })
-
-      // B: tracks to hide
-      const toHide = tvm.toBeHidden()
-      console.log('To be hidden: ', toHide)
-      _.forEach(toHide, function (id) { mmap.setInvisible(id) })
-
-      // A2: load missing and add vector layer to map
-      const trackIdsToBeLoaded = tvm.toBeLoaded()
-      console.log('To be loaded: ', trackIdsToBeLoaded)
-
-      // need a function which adds a track to the layer
-      const addLayerFunc = (gwt: GeoJsonWithTrack) => mmap.addTrackLayer(gwt)
-
-      const loaderWorker = createTrackLoadingAsyncWorker(
-        addLayerFunc,
-        props.sid
-      )
-      const loaderQueue = queue(loaderWorker, NUMWORKERS)
-      loaderQueue.drain(() => loading.value = false)
-
-      // process toBeLoaded list. push it to queue in chunks
-      const listOfChunks: IdList[] = []
-      for (let i = 0; i < trackIdsToBeLoaded.length; i += BATCHSIZE) {
-        const batch: IdList = trackIdsToBeLoaded.slice(i, i + BATCHSIZE)
-        listOfChunks.push(batch)
-      }
-
-      if (listOfChunks.length > 0) {
-        loading.value = true
-        loaderQueue.push<IdList>(listOfChunks, (err, retVal) => {
-          if (err) console.error("Error in worker", err)
-          if (retVal) console.log("Return value from worker", retVal)
-        })
-      }
       return // done here
 
     } else if (command.command === 'year') {
 
       const year = command.payload
-      loadFunc = () => getTracksByYear(year, props.sid)
+      loadFunc = () => getTrackIdsByYear(year, props.sid)
 
     } else if (command.command === 'bbox') {
 

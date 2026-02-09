@@ -70,7 +70,7 @@ async function getTrackYears(sid: string): Promise<number[]> {
 }
 
 // /// Get tracks by year
-async function getTracksByYear(year: number, sid: string) {
+async function getTrackIdsByYear(year: number, sid: string) {
   if (!_.isInteger(year)) throw Error('Year is not integer: ' + year)
   const url = `/api/tracks/byyear/${year}/sid/${sid}`
   let response
@@ -333,7 +333,7 @@ async function deleteTrack(id: number, sid: string) {
 }
 
 export {
-  getAllTracks, getTrackYears, getTracksByYear, getGeoJson, getTrackMetaDataByIdList,
+  getAllTracks, getTrackYears, getTrackIdsByYear, getGeoJson, getTrackMetaDataByIdList,
   updateTrack, updateTrackById,
   deleteTrack, getTrackById, getTracksByExtent,
   updateNameFromSource,

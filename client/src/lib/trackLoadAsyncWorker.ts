@@ -3,7 +3,7 @@
 import { Track } from '@/lib/Track'
 import type { GeoJSONWithTrackId, GeoJsonWithTrack } from '@/lib/mapservices/ManagedMap'
 import type { AsyncWorker } from 'async'
-import { getTracksByIdList, getGeoJson } from './trackServices';
+import { getTrackMetaDataByIdList, getGeoJson } from './trackServices';
 
 type IdList = number[]
 
@@ -20,7 +20,7 @@ function createTrackLoadingAsyncWorker(
   const worker: AsyncWorker<IdList> = async (idListTask: IdList) => {
 
     // ----
-    const trackMetadataList = await getTracksByIdList(idListTask, sid)
+    const trackMetadataList = await getTrackMetaDataByIdList(idListTask, sid)
     if (trackMetadataList === null) {
       throw Error("Track metadata list could not be loaded")
     }

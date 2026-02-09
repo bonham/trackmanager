@@ -162,7 +162,7 @@ async function getTrackById(id: number, sid: string): Promise<Track | null> {
   }
 }
 
-async function getTracksByIdList(idList: number[], sid: string): Promise<Track[] | null> {
+async function getTrackMetaDataByIdList(idList: number[], sid: string): Promise<Track[] | null> {
 
   const url = `/api/tracks/bylist/sid/${sid}`
   let response
@@ -333,7 +333,7 @@ async function deleteTrack(id: number, sid: string) {
 }
 
 export {
-  getAllTracks, getTrackYears, getTracksByYear, getGeoJson, getTracksByIdList,
+  getAllTracks, getTrackYears, getTracksByYear, getGeoJson, getTrackMetaDataByIdList,
   updateTrack, updateTrackById,
   deleteTrack, getTrackById, getTracksByExtent,
   updateNameFromSource,

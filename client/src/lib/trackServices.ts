@@ -4,8 +4,6 @@ import type { TrackPropertiesOptional } from '@/lib/Track'
 import _ from 'lodash'
 import type { GeoJSONWithTrackId } from '@/lib/mapservices/ManagedMap'
 import type { Extent } from 'ol/extent'
-
-
 import * as z from 'zod'
 
 
@@ -71,9 +69,11 @@ async function getTrackYears(sid: string): Promise<number[]> {
 
 // /// Get tracks by year
 async function getTrackIdsByYear(year: number, sid: string) {
+
   if (!_.isInteger(year)) throw Error('Year is not integer: ' + year)
-  const url = `/api/tracks/byyear/${year}/sid/${sid}`
-  let response
+  const url = `/api/tracks/ids/byyear/${year}/sid/${sid}`
+
+  let response: Response
   try {
     response = await fetch(url)
   } catch (error) {
@@ -86,16 +86,16 @@ async function getTrackIdsByYear(year: number, sid: string) {
   }
 
   try {
+
     const responseJson = await response.json() as unknown
+    const idList = z.array(z.number()).parse(responseJson)
+    return idList
 
-    if (!Array.isArray(responseJson)) throw Error("not array")
-    if (!responseJson.every(isTrackDataServer)) throw Error("not array of trackdata")
-
-    const trackArray = responseJson.map(t => new Track(t))
-    return trackArray
   } catch (error) {
+
     console.error('Error when processing result from http call', error)
     return []
+
   }
 }
 

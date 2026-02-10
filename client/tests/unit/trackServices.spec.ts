@@ -1,4 +1,4 @@
-import { getTrackYears, getIdListByExtentAndTime, getTrackMetaDataByIdList } from '@/lib/trackServices'
+import { getTrackYears, getIdListByExtentAndTime, getTrackMetaDataByIdList, getTrackIdsByYear } from '@/lib/trackServices'
 import { Track } from '@/lib/Track'
 import { describe, vi, test, expect, beforeEach } from "vitest"
 
@@ -89,5 +89,20 @@ describe('trackServices', () => {
 
     const yearList = await getTrackYears(sid)
     expect(yearList).toEqual(expectedResult)
+  })
+
+  test('getTrackIdsByYear', async () => {
+
+    const sid = "mysid"
+    const expectedResult = [5, 9, 7]
+
+    mockFetch.mockResolvedValue(new Response(
+      JSON.stringify(
+        expectedResult
+      )
+    ))
+
+    const idList = await getTrackIdsByYear(2000, sid)
+    expect(idList).toEqual(expectedResult)
   })
 })

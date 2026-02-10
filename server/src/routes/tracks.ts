@@ -269,7 +269,7 @@ router.get(
 
 /// // Get list of tracks by year
 router.get(
-  '/byyear/:year/sid/:sid',
+  '/ids/byyear/:year/sid/:sid',
   sidValidationChain,
   yearValidation,
   asyncWrapper(async (req: ExpressRequest, res: Response) => {
@@ -283,12 +283,15 @@ router.get(
       whereClause = `extract(YEAR from time) = ${year}`;
     }
 
-    const query = 'select id, name, length, length_calc, src, '
-      + 'time, timelength, timelength_calc, ascent, ascent_calc '
+    const query = 'select id '
       + `from ${schema}.tracks where ${whereClause} order by time desc`;
     try {
+
       const queryResult = await pool.query(query);
-      res.json(queryResult.rows);
+      const rowsUnknown = queryResult.rows as unknown
+      const rows = z.array(z.object({ id: z.number() })).parse(rowsUnknown)
+      res.json(rows.map((e) => e.id));
+
     } catch (err) {
       console.trace('Exception handling trace');
       console.error(err);

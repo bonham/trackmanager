@@ -9,9 +9,6 @@
     <div v-else class="year-navbar border-bottom border-top">
       <button v-if="buttonAll" class="btn m-2 button-year-navbar" :class="activeClass(buttonAllActive)"
         @click="loadAllTracks()">All</button>
-      <button v-if="buttonAllInView" class="btn m-2 button-year-navbar" :class="activeClass(buttonAllInViewActive)"
-        @click=" loadAllTracksinView()">All in
-        view</button>
       <button v-for="year in years" :key="year" class="btn m-2 button-year-navbar"
         :class="year in buttonYActive ? activeClass(buttonYActive[year] ?? false) : activeClass(false)"
         @click="loadTracksOfYear(year, false)">
@@ -34,9 +31,6 @@ import { useConfigStore } from '@/stores/configstore'
 import { ref } from 'vue'
 
 // Config ----------------------------
-// Todo: move to config.js
-const SHOW_BUTTON_ALL_IN_VIEW = false
-// Config ----------------------------
 
 // props
 const props = defineProps({
@@ -52,7 +46,6 @@ const mapStateStore = useMapStateStore()
 // reactive data
 const years = ref<number[]>([])
 const buttonsLoading = ref(false)
-const buttonAllInView = ref(SHOW_BUTTON_ALL_IN_VIEW)
 const buttonAll = ref(true)
 
 // buttons active
@@ -111,18 +104,9 @@ async function makeYearButtons() {
 function loadAllTracks() {
   mapStateStore.loadCommand = {
     command: 'all',
-    zoomOut: true
   }
   setAllButtonsInactive()
   buttonAllActive.value = true
-}
-
-function loadAllTracksinView() {
-  mapStateStore.loadCommand = {
-    command: 'bbox'
-  }
-  setAllButtonsInactive()
-  buttonAllInViewActive.value = true
 }
 
 function loadTracksOfYear(year: number, zoomOut: boolean) {

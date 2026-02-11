@@ -456,9 +456,10 @@ export class ManagedMap {
       if (lid === undefined) { console.error("Can not get track layer"); return }
       const source = lid.getSource()
       if (!(source instanceof VectorSource)) { console.error("source is not of right type"); return }
-      extentList.push(
-        source.getExtent()
-      )
+      const extent = source.getExtent()
+      if (extent !== null) {
+        extentList.push(extent)
+      }
     }
 
     if (extentList.length > 0) {

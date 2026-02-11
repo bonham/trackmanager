@@ -68,10 +68,10 @@ describe('trackServices', () => {
       )
     ))
 
-    const resultList = await getTrackMetaDataByIdList([1, 2], sid)
+    const resultList = await getTrackMetaDataByIdList([1, 2], sid, new AbortController().signal)
     expect(resultList).not.toBeNull()
     expect(resultList).toHaveLength(2)
-    expect(resultList![0]).toBeInstanceOf(Track)
+    expect(resultList[0]).toBeInstanceOf(Track)
     const requestInit = mockFetch.mock.calls[0]?.[1] as RequestInit | undefined
     expect(requestInit?.method).equals('POST')
 

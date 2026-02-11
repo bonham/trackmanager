@@ -6,6 +6,7 @@ import type { AsyncWorker } from 'async'
 import { getTrackMetaDataByIdList, getGeoJson } from './trackServices';
 
 type IdList = number[]
+interface Task { idList: IdList, signal: AbortSignal }
 
 /**
  * Loads tracks in batches and performs add function
@@ -15,12 +16,15 @@ type IdList = number[]
 function createTrackLoadingAsyncWorker(
   addToLayerFunction: (gwt: GeoJsonWithTrack) => void,
   sid: string
-): AsyncWorker<IdList> {
+): AsyncWorker<Task> {
 
-  const worker: AsyncWorker<IdList> = async (idListTask: IdList) => {
+  const worker: AsyncWorker<Task> = async (task: Task) => {
+
+    const { idList, signal } = task
+    if (signal.aborted) return
 
     // ----
-    const trackMetadataList = await getTrackMetaDataByIdList(idListTask, sid)
+    const trackMetadataList = await getTrackMetaDataByIdList(idList, sid, signal)
     if (trackMetadataList === null) {
       throw Error("Track metadata list could not be loaded")
     }
@@ -28,12 +32,14 @@ function createTrackLoadingAsyncWorker(
     trackMetadataList.forEach((track) => trackMetadataMap.set(track.id, track))
 
     // ----
-    const geoJsonList = await getGeoJson(idListTask, sid)
+    if (signal.aborted) return
+    const geoJsonList = await getGeoJson(idList, sid, signal)
     const geoJsonMap = new Map<number, GeoJSONWithTrackId>()
     geoJsonList.forEach((gwt) => geoJsonMap.set(gwt.id, gwt))
 
     // ----
-    idListTask.forEach((id) => {
+    if (signal.aborted) return
+    idList.forEach((id) => {
       const track = trackMetadataMap.get(id)
       if (track === undefined) throw Error(`Track for id ${id} is undefined`)
 
@@ -44,11 +50,12 @@ function createTrackLoadingAsyncWorker(
         track,
         geojson: geoJsonWithId.geojson
       }
+      if (signal.aborted) return
       addToLayerFunction(geoJsonWithTrack)
     })
   }
   return worker
 }
-export { createTrackLoadingAsyncWorker, type IdList }
+export { createTrackLoadingAsyncWorker, type IdList, type Task }
 
 

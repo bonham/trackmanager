@@ -162,7 +162,7 @@ async function getTrackById(id: number, sid: string): Promise<Track | null> {
   }
 }
 
-async function getTrackMetaDataByIdList(idList: number[], sid: string): Promise<Track[] | null> {
+async function getTrackMetaDataByIdList(idList: number[], sid: string, signal: AbortSignal): Promise<Track[]> {
 
   const url = `/api/tracks/bylist/sid/${sid}`
   let response
@@ -171,17 +171,20 @@ async function getTrackMetaDataByIdList(idList: number[], sid: string): Promise<
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(idList)
-      }
+        body: JSON.stringify(idList),
+        signal
+      },
+
     )
   } catch (error) {
+    if (error instanceof Error && error.name === 'AbortError') { console.log("Abort error trackservices"); return [] }
     console.error('Error when fetching tracks by year', error)
-    return null
+    return []
   }
   if (!response.ok) {
     const errText = await response.text()
     console.error(`Response code ${response.status} after fetching to ${url}, error: ${errText}`)
-    return null
+    return []
   }
 
   try {
@@ -199,13 +202,15 @@ async function getTrackMetaDataByIdList(idList: number[], sid: string): Promise<
     return trackList
 
   } catch (error) {
+
+    if (error instanceof Error && error.name === 'AbortError') { console.log("Abort error trackservices 2"); return [] }
     console.error('Error when processing result from http call', error)
-    return null
+    return []
   }
 }
 
 // /// Get geojson by id
-async function getGeoJson(idList: number[], sid: string) {
+async function getGeoJson(idList: number[], sid: string, signal: AbortSignal) {
   const payload = { ids: idList }
 
   const url = `/api/tracks/geojson/sid/${sid}`
@@ -216,28 +221,39 @@ async function getGeoJson(idList: number[], sid: string) {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
+      signal
     }
 
   )
 
-  const response = await fetch(req)
-  if (response.ok) {
-    let respJson
-    try {
-      respJson = (await response.json() as GeoJSONWithTrackId[])
-    } catch (e) {
-      if (e instanceof SyntaxError) {
-        console.log(e)
-        throw new Error('Failed to convert response to json. Response')
-      } else throw new Error("Unknown error after trying to read json response")
+  let response = new Response()
+
+  try {
+
+    response = await fetch(req)
+    if (response.ok) {
+      const respJson = await response.json() as GeoJSONWithTrackId[]
+      //const respJson = z.array(GeoJSONWithTrackIdSchema).parse(unknownVal)
+      return respJson
+    } else {
+      const errText = await response.text()
+      console.error(`Response code ${response.status} after fetching to ${url}, error: ${errText}`)
+      return []
     }
-    return respJson
-  } else {
-    const errText = await response.text()
-    throw new Error(`Response code ${response.status} after fetching to ${url}, error: ${errText}`)
+
+  } catch (e) {
+
+    if (e instanceof Error && e.name === 'AbortError') { console.log("Abort error trackservices") }
+    else if (e instanceof SyntaxError) {
+      console.error('Failed to convert response to json', e)
+      const errText = await response.text()
+      console.error("Response was not json, but: " + errText)
+    } else console.error("Unknown error after trying to read json response")
+    return []
   }
 }
+
 
 async function updateTrack(track: Track, attributes: string[], sid: string) {
   const id = track.id

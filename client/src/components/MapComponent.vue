@@ -19,7 +19,7 @@ import { useConfigStore } from '@/stores/configstore'
 import { useMapStateStore } from '@/stores/mapstate'
 import { StyleFactoryFixedColors, THREE_BROWN_COLORSTYLE, FIVE_COLORFUL_COLORSTYLE } from '@/lib/mapStyles';
 import { queue, type QueueObject } from 'async'
-import { createTrackLoadingAsyncWorker, type IdList } from '@/lib/trackLoadAsyncWorker'
+import { createTrackLoadingAsyncWorker, type IdList, type Task } from '@/lib/trackLoadAsyncWorker'
 
 const NUMWORKERS = 4
 const BATCHSIZE = 5
@@ -103,7 +103,12 @@ onMounted(() => {
   })
 })
 
-function makeVisible(ids: IdList, mmap: ManagedMap, queue: QueueObject<IdList>, zoomOut: boolean) {
+let controller: AbortController | undefined = undefined
+
+function makeVisible(ids: IdList, mmap: ManagedMap, queue: QueueObject<Task>, zoomOut: boolean) {
+
+  controller?.abort()
+  queue.remove(() => true)
 
   const tvm = new TrackVisibilityManager(
     mmap.getTrackIdsVisible(), // currently visible
@@ -136,17 +141,22 @@ function makeVisible(ids: IdList, mmap: ManagedMap, queue: QueueObject<IdList>, 
     .catch(() => console.error("what??"))
 
   // process toBeLoaded list and cut it in chunks
-  const listOfChunks: IdList[] = []
+  controller = new AbortController()
+  const listOfTasks: Task[] = []
   for (let i = 0; i < trackIdsToBeLoaded.length; i += BATCHSIZE) {
     const batch: IdList = trackIdsToBeLoaded.slice(i, i + BATCHSIZE)
-    listOfChunks.push(batch)
+    const task: Task = { idList: batch, signal: controller.signal }
+    listOfTasks.push(task)
   }
 
   // push chunks to queue
-  if (listOfChunks.length > 0) {
+  if (listOfTasks.length > 0) {
     loading.value = true
-    queue.push<IdList>(listOfChunks, (err, retVal) => {
-      if (err) console.error("Error in worker", err)
+    queue.push<Task>(listOfTasks, (err, retVal) => {
+      if (err) {
+        if (err.name === 'AbortError') console.log("Aborted worker")
+        else console.error("Error in worker", err)
+      }
       if (retVal) console.log("Return value from worker", retVal)
     })
   }

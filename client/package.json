@@ -13,7 +13,7 @@
     "lint": "eslint --quiet",
     "lintwarn": "sleep 10 && eslint",
     "test": "vitest",
-    "typecheck": "vue-tsc --noEmit -p tsconfig.vitest.json --composite false"
+    "typecheck": "vue-tsc --build --noEmit"
   },
   "dependencies": {
     "@popperjs/core": "^2.11.8",

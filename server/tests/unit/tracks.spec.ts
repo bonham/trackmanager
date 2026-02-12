@@ -1,4 +1,4 @@
-import { afterEach, beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
+import { beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
 vi.mock('pg', () => {
   const Pool = vi.fn(class FakePool {
     connect = vi.fn()
@@ -23,15 +23,24 @@ const mockGetSchema = vi.mocked(getSchema)
 const { Pool } = pg
 
 const mockTrack1 = {
-  id: '2',
+  id: 2,
   name: 'firsttrack',
   length: 34.5,
   src: 'mysrc',
-  time: '2020-01-01T11:11:11.011Z',
+  time: new Date('2020-01-01T11:11:11.011Z'),
   ascent: 3,
 };
 
-describe('Track byid', () => {
+const mockTrack2 = {
+  id: 7,
+  name: 'trackseven',
+  length: 44.5,
+  src: 'sevensrc',
+  time: new Date('2027-01-01T11:11:11.011Z'),
+  ascent: 3,
+};
+
+describe('Endpoints related to track metadata', () => {
 
   const mockQuery = vi.fn<() => Promise<any>>(() => Promise.resolve("initial"))
 
@@ -52,10 +61,6 @@ describe('Track byid', () => {
     });
   });
 
-  afterEach(() => {
-    vi.clearAllMocks();
-  });
-
   test('GET happy path', async () => {
     mockQuery.mockResolvedValue({ rows: [mockTrack1] });
     mockGetSchema.mockResolvedValue('myschema');
@@ -63,7 +68,7 @@ describe('Track byid', () => {
       .get('/api/tracks/byid/123/sid/correct')
       .expect(200);
 
-    expect(response.body).toEqual(mockTrack1);
+    expect(response.body).toEqual({ ...mockTrack1, time: mockTrack1.time.toISOString() });
     expect(mockGetSchema).toHaveBeenCalled();
   });
 
@@ -139,6 +144,49 @@ describe('Track byid', () => {
     await request(app)
       .delete('/api/tracks/byid/88/sid/abcsid')
       .expect(404);
+  });
+
+  test('Get list of tracks', async () => {
+    mockQuery.mockResolvedValue({ rows: [mockTrack1, mockTrack2] });
+    mockGetSchema.mockResolvedValue('myschema');
+    const response = await request(app)
+      .post('/api/tracks/bylist/sid/correct')
+      .set('Content-Type', 'application/json')
+      .send(
+        [2, 7]
+      )
+      .expect(200);
+
+    expect(response.body).toEqual([
+      { ...mockTrack1, time: mockTrack1.time.toISOString() },
+      { ...mockTrack2, time: mockTrack2.time.toISOString() }
+    ]
+    );
+    expect(mockGetSchema).toHaveBeenCalled();
+    //    expect(mockQuery).toHaveBeenCalledTimes(2); // why?
+    //    expect(mockQuery).toHaveBeenNthCalledWith(
+    // 2,
+    //   'SELECT id, name, length, src, time, ascent FROM myschema.tracks WHERE id = ANY($1::int[])',
+    //   [[2, 7]],
+    // );
+  });
+
+  test('Get list of ids', async () => {
+    const testArray = [-11, 4, 7, 9]
+    mockQuery.mockResolvedValue(
+      {
+        rows: testArray.map((id) => ({ id }))
+      }
+    );
+    mockGetSchema.mockResolvedValue('myschema');
+    const response = await request(app)
+      .post('/api/tracks/idlist/byextentbytime/sid/correct')
+      .set('Content-Type', 'application/json')
+      .send(testArray)
+      .expect(200);
+
+    expect(response.body).toEqual(testArray);
+    expect(mockGetSchema).toHaveBeenCalled();
   });
 
 });

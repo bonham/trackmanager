@@ -8,6 +8,7 @@ import { mkdtemp as mkdtempprom } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { basename, join } from 'node:path';
 import pg from 'pg';
+import * as z from 'zod';
 import { Track2DbWriter } from '../lib/Track2DbWriter.js';
 import { DateStringMatcher, StringCleaner } from '../lib/analyzeString.js';
 import { asyncWrapper } from '../lib/asyncMiddlewareWrapper.js';
@@ -177,9 +178,98 @@ router.get(
   })
 );
 
+/// // Get track metadata objects for list of tracks
+router.post(
+  '/bylist/sid/:sid',
+  sidValidationChain,
+  asyncWrapper(async (req: ExpressRequest, res: Response) => {
+    const { schema } = req as ReqWSchema
+
+    // validate body. expect list of integers ( track ids )
+    const body = req.body;
+
+    let idList: number[];
+    try {
+      idList = z.array(z.number().int().nonnegative()).parse(body);
+    } catch (e) {
+      console.error('Error parsing track id list', e);
+      console.error('Received body:', body);
+      res.status(400).send('Bad request: Could not parse body as list of track ids');
+      return;
+    }
+
+    // empty list shortcut
+    if (idList.length === 0) {
+      res.json([]);
+      return;
+    }
+
+    // compose query
+    const inClause = `(${idList.join(',')})`;
+
+    const query = 'select id, name, length, length_calc, src, '
+      + 'time, timelength, timelength_calc, ascent, ascent_calc '
+      + `from ${schema}.tracks where id in ${inClause}`;
+
+    try {
+      const queryResult = await pool.query(query);
+      const qResult = queryResult.rows;
+      const rows = z.array(z.object({
+        id: z.number().int().nonnegative(),
+        name: z.string().nullable(),
+        length: z.number().nullable(),
+        src: z.string().nullable(),
+        time: z.date().nullable(),
+        ascent: z.number().nullable()
+      })).parse(qResult);
+
+      if (rows.length === 0) {
+        res.json([]);
+      } else {
+        res.json(rows);
+      }
+
+    } catch (err) {
+      console.trace('Exception handling trace');
+      console.error(err);
+      if (err instanceof Error && 'message' in err) res.status(500).send(err.message);
+      else res.status(500);
+    }
+
+  })
+);
+
+// Get years for existing tracks
+router.get(
+  '/trackyears/sid/:sid',
+  sidValidationChain,
+  asyncWrapper(async (req: ExpressRequest, res: Response) => {
+    const { schema } = req as ReqWSchema
+
+    const query = "select distinct to_char(time, 'YYYY') as year "
+      + `from ${schema}.tracks`;
+
+    const SQLResult = z.array(z.object({ year: z.string() }));
+    try {
+      const queryResult = await pool.query(query);
+      const tmpResult = queryResult.rows as unknown; // [ [5], [7], [9], ...]
+
+      const rows = SQLResult.parse(tmpResult);
+      res.json(rows.map((r) => r.year));
+
+    } catch (err) {
+      console.trace('Exception handling trace');
+      console.error(err);
+      if (err instanceof Error && 'message' in err) res.status(500).send(err.message);
+      else res.status(500);
+    }
+
+  })
+);
+
 /// // Get list of tracks by year
 router.get(
-  '/byyear/:year/sid/:sid',
+  '/ids/byyear/:year/sid/:sid',
   sidValidationChain,
   yearValidation,
   asyncWrapper(async (req: ExpressRequest, res: Response) => {
@@ -193,12 +283,15 @@ router.get(
       whereClause = `extract(YEAR from time) = ${year}`;
     }
 
-    const query = 'select id, name, length, length_calc, src, '
-      + 'time, timelength, timelength_calc, ascent, ascent_calc '
+    const query = 'select id '
       + `from ${schema}.tracks where ${whereClause} order by time desc`;
     try {
+
       const queryResult = await pool.query(query);
-      res.json(queryResult.rows);
+      const rowsUnknown = queryResult.rows as unknown
+      const rows = z.array(z.object({ id: z.number() })).parse(rowsUnknown)
+      res.json(rows.map((e) => e.id));
+
     } catch (err) {
       console.trace('Exception handling trace');
       console.error(err);
@@ -236,6 +329,55 @@ router.post(
 
       const queryResult = await pool.query(query);
       res.json(queryResult.rows);
+    } catch (err) {
+      next(err);
+    }
+  })
+);
+
+/// // Get list of track ids by extent (bounding box) and time 
+// This is to have a priority for fetching in batches
+router.post(
+  '/idlist/byextentbytime/sid/:sid',
+  sidValidationChain,
+  asyncWrapper(async (req: ExpressRequest, res: Response, next: NextFunction) => {
+    try {
+      const { schema } = req as ReqWSchema;
+
+      // get extent from payload
+      let bbox: number[]
+      try {
+        bbox = z.array(z.number()).length(4).parse(req.body);
+      } catch (e) {
+        console.error('Error parsing bounding box from payload', e);
+        console.error('Payload for bounding box is not array of 4 numbers');
+        next(e);
+        return;
+      }
+
+      const query =
+      {
+        name: 'Get track ids by extent and time',
+        text: `
+      with g as (
+        select
+        id,
+        time,
+        case when
+          ST_Intersects(wkb_geometry, ST_MakeEnvelope($1,$2,$3,$4, '4326'))
+          then 1
+          else 2
+        end as intersects
+        from ${schema}.tracks  
+        )
+        select id from g order by intersects asc , time desc
+      `,
+        values: bbox,
+      }
+      const queryResult = await pool.query(query);
+      const validatedResult = z.array(z.object({ id: z.number().int() })).parse(queryResult.rows);
+      const idList = validatedResult.map((r) => r.id);
+      res.json(idList);
     } catch (err) {
       next(err);
     }

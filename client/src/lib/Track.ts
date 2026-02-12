@@ -1,6 +1,7 @@
 import { DateTime } from 'luxon'
 import _ from 'lodash'
 import type { GeoJsonObject } from 'geojson'
+import * as z from 'zod'
 
 
 import { sprintf } from 'sprintf-js'
@@ -39,6 +40,22 @@ interface TrackPropertiesOptional {
   time?: DateTime | null | undefined
 }
 
+const TrackDataServerGetallSchema = z.object({
+  id: z.number(),
+  name: z.string().nullable(),
+  length: z.number().nullable(),
+  length_calc: z.number().nullable(),
+  src: z.string().nullable(),
+  time: z.string().nullable(),
+  timelength: z.number().nullable(),
+  timelength_calc: z.number().nullable(),
+  ascent: z.number().nullable(),
+  ascent_calc: z.number().nullable(),
+})
+
+type TrackDataServerGetall = z.infer<typeof TrackDataServerGetallSchema>
+
+/* Original definition:
 interface TrackDataServerGetall {
   id: number,
   name: string | null,
@@ -51,6 +68,7 @@ interface TrackDataServerGetall {
   ascent: number | null,
   ascent_calc: number | null,
 }
+*/
 
 interface HMS {
   hours: number;
@@ -255,4 +273,5 @@ class TrackCollection {
 }
 
 export { Track, TrackCollection, isTrackDataServer, isTrackDataServerArray }
+export { TrackDataServerGetallSchema }
 export type { TrackPropertiesOptional, TrackInitData, TrackDataServerGetall }

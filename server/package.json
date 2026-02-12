@@ -36,7 +36,8 @@
     "morgan": "^1.10.0",
     "pg": "^8.5.1",
     "tsx": "^4.19.2",
-    "xpath": "^0.0.34"
+    "xpath": "^0.0.34",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@tsconfig/node20": "^20.1.4",
@@ -48,7 +49,7 @@
     "@types/lodash": "^4.14.202",
     "@types/luxon": "^3.3.4",
     "@types/morgan": "^1.9.4",
-    "@types/node": "^24.10.9",
+    "@types/node": "^22.19.7",
     "@types/pg": "^8.10.0",
     "@types/supertest": "^6.0.2",
     "eslint": "^9.13.0",

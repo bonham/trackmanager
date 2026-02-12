@@ -1,6 +1,7 @@
 .DS_Store
 node_modules
 /dist
+/dist_random
 
 
 # local env files
@@ -32,3 +33,4 @@ pnpm-debug.log*
 
 #
 coverage
+*.tsbuildinfo

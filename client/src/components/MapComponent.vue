@@ -8,20 +8,21 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref, watch, onMounted, nextTick } from 'vue'
+import { ref, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import { BSpinner } from 'bootstrap-vue-next'
 import { ManagedMap } from '@/lib/mapservices/ManagedMap'
-import type { GeoJSONWithTrackId } from '@/lib/mapservices/ManagedMap'
+import type { GeoJsonWithTrack } from '@/lib/zodSchemas'
 import { TrackVisibilityManager } from '@/lib/mapStateHelpers'
-import { getGeoJson, getTracksByExtent, getTracksByYear, getTrackById, getAllTracks } from '@/lib/trackServices'
+import { getIdListByExtentAndTime, getTrackIdsByYear } from '@/lib/trackServices'
 import _ from 'lodash'
 import { useConfigStore } from '@/stores/configstore'
 import { useMapStateStore } from '@/stores/mapstate'
 import { StyleFactoryFixedColors, THREE_BROWN_COLORSTYLE, FIVE_COLORFUL_COLORSTYLE } from '@/lib/mapStyles';
-import { TrackBag } from '@/lib/TrackBag'
-import { Track } from '@/lib/Track'
+import { queue, type QueueObject } from 'async'
+import { createTrackLoadingAsyncWorker, type IdList, type Task } from '@/lib/trackLoadAsyncWorker'
 
-
+const NUMWORKERS = 4
+const BATCHSIZE = 5
 /**
  * This component provides a div anchor with the openlayers map attached to it.
  * It is using javascript class ManagedMap to interact with openlayers library.
@@ -56,6 +57,8 @@ const configStore = useConfigStore()
 
 // ------------ Initialize map and set trackstyle from configstore
 const mmap = new ManagedMap()
+
+// load config
 configStore.loadConfig(props.sid)
   .then(() => {
     const TRACKSTYLE = configStore.get("TRACKSTYLE")
@@ -69,6 +72,17 @@ configStore.loadConfig(props.sid)
     }
   })
   .catch((e) => console.error("Could not load config", e))
+
+// Initialize loading worker and queue
+const addLayerFunc = (gwt: GeoJsonWithTrack) => mmap.addTrackLayer(gwt)
+
+// worker function and queue
+const loaderWorker = createTrackLoadingAsyncWorker(
+  addLayerFunc,
+  props.sid
+)
+const loaderQueue = queue(loaderWorker, NUMWORKERS)
+
 
 
 // ------------ Mount map and popup to dom
@@ -89,123 +103,106 @@ onMounted(() => {
   })
 })
 
+let controller: AbortController | undefined = undefined
+onUnmounted(() => {
+  controller?.abort()
+})
 
-// ------------ Watch and execute loading commands
-type TrackLoadFunction = (() => Promise<Track[]>)
-watch(
-  () => mapStateStore.loadCommand, async (command) => {
+function makeVisible(ids: IdList, mmap: ManagedMap, queue: QueueObject<Task>, zoomOut: boolean) {
 
-    // calculate the load function based on command and args
-    let loadFunc: TrackLoadFunction
-    console.log(`received command ${command.command}`)
+  queue.remove(() => true)
+  controller?.abort() // abort tasks of previous run
 
-    if (command.command === 'all') {
-
-      loadFunc = () => getAllTracks(props.sid)
-
-    } else if (command.command === 'year') {
-
-      const year = command.payload
-      loadFunc = () => getTracksByYear(year, props.sid)
-
-    } else if (command.command === 'bbox') {
-
-      const bbox = mmap.getMapViewBbox()
-      loadFunc = () => getTracksByExtent(bbox, props.sid)
-
-    } else if (command.command === 'track') {
-
-      const id = command.payload
-      loadFunc = async () => {
-        const singleTrack = await getTrackById(id, props.sid)
-        if (singleTrack === null) {
-          console.error(`Could not fetch track with id ${id}`)
-          return []
-        } else {
-          return [singleTrack]
-        }
-      }
-    } else {
-      loadFunc = () => Promise.resolve([])
-    }
-
-    // execute the load function
-    loading.value = true
-    const tracks = await loadFunc()
-    // put in bag ;-)
-    const trackBag = new TrackBag()
-    trackBag.setLoadedTracks(tracks)
-
-    // finally redraw
-    await drawTracks(!!command.zoomOut, trackBag)
-    loading.value = false
-  }
-)
-
-// ------------ Draw tracks , reset selection, zoomOut
-/**
- * This method calculates which geojson structures to be loaded from DB and manipulates ManagedMap object
- * to modify appearance of map.
- * 
- * @param zoomOut Specify if map should be zoomed to extent of all tracks after drawing
- * @param tbag Track metadata information
- */
-async function drawTracks(zoomOut = false, tbag: TrackBag) {
-  if (mmap === null) {
-    console.error("mmap not initalized")
-    return
-  }
-
-  // reset selection and popups
-  mmap.clearSelection()
-  mmap.popovermgr?.dispose()
-
+  // calculate which tracks to load , which to flip visibility
   const tvm = new TrackVisibilityManager(
     mmap.getTrackIdsVisible(), // currently visible
-    tbag.getLoadedTrackIds(), // to be visible
+    ids, // to be visible
     mmap.getTrackIds() // already loaded
   )
 
-  // A1: Set tracks already loaded to be visible
+  // A: Set tracks already loaded to be visible
   const toggleIds = tvm.toggleToVisible()
   console.log('Toggle: ', toggleIds)
   _.forEach(toggleIds, function (id) { mmap.setVisible(id) })
-
-  // A2: load missing and add vector layer to map
-  const toBeLoaded = tvm.toBeLoaded()
-  console.log('To be loaded: ', toBeLoaded)
-
-  let resultSet: GeoJSONWithTrackId[]
-  if (toBeLoaded.length > 0) {
-    resultSet = await getGeoJson(toBeLoaded, props.sid)
-  } else {
-    resultSet = []
-  }
-  // Tracks in managed map do not really have an order. But for some styling scenarios we want tracks ordered by date. 
-  // This is a dirty hack to maintain an order for the tracks newly added to mmap. This hack will not maintain overall track order when tracks
-  // are loaded in chunks/batches
-  const tmpList = resultSet.map((result) => {
-    return {
-      track: tbag.getTrackById(result.id),
-      geojson: result.geojson
-    }
-  })
-  tmpList.sort((a, b) => {
-    return a.track.secondsSinceEpoch() - b.track.secondsSinceEpoch()
-  })
-  tmpList.forEach(ele => {
-    mmap.addTrackLayer(ele)
-  })
 
   // B: tracks to hide
   const toHide = tvm.toBeHidden()
   console.log('To be hidden: ', toHide)
   _.forEach(toHide, function (id) { mmap.setInvisible(id) })
 
-  if (zoomOut) {
-    mmap.setExtentAndZoomOut()
+  // C: load missing tracks and add vector layers to map
+  const trackIdsToBeLoaded = tvm.toBeLoaded()
+  console.log('To be loaded: ', trackIdsToBeLoaded)
+
+  // stop spinner when queue empty ( one time promise)
+  queue.drain()
+    .then(
+      () => {
+        loading.value = false
+        if (zoomOut) { mmap.setExtentAndZoomOut() }
+      }
+    )
+    .catch((e) => console.error("what??", e))
+
+  // process toBeLoaded list and cut it in chunks
+  controller = new AbortController()
+  const listOfTasks: Task[] = []
+  for (let i = 0; i < trackIdsToBeLoaded.length; i += BATCHSIZE) {
+    const batch: IdList = trackIdsToBeLoaded.slice(i, i + BATCHSIZE)
+    const task: Task = { idList: batch, signal: controller.signal }
+    listOfTasks.push(task)
+  }
+
+  // push chunks to queue
+  if (listOfTasks.length > 0) {
+    loading.value = true
+    queue.push<Task>(listOfTasks, (err, retVal) => {
+      if (err) {
+        if (err.name === 'AbortError') console.log("Aborted worker")
+        else console.error("Error in worker", err)
+      }
+      if (retVal) console.log("Return value from worker", retVal)
+    })
   }
 }
+
+// ------------ Watch and execute loading commands
+watch(
+  () => mapStateStore.loadCommand,
+  async (command) => {
+
+    console.log(`received command ${command.command}`)
+
+    mmap.clearSelection()
+    mmap.popovermgr?.dispose()
+
+    const zoomOut = command.zoomOut ?? false
+    loading.value = true // set to false after queue drain
+
+    if (command.command === 'all') {
+
+      const bbox = mmap.getMapViewBbox()
+      const allIds: number[] = await getIdListByExtentAndTime(bbox, props.sid)
+
+      makeVisible(allIds, mmap, loaderQueue, zoomOut)
+
+    } else if (command.command === 'year') {
+
+      const year = command.payload
+      const idList = await getTrackIdsByYear(year, props.sid)
+      makeVisible(idList, mmap, loaderQueue, zoomOut)
+
+    } else if (command.command === 'track') {
+
+      const id = command.payload
+      makeVisible([id], mmap, loaderQueue, zoomOut)
+
+    } else {
+
+      console.error(`unknown command ${command.command}`)
+    }
+  }
+)
 
 </script>
 

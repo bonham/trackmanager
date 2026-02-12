@@ -9,9 +9,6 @@
     <div v-else class="year-navbar border-bottom border-top">
       <button v-if="buttonAll" class="btn m-2 button-year-navbar" :class="activeClass(buttonAllActive)"
         @click="loadAllTracks()">All</button>
-      <button v-if="buttonAllInView" class="btn m-2 button-year-navbar" :class="activeClass(buttonAllInViewActive)"
-        @click=" loadAllTracksinView()">All in
-        view</button>
       <button v-for="year in years" :key="year" class="btn m-2 button-year-navbar"
         :class="year in buttonYActive ? activeClass(buttonYActive[year] ?? false) : activeClass(false)"
         @click="loadTracksOfYear(year, false)">
@@ -27,16 +24,12 @@
 <script setup lang="ts">
 import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'
 import MapComponent from '@/components/MapComponent.vue'
-import { TrackCollection } from '@/lib/Track'
-import { getAllTracks } from '@/lib/trackServices'
+import { getTrackYears } from '@/lib/trackServices'
 import { useMapStateStore } from '@/stores/mapstate'
 import { useConfigStore } from '@/stores/configstore'
 
 import { ref } from 'vue'
 
-// Config ----------------------------
-// Todo: move to config.js
-const SHOW_BUTTON_ALL_IN_VIEW = false
 // Config ----------------------------
 
 // props
@@ -53,7 +46,6 @@ const mapStateStore = useMapStateStore()
 // reactive data
 const years = ref<number[]>([])
 const buttonsLoading = ref(false)
-const buttonAllInView = ref(SHOW_BUTTON_ALL_IN_VIEW)
 const buttonAll = ref(true)
 
 // buttons active
@@ -73,17 +65,16 @@ configStore.loadConfig(props.sid)
     if (initialState === "ALL") {
 
       // async possible
-      getYears()
-        .then(() => { buttonsLoading.value = false })
-        .catch((e) => console.error("Error while loading years", e))
-
+      await makeYearButtons()
+      buttonsLoading.value = false
       loadAllTracks()
 
     } else if (initialState === "LATEST_YEAR") {
 
       // not async pls
-      await getYears()
+      await makeYearButtons()
       buttonsLoading.value = false
+      // calc and load most recent year
       if (years.value.length > 0) {
         const mostRecentYear = years.value[0]
         if (mostRecentYear !== undefined) {
@@ -94,36 +85,28 @@ configStore.loadConfig(props.sid)
       }
     }
   })
-  .catch((e) => console.error("Error when loading config store", e))
+  .catch((e) => console.error("Error on initial load", e))
 
-async function getYears() {
-  await getAllTracks(props.sid)
-    .then((trackList) => {
-      const tColl = new TrackCollection(trackList)
-      years.value = tColl.yearList().sort((a, b) => b - a)
-      // button active state
-      years.value.forEach((y) => {
-        buttonYActive.value[y] = false
-      })
-    })
-    .catch((e: Error) => { console.log("Error in getYears", e) })
+/**
+ * Fetch available years for tracks and initialize button states
+ */
+async function makeYearButtons() {
+
+  const yearList = await getTrackYears(props.sid)
+  years.value = yearList.sort((a, b) => b - a)
+
+  // initialize button active state
+  years.value.forEach((y) => {
+    buttonYActive.value[y] = false
+  })
 }
 
 function loadAllTracks() {
   mapStateStore.loadCommand = {
     command: 'all',
-    zoomOut: true
   }
   setAllButtonsInactive()
   buttonAllActive.value = true
-}
-
-function loadAllTracksinView() {
-  mapStateStore.loadCommand = {
-    command: 'bbox'
-  }
-  setAllButtonsInactive()
-  buttonAllInViewActive.value = true
 }
 
 function loadTracksOfYear(year: number, zoomOut: boolean) {

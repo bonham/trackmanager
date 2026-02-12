@@ -1,9 +1,17 @@
 {
-  "vitest.enable": true,
-  "vitest.commandLine": "npx vitest",
-  "eslint.validate": ["javascript", "javascriptreact", "vue"],
+  "eslint.lintTask.enable": false,
+  "eslint.run": "onType",
+  "eslint.validate": [
+    "typescript",
+    "typescriptreact",
+    "javascript",
+    "javascriptreact",
+    "vue"
+  ],
+  "eslint.workingDirectories": [{ "mode": "auto" }],
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "[vue]": {
     "editor.defaultFormatter": "Vue.volar"
-  }
+  },
+  "editor.codeActionsOnSave": { "source.fixAll.eslint": "always" }
 }

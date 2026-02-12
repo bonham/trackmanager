@@ -64,6 +64,8 @@ const mockFetch = vi.fn((reqOrUrl) => {
     return new Response(JSON.stringify({ value: null }))
   } else if (/^\/api\/tracks\/namefromsrc\/404\/sid\/abcd1234/.exec(req.url)) {
     return new Response()
+  } else if (/^\/api\/tracks\/trackyears\/sid\/abcd1234/.exec(req.url)) {
+    return new Response(JSON.stringify([2021, 2020, 2019]))
   } else {
     throw new Error(`Url ${req.url} is not mocked`)
   }

@@ -43,7 +43,7 @@
       "problemMatcher": ["$eslint-stylish"],
       "label": "eslint: lint whole folder client",
       "runOptions": {
-        "runOn": "folderOpen"
+        //"runOn": "folderOpen"
       },
       "presentation": {
         "echo": true,

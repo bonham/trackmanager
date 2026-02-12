@@ -23,7 +23,17 @@ export default defineConfig({
     })
   ],
   build: {
-    sourcemap: true
+    sourcemap: true,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          lodash: ['lodash'],
+          bvn: ['bootstrap-vue-next'],
+          mmap: ['@/lib/mapservices/ManagedMap'],
+          openlayers: ['ol']
+        }
+      }
+    }
   },
   resolve: {
     alias: {

@@ -8,7 +8,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref, watch, onMounted, nextTick } from 'vue'
+import { ref, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import { BSpinner } from 'bootstrap-vue-next'
 import { ManagedMap } from '@/lib/mapservices/ManagedMap'
 import type { GeoJsonWithTrack } from '@/lib/mapservices/ManagedMap'
@@ -104,6 +104,9 @@ onMounted(() => {
 })
 
 let controller: AbortController | undefined = undefined
+onUnmounted(() => {
+  controller?.abort()
+})
 
 function makeVisible(ids: IdList, mmap: ManagedMap, queue: QueueObject<Task>, zoomOut: boolean) {
 

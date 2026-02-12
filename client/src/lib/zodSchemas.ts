@@ -71,7 +71,7 @@ export const GeometrySchema = z.union([
 export type GeoJsonObject = z.infer<typeof GeoJsonObjectSchema>
 
 
-const GeoJSONWithTrackIdSchema = z.object({ id: z.number(), geojson: GeoJsonObjectSchema })
+const GeoJSONWithTrackIdSchema = z.object({ id: z.number(), geojson: z.union([MultiLineStringSchema, LineStringSchema]) })
 type GeoJSONWithTrackId = z.infer<typeof GeoJSONWithTrackIdSchema>
 
 export { GeoJSONWithTrackIdSchema, type GeoJSONWithTrackId }

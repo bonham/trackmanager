@@ -2,7 +2,8 @@
 import { Track, isTrackDataServer } from '@/lib/Track'
 import type { TrackPropertiesOptional } from '@/lib/Track'
 import _ from 'lodash'
-import type { GeoJSONWithTrackId } from '@/lib/mapservices/ManagedMap'
+import { GeoJSONWithTrackIdSchema } from './zodSchemas'
+
 import type { Extent } from 'ol/extent'
 import * as z from 'zod'
 
@@ -233,8 +234,9 @@ async function getGeoJson(idList: number[], sid: string, signal: AbortSignal) {
 
     response = await fetch(req)
     if (response.ok) {
-      const respJson = await response.json() as GeoJSONWithTrackId[]
-      //const respJson = z.array(GeoJSONWithTrackIdSchema).parse(unknownVal)
+      const tmpResp = await response.json() as unknown
+      const respJson = z.array(GeoJSONWithTrackIdSchema).parse(tmpResp)
+
       return respJson
     } else {
       const errText = await response.text()
@@ -249,7 +251,7 @@ async function getGeoJson(idList: number[], sid: string, signal: AbortSignal) {
       console.error('Failed to convert response to json', e)
       const errText = await response.text()
       console.error("Response was not json, but: " + errText)
-    } else console.error("Unknown error after trying to read json response")
+    } else console.error("Unknown error after trying to read json response", e)
     return []
   }
 }

@@ -173,15 +173,14 @@ watch(
     mmap.popovermgr?.dispose()
 
     const zoomOut = command.zoomOut ?? false
+    loading.value = true // set to false after queue drain
 
     if (command.command === 'all') {
 
       const bbox = mmap.getMapViewBbox()
       const allIds: number[] = await getIdListByExtentAndTime(bbox, props.sid)
+
       makeVisible(allIds, mmap, loaderQueue, zoomOut)
-
-
-      return // done here
 
     } else if (command.command === 'year') {
 
@@ -196,8 +195,7 @@ watch(
 
     } else {
 
-      throw Error(`unknown command ${command.command}`)
-
+      console.error(`unknown command ${command.command}`)
     }
   }
 )

@@ -107,9 +107,10 @@ let controller: AbortController | undefined = undefined
 
 function makeVisible(ids: IdList, mmap: ManagedMap, queue: QueueObject<Task>, zoomOut: boolean) {
 
-  controller?.abort()
   queue.remove(() => true)
+  controller?.abort() // abort tasks of previous run
 
+  // calculate which tracks to load , which to flip visibility
   const tvm = new TrackVisibilityManager(
     mmap.getTrackIdsVisible(), // currently visible
     ids, // to be visible
@@ -138,7 +139,7 @@ function makeVisible(ids: IdList, mmap: ManagedMap, queue: QueueObject<Task>, zo
         if (zoomOut) { mmap.setExtentAndZoomOut() }
       }
     )
-    .catch(() => console.error("what??"))
+    .catch((e) => console.error("what??", e))
 
   // process toBeLoaded list and cut it in chunks
   controller = new AbortController()

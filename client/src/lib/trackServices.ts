@@ -178,7 +178,7 @@ async function getTrackMetaDataByIdList(idList: number[], sid: string, signal: A
 
     )
   } catch (error) {
-    if (error instanceof Error && error.name === 'AbortError') { console.log("Abort error trackservices"); return [] }
+    if (error instanceof Error && error.name === 'AbortError') { return [] }
     console.error('Error when fetching tracks by year', error)
     return []
   }
@@ -204,7 +204,7 @@ async function getTrackMetaDataByIdList(idList: number[], sid: string, signal: A
 
   } catch (error) {
 
-    if (error instanceof Error && error.name === 'AbortError') { console.log("Abort error trackservices 2"); return [] }
+    if (error instanceof Error && error.name === 'AbortError') { return [] }
     console.error('Error when processing result from http call', error)
     return []
   }
@@ -246,7 +246,7 @@ async function getGeoJson(idList: number[], sid: string, signal: AbortSignal) {
 
   } catch (e) {
 
-    if (e instanceof Error && e.name === 'AbortError') { console.log("Abort error trackservices") }
+    if (e instanceof Error && e.name === 'AbortError') { return [] }
     else if (e instanceof SyntaxError) {
       console.error('Failed to convert response to json', e)
       const errText = await response.text()

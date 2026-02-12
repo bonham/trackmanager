@@ -16,7 +16,7 @@ import { getUid } from 'ol/util'
 import type { Geometry } from 'ol/geom'
 import { SelectEvent } from 'ol/interaction/Select'
 import type BaseEvent from 'ol/events/Event'
-import type { GeoJsonObject } from 'geojson'
+import type { GeoJsonWithTrack } from '@/lib/zodSchemas'
 import _ from 'lodash'
 import { StyleFactoryFixedColors } from '../mapStyles'
 import type { StyleFactoryLike } from '../mapStyles'
@@ -24,11 +24,7 @@ import type { Track } from '@/lib/Track'
 import type { Coordinate } from 'ol/coordinate'
 
 
-
-
 interface SelectionObject { selected: number[], deselected: number[] }
-export interface GeoJSONWithTrackId { id: number, geojson: GeoJsonObject }
-export interface GeoJsonWithTrack { track: Track, geojson: GeoJsonObject }
 interface FeatureIdMapMember { vectorLayerId: string, trackId: number }
 
 

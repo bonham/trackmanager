@@ -11,7 +11,7 @@
 import { ref, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import { BSpinner } from 'bootstrap-vue-next'
 import { ManagedMap } from '@/lib/mapservices/ManagedMap'
-import type { GeoJsonWithTrack } from '@/lib/mapservices/ManagedMap'
+import type { GeoJsonWithTrack } from '@/lib/zodSchemas'
 import { TrackVisibilityManager } from '@/lib/mapStateHelpers'
 import { getIdListByExtentAndTime, getTrackIdsByYear } from '@/lib/trackServices'
 import _ from 'lodash'

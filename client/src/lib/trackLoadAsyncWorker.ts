@@ -1,7 +1,7 @@
 
 /* eslint-disable @typescript-eslint/no-misused-promises */
 import { Track } from '@/lib/Track'
-import type { GeoJSONWithTrackId, GeoJsonWithTrack } from '@/lib/mapservices/ManagedMap'
+import type { GeoJsonWithTrack, GeoJSONWithTrackId } from '@/lib/zodSchemas'
 import type { AsyncWorker } from 'async'
 import { getTrackMetaDataByIdList, getGeoJson } from './trackServices';
 

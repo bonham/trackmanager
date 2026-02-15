@@ -1,8 +1,6 @@
 import * as z from 'zod'
 import type { Track } from '@/lib/Track'
-
-//import type { GeoJsonObject } from 'geojson'
-//export type { GeoJsonObject }
+import type { MultiLineString } from 'geojson'
 
 export const BBoxSchema = z.union([
   z.tuple([z.number(), z.number(), z.number(), z.number()]),
@@ -23,7 +21,7 @@ export const GeoJsonTypesSchema = z.enum([
   'FeatureCollection'
 ]);
 
-export const GeoJsonObjectSchema = z.object({
+const GeoJsonObjectSchema = z.object({
   type: GeoJsonTypesSchema,
   bbox: BBoxSchema.optional()
 });
@@ -68,12 +66,42 @@ export const GeometrySchema = z.union([
   MultiPolygonSchema
 ]);
 
-export type GeoJsonObject = z.infer<typeof GeoJsonObjectSchema>
+// GeoJSON Properties and Feature schemas
+export const GeoJsonPropertiesSchema = z.record(z.string(), z.any()).nullable();
+
+export const FeatureSchema = z.object({
+  type: z.literal('Feature'),
+  geometry: GeometrySchema,
+  id: z.union([z.string(), z.number()]).optional(),
+  properties: GeoJsonPropertiesSchema,
+  bbox: BBoxSchema.optional()
+});
+
+// extra .... to improve with FeatureSchema.refine(..)
+export const MultiLineStringFeatureSchema = z.object({
+  type: z.literal('Feature'),
+  geometry: MultiLineStringSchema,
+  id: z.union([z.string(), z.number()]).optional(),
+  properties: GeoJsonPropertiesSchema,
+  bbox: BBoxSchema.optional()
+});
 
 
-const GeoJSONWithTrackIdSchema = z.object({ id: z.number(), geojson: z.union([MultiLineStringSchema, LineStringSchema]) })
-type GeoJSONWithTrackId = z.infer<typeof GeoJSONWithTrackIdSchema>
+export const FeatureCollectionSchema = z.object({
+  type: z.literal('FeatureCollection'),
+  features: z.array(FeatureSchema),
+  bbox: BBoxSchema.optional()
+});
 
-export { GeoJSONWithTrackIdSchema, type GeoJSONWithTrackId }
+// Type inference for Feature and FeatureCollection
+export type GeoJsonProperties = z.infer<typeof GeoJsonPropertiesSchema>;
+export type Feature = z.infer<typeof FeatureSchema>;
+export type MultiLineStringFeature = z.infer<typeof MultiLineStringFeatureSchema>;
+export type FeatureCollection = z.infer<typeof FeatureCollectionSchema>;
 
-export interface GeoJsonWithTrack { track: Track, geojson: GeoJsonObject }
+const MultiLineStringWithTrackIdSchema = z.object({ id: z.number(), geojson: MultiLineStringSchema })
+type MultiLineStringWithTrackId = z.infer<typeof MultiLineStringWithTrackIdSchema>
+
+export { MultiLineStringWithTrackIdSchema, type MultiLineStringWithTrackId }
+
+export interface MultiLineStringWithTrack { track: Track, geojson: MultiLineString }

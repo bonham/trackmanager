@@ -1,11 +1,11 @@
 import GeoJSON from 'ol/format/GeoJSON'
 import type { StyleLike } from 'ol/style/Style'
 import VectorLayer from 'ol/layer/Vector.js';
-import type { GeoJsonObject } from 'geojson'
+import type { MultiLineString } from 'geojson'
 import { getUid } from 'ol/util'
 import VectorSource from 'ol/source/Vector.js';
 
-export function createLayerFromGeoJson(geoJson: GeoJsonObject, style: StyleLike) {
+export function createLayerFromGeoJson(geoJson: MultiLineString, style: StyleLike) {
   // load track
 
   const features = new GeoJSON().readFeatures(

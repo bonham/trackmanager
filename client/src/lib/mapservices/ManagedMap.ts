@@ -16,7 +16,7 @@ import { getUid } from 'ol/util'
 import type { Geometry } from 'ol/geom'
 import { SelectEvent } from 'ol/interaction/Select'
 import type BaseEvent from 'ol/events/Event'
-import type { GeoJsonWithTrack } from '@/lib/zodSchemas'
+import type { MultiLineStringWithTrack } from '@/lib/zodSchemas'
 import _ from 'lodash'
 import { StyleFactoryFixedColors } from '../mapStyles'
 import type { StyleFactoryLike } from '../mapStyles'
@@ -43,7 +43,7 @@ How to use:
   methods: {
 
     drawTrack: async function () {
-      const resultSet = await getGeoJson([this.trackId], this.sid)
+      const resultSet = await getMultiLineStringWithIdList([this.trackId], this.sid)
       const result = resultSet[0]
       this.mmap.addTrackLayer(result)
       this.mmap.setExtentAndZoomOut()
@@ -261,21 +261,17 @@ export class ManagedMap {
     this.styleFactory = stf
   }
 
-  addTrackLayer(geoJsonWithTrack: GeoJsonWithTrack) { // geojsonwithid: { id: id, geojson: geojson }
-    const geojson = geoJsonWithTrack.geojson
-    const track = geoJsonWithTrack.track
+  addTrackLayer(multiLineStringWithTrack: MultiLineStringWithTrack) { // geojsonwithid: { id: id, geojson: geojson }
+    const multiLineString = multiLineStringWithTrack.geojson
+    const track = multiLineStringWithTrack.track
     const trackId = track.id
-
-    if (geojson === null) {
-      throw new Error(`Geojson object is null when trying to add track layer for track ${trackId}`)
-    }
 
     if (this.trackIdToLayerMap.has(trackId)) {
       console.log(`An attempt was made to add layer with track id ${trackId}, but a track with this id already exists in map layers`)
       return
     }
     const style = this.styleFactory.getNext()
-    const { featureIdList, vectorLayer } = createLayerFromGeoJson(geojson, style)
+    const { featureIdList, vectorLayer } = createLayerFromGeoJson(multiLineString, style)
     const vectorLayerId = getUid(vectorLayer)
     this.map.addLayer(vectorLayer)
     // add to maps

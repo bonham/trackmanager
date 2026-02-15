@@ -1,46 +1,36 @@
 import { vi } from 'vitest'
 import { describe, test, beforeEach, expect } from 'vitest'
 import { ManagedMap } from '@/lib/mapservices/ManagedMap'
-import { GeoJsonCollection } from '@/lib/mapservices/GeoJsonCollection'
-import { ExtentCollection } from '@/lib/mapservices/ExtentCollection'
 import _ from 'lodash'
 import ResizeObserverMock from './__mocks__/ResizeObserver'
 import { Track } from '@/lib/Track'
 import type { TrackInitData } from '@/lib/Track'
-import type { GeoJSON, GeoJsonObject, BBox } from 'geojson'
-import type { GeoJSONObjectWithId } from '@/lib/mapservices/GeoJsonCollection'
+import type { MultiLineString, BBox } from 'geojson'
+import { ExtentCollection } from '@/lib/mapservices/ExtentCollection'
+import { GeoJsonCollection } from '@/lib/mapservices/GeoJsonCollection'
+
+
 
 
 let mm: ManagedMap
-let gList1: GeoJSONObjectWithId
-let gList2: GeoJSONObjectWithId
-let gList3: GeoJSONObjectWithId
-let bboxexpectedg1g2: BBox
-let bboxexpectedg1g3: BBox
+
 let bbox1: BBox, bbox2: BBox, bbox3: BBox
 
-const geojson: GeoJSON = {
-  type: 'FeatureCollection',
-  features: [
-    {
-      type: 'Feature',
-      properties: {},
-      geometry: {
-        type: 'LineString',
-        coordinates: [
-          [
-            -4.103736877441406,
-            56.24163292831188
-          ],
-          [
-            -4.0704345703125,
-            56.22484046826683
-          ]
-        ]
-      }
-    }
-  ]
+const multilinestring: MultiLineString = {
+
+  type: 'MultiLineString',
+  coordinates: [[
+    [
+      -4.103736877441406,
+      56.24163292831188
+    ],
+    [
+      -4.0704345703125,
+      56.22484046826683
+    ]
+  ]]
 }
+
 
 const initData1: TrackInitData = {
   id: 1,
@@ -65,52 +55,76 @@ const track1 = new Track(initData1)
 const track2 = new Track(initData2)
 
 
-beforeEach(() => {
-  vi.stubGlobal('ResizeObserver', ResizeObserverMock)
+describe('first', () => {
 
-  mm = new ManagedMap()
-  bbox1 = [-20, -10.1, 40, 80]
-  bbox2 = [-23, -11, -5, 70]
-  bbox3 = [-30, 15, -28, 16]
-  const g1: GeoJsonObject = geojson
-  const g2 = _.cloneDeep(geojson)
-  const g3 = _.cloneDeep(geojson)
-  g1.bbox = bbox1
-  gList1 = { id: 1, geojson: g1 }
-  g2.bbox = bbox2
-  gList2 = { id: 2, geojson: g2 }
-  g3.bbox = bbox3
-  gList3 = { id: 3, geojson: g3 }
-  bboxexpectedg1g2 = [-23, -11, 40, 80]
-  bboxexpectedg1g3 = [-30, -10.1, 40, 80]
-})
 
-test('Simple', () => {
-  expect(mm.map).toBeDefined()
-})
+  beforeEach(() => {
+    vi.stubGlobal('ResizeObserver', ResizeObserverMock)
 
-test('Add layer', () => {
-  mm = new ManagedMap()
-  mm.addTrackLayer({ track: track1, geojson })
-  mm.addTrackLayer({ track: track2, geojson })
-  expect(mm.getTrackIds()).toEqual([1, 2])
-   
-  const l9 = mm.getTrackLayer(2)
-  expect(l9).toBeDefined()
-  mm.setInvisible(2)
-  expect(mm.getTrackIdsVisible()).toEqual([1])
-  expect(mm.getTrackIdsInVisible()).toEqual([2])
-})
+    mm = new ManagedMap()
+    bbox1 = [-20, -10.1, 40, 80]
+    bbox2 = [-23, -11, -5, 70]
+    bbox3 = [-30, 15, -28, 16]
+    const g1 = multilinestring
+    const g2 = _.cloneDeep(multilinestring)
+    const g3 = _.cloneDeep(multilinestring)
+    g1.bbox = bbox1
+    g2.bbox = bbox2
+    g3.bbox = bbox3
 
-test('createLayer-getextent', () => {
-  mm = new ManagedMap()
-  mm.addTrackLayer({ track: track1, geojson })
-  const layer = mm.getTrackLayer(1)
-  const source = layer.getSource()
-  expect(source).not.toBeNull()
+  })
+
+  test('Simple', () => {
+    expect(mm.map).toBeDefined()
+  })
+
+  test('Add layer', () => {
+    mm = new ManagedMap()
+    mm.addTrackLayer({ track: track1, geojson: multilinestring })
+    mm.addTrackLayer({ track: track2, geojson: multilinestring })
+    expect(mm.getTrackIds()).toEqual([1, 2])
+
+    const l9 = mm.getTrackLayer(2)
+    expect(l9).toBeDefined()
+    mm.setInvisible(2)
+    expect(mm.getTrackIdsVisible()).toEqual([1])
+    expect(mm.getTrackIdsInVisible()).toEqual([2])
+  })
+
+  test('createLayer-getextent', () => {
+    mm = new ManagedMap()
+    mm.addTrackLayer({ track: track1, geojson: multilinestring })
+    const layer = mm.getTrackLayer(1)
+    const source = layer.getSource()
+    expect(source).not.toBeNull()
+  })
+
+  // test('Wrong Feature', () => {
+  //   const mm = new ManagedMap()
+  //   const wrongFeature = structuredClone(feature) as Feature
+  //   wrongFeature.geometry.type = 'LineString'
+  //   expect(
+  //     () => mm.addTrackLayer({ track: track1, geojson: wrongFeature as Feature<MultiLineString> })
+  //   ).toThrowError()
+  // })
 })
 
 describe('geojson collection and bounding box', () => {
+
+  bbox1 = [-20, -10.1, 40, 80]
+  bbox2 = [-23, -11, -5, 70]
+  bbox3 = [-30, 15, -28, 16]
+  const g1 = multilinestring
+  const g2 = _.cloneDeep(multilinestring)
+  const g3 = _.cloneDeep(multilinestring)
+  g1.bbox = bbox1
+  const gList1 = { id: 1, geojson: g1 }
+  g2.bbox = bbox2
+  const gList2 = { id: 2, geojson: g2 }
+  g3.bbox = bbox3
+  const gList3 = { id: 3, geojson: g3 }
+  const bboxexpectedg1g2 = [-23, -11, 40, 80]
+  const bboxexpectedg1g3 = [-30, -10.1, 40, 80]
   test('extent collection 1 2', () => {
     const ec = new ExtentCollection([bbox1, bbox2])
     expect(ec.boundingBox()).toEqual(bboxexpectedg1g2)
@@ -131,3 +145,4 @@ describe('geojson collection and bounding box', () => {
     expect(gjc.boundingBox()).toEqual(bboxexpectedg1g3)
   })
 })
+

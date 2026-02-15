@@ -1,9 +1,9 @@
 
 /* eslint-disable @typescript-eslint/no-misused-promises */
 import { Track } from '@/lib/Track'
-import type { GeoJsonWithTrack, GeoJSONWithTrackId } from '@/lib/zodSchemas'
+import type { MultiLineStringWithTrack, MultiLineStringWithTrackId } from '@/lib/zodSchemas'
 import type { AsyncWorker } from 'async'
-import { getTrackMetaDataByIdList, getGeoJson } from './trackServices';
+import { getTrackMetaDataByIdList, getMultiLineStringWithIdList } from './trackServices';
 
 type IdList = number[]
 interface Task { idList: IdList, signal: AbortSignal }
@@ -14,7 +14,7 @@ interface Task { idList: IdList, signal: AbortSignal }
  * @param addToLayerFunction Function with signature f(number[], (gwt)=>void)
  */
 function createTrackLoadingAsyncWorker(
-  addToLayerFunction: (gwt: GeoJsonWithTrack) => void,
+  addToLayerFunction: (multiLineStringWithTrack: MultiLineStringWithTrack) => void,
   sid: string
 ): AsyncWorker<Task> {
 
@@ -33,9 +33,9 @@ function createTrackLoadingAsyncWorker(
 
     // ----
     if (signal.aborted) return
-    const geoJsonList = await getGeoJson(idList, sid, signal)
-    const geoJsonMap = new Map<number, GeoJSONWithTrackId>()
-    geoJsonList.forEach((gwt) => geoJsonMap.set(gwt.id, gwt))
+    const multiLineStringList = await getMultiLineStringWithIdList(idList, sid, signal)
+    const geoJsonMap = new Map<number, MultiLineStringWithTrackId>()
+    multiLineStringList.forEach((multiLineString) => geoJsonMap.set(multiLineString.id, multiLineString))
 
     // ----
     if (signal.aborted) return
@@ -46,7 +46,7 @@ function createTrackLoadingAsyncWorker(
       const geoJsonWithId = geoJsonMap.get(id)
       if (geoJsonWithId === undefined) throw Error(`GeoJson for id ${id} is undefined`)
 
-      const geoJsonWithTrack: GeoJsonWithTrack = {
+      const geoJsonWithTrack: MultiLineStringWithTrack = {
         track,
         geojson: geoJsonWithId.geojson
       }

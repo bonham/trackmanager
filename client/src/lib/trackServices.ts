@@ -2,11 +2,10 @@
 import { Track, isTrackDataServer } from '@/lib/Track'
 import type { TrackPropertiesOptional } from '@/lib/Track'
 import _ from 'lodash'
-import { GeoJSONWithTrackIdSchema } from './zodSchemas'
 
 import type { Extent } from 'ol/extent'
 import * as z from 'zod'
-
+import { MultiLineStringWithTrackIdSchema, type MultiLineStringWithTrackId } from '@/lib/zodSchemas';
 
 /**
  * Gets a list of all track ids of map. First the tracks in the view are returned, newest first
@@ -210,8 +209,8 @@ async function getTrackMetaDataByIdList(idList: number[], sid: string, signal: A
   }
 }
 
-// /// Get geojson by id
-async function getGeoJson(idList: number[], sid: string, signal: AbortSignal) {
+// /// Get array of objects with id and multilinestrin geometry by id list
+async function getMultiLineStringWithIdList(idList: number[], sid: string, signal: AbortSignal): Promise<MultiLineStringWithTrackId[]> {
   const payload = { ids: idList }
 
   const url = `/api/tracks/geojson/sid/${sid}`
@@ -235,7 +234,7 @@ async function getGeoJson(idList: number[], sid: string, signal: AbortSignal) {
     response = await fetch(req)
     if (response.ok) {
       const tmpResp = await response.json() as unknown
-      const respJson = z.array(GeoJSONWithTrackIdSchema).parse(tmpResp)
+      const respJson = z.array(MultiLineStringWithTrackIdSchema).parse(tmpResp)
 
       return respJson
     } else {
@@ -351,7 +350,7 @@ async function deleteTrack(id: number, sid: string) {
 }
 
 export {
-  getAllTracks, getTrackYears, getTrackIdsByYear, getGeoJson, getTrackMetaDataByIdList,
+  getAllTracks, getTrackYears, getTrackIdsByYear, getMultiLineStringWithIdList, getTrackMetaDataByIdList,
   updateTrack, updateTrackById,
   deleteTrack, getTrackById, getTracksByExtent,
   updateNameFromSource,

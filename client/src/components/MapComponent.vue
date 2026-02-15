@@ -11,7 +11,7 @@
 import { ref, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import { BSpinner } from 'bootstrap-vue-next'
 import { ManagedMap } from '@/lib/mapservices/ManagedMap'
-import type { GeoJsonWithTrack } from '@/lib/zodSchemas'
+import type { MultiLineStringWithTrack } from '@/lib/zodSchemas'
 import { TrackVisibilityManager } from '@/lib/mapStateHelpers'
 import { getIdListByExtentAndTime, getTrackIdsByYear } from '@/lib/trackServices'
 import _ from 'lodash'
@@ -74,7 +74,7 @@ configStore.loadConfig(props.sid)
   .catch((e) => console.error("Could not load config", e))
 
 // Initialize loading worker and queue
-const addLayerFunc = (gwt: GeoJsonWithTrack) => mmap.addTrackLayer(gwt)
+const addLayerFunc = (featureWithTrack: MultiLineStringWithTrack) => mmap.addTrackLayer(featureWithTrack)
 
 // worker function and queue
 const loaderWorker = createTrackLoadingAsyncWorker(
@@ -134,15 +134,6 @@ function makeVisible(ids: IdList, mmap: ManagedMap, queue: QueueObject<Task>, zo
   const trackIdsToBeLoaded = tvm.toBeLoaded()
   console.log('To be loaded: ', trackIdsToBeLoaded)
 
-  // stop spinner when queue empty ( one time promise)
-  queue.drain()
-    .then(
-      () => {
-        loading.value = false
-        if (zoomOut) { mmap.setExtentAndZoomOut() }
-      }
-    )
-    .catch((e) => console.error("what??", e))
 
   // process toBeLoaded list and cut it in chunks
   controller = new AbortController()
@@ -155,7 +146,18 @@ function makeVisible(ids: IdList, mmap: ManagedMap, queue: QueueObject<Task>, zo
 
   // push chunks to queue
   if (listOfTasks.length > 0) {
-    loading.value = true
+
+    // stop spinner when queue empty ( one time promise)
+    queue.drain()
+      .then(
+        () => {
+          loading.value = false
+          if (zoomOut) { mmap.setExtentAndZoomOut() }
+        }
+      )
+      .catch((e) => console.error("what??", e))
+
+    loading.value = true // should be true already
     queue.push<Task>(listOfTasks, (err, retVal) => {
       if (err) {
         if (err.name === 'AbortError') console.log("Aborted worker")
@@ -163,6 +165,10 @@ function makeVisible(ids: IdList, mmap: ManagedMap, queue: QueueObject<Task>, zo
       }
       if (retVal) console.log("Return value from worker", retVal)
     })
+  } else {
+    // There was nothing to push - maybe because all was loaded already
+    loading.value = false
+    if (zoomOut) { mmap.setExtentAndZoomOut() }
   }
 }
 
@@ -177,7 +183,7 @@ watch(
     mmap.popovermgr?.dispose()
 
     const zoomOut = command.zoomOut ?? false
-    loading.value = true // set to false after queue drain
+    loading.value = true // set to false in makeVisible
 
     if (command.command === 'all') {
 

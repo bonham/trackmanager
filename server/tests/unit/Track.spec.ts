@@ -1,3 +1,4 @@
+import { describe, expect, test } from 'vitest';
 import type { TrackPoint } from '../../src/lib/Track.js';
 import { Track } from '../../src/lib/Track.js';
 

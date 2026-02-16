@@ -5,16 +5,19 @@
     },
     {
       "path": "server"
+    },
+    {
+      "path": "shared"
     }
   ],
   "settings": {
-    "eslint.validate": ["javascript"],
+    "eslint.validate": [
+      "typescript",
+      "javascript"],
     "[vue]": {},
     "[javascript]": {},
-    "task.allowAutomaticTasks": "on",
-    "jest.disabledWorkspaceFolders": ["client"],
     "testing.automaticallyOpenPeekView": "never",
     "eslint.lintTask.enable": true,
-    "eslint.workingDirectories": ["./client", "./server"]
+    "eslint.workingDirectories": ["./client", "./server", "./shared"]
   }
 }

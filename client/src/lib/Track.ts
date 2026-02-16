@@ -1,8 +1,7 @@
 import { DateTime } from 'luxon'
 import _ from 'lodash'
 import type { GeoJsonObject } from 'geojson'
-import * as z from 'zod'
-
+import type { TrackMetadata } from 'trackmanager-shared/zodSchemas'
 
 import { sprintf } from 'sprintf-js'
 /**
@@ -11,21 +10,13 @@ import { sprintf } from 'sprintf-js'
  * It can calculate properties etc
  */
 
+/**
+ * TrackInitData is the constructor input for Track.
+ * Derives from the shared TrackMetadata (API wire format) with all metadata fields optional,
+ * plus an optional geojson field.
+ */
+type TrackInitData = { id: number; geojson?: GeoJsonObject | null } & Partial<Omit<TrackMetadata, 'id'>>
 
-
-interface TrackInitData {
-  id: number,
-  name?: string | null,
-  length?: number | null,
-  length_calc?: number | null,
-  src?: string | null,
-  timelength?: number | null,
-  timelength_calc?: number | null,
-  ascent?: number | null,
-  ascent_calc?: number | null,
-  geojson?: GeoJsonObject | null,
-  time?: string | null
-}
 interface TrackPropertiesOptional {
   id?: number,
   name?: string | null,
@@ -40,67 +31,10 @@ interface TrackPropertiesOptional {
   time?: DateTime | null | undefined
 }
 
-const TrackDataServerGetallSchema = z.object({
-  id: z.number(),
-  name: z.string().nullable(),
-  length: z.number().nullable(),
-  length_calc: z.number().nullable(),
-  src: z.string().nullable(),
-  time: z.string().nullable(),
-  timelength: z.number().nullable(),
-  timelength_calc: z.number().nullable(),
-  ascent: z.number().nullable(),
-  ascent_calc: z.number().nullable(),
-})
-
-type TrackDataServerGetall = z.infer<typeof TrackDataServerGetallSchema>
-
-/* Original definition:
-interface TrackDataServerGetall {
-  id: number,
-  name: string | null,
-  length: number | null,
-  length_calc: number | null,
-  src: string | null,
-  time: string | null,
-  timelength: number | null,
-  timelength_calc: number | null,
-  ascent: number | null,
-  ascent_calc: number | null,
-}
-*/
-
 interface HMS {
   hours: number;
   minutes: number;
   seconds: number;
-}
-
-function isTrackDataServer(t: unknown): t is TrackDataServerGetall {
-  if (
-    typeof t === 'object' &&
-    !!t &&
-    "id" in t && (typeof t.id === 'number') &&
-    "name" in t && (typeof t.name === 'string' || t.name === null) &&
-    "length" in t && (typeof t.length === 'number' || t.length === null) &&
-    "length_calc" in t && (typeof t.length_calc === 'number' || t.length_calc === null) &&
-    "src" in t && (typeof t.src === 'string' || t.src === null) &&
-    "time" in t && (typeof t.time === 'string' || t.time === null) &&
-    "timelength" in t && (typeof t.timelength === 'number' || t.timelength === null) &&
-    "timelength_calc" in t && (typeof t.timelength_calc === 'number' || t.timelength_calc === null) &&
-    "ascent" in t && (typeof t.ascent === 'number' || t.ascent === null) &&
-    "ascent_calc" in t && (typeof t.ascent_calc === 'number' || t.ascent_calc === null)
-  ) {
-    return true
-  } else {
-    return false
-  }
-}
-
-function isTrackDataServerArray(t: unknown[]): t is TrackDataServerGetall[] {
-  return t.every((ele) => {
-    return isTrackDataServer(ele)
-  })
 }
 
 class Track {
@@ -272,6 +206,5 @@ class TrackCollection {
   }
 }
 
-export { Track, TrackCollection, isTrackDataServer, isTrackDataServerArray }
-export { TrackDataServerGetallSchema }
-export type { TrackPropertiesOptional, TrackInitData, TrackDataServerGetall }
+export { Track, TrackCollection }
+export type { TrackPropertiesOptional, TrackInitData }

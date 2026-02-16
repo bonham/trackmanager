@@ -1,11 +1,11 @@
 
-import { Track, isTrackDataServer } from '@/lib/Track'
+import { Track } from '@/lib/Track'
 import type { TrackPropertiesOptional } from '@/lib/Track'
 import _ from 'lodash'
 
 import type { Extent } from 'ol/extent'
 import * as z from 'zod'
-import { MultiLineStringWithTrackIdSchema, type MultiLineStringWithTrackId } from '@/lib/zodSchemas';
+import { MultiLineStringWithTrackIdSchema, TrackMetadataSchema, type MultiLineStringWithTrackId } from 'trackmanager-shared/zodSchemas';
 
 /**
  * Gets a list of all track ids of map. First the tracks in the view are returned, newest first
@@ -33,10 +33,8 @@ async function getAllTracks(sid: string) {
   const response = await fetch(`/api/tracks/getall/sid/${sid}`)
   const responseJson = await response.json() as unknown
 
-  if (!Array.isArray(responseJson)) throw Error("not array")
-  if (!responseJson.every(isTrackDataServer)) throw Error("not array of trackdata")
-
-  const trackArray = responseJson.map(t => new Track(t))
+  const trackDataArray = z.array(TrackMetadataSchema).parse(responseJson)
+  const trackArray = trackDataArray.map(t => new Track(t))
   return trackArray
 }
 
@@ -123,10 +121,8 @@ async function getTracksByExtent(extent: Extent, sid: string) {
   try {
     const responseJson = await response.json() as unknown
 
-    if (!Array.isArray(responseJson)) throw Error("not array")
-    if (!responseJson.every(isTrackDataServer)) throw Error("not array of trackdata")
-
-    const trackArray = responseJson.map(t => new Track(t))
+    const trackDataArray = z.array(TrackMetadataSchema).parse(responseJson)
+    const trackArray = trackDataArray.map(t => new Track(t))
     return trackArray
   } catch (error) {
     console.error('Error when processing result from http call', error)
@@ -152,9 +148,8 @@ async function getTrackById(id: number, sid: string): Promise<Track | null> {
   try {
     const responseJson = await response.json() as unknown
 
-    if (!isTrackDataServer(responseJson)) throw Error("not trackdata")
-
-    const track = new Track(responseJson)
+    const trackData = TrackMetadataSchema.parse(responseJson)
+    const track = new Track(trackData)
     return track
   } catch (error) {
     console.error('Error when processing result from http call', error)
@@ -189,16 +184,9 @@ async function getTrackMetaDataByIdList(idList: number[], sid: string, signal: A
 
   try {
     const responseJson = await response.json() as unknown
-    const trackDataGetall = z.array(z.object({
-      id: z.number().int().nonnegative(),
-      name: z.string().nullable(),
-      length: z.number().nullable(),
-      src: z.string().nullable(),
-      time: z.string().nullable(),
-      ascent: z.number().nullable()
-    })).parse(responseJson)
+    const trackDataList = z.array(TrackMetadataSchema).parse(responseJson)
 
-    const trackList = trackDataGetall.map(td => new Track(td))
+    const trackList = trackDataList.map(td => new Track(td))
     return trackList
 
   } catch (error) {

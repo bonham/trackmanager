@@ -23,7 +23,6 @@ jobs:
         with:
           node-version: "~22"
           cache: "npm"
-          cache-dependency-path: package-lock.json
       - run: npm ci
       - run: npm test --workspace=client
       - run: npm run lint --workspace=client
@@ -40,7 +39,6 @@ jobs:
         with:
           node-version: "~22"
           cache: "npm"
-          cache-dependency-path: package-lock.json
       - run: npm ci
       - run: npm run copyconfig --workspace=server
       - run: npm run build --workspace=server

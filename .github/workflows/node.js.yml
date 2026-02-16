@@ -23,8 +23,12 @@ jobs:
         with:
           node-version: "~22"
           cache: "npm"
-          cache-dependency-path: package-lock.json
-      - run: npm ci
+          cache-dependency-path: |
+            package-lock.json
+            client/package-lock.json
+            shared/package-lock.json
+      - run: npm ci --workspace=shared --include-workspace-root
+      - run: npm ci --workspace=client
       - run: npm test --workspace=client
       - run: npm run lint --workspace=client
       - run: npm run build --workspace=client
@@ -40,8 +44,12 @@ jobs:
         with:
           node-version: "~22"
           cache: "npm"
-          cache-dependency-path: package-lock.json
-      - run: npm ci
+          cache-dependency-path: |
+            package-lock.json
+            server/package-lock.json
+            shared/package-lock.json
+      - run: npm ci --workspace=shared --include-workspace-root
+      - run: npm ci --workspace=server
       - run: npm run copyconfig --workspace=server
       - run: npm run build --workspace=server
       - run: npm run lint --workspace=server

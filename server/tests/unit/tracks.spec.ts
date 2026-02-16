@@ -172,20 +172,21 @@ describe('Endpoints related to track metadata', () => {
   });
 
   test('Get list of ids', async () => {
-    const testArray = [-11, 4, 7, 9]
+    const mockIdResults = [4, 7, 9, 11]
+    const bboxPayload = [-11, 4, 7, 9]
     mockQuery.mockResolvedValue(
       {
-        rows: testArray.map((id) => ({ id }))
+        rows: mockIdResults.map((id) => ({ id }))
       }
     );
     mockGetSchema.mockResolvedValue('myschema');
     const response = await request(app)
       .post('/api/tracks/idlist/byextentbytime/sid/correct')
       .set('Content-Type', 'application/json')
-      .send(testArray)
+      .send(bboxPayload)
       .expect(200);
 
-    expect(response.body).toEqual(testArray);
+    expect(response.body).toEqual(mockIdResults);
     expect(mockGetSchema).toHaveBeenCalled();
   });
 

@@ -24,6 +24,8 @@ jobs:
           node-version: "~22"
       #          cache: "npm"
       #         cache-dependency-path: ./client/package-lock.json
+      - run: npm install
+        working-directory: ./shared
       - run: rm -rf node_modules package-lock.json
         working-directory: ./client
       - run: npm install
@@ -48,6 +50,8 @@ jobs:
           node-version: "~22"
           cache: "npm"
           cache-dependency-path: ./server/package-lock.json
+      - run: npm install
+        working-directory: ./shared
       - run: npm install
         working-directory: ./server
       - run: npm run copyconfig

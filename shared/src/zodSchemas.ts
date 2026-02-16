@@ -99,3 +99,24 @@ export type FeatureCollection = z.infer<typeof FeatureCollectionSchema>;
 
 export const MultiLineStringWithTrackIdSchema = z.object({ id: z.number(), geojson: MultiLineStringSchema })
 export type MultiLineStringWithTrackId = z.infer<typeof MultiLineStringWithTrackIdSchema>
+
+/**
+ * Track metadata schema — the API wire format for track objects.
+ * All fields except `id` are nullable. `time` is an ISO date string (serialized from Date by the server).
+ */
+export const TrackMetadataSchema = z.object({
+  id: z.number(),
+  name: z.string().nullable(),
+  length: z.number().nullable(),
+  length_calc: z.number().nullable(),
+  src: z.string().nullable(),
+  time: z.string().nullable(),
+  timelength: z.number().nullable(),
+  timelength_calc: z.number().nullable(),
+  ascent: z.number().nullable(),
+  ascent_calc: z.number().nullable(),
+})
+export type TrackMetadata = z.infer<typeof TrackMetadataSchema>
+
+/** Schema for a list of track IDs */
+export const TrackIdListSchema = z.array(z.number().int().nonnegative())

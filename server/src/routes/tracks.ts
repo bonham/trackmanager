@@ -8,7 +8,7 @@ import { mkdtemp as mkdtempprom } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { basename, join } from 'node:path';
 import pg from 'pg';
-import { MultiLineStringWithTrackIdSchema } from 'trackmanager-shared/zodSchemas';
+import { MultiLineStringWithTrackIdSchema, TrackIdListSchema } from 'trackmanager-shared/zodSchemas';
 import * as z from 'zod';
 import { Track2DbWriter } from '../lib/Track2DbWriter.js';
 import { DateStringMatcher, StringCleaner } from '../lib/analyzeString.js';
@@ -193,7 +193,7 @@ router.post(
 
     let idList: number[];
     try {
-      idList = z.array(z.number().int().nonnegative()).parse(body);
+      idList = TrackIdListSchema.parse(body);
     } catch (e) {
       console.error('Error parsing track id list', e);
       console.error('Received body:', body);
@@ -216,15 +216,7 @@ router.post(
 
     try {
       const queryResult = await pool.query(query);
-      const qResult = queryResult.rows;
-      const rows = z.array(z.object({
-        id: z.number().int().nonnegative(),
-        name: z.string().nullable(),
-        length: z.number().nullable(),
-        src: z.string().nullable(),
-        time: z.date().nullable(),
-        ascent: z.number().nullable()
-      })).parse(qResult);
+      const { rows } = queryResult;
 
       if (rows.length === 0) {
         res.json([]);
@@ -378,9 +370,8 @@ router.post(
         values: bbox,
       }
       const queryResult = await pool.query(query);
-      const validatedResult = z.array(z.object({ id: z.number().int() })).parse(queryResult.rows);
-      const idList = validatedResult.map((r) => r.id);
-      res.json(idList);
+      const validatedResult = TrackIdListSchema.parse(queryResult.rows.map((r: { id: number }) => r.id));
+      res.json(validatedResult);
     } catch (err) {
       next(err);
     }
@@ -395,15 +386,16 @@ router.put(
   trackIdValidationMiddleware,
   asyncWrapper(async (req: ExpressRequest, res: Response) => {
     const { schema } = req as ReqWSchema;
-    const { updateAttributes } = req.body;
-    const { data } = req.body;
+    const body = req.body as Record<string, unknown>;
+    const updateAttributes = body.updateAttributes as string[];
+    const data = body.data as Record<string, string>;
     // SQL injection here
 
     // filter out attributes not in data object
-    const existingAttributes = updateAttributes.filter((x: any) => (!(data[x] === undefined)));
+    const existingAttributes = updateAttributes.filter((x: string) => (!(data[x] === undefined)));
 
     // compose query
-    const halfCoalesced = existingAttributes.map((x: any) => `${x} = '${data[x]}'`);
+    const halfCoalesced = existingAttributes.map((x: string) => `${x} = '${data[x]}'`);
     const setExpression = halfCoalesced.join(',');
 
     const query = `update ${schema}.tracks set ${setExpression} where id = ${req.params.trackId}`;

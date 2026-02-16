@@ -160,14 +160,14 @@ router.get(
       + 'time, timelength, timelength_calc, ascent, ascent_calc '
       + `from ${schema}.tracks where id = '${trackId}'`;
 
-    let rows;
+    let rows: unknown[];
     try {
       const queryResult = await pool.query(query);
       rows = queryResult.rows;
       if (rows.length === 0) {
         res.status(404).end();
       } else {
-        const row = rows[0];
+        const row = rows[0] as Record<string, unknown>;
         res.json(row);
       }
 
@@ -189,7 +189,7 @@ router.post(
     const { schema } = req as ReqWSchema
 
     // validate body. expect list of integers ( track ids )
-    const body = req.body;
+    const body: unknown = req.body;
 
     let idList: number[];
     try {

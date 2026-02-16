@@ -1,7 +1,8 @@
 
 /* eslint-disable @typescript-eslint/no-misused-promises */
 import { Track } from '@/lib/Track'
-import type { MultiLineStringWithTrack, MultiLineStringWithTrackId } from '@/lib/zodSchemas'
+import type { MultiLineStringWithTrack } from '@/lib/zodSchemas'
+import type { MultiLineStringWithTrackId } from 'trackmanager-shared/zodSchemas'
 import type { AsyncWorker } from 'async'
 import { getTrackMetaDataByIdList, getMultiLineStringWithIdList } from './trackServices';
 

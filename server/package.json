@@ -35,6 +35,7 @@
     "luxon": "^3.4.4",
     "morgan": "^1.10.0",
     "pg": "^8.5.1",
+    "trackmanager-shared": "file:../shared",
     "tsx": "^4.19.2",
     "xpath": "^0.0.34",
     "zod": "^4.3.6"

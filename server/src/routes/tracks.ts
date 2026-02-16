@@ -8,6 +8,7 @@ import { mkdtemp as mkdtempprom } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { basename, join } from 'node:path';
 import pg from 'pg';
+import { MultiLineStringWithTrackIdSchema } from 'trackmanager-shared/zodSchemas';
 import * as z from 'zod';
 import { Track2DbWriter } from '../lib/Track2DbWriter.js';
 import { DateStringMatcher, StringCleaner } from '../lib/analyzeString.js';
@@ -87,7 +88,7 @@ router.get(
 
 // result: { id: x.id, geojson: { .. } }
 function isIdsNumberArray(obj: unknown): obj is { ids: number[] } {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call
+
 
   if (
     obj &&
@@ -133,7 +134,9 @@ router.post(
 
         const rowsWGeoJson = _.map(rows, (x) => ({ id: x.id, geojson: JSON.parse(x.geojson) as GeoJsonObject }));
 
-        res.json(rowsWGeoJson);
+        // Validate response against shared schema
+        const validatedResponse = z.array(MultiLineStringWithTrackIdSchema).parse(rowsWGeoJson);
+        res.json(validatedResponse);
       }
     } catch (err: unknown) {
       console.trace('Exception handling trace');

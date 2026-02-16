@@ -5,7 +5,7 @@ import _ from 'lodash'
 
 import type { Extent } from 'ol/extent'
 import * as z from 'zod'
-import { MultiLineStringWithTrackIdSchema, type MultiLineStringWithTrackId } from '@/lib/zodSchemas';
+import { MultiLineStringWithTrackIdSchema, type MultiLineStringWithTrackId } from 'trackmanager-shared/zodSchemas';
 
 /**
  * Gets a list of all track ids of map. First the tracks in the view are returned, newest first

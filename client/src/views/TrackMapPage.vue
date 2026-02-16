@@ -8,7 +8,7 @@
     </div>
     <div v-else class="year-navbar border-bottom border-top">
       <button v-if="buttonAll" class="btn m-2 button-year-navbar" :class="activeClass(buttonAllActive)"
-        @click="loadAllTracks()">All</button>
+        @click="loadAllTracks(false)">All</button>
       <button v-for="year in years" :key="year" class="btn m-2 button-year-navbar"
         :class="year in buttonYActive ? activeClass(buttonYActive[year] ?? false) : activeClass(false)"
         @click="loadTracksOfYear(year, false)">
@@ -67,7 +67,7 @@ configStore.loadConfig(props.sid)
       // async possible
       await makeYearButtons()
       buttonsLoading.value = false
-      loadAllTracks()
+      loadAllTracks(true)
 
     } else if (initialState === "LATEST_YEAR") {
 
@@ -101,9 +101,10 @@ async function makeYearButtons() {
   })
 }
 
-function loadAllTracks() {
+function loadAllTracks(zoomOut: boolean) {
   mapStateStore.loadCommand = {
     command: 'all',
+    zoomOut
   }
   setAllButtonsInactive()
   buttonAllActive.value = true

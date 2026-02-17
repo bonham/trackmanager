@@ -60,7 +60,7 @@ jobs:
         working-directory: ./server
       - run: npm run lint
         working-directory: ./server
-      - run: npm run test
+      - run: npm run test:run
         working-directory: ./server
       - run: npm run typecheck
         working-directory: ./server

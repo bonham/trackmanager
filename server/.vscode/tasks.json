@@ -37,6 +37,24 @@
         "clear": false,
         "close": false
       }
+    },
+    {
+      "type": "npm",
+      "script": "test:watch",
+      "problemMatcher": [],
+      "label": "vitest watch",
+      "runOptions": {
+        "runOn": "folderOpen"
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": false,
+        "close": false
+      }
     }
   ]
 }

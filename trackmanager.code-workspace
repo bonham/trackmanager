@@ -1,6 +1,10 @@
 {
   "folders": [
     {
+      "name": "xxx root",
+      "path": ".",
+    },
+    {
       "path": "client"
     },
     {
@@ -18,6 +22,12 @@
     "[javascript]": {},
     "testing.automaticallyOpenPeekView": "never",
     "eslint.lintTask.enable": true,
-    "eslint.workingDirectories": ["./client", "./server", "./shared"]
+    "eslint.workingDirectories": ["./client", "./server", "./shared"],
+    "files.exclude": {
+      "node_modules": true,
+      "client": true,
+      "server": true,
+      "shared": true
+    }
   }
 }

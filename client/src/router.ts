@@ -43,7 +43,10 @@ const router = createRouter({
       path: '/track/:id/sid/:sid',
       name: 'TrackDetailPage',
       component: () => import('./views/TrackDetailPage.vue'),
-      props: true
+      props: (route) => ({
+        sid: route.params.sid,
+        id: Number(route.params.id)
+      })
     }
   ]
 })

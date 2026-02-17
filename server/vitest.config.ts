@@ -6,5 +6,10 @@ export default defineConfig({
     globals: true,
     root: '.',
     exclude: ['node_modules', 'dist'],
-  },
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'html'],
+      enabled: false,
+    },
+  }
 });

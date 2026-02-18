@@ -1,7 +1,7 @@
 # CI for trackmanager monorepo (npm workspaces)
-# Uses `npm install` instead of `npm ci` because the lockfile is generated
-# on Windows and lacks Linux-specific optional deps (e.g. @rollup/rollup-linux-x64-gnu).
-# See https://github.com/npm/cli/issues/4828
+# Deletes sub-directory lockfiles and regenerates a fresh root lockfile on
+# the Linux runner so platform-specific optional deps (e.g. @rollup/rollup-linux-x64-gnu)
+# are resolved correctly. See https://github.com/npm/cli/issues/4828
 
 name: Node.js CI
 
@@ -24,8 +24,11 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: "~24"
-          cache: "npm"
-      - run: npm install
+      - name: Clean stale lockfiles and install
+        run: |
+          rm -f client/package-lock.json server/package-lock.json shared/package-lock.json
+          rm -f package-lock.json
+          npm install
       - run: npm test -w client
       - run: npm run lint -w client
       - run: npm run build -w client
@@ -40,8 +43,11 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: "~24"
-          cache: "npm"
-      - run: npm install
+      - name: Clean stale lockfiles and install
+        run: |
+          rm -f client/package-lock.json server/package-lock.json shared/package-lock.json
+          rm -f package-lock.json
+          npm install
       - run: npm run copyconfig -w server
       - run: npm run build -w server
       - run: npm run lint -w server

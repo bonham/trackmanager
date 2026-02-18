@@ -213,7 +213,7 @@ watch(
 </script>
 
 <style>
-@import '../../node_modules/ol/ol.css';
+@import 'ol/ol.css';
 
 #mapdiv {
   width: 100%;

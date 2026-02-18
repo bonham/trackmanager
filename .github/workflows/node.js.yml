@@ -1,6 +1,7 @@
 # CI for trackmanager monorepo (npm workspaces)
-# Runs npm ci at the workspace root so platform-specific optional deps
-# (e.g. @rollup/rollup-linux-x64-gnu) are resolved correctly.
+# Uses `npm install` instead of `npm ci` because the lockfile is generated
+# on Windows and lacks Linux-specific optional deps (e.g. @rollup/rollup-linux-x64-gnu).
+# See https://github.com/npm/cli/issues/4828
 
 name: Node.js CI
 
@@ -24,7 +25,7 @@ jobs:
         with:
           node-version: "~24"
           cache: "npm"
-      - run: npm ci
+      - run: npm install
       - run: npm test -w client
       - run: npm run lint -w client
       - run: npm run build -w client
@@ -40,7 +41,7 @@ jobs:
         with:
           node-version: "~24"
           cache: "npm"
-      - run: npm ci
+      - run: npm install
       - run: npm run copyconfig -w server
       - run: npm run build -w server
       - run: npm run lint -w server

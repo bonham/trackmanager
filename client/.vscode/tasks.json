@@ -2,8 +2,9 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "type": "npm",
-      "script": "dev",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "dev"],
       "problemMatcher": [],
       "label": "vite dev",
       "runOptions": {
@@ -20,10 +21,11 @@
       }
     },
     {
-      "type": "npm",
-      "script": "test",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "test:watch"],
       "problemMatcher": [],
-      "label": "vitest",
+      "label": "vitest client",
       "runOptions": {
         "runOn": "folderOpen"
       },
@@ -38,8 +40,9 @@
       }
     },
     {
-      "type": "npm",
-      "script": "lintwarn",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "lintwarn"],
       "problemMatcher": ["$eslint-stylish"],
       "label": "eslint: lint whole folder client",
       "runOptions": {
@@ -56,8 +59,9 @@
       }
     },
     {
-      "type": "npm",
-      "script": "typecheck",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "typecheck"],
       "problemMatcher": ["$tsc"],
       "label": "typecheck folder",
       "runOptions": {

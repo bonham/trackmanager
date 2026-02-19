@@ -2,8 +2,9 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "type": "npm",
-      "script": "start",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "start"],
       "problemMatcher": [],
       "label": "backend server",
       "runOptions": {
@@ -20,8 +21,9 @@
       }
     },
     {
-      "type": "npm",
-      "script": "lint",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "lint"],
       "problemMatcher": ["$eslint-stylish"],
       "label": "lint folder",
       "runOptions": {
@@ -39,8 +41,9 @@
       }
     },
     {
-      "type": "npm",
-      "script": "test:watch",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "test:watch"],
       "problemMatcher": [],
       "label": "vitest watch",
       "runOptions": {

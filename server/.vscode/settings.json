@@ -1,4 +1,5 @@
 {
+  "npm.packageManager": "npm",
   "editor.codeActionsOnSave": {
     "source.fixAll": "explicit",
     "source.organizeImports": "explicit"

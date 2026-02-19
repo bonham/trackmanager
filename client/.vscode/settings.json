@@ -1,4 +1,5 @@
 {
+  "npm.packageManager": "npm",
   "eslint.lintTask.enable": false,
   "eslint.run": "onType",
   "eslint.validate": [

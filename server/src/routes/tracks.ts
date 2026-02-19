@@ -119,6 +119,7 @@ router.post(
         // zero payload
         if (ids.length === 0) {
           res.json([]);
+          return;
         }
 
         // validate integer

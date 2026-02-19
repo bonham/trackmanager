@@ -3,13 +3,15 @@
   "version": "0.0.0",
   "type": "module",
   "engines": {
-    "node": "~22"
+    "node": "~24"
   },
   "scripts": {
     "start": "tsx watch src/index.ts",
-    "build": "tsc --build --clean && tsc",
+    "build": "node build.mjs",
     "startbuild": "node ./dist/src/index.js",
-    "test": "vitest run",
+    "test:run": "vitest run",
+    "test:watch": "vitest watch",
+    "test:coverage": "vitest run --coverage",
     "copyconfig": "tsx ./src/bin/copyconfig.ts",
     "lint": "eslint --quiet .",
     "lintwarn": "eslint .",
@@ -41,7 +43,7 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@tsconfig/node20": "^20.1.4",
+    "@tsconfig/node24": "^24.0.0",
     "@types/connect-pg-simple": "^7.0.0",
     "@types/cors": "^2.8.13",
     "@types/express": "^4.0.0",
@@ -50,9 +52,11 @@
     "@types/lodash": "^4.14.202",
     "@types/luxon": "^3.3.4",
     "@types/morgan": "^1.9.4",
-    "@types/node": "^22.19.7",
+    "@types/node": "^24.0.0",
     "@types/pg": "^8.10.0",
     "@types/supertest": "^6.0.2",
+    "@vitest/coverage-v8": "^4.0.18",
+    "esbuild": "^0.27.3",
     "eslint": "^9.13.0",
     "eslint-config-prettier": "^10.1.8",
     "nodemon": "^3.0.1",

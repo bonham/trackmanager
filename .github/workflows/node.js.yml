@@ -1,5 +1,7 @@
-# This workflow will do a clean install of node dependencies, cache/restore them, build the source code and run tests across different versions of node
-# For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
+# CI for trackmanager monorepo (npm workspaces)
+# Deletes sub-directory lockfiles and regenerates a fresh root lockfile on
+# the Linux runner so platform-specific optional deps (e.g. @rollup/rollup-linux-x64-gnu)
+# are resolved correctly. See https://github.com/npm/cli/issues/4828
 
 name: Node.js CI
 
@@ -17,50 +19,37 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Use Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: "~22"
-      #          cache: "npm"
-      #         cache-dependency-path: ./client/package-lock.json
-      - run: npm install
-        working-directory: ./shared
-      - run: rm -rf node_modules package-lock.json
-        working-directory: ./client
-      - run: npm install
-        working-directory: ./client
-      - run: npm test
-        working-directory: ./client
-      - run: npm run lint
-        working-directory: ./client
-      - run: npm run build
-        working-directory: ./client
-      - run: npm run typecheck
-        working-directory: ./client
+          node-version: "~24"
+      - name: Clean stale lockfiles and install
+        run: |
+          rm -f client/package-lock.json server/package-lock.json shared/package-lock.json
+          rm -f package-lock.json
+          npm install
+      - run: npm test -w client
+      - run: npm run lint -w client
+      - run: npm run build -w client
+      - run: npm run typecheck -w client
 
   build_server:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Use Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: "~22"
-          cache: "npm"
-          cache-dependency-path: ./server/package-lock.json
-      - run: npm install
-        working-directory: ./shared
-      - run: npm install
-        working-directory: ./server
-      - run: npm run copyconfig
-        working-directory: ./server
-      - run: npm run build
-        working-directory: ./server
-      - run: npm run lint
-        working-directory: ./server
-      - run: npm run test
-        working-directory: ./server
-      - run: npm run typecheck
-        working-directory: ./server
+          node-version: "~24"
+      - name: Clean stale lockfiles and install
+        run: |
+          rm -f client/package-lock.json server/package-lock.json shared/package-lock.json
+          rm -f package-lock.json
+          npm install
+      - run: npm run copyconfig -w server
+      - run: npm run build -w server
+      - run: npm run lint -w server
+      - run: npm run test:run -w server
+      - run: npm run typecheck -w server

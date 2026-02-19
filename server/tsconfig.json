@@ -14,7 +14,12 @@
     "allowJs": true,
     "checkJs": false, // todo: set to true
     "rootDir": "./",
-    "typeRoots": ["./node_modules/@types", "./types", "./src/routes/auth/interfaces"],
+    "typeRoots": [
+      "./node_modules/@types",
+      "../node_modules/@types",
+      "./types",
+      "./src/routes/auth/interfaces"
+    ],
     "types": ["node"]
   },
   "ts-node": {
@@ -26,7 +31,8 @@
     "types/**/*",
     "vitest.config.ts",
     "eslint.config.mjs",
-    "config.js"
+    "config.js",
+    "build.mjs"
   ],
   "exclude": ["dist"]
 }

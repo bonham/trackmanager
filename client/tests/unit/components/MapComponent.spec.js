@@ -6,7 +6,7 @@ import { ManagedMap } from '@/lib/mapservices/ManagedMap'
 
 import { createTestingPinia } from '@pinia/testing'
 import { vi, test, beforeEach, describe, expect } from 'vitest'
-import ResizeObserverMock from './__mocks__/ResizeObserver'
+import ResizeObserverMock from '../__mocks__/ResizeObserver'
 
 // Mock external dependencies
 vi.mock('@/lib/trackServices', () => ({

@@ -23,7 +23,7 @@
     "@tsconfig/node24": "^24.0.0",
     "async": "^3.2.6",
     "bootstrap": "^5.3.7",
-    "bootstrap-vue-next": "^0.30.4",
+    "bootstrap-vue-next": "^0.43.6",
     "chart.js": "^4.5.0",
     "chartjs-adapter-luxon": "^1.3.1",
     "chartjs-plugin-zoom": "^2.2.0",

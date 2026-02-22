@@ -29,7 +29,7 @@ jobs:
           rm -f client/package-lock.json server/package-lock.json shared/package-lock.json
           rm -f package-lock.json
           npm install
-      - run: npm test -w client
+      - run: npm run test:run -w client
       - run: npm run lint -w client
       - run: npm run build -w client
       - run: npm run typecheck -w client

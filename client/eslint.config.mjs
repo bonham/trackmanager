@@ -56,10 +56,11 @@ export default tseslint.config(
     }
   },
   {
-    files: ["tests/**/*.spec.js"],
+    files: ["tests/**/*.spec.js", "tests/**/*.spec.ts"],
     rules: {
       "@typescript-eslint/no-unsafe-assignment": "off",
       "@typescript-eslint/no-unsafe-member-access": "off",
+      "@typescript-eslint/unbound-method": "off",
     }
   }
   // pluginVue.configs['flat/recommended'],

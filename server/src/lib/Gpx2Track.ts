@@ -95,7 +95,7 @@ class Gpx2Track {
       } else if (trackGeometry.type === "MultiLineString") {
         // check if number of segments matching number of property array entries
         const numCoordinateSegments = trackGeometry.coordinates.length
-        let validProperties = false
+        let validProperties: boolean
         if (
           props !== null &&
           isPropsWithTimes(props)

@@ -44,7 +44,7 @@ async function uploadFile(fileIdObject: QueuedFile, uploadUrl: string, formParam
 
   if (!response.ok) {
     const errDetail = await response.text()
-    let errcause = ''
+    let errcause: string
     try {
       const j = JSON.parse(errDetail) as unknown
       try {

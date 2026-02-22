@@ -50,7 +50,7 @@ export default defineConfig({
     setupFiles: ['tests/vitest-setupfiles/setup-jest-dom.js', 'jsdom-worker'],
     environment: 'jsdom',
     globals: true,
-    exclude: ['node_modules', 'dist'],
+    exclude: ['node_modules', 'dist', "dist_random"],
     coverage: {
       enabled: false,
       include: ['src/**/*'],

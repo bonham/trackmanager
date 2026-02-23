@@ -12,14 +12,6 @@ vi.mock('../../src/lib/Track2DbWriter.js', () => {
   return { default: { Track2DbWriter }, Track2DbWriter }
 })
 
-
-//type DbOpts = Parameters<InstanceType<typeof Track2DbWriter>['init']>[0];
-
-// const mockInit = vi.fn<[o: DbOpts], Promise<void>>();
-// const mockWrite = vi.fn<[], Promise<number>>()
-// vi.spyOn(Track2DbWriter.prototype, 'write').mockImplementation(mockWrite)
-// vi.spyOn(Track2DbWriter.prototype, 'init').mockImplementation(mockInit)
-
 describe('FitFile', () => {
 
   beforeEach(() => {

@@ -105,12 +105,12 @@ describe('processUpload', () => {
 describe('processUpload - DATABASE undefined', () => {
   test('throws when TM_DATABASE is undefined', async () => {
     // Reset modules to reload processUpload without TM_DATABASE set
-    vi.resetModules();
     const savedDb = process.env['TM_DATABASE'];
     delete process.env['TM_DATABASE'];
+    vi.resetModules();
 
     try {
-      const { processUpload: freshUpload } = await import('../../src/lib/processUpload.js?nocache');
+      const { processUpload: freshUpload } = await import('../../src/lib/processUpload.js');
       await expect(freshUpload('/any/path.fit', 'schema')).rejects.toThrow('Database is undefined');
     } catch {
       // If dynamic import fails due to cache, test the module directly

@@ -24,7 +24,7 @@ Trackmanager is a self-hosted web application for storing, viewing, and analyzin
 
 ### Progress Chart
 
-- Visualise your **cumulative mileage over time** with an interactive chart
+- Visualize your **cumulative mileage over time** with an interactive chart
 - Compare the current year against previous years at a glance
 - Zoom and pan to focus on specific time ranges
 

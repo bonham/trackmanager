@@ -17,29 +17,31 @@ import { processUpload } from '../lib/processUpload.js';
 import createSidValidationChain from '../lib/sidResolverMiddleware.js';
 import trackIdValidationMiddleware from '../lib/trackIdValidationMiddleware.js';
 import yearValidation from '../lib/yearValidation.js';
-
+import { isAuthenticated } from './auth/auth.js';
 
 const { Pool } = pg;
 
-
-
-import { isAuthenticated } from './auth/auth.js';
-
 const UPLOAD_DIR_PREFIX = 'trackmanager-upload-';
-
-type ReqWSchema = ExpressRequest & {
-  schema: string
-}
-
 dotenv.config();
-
 const TMP_BASE_DIR = process.env.UPLOAD_DIR ?? tmpdir();
-
-
 
 const router = express.Router();
 router.use(express.json()); // use builtin json body parser
 
+const ReqValidateSchema = z.object({
+  schema: z.string(),
+});
+const ReqValidateYear = z.object({
+  params: z.object({
+    year: z.string().min(1),
+  }),
+});
+const ReqValidateSchemaTrack = z.object({
+  schema: z.string().min(1),
+  params: z.object({
+    trackId: z.coerce.number().int(),
+  }),
+})
 
 const database = process.env.TM_DATABASE;
 if (database === undefined) {
@@ -59,7 +61,7 @@ router.get(
   '/getall/sid/:sid',
   sidValidationChain,
   asyncWrapper(async (req: ExpressRequest, res: Response) => {
-    const { schema } = req as ReqWSchema
+    const { schema } = ReqValidateSchema.parse(req);
     try {
       const queryResult = await pool.query(
         'select id, name, length, length_calc, src, '
@@ -107,7 +109,7 @@ router.post(
   '/geojson/sid/:sid',
   sidValidationChain,
   asyncWrapper(async (req: ExpressRequest, res: Response) => {
-    const { schema } = req as ReqWSchema
+    const { schema } = ReqValidateSchema.parse(req);
     try {
 
       if (!isIdsNumberArray(req.body)) {
@@ -154,8 +156,9 @@ router.get(
   sidValidationChain,
   trackIdValidationMiddleware,
   asyncWrapper(async (req: ExpressRequest, res: Response) => {
-    const { schema } = req as ReqWSchema
-    const { trackId } = req.params;
+    const validatedReq = ReqValidateSchemaTrack.parse(req);
+    const { schema } = validatedReq;
+    const { trackId } = validatedReq.params;
 
     const query = 'select id, name, length, length_calc, src, '
       + 'time, timelength, timelength_calc, ascent, ascent_calc '
@@ -187,7 +190,7 @@ router.post(
   '/bylist/sid/:sid',
   sidValidationChain,
   asyncWrapper(async (req: ExpressRequest, res: Response) => {
-    const { schema } = req as ReqWSchema
+    const { schema } = ReqValidateSchema.parse(req);
 
     // validate body. expect list of integers ( track ids )
     const body: unknown = req.body;
@@ -240,7 +243,7 @@ router.get(
   '/trackyears/sid/:sid',
   sidValidationChain,
   asyncWrapper(async (req: ExpressRequest, res: Response) => {
-    const { schema } = req as ReqWSchema
+    const { schema } = ReqValidateSchema.parse(req);
 
     const query = "select distinct to_char(time, 'YYYY') as year "
       + `from ${schema}.tracks`;
@@ -269,8 +272,8 @@ router.get(
   sidValidationChain,
   yearValidation,
   asyncWrapper(async (req: ExpressRequest, res: Response) => {
-    const { schema } = req as ReqWSchema;
-    const { year } = req.params;
+    const { schema } = ReqValidateSchema.parse(req);
+    const { year } = ReqValidateYear.parse(req).params;
 
     let whereClause;
     if (year === '0') {
@@ -304,7 +307,7 @@ router.post(
   asyncWrapper(async (req: ExpressRequest, res: Response, next: NextFunction) => {
     let query: string;
     try {
-      const { schema } = req as ReqWSchema;
+      const { schema } = ReqValidateSchema.parse(req);
 
       // get extent from payload
       const bbox = req.body as unknown;
@@ -338,7 +341,7 @@ router.post(
   sidValidationChain,
   asyncWrapper(async (req: ExpressRequest, res: Response, next: NextFunction) => {
     try {
-      const { schema } = req as ReqWSchema;
+      const { schema } = ReqValidateSchema.parse(req);
 
       // get extent from payload
       let bbox: number[]
@@ -386,7 +389,10 @@ router.put(
   sidValidationChain,
   trackIdValidationMiddleware,
   asyncWrapper(async (req: ExpressRequest, res: Response) => {
-    const { schema } = req as ReqWSchema;
+    const validatedReq = ReqValidateSchemaTrack.parse(req);
+    const { schema } = validatedReq;
+    const { trackId } = validatedReq.params;
+
     const body = req.body as Record<string, unknown>;
     const updateAttributes = body.updateAttributes as string[];
     const data = body.data as Record<string, string>;
@@ -399,7 +405,7 @@ router.put(
     const halfCoalesced = existingAttributes.map((x: string) => `${x} = '${data[x]}'`);
     const setExpression = halfCoalesced.join(',');
 
-    const query = `update ${schema}.tracks set ${setExpression} where id = ${req.params.trackId}`;
+    const query = `update ${schema}.tracks set ${setExpression} where id = ${trackId}`;
     console.log(query);
 
     try {
@@ -430,14 +436,14 @@ router.patch(
   sidValidationChain,
   trackIdValidationMiddleware,
   asyncWrapper(async (req: ExpressRequest, res: Response) => {
-    const { schema } = req as ReqWSchema;
-    const tidS: string = req.params.trackId
-    const tid = parseInt(tidS)
+    const validatedReq = ReqValidateSchemaTrack.parse(req);
+    const { schema } = validatedReq;
+    const { trackId } = validatedReq.params;
 
     // get source file name from server
     const queryResult = await pool.query(
       `select src from ${schema}.tracks where id = $1`,
-      [tid]
+      [trackId]
     );
     if (queryResult.rowCount !== 1) { throw Error(`Got ${queryResult.rowCount} but expected 1`) }
     const { src } = queryResult.rows[0] as { src: string }
@@ -457,7 +463,7 @@ router.patch(
       const cleaner = new StringCleaner(fileNameWithoutDate)
       const cleanedFileName = cleaner.applyAll({ suffixList: ['gpx', 'fit'] })
 
-      await tdbw.updateMetaData(tid, { name: cleanedFileName })
+      await tdbw.updateMetaData(trackId, { name: cleanedFileName })
     } finally {
       tdbw.end()
     }
@@ -473,8 +479,9 @@ router.delete(
   sidValidationChain,
   trackIdValidationMiddleware,
   asyncWrapper(async (req: ExpressRequest, res: Response) => {
-    const { schema } = req as ReqWSchema;
-    const { trackId } = req.params;
+    const validatedReq = ReqValidateSchemaTrack.parse(req);
+    const { schema } = validatedReq;
+    const { trackId } = validatedReq.params;
 
     const query1 = `delete from ${schema}.track_points `
       + `where track_id = ${trackId}`;
@@ -515,6 +522,8 @@ router.post(
   sidValidationChain,
 
   asyncWrapper(async (req: ExpressRequest, res: Response, next: NextFunction) => {
+    const { schema } = ReqValidateSchema.parse(req);
+
     const uploadDir = await mkdtempprom(join(TMP_BASE_DIR, UPLOAD_DIR_PREFIX));
     const form = new Formidable({
       uploadDir,
@@ -538,7 +547,7 @@ router.post(
         const filePath = files.newtrack[0].filepath;
         const fileName = basename(filePath);
 
-        processUpload(filePath, (req as ReqWSchema).schema)
+        processUpload(filePath, schema)
           .then(() => res.json({ message: 'ok' }))
           .catch(e => {
             console.log(`Could not write ${fileName}`, e)

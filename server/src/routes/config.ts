@@ -2,16 +2,19 @@ import * as dotenv from 'dotenv';
 import type { Request, Response } from 'express';
 import express from 'express';
 import pg from 'pg';
+import * as z from 'zod';
 import { asyncWrapper } from '../lib/asyncMiddlewareWrapper.js';
 import createSidValidationChain from '../lib/sidResolverMiddleware.js';
 
 const { Pool } = pg;
-
-
 dotenv.config();
 
 const router = express.Router();
 router.use(express.json()); // use builtin json body parser
+
+const ReqValidateSchema = z.object({
+  schema: z.string(),
+});
 
 
 const database = process.env.TM_DATABASE;
@@ -46,7 +49,8 @@ router.get(
 
     interface ResponseJson { value: (string | undefined) }
 
-    const schema = req.schema
+    const schema = ReqValidateSchema.parse(req).schema
+
     const { conftype, confkey } = req.params
 
     if (schema === undefined) {
@@ -96,7 +100,7 @@ router.get(
       value: string
     }
 
-    const schema = req.schema
+    const schema = ReqValidateSchema.parse(req).schema;
     const { conftype } = req.params
 
     if (schema === undefined) {

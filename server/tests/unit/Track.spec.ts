@@ -49,5 +49,32 @@ describe('Track Object', () => {
     expect(t1.getMetaData().name).toEqual('First Track');
     expect(t1.getSegments().length).toEqual(2);
   });
+
+  test('setSegmentList replaces segments', () => {
+    const t = new Track({ startTime: new Date('2024-01-01') });
+    t.addSegment(segment1);
+    t.setSegmentList([segment2]);
+    expect(t.getSegments().length).toEqual(1);
+    expect(t.getSegments()[0]).toEqual(segment2);
+  });
+
+  test('getStartTime returns the initial start time', () => {
+    const start = new Date('2024-06-15T10:00:00.000Z');
+    const t = new Track({ startTime: start });
+    expect(t.getStartTime()).toEqual(start);
+  });
+
+  test('setStartTime updates the start time', () => {
+    const initialDate = new Date('2024-01-01T00:00:00.000Z');
+    const newDate = new Date('2024-06-15T10:00:00.000Z');
+    const t = new Track({ startTime: initialDate });
+    t.setStartTime(newDate);
+    expect(t.getStartTime()).toEqual(newDate);
+  });
+
+  test('empty segments list initially', () => {
+    const t = new Track({ startTime: new Date() });
+    expect(t.getSegments()).toEqual([]);
+  });
 });
 

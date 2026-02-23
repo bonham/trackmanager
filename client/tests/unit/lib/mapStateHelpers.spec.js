@@ -1,5 +1,5 @@
 import { test, expect } from 'vitest'
-import { TrackVisibilityManager } from '../../src/lib/mapStateHelpers'
+import { TrackVisibilityManager } from '@/lib/mapStateHelpers'
 
 test('TrackVisibilityManager', () => {
   const currentlyVisible = [3, 5, 6, 7, 10]
@@ -14,7 +14,7 @@ test('TrackVisibilityManager', () => {
   const toBeLoaded = [2]
   const loadedButDoNotToggle = [3, 10, 12]
 
-   
+
   const tvm = new TrackVisibilityManager(currentlyVisible, toBeVisible, alreadyLoaded)
 
   expect(tvm.deltaToBeEnabled()).toEqual(deltaToBeEnabled)

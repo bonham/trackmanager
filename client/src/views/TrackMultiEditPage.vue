@@ -155,7 +155,7 @@ async function nameFromSrc(item: TableItem): Promise<boolean> {
 
   // update name from source in backend
   const updateSuccess = await updateNameFromSource(id, props.sid)
-  let updatedName: string | null = null
+  let updatedName: string | null
 
   if (updateSuccess) {
 

@@ -1,7 +1,7 @@
-import { mockFetch } from './mockResponse.js'
+import { mockFetch } from '../mockResponse.js'
 import { render, fireEvent, waitForElementToBeRemoved } from '@testing-library/vue'
 import TrackMultiEditPage from '@/views/TrackMultiEditPage.vue'
-import ResizeObserverMock from './__mocks__/ResizeObserver'
+import ResizeObserverMock from '../__mocks__/ResizeObserver'
 import { Request, Response } from 'cross-fetch'
 import { describe, beforeEach, test, expect, vi } from 'vitest'
 import { createTestingPinia } from '@pinia/testing'
@@ -9,10 +9,10 @@ import { createTestingPinia } from '@pinia/testing'
 // skipped tests do not work because of https://github.com/testing-library/vue-testing-library/issues/298
 describe('MultiEditPage', () => {
   beforeEach(() => {
-    vi.stubGlobal('ResizeObserver', ResizeObserverMock)  
-    vi.stubGlobal('fetch', mockFetch)  
-    vi.stubGlobal('Request', Request)  
-    vi.stubGlobal('Response', Response)  
+    vi.stubGlobal('ResizeObserver', ResizeObserverMock)
+    vi.stubGlobal('fetch', mockFetch)
+    vi.stubGlobal('Request', Request)
+    vi.stubGlobal('Response', Response)
     mockFetch.mockClear()
 
 

@@ -6,7 +6,7 @@
 import { render, fireEvent, waitFor } from '@testing-library/vue'
 import { describe, test, expect, vi, beforeEach } from 'vitest'
 import { createTestingPinia } from '@pinia/testing'
-import ResizeObserverMock from './__mocks__/ResizeObserver'
+import ResizeObserverMock from '../__mocks__/ResizeObserver'
 
 vi.mock('@/lib/trackServices', () => ({
   getAllTracks: vi.fn(),

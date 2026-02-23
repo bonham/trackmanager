@@ -1,8 +1,8 @@
 import { render } from '@testing-library/vue'
 // import userEvent from '@testing-library/user-event'
-import router from '../../src/router'
+import router from '@/router'
 import { vi, describe, test, beforeEach, expect } from 'vitest'
-import { mockFetch } from './mockResponse.js'
+import { mockFetch } from '../mockResponse.js'
 import { Request } from 'cross-fetch'
 import { createTestingPinia } from '@pinia/testing'
 

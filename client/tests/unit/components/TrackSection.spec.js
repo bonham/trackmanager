@@ -23,7 +23,6 @@ describe('TrackSection', () => {
     )
     const tc = new TrackCollection([mytrack])
 
-    // eslint-disable-next-line @typescript-eslint/unbound-method
     const { findByText, getByTestId } = render(
       TrackSection,
       {
@@ -65,7 +64,6 @@ describe('TrackSection', () => {
     )
     const tc = new TrackCollection([mytrack])
 
-    // eslint-disable-next-line @typescript-eslint/unbound-method
     const { findByText, getByTestId, } = render(
       TrackSection,
       {

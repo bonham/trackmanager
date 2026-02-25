@@ -8,7 +8,6 @@ import { AutenticatorDb } from './AuthenticatorDb.js';
 
 const router = Router();
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function makeAuthenticationOptionsRoute(authdb: AutenticatorDb, rpID: string) {
   // call this route with /authoptions?authuser=myuserid
   router.get('/authoptions', asyncWrapper(async (req: RequestWebauthn, res) => {

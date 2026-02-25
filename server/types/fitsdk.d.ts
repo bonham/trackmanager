@@ -1,4 +1,4 @@
-/* eslint-disable max-classes-per-file */
+
 declare module '@garmin/fitsdk' {
   interface BaseFitMessage {
     'timestamp': Date;
@@ -54,7 +54,7 @@ declare module '@garmin/fitsdk' {
     constructor(stream: Stream);
     isFIT(): boolean;
     checkIntegrity(): boolean;
-    read(): { messages: FitMessages, errors: any };
+    read(): { messages: FitMessages, errors: unkown };
   }
 
   export { Decoder, Stream };

@@ -1,7 +1,7 @@
 import pg from 'pg';
+import * as z from 'zod';
 import type { TrackMetadata, TrackMetadataOptionalStartDate, TrackPoint } from './Track.js';
 import { Track } from './Track.js';
-import { isNextValQueryResult } from './typeguards.js';
 
 const TRACK_TABLENAME = "tracks"
 const TRACK_SEQUENCENAME = "tracks_id"
@@ -307,13 +307,11 @@ class Track2DbWriter {
 
   async getNextTrackId(): Promise<number> {
     const resTrackId = await this.client().query(`select nextval('${this.schema()}.tracks_id')`);
-    const nextValRow = resTrackId.rows[0] as (object | undefined)
-    if (!isNextValQueryResult(nextValRow)) {
-      throw Error("Query did not return correct nextval structure")
-    } else {
-      const newId = parseInt(nextValRow.nextval);
-      return newId
-    }
+
+    const nextValRow = z.array(z.object({ nextval: z.string() })).parse(resTrackId.rows)[0]
+
+    const newId = parseInt(nextValRow.nextval);
+    return newId
   }
 }
 

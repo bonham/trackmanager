@@ -1,5 +1,3 @@
-/* eslint-disable padded-blocks */
-/* eslint-disable no-trailing-spaces */
 import type { FitMessages, SessionFitMessage } from '@garmin/fitsdk';
 import {
   Decoder, Stream,
@@ -56,7 +54,7 @@ class FitFile {
    * @param buf 
    * @returns 
    */
-  // eslint-disable-next-line class-methods-use-this
+
   private decode(buf: Buffer): FitMessages {
 
     const bytes = Array.from(buf);
@@ -67,8 +65,10 @@ class FitFile {
     if (!decoder.isFIT()) { throw new Error('is not fit'); }
     if (!decoder.checkIntegrity()) { throw new Error('integrity check failed'); }
 
-    const { messages: fitMessages, errors } = decoder.read();
-    if (errors.length) {
+    const readResult = decoder.read();
+    const fitMessages = readResult.messages;
+    const errors = readResult.errors as unknown;
+    if (Array.isArray(errors) && errors.length) {
       throw new Error('error', { cause: errors });
     }
     return fitMessages;

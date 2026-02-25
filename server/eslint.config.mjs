@@ -38,5 +38,15 @@ export default tseslint.config(
       "@typescript-eslint/no-unnecessary-type-assertion": "warn",
       "@typescript-eslint/prefer-for-of": "off"
     }
+  },
+  {
+    // build.mjs is infrastructure glue — disable type-aware unsafe rules
+    files: ['build.mjs'],
+    rules: {
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-argument': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
+    }
   }
 );

@@ -1,4 +1,4 @@
-import type { AuthenticatorTransportFuture, Base64URLString } from '@simplewebauthn/server';
+import type { AuthenticatorTransportFuture } from '@simplewebauthn/server';
 import type { Pool, QueryConfig } from 'pg';
 import type { Authenticator, RegCodeLookup } from '../interfaces/server.js';
 
@@ -51,7 +51,7 @@ export class AutenticatorDb {
 
       const authenticator = {
 
-        credentialID: row.credentialid as Base64URLString,
+        credentialID: row.credentialid,
         credentialPublicKey: row.credentialpublickey as Uint8Array<ArrayBuffer>,
         counter: row.counter,
         credentialDeviceType: row.credentialdevicetype,

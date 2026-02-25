@@ -135,7 +135,7 @@ describe('Track2DbWriter - getNextTrackId', () => {
 
   test('throws when nextval result is malformed', async () => {
     const { writer } = await makeInitializedWriter([makeQueryResult([{ unexpected: 'data' }])]);
-    await expect(writer.getNextTrackId()).rejects.toThrow('Query did not return correct nextval structure');
+    await expect(writer.getNextTrackId()).rejects.toThrow('Invalid input');
   });
 });
 

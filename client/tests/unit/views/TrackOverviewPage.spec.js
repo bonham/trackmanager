@@ -34,7 +34,6 @@ describe('TrackOverview and TrackDetail', () => {
     vi.stubGlobal('fetch', mockFetch)
     // const user = userEvent.setup()
 
-    // eslint-disable-next-line @typescript-eslint/unbound-method
     const { findAllByRole, findByText } = render(
       TrackOverviewPage,
       {

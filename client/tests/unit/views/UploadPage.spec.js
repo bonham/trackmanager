@@ -1,5 +1,4 @@
- 
-/* eslint-disable @typescript-eslint/unbound-method */
+
 import { render } from '@testing-library/vue'
 import userEvent from '@testing-library/user-event'
 import UploadPage from '@/views/UploadPage.vue'

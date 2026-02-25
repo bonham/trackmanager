@@ -1,5 +1,6 @@
 import { constants } from 'node:fs';
 import { copyFile } from 'node:fs/promises';
+import * as z from 'zod';
 
 async function main() {
   try {
@@ -10,11 +11,15 @@ async function main() {
     );
     console.log('env.dist was copied to .env');
   } catch (e) {
-    if ((e as any).code === 'EEXIST') {
-      console.log('.env already exists');
+    const result = z.object({
+      code: z.string(),
+    }).safeParse(e);
+
+    if (result.success && result.data.code === 'EEXIST') {
+      console.error('.env already exists');
       return;
     }
-    console.log('The file could not be copied', e);
+    console.error('The file could not be copied', e);
   }
 }
 main().catch(e => console.error(e));

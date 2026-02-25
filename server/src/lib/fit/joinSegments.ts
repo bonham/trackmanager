@@ -1,4 +1,3 @@
-/* eslint-disable no-continue */
 import geodesic from 'geographiclib-geodesic';
 import { RecordMessageList, concatRecordMessageLists } from './Messages.js';
 

@@ -1,4 +1,4 @@
 declare module 'helmet' {
-  const helmet: () => any;
+  const helmet: () => unkown;
   export default helmet;
 }

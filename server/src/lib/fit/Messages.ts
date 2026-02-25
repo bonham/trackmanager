@@ -1,4 +1,3 @@
-/* eslint-disable max-classes-per-file */
 import type { BaseFitMessage, EventFitMessage, RecordFitMessage } from '@garmin/fitsdk';
 import { DateTime } from 'luxon';
 import type { DateTimeInterval } from './types.js';
@@ -227,8 +226,8 @@ function concatRecordMessageLists(
   rmlist2: RecordMessageList,
 ): RecordMessageList {
   // concat the segments
-  const msgs1 = rmList1.getMessages() as RecordMessage[];
-  const msgs2 = rmlist2.getMessages() as RecordMessage[];
+  const msgs1 = rmList1.getMessages();
+  const msgs2 = rmlist2.getMessages();
   const n = msgs1.concat(msgs2);
   const concatList = new RecordMessageList(n);
   return concatList;

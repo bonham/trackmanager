@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@garmin/fitsdk": "^21.126.0",
+    "@modelcontextprotocol/sdk": "^1.27.1",
     "@simplewebauthn/server": "^13",
     "@tmcw/togeojson": "^7.1.2",
     "@types/geojson": "^7946.0.14",

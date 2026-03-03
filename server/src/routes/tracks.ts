@@ -95,21 +95,7 @@ router.get(
   })
 );
 
-// result: { id: x.id, geojson: { .. } }
-function isIdsNumberArray(obj: unknown): obj is { ids: number[] } {
-
-
-  if (
-    obj &&
-    typeof obj === 'object' &&
-    'ids' in obj &&
-    Array.isArray(obj.ids) &&
-    obj.ids.every((item: unknown) => typeof item === 'number')
-  ) return true
-  else {
-    return false
-  }
-}
+const IdsPayloadSchema = z.object({ ids: z.array(z.number().int()) });
 
 /**
  * POST /geojson/sid/:sid
@@ -125,35 +111,27 @@ router.post(
     const { schema } = ReqValidateSchema.parse(req);
     try {
 
-      if (!isIdsNumberArray(req.body)) {
-        throw Error("Wrong type for req.body")
-      } else {
-        // validate expected property
-        const { ids } = req.body
+      const { ids } = IdsPayloadSchema.parse(req.body);
 
-        // zero payload
-        if (ids.length === 0) {
-          res.json([]);
-          return;
-        }
-
-        // validate integer
-        const notIntegerList = _.reject(ids, (x) => (_.isInteger(x)));
-        if (notIntegerList.length) throw Error('Found non integer elements in payload');
-
-        const inClause = `(${ids.join()})`;
-        const query = 'select id, ST_AsGeoJSON(wkb_geometry,6,3) as geojson '
-          + `from ${schema}.tracks where id in ${inClause}`;
-
-        const queryResult = await pool.query(query);
-        const { rows } = queryResult as { rows: { id: number, geojson: string }[] };
-
-        const rowsWGeoJson = _.map(rows, (x) => ({ id: x.id, geojson: JSON.parse(x.geojson) as GeoJsonObject }));
-
-        // Validate response against shared schema
-        const validatedResponse = z.array(MultiLineStringWithTrackIdSchema).parse(rowsWGeoJson);
-        res.json(validatedResponse);
+      // zero payload
+      if (ids.length === 0) {
+        res.json([]);
+        return;
       }
+
+      const inClause = `(${ids.join()})`;
+      const query = 'select id, ST_AsGeoJSON(wkb_geometry,6,3) as geojson '
+        + `from ${schema}.tracks where id in ${inClause}`;
+
+      const queryResult = await pool.query(query);
+      const { rows } = queryResult as { rows: { id: number, geojson: string }[] };
+
+      const rowsWGeoJson = _.map(rows, (x) => ({ id: x.id, geojson: JSON.parse(x.geojson) as GeoJsonObject }));
+
+      // Validate response against shared schema
+      const validatedResponse = z.array(MultiLineStringWithTrackIdSchema).parse(rowsWGeoJson);
+      res.json(validatedResponse);
+
     } catch (err: unknown) {
       console.trace('Exception handling trace');
       console.log(err);

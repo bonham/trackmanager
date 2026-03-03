@@ -94,6 +94,27 @@ describe('POST /api/mcp', () => {
     });
   });
 
+  test('tools/list includes get_track_aggregates with sid and trackIds inputSchema', async () => {
+    const response = await request(app)
+      .post('/api/mcp')
+      .set('Content-Type', 'application/json')
+      .set('Accept', MCP_ACCEPT)
+      .send(TOOLS_LIST_REQUEST)
+      .expect(200);
+
+    const tools: Array<{ name: string; inputSchema: { properties?: Record<string, unknown> } }> =
+      response.body.result.tools;
+    const aggregatesTool = tools.find(t => t.name === 'get_track_aggregates');
+
+    expect(aggregatesTool).toBeDefined();
+    expect(aggregatesTool?.inputSchema).toMatchObject({
+      properties: {
+        sid: expect.any(Object),
+        trackIds: expect.any(Object)
+      }
+    });
+  });
+
   test('get_all_tracks returns isError when sid cannot be resolved (no DB)', async () => {
     const response = await request(app)
       .post('/api/mcp')
@@ -130,6 +151,25 @@ describe('POST /api/mcp', () => {
     const result = response.body.result as { isError?: boolean; content?: unknown[] } | undefined;
     const hasTrackData = result && !result.isError && Array.isArray(result.content);
     expect(hasTrackData).toBe(false);
+  });
+
+  test('get_track_aggregates returns isError when sid cannot be resolved (no DB)', async () => {
+    const response = await request(app)
+      .post('/api/mcp')
+      .set('Content-Type', 'application/json')
+      .set('Accept', MCP_ACCEPT)
+      .send({
+        jsonrpc: '2.0',
+        id: 6,
+        method: 'tools/call',
+        params: { name: 'get_track_aggregates', arguments: { sid: 'testschema', trackIds: [1, 2] } }
+      })
+      .expect(200);
+
+    // Without a real DB the schema lookup fails; the tool should return isError
+    expect(response.body.result.isError).toBe(true);
+    const parsed: unknown = JSON.parse(response.body.result.content[0].text as string);
+    expect(parsed).toMatchObject({ error: expect.any(String) });
   });
 
   test('returns JSON-RPC error for unknown method', async () => {

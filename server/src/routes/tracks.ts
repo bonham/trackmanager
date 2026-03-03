@@ -82,6 +82,26 @@ export async function getAllTracks(schema: string) {
 }
 
 /**
+ * getTracksByIdList - query tracks by ID list for a given schema.
+ * @param schema - Resolved PostgreSQL schema name
+ * @param idList - Array of track IDs to retrieve
+ * @returns Array of track metadata objects
+ */
+export async function getTracksByIdList(schema: string, idList: number[]) {
+  if (idList.length === 0) {
+    return [];
+  }
+
+  const inClause = `(${idList.join(',')})`;
+  const query = 'select id, name, length, length_calc, src, '
+    + 'time, timelength, timelength_calc, ascent, ascent_calc '
+    + `from ${schema}.tracks where id in ${inClause}`;
+
+  const queryResult = await pool.query(query);
+  return z.array(TrackMetadataDbRowSchema).parse(queryResult.rows);
+}
+
+/**
  * GET /getall/sid/:sid
  * Retrieve all tracks for a given schema.
  * @param sid - Schema identifier from session

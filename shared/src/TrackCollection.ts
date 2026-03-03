@@ -23,6 +23,19 @@ class TrackCollection {
     return sum
   }
 
+  ascent() {
+    const sum = this.members().reduce((s, tr) => s + tr.getAscent(), 0)
+    return sum
+  }
+
+  timeLength() {
+    const sum = this.members().reduce((s, tr) => {
+      const tl = tr.getTimeLength()
+      return s + (tl ?? 0)
+    }, 0)
+    return sum
+  }
+
   yearList() {
     const yList = this.members().map(x => x.year())
     return _.uniq(yList)

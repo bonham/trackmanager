@@ -144,8 +144,8 @@ describe('Track2DbWriter - insertTrackMetadata', () => {
     const { writer } = await makeInitializedWriter([{ ...makeQueryResult([{}]), rowCount: 1 }]);
     await expect(
       writer.insertTrackMetadata(1, {
-        name: 'test', source: 'src.gpx', totalAscent: 100,
-        totalDistance: 10000, startTime: new Date(), durationSeconds: 3600,
+        name: 'test', src: 'src.gpx', ascent: 100,
+        length: 10000, time: new Date(), timelength: 3600,
       }, 'hash123')
     ).resolves.toBeUndefined();
   });
@@ -153,7 +153,7 @@ describe('Track2DbWriter - insertTrackMetadata', () => {
   test('throws when rowCount is not 1', async () => {
     const { writer } = await makeInitializedWriter([{ ...makeQueryResult([]), rowCount: 0 }]);
     await expect(
-      writer.insertTrackMetadata(1, { name: 'test', source: 'src.gpx', startTime: new Date() }, 'hash123')
+      writer.insertTrackMetadata(1, { name: 'test', src: 'src.gpx', time: new Date() }, 'hash123')
     ).rejects.toThrow('Insert rowcount is not equal to 1');
   });
 });
@@ -161,7 +161,7 @@ describe('Track2DbWriter - insertTrackMetadata', () => {
 describe('Track2DbWriter - write', () => {
   test('returns -1 when hash already exists', async () => {
     const { writer } = await makeInitializedWriter([makeQueryResult([{ count: 1 }])]);
-    const track = new Track({ name: 'test', startTime: new Date() });
+    const track = new Track({ name: 'test', time: new Date() });
     expect(await writer.write(track, 'existing-hash')).toBe(-1);
   });
 
@@ -184,7 +184,7 @@ describe('Track2DbWriter - write', () => {
       makeQueryResult([]),                        // COMMIT
     ]);
 
-    const track = new Track({ name: 'test track', startTime: new Date() });
+    const track = new Track({ name: 'test track', time: new Date() });
     track.addSegment(segment);
     expect(await writer.write(track, 'new-hash')).toBe(10);
   });
@@ -197,7 +197,7 @@ describe('Track2DbWriter - write', () => {
       // rollback uses the fallback mock
     ]);
 
-    const track = new Track({ name: 'test', startTime: new Date() });
+    const track = new Track({ name: 'test', time: new Date() });
     await expect(writer.write(track, 'new-hash')).rejects.toThrow('Error during track creation');
   });
 });
@@ -206,8 +206,8 @@ describe('Track2DbWriter - updateMetaData', () => {
   test('updates all provided fields', async () => {
     const { writer, client } = await makeInitializedWriter();
     await writer.updateMetaData(1, {
-      name: 'new name', source: 'new source', totalAscent: 200,
-      totalDistance: 20000, startTime: new Date(), durationSeconds: 7200,
+      name: 'new name', src: 'new source', ascent: 200,
+      length: 20000, time: new Date(), timelength: 7200,
     });
     // BEGIN + 6 updates + COMMIT = 8 calls
     expect(client.query).toHaveBeenCalledTimes(8);

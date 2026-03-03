@@ -38,11 +38,11 @@ async function processFitFile(
 
   const track = new Track({
     name: cleanedFileName,
-    source: fileName,
-    totalAscent,
-    totalDistance,
-    durationSeconds: totalTimerTime,
-    startTime,
+    src: fileName,
+    ascent: totalAscent,
+    length: totalDistance,
+    timelength: totalTimerTime,
+    time: startTime,
   });
 
   const segments = fitFile.getRecordMessageList(); // default join distance of 10

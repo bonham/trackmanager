@@ -17,19 +17,10 @@ import { sprintf } from 'sprintf-js'
  */
 type TrackInitData = { id: number; geojson?: GeoJsonObject | null } & Partial<Omit<TrackMetadata, 'id'>>
 
-interface TrackPropertiesOptional {
-  id?: number,
-  name?: string | null,
-  length?: number | null,
-  length_calc?: number | null,
-  src?: string | null,
-  timelength?: number | null,
-  timelength_calc?: number | null,
-  ascent?: number | null,
-  ascent_calc?: number | null,
-  geojson?: GeoJsonObject | null,
-  time?: DateTime | null | undefined
-}
+/** Partial track data fields — used for update operations (e.g. PUT to API). */
+type TrackPropertiesOptional = Partial<Pick<Track,
+  'id' | 'name' | 'length' | 'length_calc' | 'src' | 'timelength' | 'timelength_calc' | 'ascent' | 'ascent_calc' | 'geojson' | 'time'
+>>
 
 interface HMS {
   hours: number;

@@ -232,7 +232,7 @@ router.post(
 
     try {
       const queryResult = await pool.query(query);
-      const { rows } = queryResult;
+      const rows = z.array(TrackMetadataDbRowSchema).parse(queryResult.rows);
 
       if (rows.length === 0) {
         res.json([]);
@@ -351,7 +351,8 @@ router.post(
       console.log(query);
 
       const queryResult = await pool.query(query);
-      res.json(queryResult.rows);
+      const rows = z.array(TrackMetadataDbRowSchema).parse(queryResult.rows);
+      res.json(rows);
     } catch (err) {
       next(err);
     }

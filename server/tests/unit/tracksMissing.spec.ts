@@ -103,9 +103,13 @@ const mockTrack1 = {
   id: 2,
   name: 'firsttrack',
   length: 34.5,
+  length_calc: null,
   src: 'mysrc',
   time: new Date('2020-01-01T11:11:11.011Z'),
+  timelength: null,
+  timelength_calc: null,
   ascent: 3,
+  ascent_calc: null,
 }
 
 describe('POST /byextent/sid/:sid', () => {

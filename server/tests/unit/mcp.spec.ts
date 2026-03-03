@@ -44,7 +44,7 @@ describe('POST /api/mcp', () => {
       result: {
         protocolVersion: expect.any(String),
         serverInfo: {
-          name: 'bedtime-mystery-stories',
+          name: 'trackmanager',
           version: '1.0.0'
         },
         capabilities: expect.any(Object)
@@ -66,15 +66,15 @@ describe('POST /api/mcp', () => {
       result: {
         tools: expect.arrayContaining([
           expect.objectContaining({
-            name: 'tell_mystery_story',
-            description: expect.stringContaining('mystery')
+            name: 'get_all_tracks',
+            description: expect.stringContaining('tracks')
           })
         ])
       }
     });
   });
 
-  test('tools/list includes tell_mystery_story with theme inputSchema', async () => {
+  test('tools/list includes get_all_tracks with sid inputSchema', async () => {
     const response = await request(app)
       .post('/api/mcp')
       .set('Content-Type', 'application/json')
@@ -84,17 +84,17 @@ describe('POST /api/mcp', () => {
 
     const tools: Array<{ name: string; inputSchema: { properties?: Record<string, unknown> } }> =
       response.body.result.tools;
-    const storyTool = tools.find(t => t.name === 'tell_mystery_story');
+    const tracksTool = tools.find(t => t.name === 'get_all_tracks');
 
-    expect(storyTool).toBeDefined();
-    expect(storyTool?.inputSchema).toMatchObject({
+    expect(tracksTool).toBeDefined();
+    expect(tracksTool?.inputSchema).toMatchObject({
       properties: {
-        theme: expect.any(Object)
+        sid: expect.any(Object)
       }
     });
   });
 
-  test('tell_mystery_story returns a 20-sentence forest story', async () => {
+  test('get_all_tracks returns isError when sid cannot be resolved (no DB)', async () => {
     const response = await request(app)
       .post('/api/mcp')
       .set('Content-Type', 'application/json')
@@ -103,17 +103,17 @@ describe('POST /api/mcp', () => {
         jsonrpc: '2.0',
         id: 4,
         method: 'tools/call',
-        params: { name: 'tell_mystery_story', arguments: { theme: 'forest' } }
+        params: { name: 'get_all_tracks', arguments: { sid: 'testschema' } }
       })
       .expect(200);
 
-    const text: string = response.body.result.content[0].text;
-    const sentences = text.split('\n').filter((s: string) => s.trim().length > 0);
-    expect(sentences).toHaveLength(20);
-    expect(text).toContain('Finn');
+    // Without a real DB the schema lookup fails; the tool should return isError
+    expect(response.body.result.isError).toBe(true);
+    const parsed: unknown = JSON.parse(response.body.result.content[0].text as string);
+    expect(parsed).toMatchObject({ error: expect.any(String) });
   });
 
-  test('tell_mystery_story returns a 20-sentence lighthouse story', async () => {
+  test('get_all_tracks returns no successful result for invalid (non-alphanumeric) sid', async () => {
     const response = await request(app)
       .post('/api/mcp')
       .set('Content-Type', 'application/json')
@@ -122,14 +122,14 @@ describe('POST /api/mcp', () => {
         jsonrpc: '2.0',
         id: 5,
         method: 'tools/call',
-        params: { name: 'tell_mystery_story', arguments: { theme: 'lighthouse' } }
+        params: { name: 'get_all_tracks', arguments: { sid: 'bad sid!' } }
       })
       .expect(200);
 
-    const text: string = response.body.result.content[0].text;
-    const sentences = text.split('\n').filter((s: string) => s.trim().length > 0);
-    expect(sentences).toHaveLength(20);
-    expect(text).toContain('Wren');
+    // Invalid sid fails Zod validation; the response should not contain track data
+    const result = response.body.result as { isError?: boolean; content?: unknown[] } | undefined;
+    const hasTrackData = result && !result.isError && Array.isArray(result.content);
+    expect(hasTrackData).toBe(false);
   });
 
   test('returns JSON-RPC error for unknown method', async () => {
@@ -173,3 +173,4 @@ describe('GET /api/mcp', () => {
       .expect(406);
   });
 });
+

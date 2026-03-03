@@ -2,81 +2,94 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import { Router } from 'express';
 import * as z from 'zod/v4';
+import { getAllTracks, pool } from '../../routes/tracks.js';
+import getSchema from '../getSchema.js';
 
-const STORIES: Record<string, string> = {
-  forest: `
-Deep in the Whispering Forest, a small fox named Finn noticed that all the fireflies had gone dark.
-He padded softly through the trees, his amber eyes searching the shadows.
-An old owl named Mira perched on a mossy branch and whispered, "Something has taken their light."
-Finn followed a trail of tiny silver footprints deeper into the woods.
-The prints led to a hollow log sealed with a peculiar purple stone.
-He sniffed the stone — it smelled of lavender and old rain.
-When he nudged it aside, a warm golden glow spilled out like honey.
-Inside sat a small creature no bigger than a chestnut, fast asleep.
-It was a glow-keeper, a guardian of all forest light, who had curled up and forgotten to wake.
-Finn gently touched its tiny shoulder and the creature yawned, stretching its golden fingers wide.
-One by one the fireflies blinked back to life all across the forest.
-The trees swayed as if sighing with relief, their leaves catching the soft yellow light.
-Mira the owl ruffled her feathers and smiled knowingly.
-Finn watched the fireflies dance and felt a deep, quiet warmth in his chest.
-He turned and trotted home, his paws barely making a sound on the soft earth.
-The glow-keeper waved a tiny glowing hand after him.
-The forest hummed a low lullaby that drifted between the branches.
-Every creature settled into their burrow, nest, or hollow, eyes growing heavy.
-Finn curled into his den, the memory of the golden light still shining behind his eyes.
-And just like that, the mystery of the dark fireflies was peacefully solved, and the forest slept.`.trim(),
-
-  lighthouse: `
-On a small island stood a lighthouse whose beam had flickered off three nights in a row.
-A girl named Wren rowed her little boat across the calm black water to find out why.
-She climbed the spiral staircase, her lantern casting long wobbly shadows on the stone walls.
-At the top she found the great lamp cold and dark, but the logbook lay open on the keeper's desk.
-The last entry read: "Heard singing from the rocks below. Went to see. Do not follow."
-Wren pressed her ear to the cold glass and listened — and there it was, a faint silvery hum.
-She climbed down the outside ladder to the wave-splashed rocks at the base.
-There she found the lighthouse keeper, eyes closed, sitting perfectly still with a smile on his face.
-Around him swirled a dozen pale-blue starfish, each one glowing faintly and humming a different note.
-The keeper had been so enchanted by their song that he had simply forgotten everything else.
-Wren clapped her hands twice and the starfish paused, turning their tiny eyes toward her.
-"Thank you," she said politely, "but we need him back."
-The starfish hummed one final chorus, then slipped quietly into the sea.
-The keeper blinked, stretched, and looked around as though waking from the best dream of his life.
-Together he and Wren climbed back up and lit the great lamp once more.
-Its beam swept across the water, guiding ships safely through the dark.
-The keeper poured two cups of warm chamomile tea and they sat listening to the waves.
-Wren never told anyone what she had seen, and neither did the keeper.
-But every night after that, very faint music could be heard rising from the rocks below.
-And anyone who heard it found themselves yawning deeply and drifting off to the most peaceful sleep.`.trim(),
-};
-
-function tellStory(theme: 'forest' | 'lighthouse'): string {
-  return STORIES[theme];
-}
+/**
+ * Trackmanager MCP Server
+ *
+ * Exposes Trackmanager track data via the Model Context Protocol (MCP).
+ *
+ * Trackmanager is a multi-tenant GPS track management application built on
+ * an Express 5 REST API with PostgreSQL + PostGIS for spatial data storage.
+ * Data isolation is achieved through PostgreSQL schemas; each tenant is
+ * identified by a Schema ID (SID). All tools are scoped to a tenant via
+ * the `sid` parameter.
+ *
+ * See IMPLEMENTATION.md for a full description of the architecture.
+ */
 
 function createMcpServer(): McpServer {
   const mcpServer = new McpServer({
-    name: 'bedtime-mystery-stories',
-    version: '1.0.0'
+    name: 'trackmanager',
+    version: '1.0.0',
+    description: 'An MCP server for accessing a track archive containing bicycle trips with details like duration, distance, elevation gain, and performance metrics. ' +
+      'Browse trips by name, time, and route information. ' +
+      'Each query requires specifying which tenant account to access.Ask the user for the schema id ( sid ). No guessing.' +
+      'Currently supports retrieving all archived tracks with their metadata. Aggregations or calculations of performance data should not be done ' +
+      'instead talk about properties of a small sample of the tracks.'
   });
 
+  /**
+   * get_all_tracks
+   *
+   * Retrieve all GPS tracks for a given tenant schema, ordered by time
+   * descending. Each track record contains:
+   *   id, name, length, length_calc, src, time, timelength,
+   *   timelength_calc, ascent, ascent_calc
+   *
+   * The `sid` (Schema ID) parameter identifies the tenant. It must be
+   * alphanumeric and must exist in the Trackmanager database.
+   * Equivalent REST endpoint: GET /api/tracks/getall/sid/:sid
+   */
   mcpServer.registerTool(
-    'tell_mystery_story',
+    'get_all_tracks',
     {
-      title: 'Bedtime Mystery Story',
+      title: 'Get All Tracks',
       description:
-        'Tells a gentle 20-sentence mystery story for children at bedtime. ' +
-        'Choose a theme: "forest" (a fox investigates missing fireflies) or ' +
-        '"lighthouse" (a girl solves the mystery of a dark lighthouse).',
+        'Retrieve  bicycle tracks / trips from the track archive, ordered by time descending. ' +
+        'Returns a JSON array of track metadata objects, each with fields: ' +
+        'id, name, length, length_calc, src, time, timelength, timelength_calc, ascent, ascent_calc. ' +
+        'The sid parameter is the Schema ID that identifies the tenant. The user must provide it, no guessing. ' +
+        'Use this tool to get an overview of the tracks in the archive. ' +
+        'For detailed analysis, ask about specific track properties or a small sample of tracks instead of retrieving the entire archive.',
       inputSchema: {
-        theme: z
-          .enum(['forest', 'lighthouse'])
-          .describe('The story theme to tell')
-      }
+        sid: z
+          .string()
+          .regex(/^[a-zA-Z0-9]+$/)
+          .describe(
+            'Schema identifier (SID) for the tenant. Must be alphanumeric. ' +
+            'Identifies which PostgreSQL schema (tenant) to query.'
+          ),
+      },
     },
-    ({ theme }) => {
-      const story = tellStory(theme);
+    async ({ sid }) => {
+      const schema = await getSchema(sid, pool);
+      if (schema === null) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify({ error: `Could not resolve schema for sid: ${sid}` }),
+            },
+          ],
+          isError: true,
+        };
+      }
+
+      let tracks: Record<string, unknown>[];
+      try {
+        tracks = await getAllTracks(schema);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        return {
+          content: [{ type: 'text', text: JSON.stringify({ error: message }) }],
+          isError: true,
+        };
+      }
+
       return {
-        content: [{ type: 'text', text: story }]
+        content: [{ type: 'text', text: JSON.stringify(tracks) }],
       };
     }
   );
@@ -97,7 +110,7 @@ export function createMcpRouter(options: McpRouterOptions = {}): Router {
     const server = createMcpServer();
     const transport = new StreamableHTTPServerTransport({
       sessionIdGenerator: undefined, // stateless mode
-      enableJsonResponse: options.enableJsonResponse ?? false
+      enableJsonResponse: options.enableJsonResponse ?? false,
     });
 
     try {
@@ -115,7 +128,7 @@ export function createMcpRouter(options: McpRouterOptions = {}): Router {
   router.get('/', async (req, res) => {
     const server = createMcpServer();
     const transport = new StreamableHTTPServerTransport({
-      sessionIdGenerator: undefined // stateless mode
+      sessionIdGenerator: undefined, // stateless mode
     });
 
     try {

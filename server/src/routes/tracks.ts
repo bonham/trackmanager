@@ -55,29 +55,36 @@ const poolOptions = {
   database,
 };
 const pool = new Pool(poolOptions);
+export { pool };
 const sidValidationChain = createSidValidationChain(pool);
 
+/**
+ * getAllTracks - query all tracks for a given schema, ordered by time descending.
+ * @param schema - Resolved PostgreSQL schema name
+ * @returns Array of track metadata objects with id, name, length, src, time, timelength, ascent
+ */
+export async function getAllTracks(schema: string): Promise<Record<string, unknown>[]> {
+  const queryResult = await pool.query(
+    'select id, name, length, length_calc, src, '
+    + 'time, timelength, timelength_calc, ascent, ascent_calc '
+    + `from ${schema}.tracks order by time desc`,
+  );
+  return queryResult.rows as Record<string, unknown>[];
+}
+
+/**
+ * GET /getall/sid/:sid
+ * Retrieve all tracks for a given schema.
+ * @param sid - Schema identifier from session
+ * @returns Array of track metadata objects with id, name, length, src, time, timelength, ascent
+ */
 router.get(
   '/getall/sid/:sid',
   sidValidationChain,
   asyncWrapper(async (req: ExpressRequest, res: Response) => {
     const { schema } = ReqValidateSchema.parse(req);
     try {
-      const queryResult = await pool.query(
-        'select id, name, length, length_calc, src, '
-        + 'time, timelength, timelength_calc, ascent, ascent_calc '
-        + `from ${schema}.tracks order by time desc`,
-      );
-
-      const { rows } = queryResult;
-      // convert geojson string to object
-
-      // for (let i = 0; i < rows.length; i++) {
-      //   const jsonString = rows[i].geojson
-      //   const geoJson = JSON.parse(jsonString)
-      //   rows[i].geojson = geoJson
-      // }
-
+      const rows = await getAllTracks(schema);
       res.json(rows);
     } catch (err) {
       console.trace('Exception handling trace');
@@ -104,7 +111,13 @@ function isIdsNumberArray(obj: unknown): obj is { ids: number[] } {
   }
 }
 
-/// // Get Geojson for a list of ids. Payload { ids: [..] }
+/**
+ * POST /geojson/sid/:sid
+ * Retrieve GeoJSON geometry for a list of track IDs.
+ * @param sid - Schema identifier from session
+ * @param body - Array of track IDs: { ids: [1, 2, 3, ...] }
+ * @returns Array of objects with id and geojson (GeoJsonObject)
+ */
 router.post(
   '/geojson/sid/:sid',
   sidValidationChain,
@@ -150,7 +163,13 @@ router.post(
   })
 );
 
-/// // Get single track id
+/**
+ * GET /byid/:trackId/sid/:sid
+ * Retrieve metadata for a single track by ID.
+ * @param trackId - Track identifier
+ * @param sid - Schema identifier from session
+ * @returns Track metadata object with id, name, length, src, time, timelength, ascent; 404 if not found
+ */
 router.get(
   '/byid/:trackId/sid/:sid',
   sidValidationChain,
@@ -185,7 +204,13 @@ router.get(
   })
 );
 
-/// // Get track metadata objects for list of tracks
+/**
+ * POST /bylist/sid/:sid
+ * Retrieve metadata for multiple tracks by their IDs.
+ * @param sid - Schema identifier from session
+ * @param body - Track ID list: [1, 2, 3, ...]
+ * @returns Array of track metadata objects
+ */
 router.post(
   '/bylist/sid/:sid',
   sidValidationChain,
@@ -238,7 +263,12 @@ router.post(
   })
 );
 
-// Get years for existing tracks
+/**
+ * GET /trackyears/sid/:sid
+ * Retrieve all distinct years that have track data.
+ * @param sid - Schema identifier from session
+ * @returns Array of year strings (e.g. ['2020', '2021', '2022'])
+ */
 router.get(
   '/trackyears/sid/:sid',
   sidValidationChain,
@@ -266,7 +296,13 @@ router.get(
   })
 );
 
-/// // Get list of tracks by year
+/**
+ * GET /ids/byyear/:year/sid/:sid
+ * Retrieve track IDs for a specific year or tracks with null dates.
+ * @param year - Year to query; use '0' for tracks with null dates
+ * @param sid - Schema identifier from session
+ * @returns Array of track IDs ordered by time descending
+ */
 router.get(
   '/ids/byyear/:year/sid/:sid',
   sidValidationChain,
@@ -300,7 +336,13 @@ router.get(
   })
 );
 
-/// // Get list of tracks by bounding box ( coordinates in EPSG:4326 )
+/**
+ * POST /byextent/sid/:sid
+ * Retrieve all tracks that intersect a geographic bounding box (EPSG:4326).
+ * @param sid - Schema identifier from session
+ * @param body - Bounding box coordinates: [minLon, minLat, maxLon, maxLat]
+ * @returns Array of track metadata objects intersecting the bbox
+ */
 router.post(
   '/byextent/sid/:sid',
   sidValidationChain,
@@ -334,8 +376,14 @@ router.post(
   })
 );
 
-/// // Get list of track ids by extent (bounding box) and time 
-// This is to have a priority for fetching in batches
+/**
+ * POST /idlist/byextentbytime/sid/:sid
+ * Retrieve track IDs intersecting a geographic bounding box, prioritized by time.
+ * Tracks intersecting the bbox are returned first (ordered by time desc), followed by non-intersecting tracks.
+ * @param sid - Schema identifier from session
+ * @param body - Bounding box coordinates: [minLon, minLat, maxLon, maxLat]
+ * @returns Array of track IDs ordered by intersection priority and time
+ */
 router.post(
   '/idlist/byextentbytime/sid/:sid',
   sidValidationChain,
@@ -382,7 +430,14 @@ router.post(
   })
 );
 
-/// // Update single track
+/**
+ * PUT /byid/:trackId/sid/:sid
+ * Update multiple attributes of a track (requires authentication).
+ * @param trackId - Track identifier
+ * @param sid - Schema identifier from session
+ * @param body - { updateAttributes: string[], data: { [key]: value } }
+ * @returns 200 OK on success; 404 if track not found; 500 on error
+ */
 router.put(
   '/byid/:trackId/sid/:sid',
   isAuthenticated,
@@ -429,7 +484,14 @@ router.put(
   }),
 );
 
-/// // Update name from source for a track
+/**
+ * PATCH /namefromsrc/:trackId/sid/:sid
+ * Update a track's name by parsing and cleaning its source filename (requires authentication).
+ * Extracts date strings and format suffixes to generate a clean name.
+ * @param trackId - Track identifier
+ * @param sid - Schema identifier from session
+ * @returns 204 No Content on success
+ */
 router.patch(
   '/namefromsrc/:trackId/sid/:sid',
   isAuthenticated,
@@ -472,7 +534,14 @@ router.patch(
   })
 )
 
-/// // Delete single track
+/**
+ * DELETE /byid/:trackId/sid/:sid
+ * Delete a track and all its associated data (requires authentication).
+ * Cascades delete to track_points and segments tables.
+ * @param trackId - Track identifier
+ * @param sid - Schema identifier from session
+ * @returns 200 OK on success; 404 if track not found; 500 on error
+ */
 router.delete(
   '/byid/:trackId/sid/:sid',
   isAuthenticated,
@@ -515,7 +584,14 @@ router.delete(
   }),
 );
 
-// POST route for handling gpx track file uploads.
+/**
+ * POST /addtrack/sid/:sid
+ * Upload and process a new track file (GPX or FIT format) (requires authentication).
+ * Accepts multipart form-data with a 'newtrack' field containing the track file.
+ * @param sid - Schema identifier from session
+ * @param body - Multipart form with file field 'newtrack'
+ * @returns { message: 'ok' } on success; { message: 'error', fileName } on failure
+ */
 router.post(
   '/addtrack/sid/:sid',
   isAuthenticated,

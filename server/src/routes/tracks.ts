@@ -2,13 +2,11 @@ import * as dotenv from 'dotenv';
 import type { Request as ExpressRequest, NextFunction, Response } from 'express';
 import express from 'express';
 import { Formidable } from 'formidable';
-import type { GeoJsonObject } from 'geojson';
-import _ from 'lodash';
 import { mkdtemp as mkdtempprom } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { basename, join } from 'node:path';
 import pg from 'pg';
-import { MultiLineStringWithTrackIdSchema, TrackIdListSchema } from 'trackmanager-shared/zodSchemas';
+import { MultiLineStringWithTrackIdSchema, TrackIdListSchema, TrackMetadataSchema } from 'trackmanager-shared/zodSchemas';
 import * as z from 'zod';
 import { Track2DbWriter } from '../lib/Track2DbWriter.js';
 import { DateStringMatcher, StringCleaner } from '../lib/analyzeString.js';
@@ -43,6 +41,17 @@ const ReqValidateSchemaTrack = z.object({
   }),
 })
 
+// Schemas for validating DB query results and request bodies
+const TrackMetadataDbRowSchema = TrackMetadataSchema.extend({ time: z.date().nullable() })
+const GeoJsonDbRowSchema = z.object({ id: z.number(), geojson: z.string() })
+const SrcRowSchema = z.object({ src: z.string() })
+const IdRowSchema = z.object({ id: z.number() })
+const BBoxBodySchema = z.array(z.number()).length(4)
+const UpdateBodySchema = z.object({
+  updateAttributes: z.array(z.string()),
+  data: z.record(z.string(), z.string()),
+})
+
 const database = process.env.TM_DATABASE;
 if (database === undefined) {
   throw Error("Please define database in environment")
@@ -63,13 +72,13 @@ const sidValidationChain = createSidValidationChain(pool);
  * @param schema - Resolved PostgreSQL schema name
  * @returns Array of track metadata objects with id, name, length, src, time, timelength, ascent
  */
-export async function getAllTracks(schema: string): Promise<Record<string, unknown>[]> {
+export async function getAllTracks(schema: string) {
   const queryResult = await pool.query(
     'select id, name, length, length_calc, src, '
     + 'time, timelength, timelength_calc, ascent, ascent_calc '
     + `from ${schema}.tracks order by time desc`,
   );
-  return queryResult.rows as Record<string, unknown>[];
+  return z.array(TrackMetadataDbRowSchema).parse(queryResult.rows);
 }
 
 /**
@@ -124,9 +133,9 @@ router.post(
         + `from ${schema}.tracks where id in ${inClause}`;
 
       const queryResult = await pool.query(query);
-      const { rows } = queryResult as { rows: { id: number, geojson: string }[] };
+      const rows = z.array(GeoJsonDbRowSchema).parse(queryResult.rows);
 
-      const rowsWGeoJson = _.map(rows, (x) => ({ id: x.id, geojson: JSON.parse(x.geojson) as GeoJsonObject }));
+      const rowsWGeoJson = rows.map((x) => ({ id: x.id, geojson: JSON.parse(x.geojson) as unknown }));
 
       // Validate response against shared schema
       const validatedResponse = z.array(MultiLineStringWithTrackIdSchema).parse(rowsWGeoJson);
@@ -168,7 +177,7 @@ router.get(
       if (rows.length === 0) {
         res.status(404).end();
       } else {
-        const row = rows[0] as Record<string, unknown>;
+        const row = TrackMetadataDbRowSchema.parse(rows[0]);
         res.json(row);
       }
 
@@ -330,12 +339,7 @@ router.post(
       const { schema } = ReqValidateSchema.parse(req);
 
       // get extent from payload
-      const bbox = req.body as unknown;
-      if (!Array.isArray(bbox)) { throw Error('Payload is not array'); }
-      if (bbox.length !== 4) { throw Error('BBox must have array length 4'); }
-
-      const allAreNumbers = bbox.every((value) => (typeof value === 'number'));
-      if (!allAreNumbers) { throw Error('Not all elements of bbox are numbers'); }
+      const bbox = BBoxBodySchema.parse(req.body);
 
       const whereClause = 'ST_Intersects(wkb_geometry, ST_MakeEnvelope('
         + `${bbox[0]}, ${bbox[1]}, ${bbox[2]}, ${bbox[3]}, '4326'))`;
@@ -400,7 +404,8 @@ router.post(
         values: bbox,
       }
       const queryResult = await pool.query(query);
-      const validatedResult = TrackIdListSchema.parse(queryResult.rows.map((r: { id: number }) => r.id));
+      const rows = z.array(IdRowSchema).parse(queryResult.rows);
+      const validatedResult = TrackIdListSchema.parse(rows.map((r) => r.id));
       res.json(validatedResult);
     } catch (err) {
       next(err);
@@ -426,9 +431,7 @@ router.put(
     const { schema } = validatedReq;
     const { trackId } = validatedReq.params;
 
-    const body = req.body as Record<string, unknown>;
-    const updateAttributes = body.updateAttributes as string[];
-    const data = body.data as Record<string, string>;
+    const { updateAttributes, data } = UpdateBodySchema.parse(req.body);
     // SQL injection here
 
     // filter out attributes not in data object
@@ -486,7 +489,7 @@ router.patch(
       [trackId]
     );
     if (queryResult.rowCount !== 1) { throw Error(`Got ${queryResult.rowCount} but expected 1`) }
-    const { src } = queryResult.rows[0] as { src: string }
+    const { src } = SrcRowSchema.parse(queryResult.rows[0])
 
     // convert and write
     const tdbw = new Track2DbWriter()

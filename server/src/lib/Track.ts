@@ -1,4 +1,6 @@
 
+import type { ParsedTrackMetadataWithTime } from 'trackmanager-shared/zodSchemas';
+
 interface TrackPoint {
   lat: number;
   lon: number;
@@ -6,28 +8,14 @@ interface TrackPoint {
   point_time?: Date
 }
 
-interface TrackMetadataOptionalStartDate {
-  name?: string,
-  source?: string,
-  totalAscent?: number;
-  totalDistance?: number;
-  durationSeconds?: number;
-  startTime?: Date;
-}
-
-interface TrackMetadata extends TrackMetadataOptionalStartDate {
-  startTime: Date
-}
-
-
 type Segment = TrackPoint[]
 
 class Track {
   segments: Segment[] = [];
 
-  options: TrackMetadata
+  options: ParsedTrackMetadataWithTime
 
-  constructor(options: TrackMetadata) {
+  constructor(options: ParsedTrackMetadataWithTime) {
     this.options = options;
   }
 
@@ -48,14 +36,15 @@ class Track {
   }
 
   getStartTime(): Date {
-    return this.options.startTime
+    return this.options.time
   }
 
   setStartTime(d: Date) {
-    this.options.startTime = d
+    this.options.time = d
   }
 }
 
+export type { ParsedTrackMetadata, ParsedTrackMetadataWithTime } from 'trackmanager-shared/zodSchemas';
 export { Track };
-export type { Segment, TrackMetadata, TrackMetadataOptionalStartDate, TrackPoint };
+export type { Segment, TrackPoint };
 

@@ -26,18 +26,26 @@ const mockTrack1 = {
   id: 2,
   name: 'firsttrack',
   length: 34.5,
+  length_calc: null,
   src: 'mysrc',
   time: new Date('2020-01-01T11:11:11.011Z'),
+  timelength: null,
+  timelength_calc: null,
   ascent: 3,
+  ascent_calc: null,
 };
 
 const mockTrack2 = {
   id: 7,
   name: 'trackseven',
   length: 44.5,
+  length_calc: null,
   src: 'sevensrc',
   time: new Date('2027-01-01T11:11:11.011Z'),
+  timelength: null,
+  timelength_calc: null,
   ascent: 3,
+  ascent_calc: null,
 };
 
 describe('Endpoints related to track metadata', () => {

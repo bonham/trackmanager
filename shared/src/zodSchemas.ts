@@ -118,5 +118,24 @@ export const TrackMetadataSchema = z.object({
 })
 export type TrackMetadata = z.infer<typeof TrackMetadataSchema>
 
+/**
+ * Parsed track metadata — the internal format when parsing GPX/FIT files.
+ * Uses the same field names as the DB columns / API wire format.
+ * `time` is a native Date (pre-serialization). All fields are optional.
+ */
+export const ParsedTrackMetadataSchema = z.object({
+  name: z.string().optional(),
+  src: z.string().optional(),
+  ascent: z.number().optional(),
+  length: z.number().optional(),
+  timelength: z.number().optional(),
+  time: z.date().optional(),
+})
+export type ParsedTrackMetadata = z.infer<typeof ParsedTrackMetadataSchema>
+
+/** Parsed track metadata with a required `time` field (e.g. for writing to DB). */
+export const ParsedTrackMetadataWithTimeSchema = ParsedTrackMetadataSchema.required({ time: true })
+export type ParsedTrackMetadataWithTime = z.infer<typeof ParsedTrackMetadataWithTimeSchema>
+
 /** Schema for a list of track IDs */
 export const TrackIdListSchema = z.array(z.number().int().nonnegative())

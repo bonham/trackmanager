@@ -1,6 +1,7 @@
 import pg from 'pg';
+import type { ParsedTrackMetadata, ParsedTrackMetadataWithTime } from 'trackmanager-shared/zodSchemas';
 import * as z from 'zod';
-import type { TrackMetadata, TrackMetadataOptionalStartDate, TrackPoint } from './Track.js';
+import type { TrackPoint } from './Track.js';
 import { Track } from './Track.js';
 
 const TRACK_TABLENAME = "tracks"
@@ -82,7 +83,7 @@ class Track2DbWriter {
 
     const foundHash = await this.checkForHash(fileBufferHash)
     if (foundHash) {
-      console.log(`Track ${t.getMetaData().source} already in DB ... skipping`)
+      console.log(`Track ${t.getMetaData().src} already in DB ... skipping`)
       return -1
     }
 
@@ -138,11 +139,8 @@ class Track2DbWriter {
    * @param tmeta Track metadata
    * @param fileBufferHash Hash from source file
    */
-  async insertTrackMetadata(id: number, tmeta: TrackMetadata, fileBufferHash: string): Promise<void> {
-    const {
-      name, source, totalAscent, totalDistance,
-      startTime, durationSeconds,
-    } = tmeta;
+  async insertTrackMetadata(id: number, tmeta: ParsedTrackMetadataWithTime, fileBufferHash: string): Promise<void> {
+    const { name, src, ascent, length, time, timelength } = tmeta;
 
     const insert = `
     INSERT INTO ${this.schema()}.${TRACK_TABLENAME}(
@@ -152,8 +150,8 @@ class Track2DbWriter {
         $1, $2, $3, $4, $5, $6, $7, $8);
     `;
     const values = [
-      id, name, source, fileBufferHash,
-      startTime, totalDistance, durationSeconds, totalAscent,
+      id, name, src, fileBufferHash,
+      time, length, timelength, ascent,
     ];
 
     const res = await this.client().query(insert, values);
@@ -161,24 +159,21 @@ class Track2DbWriter {
 
   }
 
-  async updateMetaData(id: number, tmetaOpt: TrackMetadataOptionalStartDate): Promise<void> {
+  async updateMetaData(id: number, tmetaOpt: ParsedTrackMetadata): Promise<void> {
 
     const t = `${this.schema()}.${TRACK_TABLENAME}`
 
     await this.client().query('begin transaction')
     try {
 
-      const {
-        name, source, totalAscent, totalDistance,
-        startTime, durationSeconds,
-      } = tmetaOpt;
+      const { name, src, ascent, length, time, timelength } = tmetaOpt;
 
       if (name !== undefined) { await this.client().query(`UPDATE ${t} set name = $1 where id = $2`, [name, id]) }
-      if (source !== undefined) { await this.client().query(`UPDATE ${t} set src = $1 where id = $2`, [source, id]) }
-      if (totalAscent !== undefined) { await this.client().query(`UPDATE ${t} set ascent = $1 where id = $2`, [totalAscent, id]) }
-      if (totalDistance !== undefined) { await this.client().query(`UPDATE ${t} set length = $1 where id = $2`, [totalDistance, id]) }
-      if (startTime !== undefined) { await this.client().query(`UPDATE ${t} set "time" = $1 where id = $2`, [startTime, id]) }
-      if (durationSeconds !== undefined) { await this.client().query(`UPDATE ${t} set timelength = $1 where id = $2`, [durationSeconds, id]) }
+      if (src !== undefined) { await this.client().query(`UPDATE ${t} set src = $1 where id = $2`, [src, id]) }
+      if (ascent !== undefined) { await this.client().query(`UPDATE ${t} set ascent = $1 where id = $2`, [ascent, id]) }
+      if (length !== undefined) { await this.client().query(`UPDATE ${t} set length = $1 where id = $2`, [length, id]) }
+      if (time !== undefined) { await this.client().query(`UPDATE ${t} set "time" = $1 where id = $2`, [time, id]) }
+      if (timelength !== undefined) { await this.client().query(`UPDATE ${t} set timelength = $1 where id = $2`, [timelength, id]) }
 
       await this.client().query('commit')
 

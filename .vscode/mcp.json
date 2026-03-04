@@ -1,0 +1,8 @@
+{
+  "servers": {
+    "trackmanager-mcp": {
+      "type": "http",
+      "url": "http://localhost:4000/api/mcp"
+    }
+  }
+}

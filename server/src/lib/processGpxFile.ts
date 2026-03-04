@@ -46,10 +46,10 @@ async function processGpxFile(
 
     const track = new Track({
       name: finalName,
-      source: fileName,
-      totalAscent: ascent,
-      startTime: startTime ?? new Date(0), // epoch if not known
-      durationSeconds: timelength
+      src: fileName,
+      ascent: ascent,
+      time: startTime ?? new Date(0), // epoch if not known
+      timelength: timelength
     })
 
     const extSegments = trackSegmentPoints[trackNum]

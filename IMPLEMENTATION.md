@@ -96,8 +96,28 @@ Routes are organized into three groups, all mounted under `/api`:
 
 Provide CRUD operations for tracks and spatial queries:
 
-- **Read** — Get all track metadata, get tracks by ID / year / bounding box, get GeoJSON geometries.
-- **Write** (authenticated) — Upload new track files, update track metadata, rename from source filename, delete tracks.
+| Method | Endpoint                          | Description                                                                                                 | Auth | Params           |
+| ------ | --------------------------------- | ----------------------------------------------------------------------------------------------------------- | ---- | ---------------- |
+| GET    | `/getall/sid/:sid`                | Retrieve all tracks for a schema, ordered by time descending                                                | No   | `sid`            |
+| POST   | `/geojson/sid/:sid`               | Get GeoJSON geometries for multiple tracks by ID. Body: `{ ids: [1, 2, ...] }`                              | No   | `sid`            |
+| GET    | `/byid/:trackId/sid/:sid`         | Get metadata for a single track                                                                             | No   | `trackId`, `sid` |
+| POST   | `/bylist/sid/:sid`                | Get metadata for multiple tracks by ID. Body: `[1, 2, 3, ...]`                                              | No   | `sid`            |
+| GET    | `/trackyears/sid/:sid`            | Get all distinct years with track data                                                                      | No   | `sid`            |
+| GET    | `/ids/byyear/:year/sid/:sid`      | Get track IDs for a specific year (or `0` for null dates), ordered by time descending                       | No   | `year`, `sid`    |
+| POST   | `/byextent/sid/:sid`              | Get all tracks intersecting a geographic bounding box (EPSG:4326). Body: `[minLon, minLat, maxLon, maxLat]` | No   | `sid`            |
+| POST   | `/idlist/byextentbytime/sid/:sid` | Get track IDs by bounding box, prioritized: intersecting tracks first (by time desc), then non-intersecting | No   | `sid`            |
+| PUT    | `/byid/:trackId/sid/:sid`         | Update track attributes (name, etc.). Body: `{ updateAttributes: [...], data: {...} }`                      | Yes  | `trackId`, `sid` |
+| PATCH  | `/namefromsrc/:trackId/sid/:sid`  | Automatically generate a clean track name by parsing and cleaning the source filename                       | Yes  | `trackId`, `sid` |
+| DELETE | `/byid/:trackId/sid/:sid`         | Delete a track and all associated data (track_points, segments)                                             | Yes  | `trackId`, `sid` |
+| POST   | `/addtrack/sid/:sid`              | Upload a new track file (GPX or FIT format). Multipart form with field `newtrack`                           | Yes  | `sid`            |
+
+**Notes:**
+
+- All routes are scoped to a PostgreSQL schema via `:sid` (Schema ID).
+- Read operations (GET/POST without auth) return track metadata and/or GeoJSON geometries.
+- Write operations (PUT/PATCH/DELETE/POST upload) require authentication via WebAuthn/Passkeys.
+- Spatial queries use PostGIS (`ST_Intersects`, `ST_MakeEnvelope`, `ST_AsGeoJSON`).
+- Upload endpoint validates file type (GPX/FIT), parses geometry, calculates distance/ascent, and writes to PostGIS.
 
 #### Auth Routes (`/api/v1/auth`)
 

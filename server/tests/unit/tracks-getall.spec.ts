@@ -17,12 +17,16 @@ vi.mock('../../src/routes/auth/auth');
 vi.mock('../../src/lib/getSchema.js')
 
 const mockTrack1 = {
-  id: '2',
+  id: 2,
   name: 'firsttrack',
   length: 34.5,
+  length_calc: null,
   src: 'mysrc',
-  time: '2020-01-01T11:11:11.011Z',
+  time: new Date('2020-01-01T11:11:11.011Z'),
+  timelength: null,
+  timelength_calc: null,
   ascent: 3,
+  ascent_calc: null,
 };
 
 const mockGetSchema = vi.mocked(getSchema)
@@ -57,7 +61,7 @@ describe('tracks - getall', () => {
       .expect(200);
 
     expect(response.body).toHaveLength(1);
-    expect(response.body).toEqual(expect.arrayContaining([mockTrack1]));
+    expect(response.body).toEqual(expect.arrayContaining([{ ...mockTrack1, time: mockTrack1.time.toISOString() }]));
     expect(mockGetSchema).toHaveBeenCalled();
   });
   test('wrongsid', async () => {

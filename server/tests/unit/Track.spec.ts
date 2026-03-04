@@ -39,10 +39,10 @@ describe('Track Object', () => {
   test('Simple1', () => {
     const t1 = new Track({
       name: 'First Track',
-      source: 'From source',
-      totalAscent: 233,
-      totalDistance: 566,
-      startTime: new Date('2027-01-01T01:15:00.000'),
+      src: 'From source',
+      ascent: 233,
+      length: 566,
+      time: new Date('2027-01-01T01:15:00.000'),
     });
     t1.addSegment(segment1);
     t1.addSegment(segment2);
@@ -51,7 +51,7 @@ describe('Track Object', () => {
   });
 
   test('setSegmentList replaces segments', () => {
-    const t = new Track({ startTime: new Date('2024-01-01') });
+    const t = new Track({ time: new Date('2024-01-01') });
     t.addSegment(segment1);
     t.setSegmentList([segment2]);
     expect(t.getSegments().length).toEqual(1);
@@ -60,20 +60,20 @@ describe('Track Object', () => {
 
   test('getStartTime returns the initial start time', () => {
     const start = new Date('2024-06-15T10:00:00.000Z');
-    const t = new Track({ startTime: start });
+    const t = new Track({ time: start });
     expect(t.getStartTime()).toEqual(start);
   });
 
   test('setStartTime updates the start time', () => {
     const initialDate = new Date('2024-01-01T00:00:00.000Z');
     const newDate = new Date('2024-06-15T10:00:00.000Z');
-    const t = new Track({ startTime: initialDate });
+    const t = new Track({ time: initialDate });
     t.setStartTime(newDate);
     expect(t.getStartTime()).toEqual(newDate);
   });
 
   test('empty segments list initially', () => {
-    const t = new Track({ startTime: new Date() });
+    const t = new Track({ time: new Date() });
     expect(t.getSegments()).toEqual([]);
   });
 });

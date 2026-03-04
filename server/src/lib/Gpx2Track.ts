@@ -2,14 +2,8 @@ import * as tj from "@tmcw/togeojson";
 import { DOMParser, Document as XmlDomDocument } from "@xmldom/xmldom";
 import type { Feature, GeoJsonProperties, Geometry, Position } from "geojson";
 import { DateTime } from 'luxon';
+import type { ParsedTrackMetadata } from 'trackmanager-shared/zodSchemas';
 import xpath from "xpath";
-
-interface TrackMetadata {
-  name?: string,
-  ascent?: number,
-  timelength?: number,
-  time?: Date
-}
 
 type TimeStringList = (string | undefined)[]
 interface ExtendedSegment {
@@ -181,7 +175,7 @@ class Gpx2Track {
 
     // extract metadata for track
     const props = trackFt.properties
-    const tm: TrackMetadata = {}
+    const tm: ParsedTrackMetadata = {}
 
     if (props !== null) {
       tm.name = isString(props.name) ? props.name : undefined

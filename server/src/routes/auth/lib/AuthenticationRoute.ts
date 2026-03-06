@@ -6,6 +6,7 @@ import type { RequestWebauthn } from '../interfaces/server.js';
 import type { AuthenticationResponseJSON, VerifiedAuthenticationResponse, WebAuthnCredential } from '@simplewebauthn/server';
 import { verifyAuthenticationResponse } from '@simplewebauthn/server';
 import { AutenticatorDb } from './AuthenticatorDb.js';
+import getRouteAuthSchema from './getRouteAuthSchema.js';
 
 const router = Router();
 
@@ -14,6 +15,7 @@ const router = Router();
 export function makeAuthenticationRoute(origin: string, rpID: string, authdb: AutenticatorDb) {
   router.post('/authentication', (async (req: RequestWebauthn, res, next) => {
     try {
+      const authSchema = getRouteAuthSchema(req);
       let body: AuthenticationResponseJSON
       if (isAuthResponseJSON(req.body)) {
         body = req.body
@@ -33,7 +35,9 @@ export function makeAuthenticationRoute(origin: string, rpID: string, authdb: Au
       // (Pseudocode} Retrieve an authenticator from the DB that
       // should match the `id` in the returned credential
       console.log('Body id:', body.id);
-      const authenticators = await authdb.getAuthenticatorsById(body.id);
+      const authenticators = authSchema === undefined
+        ? await authdb.getAuthenticatorsById(body.id)
+        : await authdb.getAuthenticatorsById(body.id, authSchema);
 
       if (authenticators.length !== 1) {
         console.error(`Expected 1 authenticator, got ${authenticators.length}, for credential id ${body.id}`);

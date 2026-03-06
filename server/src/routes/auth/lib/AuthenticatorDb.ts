@@ -1,59 +1,74 @@
 import type { AuthenticatorTransportFuture } from '@simplewebauthn/server';
-import type { Pool, QueryConfig } from 'pg';
-import type { Authenticator, RegCodeLookup } from '../interfaces/server.js';
+import type { Selectable } from 'kysely';
+import { Kysely, PostgresDialect } from 'kysely';
+import type { Pool } from 'pg';
+import { z } from 'zod';
+import type { DB } from '../../../../types/db.js';
+import type { Authenticator } from '../interfaces/server.js';
 
+// This type describes the rows we pass into `authenticatorFromRows`.
+//
+// Start with Kysely's generated type for `public.cred_authenticators`, then:
+// 1) Keep only the fields we actually select in our query (with `Pick`).
+//
+// We intentionally do not widen field types for tests.
+// `counter` stays as the DB/Kysely type (BIGINT -> string in this project), and
+// `credentialpublickey` stays as DB bytes from the driver.
+//
+// In short: runtime mapping follows DB contracts, and tests should match those contracts.
+type CredentialAuthenticatorRow = Pick<
+  Selectable<DB['public.cred_authenticators']>,
+  | 'credentialid'
+  | 'credentialpublickey'
+  | 'counter'
+  | 'credentialdevicetype'
+  | 'credentialbackedup'
+  | 'transports'
+  | 'userid'
+>;
 
-interface RowType {
-  credentialid: string;
-  credentialpublickey: Uint8Array;
-  credentialdevicetype: string;
-  credentialbackedup: boolean;
-  counter: number;
-  transports: string;
-  userid: string;
-}
-
-function isRowType(obj: unknown): obj is RowType {
-  if (obj === null) { console.log("row is null"); return false }
-  if (typeof obj !== 'object') { console.log("row is not object"); return false }
-  if (!('credentialid' in obj)) { console.log("credentialid missing"); return false }
-  if (!('credentialpublickey' in obj)) { console.log("credentialpublickey missing"); return false }
-  if (!('credentialdevicetype' in obj)) { console.log("credentialdevicetype missing"); return false }
-  if (!('credentialbackedup' in obj)) { console.log("credentialbackedup missing"); return false }
-  if (!('counter' in obj)) { console.log("counter missing"); return false }
-  if (!('transports' in obj)) { console.log("transports missing"); return false }
-  if (!('userid' in obj)) { console.log("userid missing"); return false }
-  return true
-}
-
-function isRowTypeArray(obj: unknown): obj is RowType[] {
-  if (obj === null) { console.log("row is null"); return false }
-  if (!Array.isArray(obj)) { console.log("obj not array"); return false }
-
-  const allObjectsAreRows = obj.every((el) => {
-    return isRowType(el)
-  })
-  return allObjectsAreRows
-
-}
+const authenticatorTransportSchema = z.custom<AuthenticatorTransportFuture>(
+  (value) => typeof value === 'string',
+);
+const authenticatorTransportsSchema = z.array(authenticatorTransportSchema);
+const authenticatorCounterSchema = z
+  .coerce
+  .number()
+  .int()
+  .nonnegative()
+  .refine(Number.isSafeInteger, 'Counter must be a safe integer');
 
 
 export class AutenticatorDb {
   pgpool: Pool;
+  db: Kysely<DB>;
+  defaultAuthSchema: string;
 
-  constructor(pgpool: Pool) {
+  constructor(pgpool: Pool, authSchema = 'public') {
     this.pgpool = pgpool;
+    this.defaultAuthSchema = authSchema;
+    this.db = new Kysely<DB>({
+      dialect: new PostgresDialect({
+        pool: this.pgpool,
+      }),
+    });
   }
 
-  static authenticatorFromRows(rows: RowType[]): Authenticator[] {
+  private table(name: 'cred_authenticators' | 'registration_keys', authSchema?: string): keyof DB {
+    const schema = authSchema ?? this.defaultAuthSchema;
+    return `${schema}.${name}` as keyof DB;
+  }
+
+  static authenticatorFromRows(rows: CredentialAuthenticatorRow[]): Authenticator[] {
     const authenticators: Authenticator[] = rows.map((row) => {
-      const transportsArray = JSON.parse(row.transports) as AuthenticatorTransportFuture[]; // unsafe
+      const transportsArray = authenticatorTransportsSchema.parse(JSON.parse(row.transports));
+      const counterNum = authenticatorCounterSchema.parse(row.counter);
 
       const authenticator = {
 
         credentialID: row.credentialid,
-        credentialPublicKey: row.credentialpublickey as Uint8Array<ArrayBuffer>,
-        counter: row.counter,
+        credentialPublicKey: new Uint8Array(row.credentialpublickey),
+        counter: counterNum,
         credentialDeviceType: row.credentialdevicetype,
         credentialBackedUp: row.credentialbackedup,
         transports: transportsArray,
@@ -64,30 +79,38 @@ export class AutenticatorDb {
     return authenticators;
   }
 
-  async getUserAuthenticators(user: string) {
-    const query: QueryConfig = {
-      text: 'SELECT credentialID, credentialPublicKey, counter, credentialDeviceType, credentialBackedUp, transports FROM public.cred_authenticators where userid = $1',
-      values: [user],
-    };
-    const res = await this.pgpool.query(query);
-    const rows = res.rows
-    if (!isRowTypeArray(rows)) {
-      throw new Error("rows does not have expected type", { cause: rows })
-    }
+  async getUserAuthenticators(user: string, authSchema?: string) {
+    const rows = await this.db
+      .selectFrom(this.table('cred_authenticators', authSchema))
+      .select([
+        'credentialid',
+        'credentialpublickey',
+        'counter',
+        'credentialdevicetype',
+        'credentialbackedup',
+        'transports',
+        'userid',
+      ])
+      .where('userid', '=', user)
+      .execute();
     return AutenticatorDb.authenticatorFromRows(rows);
   }
 
-  async getAuthenticatorsById(authenticatorId: string) {
-    const query: QueryConfig = {
-      text: 'SELECT credentialID, credentialPublicKey, counter, credentialDeviceType, credentialBackedUp, transports, userid FROM public.cred_authenticators where credentialID = $1',
-      values: [authenticatorId],
-    };
+  async getAuthenticatorsById(authenticatorId: string, authSchema?: string) {
     try {
-      const res = await this.pgpool.query(query);
-      const rows = res.rows
-      if (!isRowTypeArray(rows)) {
-        throw new Error("rows does not have expected type", { cause: rows })
-      }
+      const rows = await this.db
+        .selectFrom(this.table('cred_authenticators', authSchema))
+        .select([
+          'credentialid',
+          'credentialpublickey',
+          'counter',
+          'credentialdevicetype',
+          'credentialbackedup',
+          'transports',
+          'userid',
+        ])
+        .where('credentialid', '=', authenticatorId)
+        .execute();
       return AutenticatorDb.authenticatorFromRows(rows);
     } catch (e: unknown) {
       if ((e instanceof Error) && ('code' in e) && (e.code === '42P01')) {
@@ -101,22 +124,25 @@ export class AutenticatorDb {
     }
   }
 
-  async saveAuthenticator(auth: Authenticator, userid: string) {
+  async saveAuthenticator(auth: Authenticator, userid: string, authSchema?: string) {
     const transportsEncoded = JSON.stringify(auth.transports);
-
-    const query: QueryConfig = {
-      text: 'INSERT INTO public.cred_authenticators'
-        + '(credentialid, credentialpublickey, counter, credentialdevicetype, credentialbackedup, transports, userid, creationdate) '
-        + 'VALUES ($1, $2, $3, $4, $5, $6, $7, $8);',
-      values: [
-        auth.credentialID, auth.credentialPublicKey, auth.counter, auth.credentialDeviceType,
-        auth.credentialBackedUp, transportsEncoded, userid, new Date().toUTCString(),
-      ],
-    };
     try {
-      const r = await this.pgpool.query(query);
-      if (r.rowCount !== 1) {
-        console.error(`Expected rowcount is not 1 but ${r.rowCount}`);
+      const r = await this.db
+        .insertInto(this.table('cred_authenticators', authSchema))
+        .values({
+          credentialid: auth.credentialID,
+          credentialpublickey: Buffer.from(auth.credentialPublicKey),
+          counter: String(auth.counter),
+          credentialdevicetype: auth.credentialDeviceType,
+          credentialbackedup: auth.credentialBackedUp,
+          transports: transportsEncoded,
+          userid,
+          creationdate: new Date(),
+        })
+        .executeTakeFirst();
+
+      if (Number(r.numInsertedOrUpdatedRows) !== 1) {
+        console.error(`Expected rowcount is not 1 but ${r.numInsertedOrUpdatedRows}`);
         return false;
       }
     } catch (error) {
@@ -126,35 +152,43 @@ export class AutenticatorDb {
     return true;
   }
 
-  async getUserByRegistrationCode(regcode: string) {
-    const query: QueryConfig = {
-      text: 'SELECT regkey, username, created, used FROM public.registration_keys where regkey = $1',
-      values: [regcode],
-    };
-
+  async getUserByRegistrationCode(regcode: string, authSchema?: string) {
     try {
-      const r = await this.pgpool.query(query);
-      if (r.rows.length !== 1) {
-        console.error(`Expected rows length is not 1 but ${r.rows.length}`);
+      const row = await this.db
+        .selectFrom(this.table('registration_keys', authSchema))
+        .select(['regkey', 'username', 'created', 'used'])
+        .where('regkey', '=', regcode)
+        .executeTakeFirst();
+
+      if (row === undefined) {
+        console.error('Expected one row but got none');
         return null;
       }
-      return r.rows[0] as RegCodeLookup;
+
+      const created = row.created instanceof Date ? row.created : new Date(row.created);
+
+      return {
+        regkey: row.regkey,
+        username: row.username,
+        created,
+        used: row.used,
+      };
     } catch (error) {
       console.error('Could not get registration key details', error);
       return null;
     }
   }
 
-  async markRegistrationCodeUsed(regcode: string): Promise<boolean> {
-    const query: QueryConfig = {
-      text: 'UPDATE public.registration_keys SET used=TRUE WHERE regkey = $1',
-      values: [regcode],
-    };
-
+  async markRegistrationCodeUsed(regcode: string, authSchema?: string): Promise<boolean> {
     try {
-      const r = await this.pgpool.query(query);
-      if (r.rowCount !== 1) {
-        console.error(`Expected rowcount is not 1 but ${r.rowCount}`);
+      const r = await this.db
+        .updateTable(this.table('registration_keys', authSchema))
+        .set({ used: true })
+        .where('regkey', '=', regcode)
+        .executeTakeFirst();
+
+      if (Number(r.numUpdatedRows) !== 1) {
+        console.error(`Expected rowcount is not 1 but ${r.numUpdatedRows}`);
         return false;
       }
       return true;

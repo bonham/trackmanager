@@ -32,12 +32,27 @@ export class EsmFileMigrationProvider implements MigrationProvider {
         const fileUrl = pathToFileURL(filePath).href;
 
         // Dynamic import using the file:// URL
-        const migration = await import(fileUrl);
+        const importedModule: unknown = await import(fileUrl);
 
-        migrations[migrationKey] = migration;
+        if (!isMigrationModule(importedModule)) {
+          throw new Error(`Invalid migration module: ${fileName}`);
+        }
+
+        migrations[migrationKey] = importedModule;
       }
     }
 
     return migrations;
   }
+}
+
+function isMigrationModule(module: unknown): module is Migration {
+  return (
+    typeof module === 'object'
+    && module !== null
+    && 'up' in module
+    && 'down' in module
+    && typeof module.up === 'function'
+    && typeof module.down === 'function'
+  );
 }

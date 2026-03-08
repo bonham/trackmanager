@@ -1,12 +1,14 @@
 import connectPgSimple from 'connect-pg-simple';
 import session from 'express-session';
 import type { Pool } from 'pg';
+import getAuthSchema from './getAuthSchema.js';
 
 const PGSession = connectPgSimple(session);
 
 function getSession(pgPool: Pool) {
   const salt = process.env.PASSKEYPOC_COOKIESALT;
   const maxAge = Number(process.env.SESSION_MAX_AGE) || 60000;
+  const authSchema = getAuthSchema();
 
   if (salt === undefined) {
     throw new Error('no cookiesalt in env');
@@ -25,6 +27,8 @@ function getSession(pgPool: Pool) {
       saveUninitialized: true,
       store: new PGSession({
         pool: pgPool,
+        schemaName: authSchema,
+        tableName: 'session',
         createTableIfMissing: false,
       }),
     },

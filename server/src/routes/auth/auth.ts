@@ -2,6 +2,7 @@ import * as dotenv from 'dotenv';
 import type { NextFunction, Request, Response } from 'express';
 import express from 'express';
 import pg from 'pg';
+import getAuthSchema from '../../lib/getAuthSchema.js';
 import type { RequestWebauthn } from './interfaces/server.js';
 import { makeAuthenticationOptionsRoute } from './lib/AuthenticationOptionsRoute.js';
 import { makeAuthenticationRoute } from './lib/AuthenticationRoute.js';
@@ -44,7 +45,8 @@ const pgpool = new pg.Pool({
   database: process.env.PASSKEYPOC_PGDATABASE,
 });
 
-const authdb = new AutenticatorDb(pgpool);
+const authSchema = getAuthSchema();
+const authdb = new AutenticatorDb(pgpool, authSchema);
 
 const router = express.Router();
 

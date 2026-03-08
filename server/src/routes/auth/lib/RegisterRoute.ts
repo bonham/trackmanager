@@ -6,6 +6,7 @@ import { verifyRegistrationResponse } from '@simplewebauthn/server';
 import type { Authenticator, RequestWebauthn } from '../interfaces/server.js';
 
 import { AutenticatorDb } from './AuthenticatorDb.js';
+import getRouteAuthSchema from './getRouteAuthSchema.js';
 
 const router = Router();
 
@@ -24,6 +25,7 @@ function isRegistrationResponse(obj: unknown): obj is RegistrationResponseJSON {
 
 export function makeRegisterRoute(origin: string, rpID: string, authdb: AutenticatorDb) {
   router.post('/register', (async (req: RequestWebauthn, res) => {
+    const authSchema = getRouteAuthSchema(req);
 
     if ('session' in req) {
       // ok
@@ -102,7 +104,9 @@ export function makeRegisterRoute(origin: string, rpID: string, authdb: Autentic
       transports: credential.transports ?? [] // not sure if this is right ...
     };
 
-    const saveSuccess = await authdb.saveAuthenticator(newAuthenticator, registrationuser);
+    const saveSuccess = authSchema === undefined
+      ? await authdb.saveAuthenticator(newAuthenticator, registrationuser)
+      : await authdb.saveAuthenticator(newAuthenticator, registrationuser, authSchema);
     if (!saveSuccess) {
       console.log('Authenticator could not be saved');
       res.sendStatus(401);
@@ -112,7 +116,9 @@ export function makeRegisterRoute(origin: string, rpID: string, authdb: Autentic
     // mark registration key used
     const { regkey } = req.session;
     if (regkey !== undefined) {
-      const markSuccess = authdb.markRegistrationCodeUsed(regkey);
+      const markSuccess = authSchema === undefined
+        ? authdb.markRegistrationCodeUsed(regkey)
+        : authdb.markRegistrationCodeUsed(regkey, authSchema);
       if (!(await markSuccess)) {
         console.log(`Could not mark regkey ${regkey} as used`);
         res.sendStatus(401);

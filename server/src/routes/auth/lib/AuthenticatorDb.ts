@@ -42,11 +42,9 @@ const authenticatorCounterSchema = z
 export class AutenticatorDb {
   pgpool: Pool;
   db: Kysely<DB>;
-  defaultAuthSchema: string;
 
-  constructor(pgpool: Pool, authSchema = 'public') {
+  constructor(pgpool: Pool) {
     this.pgpool = pgpool;
-    this.defaultAuthSchema = authSchema;
     this.db = new Kysely<DB>({
       dialect: new PostgresDialect({
         pool: this.pgpool,
@@ -54,9 +52,8 @@ export class AutenticatorDb {
     });
   }
 
-  private table(name: 'cred_authenticators' | 'registration_keys', authSchema?: string): keyof DB {
-    const schema = authSchema ?? this.defaultAuthSchema;
-    return `${schema}.${name}` as keyof DB;
+  private table(name: 'cred_authenticators' | 'registration_keys'): keyof DB {
+    return `public.${name}` as keyof DB;
   }
 
   static authenticatorFromRows(rows: CredentialAuthenticatorRow[]): Authenticator[] {
@@ -79,9 +76,9 @@ export class AutenticatorDb {
     return authenticators;
   }
 
-  async getUserAuthenticators(user: string, authSchema?: string) {
+  async getUserAuthenticators(user: string) {
     const rows = await this.db
-      .selectFrom(this.table('cred_authenticators', authSchema))
+      .selectFrom(this.table('cred_authenticators'))
       .select([
         'credentialid',
         'credentialpublickey',
@@ -96,10 +93,10 @@ export class AutenticatorDb {
     return AutenticatorDb.authenticatorFromRows(rows);
   }
 
-  async getAuthenticatorsById(authenticatorId: string, authSchema?: string) {
+  async getAuthenticatorsById(authenticatorId: string) {
     try {
       const rows = await this.db
-        .selectFrom(this.table('cred_authenticators', authSchema))
+        .selectFrom(this.table('cred_authenticators'))
         .select([
           'credentialid',
           'credentialpublickey',
@@ -124,11 +121,11 @@ export class AutenticatorDb {
     }
   }
 
-  async saveAuthenticator(auth: Authenticator, userid: string, authSchema?: string) {
+  async saveAuthenticator(auth: Authenticator, userid: string) {
     const transportsEncoded = JSON.stringify(auth.transports);
     try {
       const r = await this.db
-        .insertInto(this.table('cred_authenticators', authSchema))
+        .insertInto(this.table('cred_authenticators'))
         .values({
           credentialid: auth.credentialID,
           credentialpublickey: Buffer.from(auth.credentialPublicKey),
@@ -152,10 +149,10 @@ export class AutenticatorDb {
     return true;
   }
 
-  async getUserByRegistrationCode(regcode: string, authSchema?: string) {
+  async getUserByRegistrationCode(regcode: string) {
     try {
       const row = await this.db
-        .selectFrom(this.table('registration_keys', authSchema))
+        .selectFrom(this.table('registration_keys'))
         .select(['regkey', 'username', 'created', 'used'])
         .where('regkey', '=', regcode)
         .executeTakeFirst();
@@ -179,10 +176,10 @@ export class AutenticatorDb {
     }
   }
 
-  async markRegistrationCodeUsed(regcode: string, authSchema?: string): Promise<boolean> {
+  async markRegistrationCodeUsed(regcode: string): Promise<boolean> {
     try {
       const r = await this.db
-        .updateTable(this.table('registration_keys', authSchema))
+        .updateTable(this.table('registration_keys'))
         .set({ used: true })
         .where('regkey', '=', regcode)
         .executeTakeFirst();

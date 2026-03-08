@@ -5,7 +5,6 @@ import { asyncWrapper } from '../../../lib/asyncMiddlewareWrapper.js';
 
 import { generateRegistrationOptions } from '@simplewebauthn/server';
 import { AutenticatorDb } from './AuthenticatorDb.js';
-import getRouteAuthSchema from './getRouteAuthSchema.js';
 
 import type { Authenticator, RequestWebauthn } from '../interfaces/server.js';
 
@@ -20,13 +19,9 @@ export function makeRegistrationOptionsRoute(rpName: string, rpID: string, authd
     const registrationuser = reguser;
     req.session.reguser = registrationuser;
 
-    const authSchema = getRouteAuthSchema(req);
-
     // (Pseudocode) Retrieve any of the user's previously-
     // registered authenticators
-    const devices = authSchema === undefined
-      ? await authdb.getUserAuthenticators(registrationuser)
-      : await authdb.getUserAuthenticators(registrationuser, authSchema);
+    const devices = await authdb.getUserAuthenticators(registrationuser);
 
     try {
       const options = await generateRegistrationOptions({
@@ -70,16 +65,13 @@ export function makeRegistrationOptionsRoute(rpName: string, rpID: string, authd
   }
 
   router.get('/regoptions/regkey/:regkey', asyncWrapper(async (req: ReqWithParams, res) => {
-    const authSchema = getRouteAuthSchema(req);
     const regkey = req.params.regkey
     if (regkey === undefined) {
       console.error("regkey undefined")
       res.sendStatus(401)
       return
     }
-    const lookup = authSchema === undefined
-      ? await authdb.getUserByRegistrationCode(regkey)
-      : await authdb.getUserByRegistrationCode(regkey, authSchema);
+    const lookup = await authdb.getUserByRegistrationCode(regkey);
     req.session.regkey = regkey; // save to mark as unused later
 
     if (lookup === null) {

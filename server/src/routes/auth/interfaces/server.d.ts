@@ -41,7 +41,6 @@ declare interface SessionWChallenge extends Session {
 
 declare interface RequestWebauthn extends Request {
   session: SessionWChallenge
-  schema?: string
 };
 
 

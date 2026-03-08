@@ -2,7 +2,6 @@ import express from 'express';
 import helmet from 'helmet';
 import morgan from 'morgan';
 
-import * as dotenv from 'dotenv';
 import getPgPool from './lib/getPgPool.js';
 import getSession from './lib/getSession.js';
 import mcpRouter from './lib/mcp/mcp.js';
@@ -10,11 +9,6 @@ import authrouter from './routes/auth/auth.js';
 import configRouter from './routes/config.js';
 import tracksRouter from './routes/tracks.js';
 
-const dotenvResult = dotenv.config();
-if (dotenvResult.error) {
-  console.error('Missing configuration: Please copy .env.sample to .env and modify config');
-  process.exit(1);
-}
 const app = express();
 
 const nodeEnv = process.env.NODE_ENV;

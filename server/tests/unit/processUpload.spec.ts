@@ -1,16 +1,10 @@
 import { readFileSync, rmSync } from 'node:fs';
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
+import { afterEach, beforeAll, beforeEach, describe, expect, test, vi } from 'vitest';
 
-// Set env var inside a mock factory - runs before module imports are resolved
-vi.mock('node:fs', () => {
-  // We need TM_DATABASE set before processUpload module is evaluated
-  process.env['TM_DATABASE'] = 'testdb';
-  return {
-    readFileSync: vi.fn(),
-    rmSync: vi.fn(),
-    // basename not mocked (comes from node:path)
-  };
-});
+vi.mock('node:fs', () => ({
+  readFileSync: vi.fn(),
+  rmSync: vi.fn(),
+}));
 
 vi.mock('node:path', async (importActual) => {
   const actual = await importActual<typeof import('node:path')>();
@@ -46,6 +40,10 @@ describe('processUpload', () => {
   const fakeBuffer = Buffer.from('fake file content');
   const fakeFilePath = '/tmp/upload/test_activity_20230601.fit';
   const fakeSchema = 'myschema';
+
+  beforeAll(() => {
+    process.env['TM_DATABASE'] = 'testdb';
+  });
 
   beforeEach(() => {
     mockReadFileSync.mockReturnValue(fakeBuffer as unknown as string);

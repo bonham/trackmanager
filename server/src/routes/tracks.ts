@@ -1,4 +1,3 @@
-import * as dotenv from 'dotenv';
 import type { Request as ExpressRequest, NextFunction, Response } from 'express';
 import express from 'express';
 import { Formidable } from 'formidable';
@@ -20,7 +19,6 @@ import { isAuthenticated } from './auth/auth.js';
 const { Pool } = pg;
 
 const UPLOAD_DIR_PREFIX = 'trackmanager-upload-';
-dotenv.config();
 const TMP_BASE_DIR = process.env.UPLOAD_DIR ?? tmpdir();
 
 const router = express.Router();

@@ -4,13 +4,12 @@ import { FitFile } from './fit/FitFile.js';
 import { processFitFile } from './processFitFile.js';
 import { processGpxFile } from './processGpxFile.js';
 
-const DATABASE = process.env.TM_DATABASE;
-
 /// // Create new track from file upload
 async function processUpload(
   filePath: string,
   schema: string,
 ) {
+  const DATABASE = process.env.TM_DATABASE;
   if (DATABASE === undefined) throw Error('Database is undefined');
 
   const fileName = basename(filePath);

@@ -13,7 +13,6 @@
     "test:watch": "vitest watch",
     "test:coverage": "vitest run --coverage",
     "copyconfig": "tsx ./src/bin/copyconfig.ts",
-    "db-schema-creation-migration": "tsx ./src/bin/runSchemaMigrations.ts",
     "lint": "eslint --quiet .",
     "lintwarn": "eslint .",
     "typecheck": "tsc --noEmit"
@@ -35,7 +34,6 @@
     "formidable": "^3.5.1",
     "geographiclib-geodesic": "^2.0.0",
     "helmet": "^8.0.0",
-    "kysely": "^0.28.11",
     "lodash": "^4.17.21",
     "luxon": "^3.4.4",
     "morgan": "^1.10.0",
@@ -64,7 +62,6 @@
     "eslint": "^10.0.1",
     "eslint-config-prettier": "^10.1.8",
     "globals": "^17.3.0",
-    "kysely-codegen": "^0.20.0",
     "nodemon": "^3.0.1",
     "prettier": "^3.1.0",
     "supertest": "^7.0.0",

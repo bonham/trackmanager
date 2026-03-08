@@ -2,7 +2,7 @@ import type { Pool, QueryResult } from 'pg';
 import { describe, expect, test, vi } from 'vitest';
 import { AutenticatorDb } from '../../src/routes/auth/lib/AuthenticatorDb.js';
 
-function makeMockPool(queryResult: Partial<QueryResult> = {}, queryError?: Error): Pool {
+function makeMockPool(queryResult: Partial<QueryResult> = {}): Pool {
   const defaultResult: QueryResult = {
     rows: [],
     rowCount: 0,
@@ -10,29 +10,19 @@ function makeMockPool(queryResult: Partial<QueryResult> = {}, queryError?: Error
     oid: 0,
     fields: [],
   };
-
-  const query = queryError
-    ? vi.fn().mockRejectedValue(queryError)
-    : vi.fn().mockResolvedValue({ ...defaultResult, ...queryResult });
-
-  const client = {
-    query,
-    release: vi.fn(),
-  };
-
   return {
-    query,
-    connect: vi.fn().mockResolvedValue(client),
+    query: vi.fn().mockResolvedValue({ ...defaultResult, ...queryResult }),
+    connect: vi.fn(),
     end: vi.fn(),
   } as unknown as Pool;
 }
 
 const sampleRow = {
   credentialid: 'cred-id-123',
-  credentialpublickey: Buffer.from([1, 2, 3]),
+  credentialpublickey: new Uint8Array([1, 2, 3]),
   credentialdevicetype: 'singleDevice',
   credentialbackedup: false,
-  counter: '5',
+  counter: 5,
   transports: '["usb","nfc"]',
   userid: 'user-abc',
 };
@@ -52,15 +42,6 @@ describe('AutenticatorDb.authenticatorFromRows', () => {
 
   test('returns empty array for empty input', () => {
     expect(AutenticatorDb.authenticatorFromRows([])).toEqual([]);
-  });
-
-  test('throws for invalid counter values', () => {
-    const badCounterRow = {
-      ...sampleRow,
-      counter: 'not-a-number',
-    };
-
-    expect(() => AutenticatorDb.authenticatorFromRows([badCounterRow])).toThrow();
   });
 });
 
@@ -101,7 +82,9 @@ describe('AutenticatorDb.getAuthenticatorsById', () => {
   });
 
   test('throws with helpful message on missing table (42P01)', async () => {
-    const pool = makeMockPool({}, Object.assign(new Error('table not found'), { code: '42P01' }));
+    const pool = {
+      query: vi.fn().mockRejectedValue(Object.assign(new Error('table not found'), { code: '42P01' })),
+    } as unknown as Pool;
     const db = new AutenticatorDb(pool);
 
     await expect(db.getAuthenticatorsById('any')).rejects.toThrow(
@@ -110,7 +93,9 @@ describe('AutenticatorDb.getAuthenticatorsById', () => {
   });
 
   test('rethrows other errors', async () => {
-    const pool = makeMockPool({}, new Error('network error'));
+    const pool = {
+      query: vi.fn().mockRejectedValue(new Error('network error')),
+    } as unknown as Pool;
     const db = new AutenticatorDb(pool);
 
     await expect(db.getAuthenticatorsById('any')).rejects.toThrow('network error');
@@ -129,7 +114,7 @@ describe('AutenticatorDb.saveAuthenticator', () => {
   };
 
   test('returns true on successful save (rowCount=1)', async () => {
-    const pool = makeMockPool({ rowCount: 1, command: 'INSERT' });
+    const pool = makeMockPool({ rowCount: 1 });
     const db = new AutenticatorDb(pool);
 
     const result = await db.saveAuthenticator(auth, 'user1');
@@ -137,7 +122,7 @@ describe('AutenticatorDb.saveAuthenticator', () => {
   });
 
   test('returns false when rowCount is not 1', async () => {
-    const pool = makeMockPool({ rowCount: 0, command: 'INSERT' });
+    const pool = makeMockPool({ rowCount: 0 });
     const db = new AutenticatorDb(pool);
 
     const result = await db.saveAuthenticator(auth, 'user1');
@@ -145,7 +130,9 @@ describe('AutenticatorDb.saveAuthenticator', () => {
   });
 
   test('returns false on query error', async () => {
-    const pool = makeMockPool({}, new Error('db error'));
+    const pool = {
+      query: vi.fn().mockRejectedValue(new Error('db error')),
+    } as unknown as Pool;
     const db = new AutenticatorDb(pool);
 
     const result = await db.saveAuthenticator(auth, 'user1');
@@ -178,7 +165,9 @@ describe('AutenticatorDb.getUserByRegistrationCode', () => {
   });
 
   test('returns null on query error', async () => {
-    const pool = makeMockPool({}, new Error('db error'));
+    const pool = {
+      query: vi.fn().mockRejectedValue(new Error('db error')),
+    } as unknown as Pool;
     const db = new AutenticatorDb(pool);
 
     const result = await db.getUserByRegistrationCode('any');
@@ -188,7 +177,7 @@ describe('AutenticatorDb.getUserByRegistrationCode', () => {
 
 describe('AutenticatorDb.markRegistrationCodeUsed', () => {
   test('returns true when rowCount is 1', async () => {
-    const pool = makeMockPool({ rowCount: 1, command: 'UPDATE' });
+    const pool = makeMockPool({ rowCount: 1 });
     const db = new AutenticatorDb(pool);
 
     const result = await db.markRegistrationCodeUsed('abc123');
@@ -196,7 +185,7 @@ describe('AutenticatorDb.markRegistrationCodeUsed', () => {
   });
 
   test('returns false when rowCount is not 1', async () => {
-    const pool = makeMockPool({ rowCount: 0, command: 'UPDATE' });
+    const pool = makeMockPool({ rowCount: 0 });
     const db = new AutenticatorDb(pool);
 
     const result = await db.markRegistrationCodeUsed('notfound');
@@ -204,7 +193,9 @@ describe('AutenticatorDb.markRegistrationCodeUsed', () => {
   });
 
   test('returns false on query error', async () => {
-    const pool = makeMockPool({}, new Error('db error'));
+    const pool = {
+      query: vi.fn().mockRejectedValue(new Error('db error')),
+    } as unknown as Pool;
     const db = new AutenticatorDb(pool);
 
     const result = await db.markRegistrationCodeUsed('any');
@@ -212,12 +203,15 @@ describe('AutenticatorDb.markRegistrationCodeUsed', () => {
   });
 });
 
-describe('row-shape failures (tested indirectly via getUserAuthenticators)', () => {
+describe('isRowType (tested indirectly via getUserAuthenticators)', () => {
   const missingFieldCases = [
     ['null value', null],
     ['non-object', 'string'],
-    ['missing counter', { credentialid: 'x', credentialpublickey: Buffer.alloc(0), credentialdevicetype: '', credentialbackedup: false, transports: '[]', userid: '' }],
-    ['missing transports', { credentialid: 'x', credentialpublickey: Buffer.alloc(0), credentialdevicetype: '', credentialbackedup: false, counter: '0', userid: '' }],
+    ['missing credentialid', { credentialpublickey: new Uint8Array(), credentialdevicetype: '', credentialbackedup: false, counter: 0, transports: '[]', userid: '' }],
+    ['missing credentialpublickey', { credentialid: 'x', credentialdevicetype: '', credentialbackedup: false, counter: 0, transports: '[]', userid: '' }],
+    ['missing counter', { credentialid: 'x', credentialpublickey: new Uint8Array(), credentialdevicetype: '', credentialbackedup: false, transports: '[]', userid: '' }],
+    ['missing transports', { credentialid: 'x', credentialpublickey: new Uint8Array(), credentialdevicetype: '', credentialbackedup: false, counter: 0, userid: '' }],
+    ['missing userid', { credentialid: 'x', credentialpublickey: new Uint8Array(), credentialdevicetype: '', credentialbackedup: false, counter: 0, transports: '[]' }],
   ];
 
   missingFieldCases.forEach(([name, badRow]) => {

@@ -1,42 +1,41 @@
 import type { AuthenticatorTransportFuture } from '@simplewebauthn/server';
-import type { Selectable } from 'kysely';
-import { Kysely, PostgresDialect } from 'kysely';
-import type { Pool } from 'pg';
-import { z } from 'zod';
-import type { DB } from '../../../../types/db.js';
-import type { Authenticator } from '../interfaces/server.js';
+import type { Pool, QueryConfig } from 'pg';
+import type { Authenticator, RegCodeLookup } from '../interfaces/server.js';
 
-// This type describes the rows we pass into `authenticatorFromRows`.
-//
-// Start with Kysely's generated type for `public.cred_authenticators`, then:
-// 1) Keep only the fields we actually select in our query (with `Pick`).
-//
-// We intentionally do not widen field types for tests.
-// `counter` stays as the DB/Kysely type (BIGINT -> string in this project), and
-// `credentialpublickey` stays as DB bytes from the driver.
-//
-// In short: runtime mapping follows DB contracts, and tests should match those contracts.
-type CredentialAuthenticatorRow = Pick<
-  Selectable<DB['public.cred_authenticators']>,
-  | 'credentialid'
-  | 'credentialpublickey'
-  | 'counter'
-  | 'credentialdevicetype'
-  | 'credentialbackedup'
-  | 'transports'
-  | 'userid'
->;
 
-const authenticatorTransportSchema = z.custom<AuthenticatorTransportFuture>(
-  (value) => typeof value === 'string',
-);
-const authenticatorTransportsSchema = z.array(authenticatorTransportSchema);
-const authenticatorCounterSchema = z
-  .coerce
-  .number()
-  .int()
-  .nonnegative()
-  .refine(Number.isSafeInteger, 'Counter must be a safe integer');
+interface RowType {
+  credentialid: string;
+  credentialpublickey: Uint8Array;
+  credentialdevicetype: string;
+  credentialbackedup: boolean;
+  counter: number;
+  transports: string;
+  userid: string;
+}
+
+function isRowType(obj: unknown): obj is RowType {
+  if (obj === null) { console.log("row is null"); return false }
+  if (typeof obj !== 'object') { console.log("row is not object"); return false }
+  if (!('credentialid' in obj)) { console.log("credentialid missing"); return false }
+  if (!('credentialpublickey' in obj)) { console.log("credentialpublickey missing"); return false }
+  if (!('credentialdevicetype' in obj)) { console.log("credentialdevicetype missing"); return false }
+  if (!('credentialbackedup' in obj)) { console.log("credentialbackedup missing"); return false }
+  if (!('counter' in obj)) { console.log("counter missing"); return false }
+  if (!('transports' in obj)) { console.log("transports missing"); return false }
+  if (!('userid' in obj)) { console.log("userid missing"); return false }
+  return true
+}
+
+function isRowTypeArray(obj: unknown): obj is RowType[] {
+  if (obj === null) { console.log("row is null"); return false }
+  if (!Array.isArray(obj)) { console.log("obj not array"); return false }
+
+  const allObjectsAreRows = obj.every((el) => {
+    return isRowType(el)
+  })
+  return allObjectsAreRows
+
+}
 
 
 export class AutenticatorDb {
@@ -56,16 +55,15 @@ export class AutenticatorDb {
     return `public.${name}` as keyof DB;
   }
 
-  static authenticatorFromRows(rows: CredentialAuthenticatorRow[]): Authenticator[] {
+  static authenticatorFromRows(rows: RowType[]): Authenticator[] {
     const authenticators: Authenticator[] = rows.map((row) => {
-      const transportsArray = authenticatorTransportsSchema.parse(JSON.parse(row.transports));
-      const counterNum = authenticatorCounterSchema.parse(row.counter);
+      const transportsArray = JSON.parse(row.transports) as AuthenticatorTransportFuture[]; // unsafe
 
       const authenticator = {
 
         credentialID: row.credentialid,
-        credentialPublicKey: new Uint8Array(row.credentialpublickey),
-        counter: counterNum,
+        credentialPublicKey: row.credentialpublickey as Uint8Array<ArrayBuffer>,
+        counter: row.counter,
         credentialDeviceType: row.credentialdevicetype,
         credentialBackedUp: row.credentialbackedup,
         transports: transportsArray,
@@ -123,6 +121,16 @@ export class AutenticatorDb {
 
   async saveAuthenticator(auth: Authenticator, userid: string) {
     const transportsEncoded = JSON.stringify(auth.transports);
+
+    const query: QueryConfig = {
+      text: 'INSERT INTO public.cred_authenticators'
+        + '(credentialid, credentialpublickey, counter, credentialdevicetype, credentialbackedup, transports, userid, creationdate) '
+        + 'VALUES ($1, $2, $3, $4, $5, $6, $7, $8);',
+      values: [
+        auth.credentialID, auth.credentialPublicKey, auth.counter, auth.credentialDeviceType,
+        auth.credentialBackedUp, transportsEncoded, userid, new Date().toUTCString(),
+      ],
+    };
     try {
       const r = await this.db
         .insertInto(this.table('cred_authenticators'))
@@ -161,15 +169,7 @@ export class AutenticatorDb {
         console.error('Expected one row but got none');
         return null;
       }
-
-      const created = row.created instanceof Date ? row.created : new Date(row.created);
-
-      return {
-        regkey: row.regkey,
-        username: row.username,
-        created,
-        used: row.used,
-      };
+      return r.rows[0] as RegCodeLookup;
     } catch (error) {
       console.error('Could not get registration key details', error);
       return null;

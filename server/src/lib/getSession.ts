@@ -25,6 +25,7 @@ function getSession(pgPool: Pool) {
       saveUninitialized: true,
       store: new PGSession({
         pool: pgPool,
+        schemaName: 'auth',
         createTableIfMissing: false,
       }),
     },

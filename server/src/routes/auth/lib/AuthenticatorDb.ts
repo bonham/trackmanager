@@ -1,31 +1,39 @@
 import type { AuthenticatorTransportFuture } from '@simplewebauthn/server';
-import type { Selectable } from 'kysely';
 import { Kysely, PostgresDialect } from 'kysely';
 import type { Pool } from 'pg';
 import { z } from 'zod';
-import type { DB } from '../../../../types/db.js';
 import type { Authenticator } from '../interfaces/server.js';
 
 // This type describes the rows we pass into `authenticatorFromRows`.
-//
-// Start with Kysely's generated type for `public.cred_authenticators`, then:
-// 1) Keep only the fields we actually select in our query (with `Pick`).
-//
-// We intentionally do not widen field types for tests.
-// `counter` stays as the DB/Kysely type (BIGINT -> string in this project), and
-// `credentialpublickey` stays as DB bytes from the driver.
-//
-// In short: runtime mapping follows DB contracts, and tests should match those contracts.
-type CredentialAuthenticatorRow = Pick<
-  Selectable<DB['public.cred_authenticators']>,
-  | 'credentialid'
-  | 'credentialpublickey'
-  | 'counter'
-  | 'credentialdevicetype'
-  | 'credentialbackedup'
-  | 'transports'
-  | 'userid'
->;
+// We keep this explicit to avoid coupling table access to generated schema names.
+interface CredentialAuthenticatorRow {
+  counter: string;
+  credentialbackedup: boolean;
+  credentialdevicetype: string;
+  credentialid: string;
+  credentialpublickey: Buffer;
+  transports: string;
+  userid: string;
+}
+
+interface AuthDbTables {
+  'auth.cred_authenticators': {
+    counter: string;
+    creationdate: Date;
+    credentialbackedup: boolean;
+    credentialdevicetype: string;
+    credentialid: string;
+    credentialpublickey: Buffer;
+    transports: string;
+    userid: string;
+  };
+  'auth.registration_keys': {
+    created: Date;
+    regkey: string;
+    used: boolean;
+    username: string;
+  };
+}
 
 const authenticatorTransportSchema = z.custom<AuthenticatorTransportFuture>(
   (value) => typeof value === 'string',
@@ -41,19 +49,19 @@ const authenticatorCounterSchema = z
 
 export class AutenticatorDb {
   pgpool: Pool;
-  db: Kysely<DB>;
+  db: Kysely<AuthDbTables>;
 
   constructor(pgpool: Pool) {
     this.pgpool = pgpool;
-    this.db = new Kysely<DB>({
+    this.db = new Kysely<AuthDbTables>({
       dialect: new PostgresDialect({
         pool: this.pgpool,
       }),
     });
   }
 
-  private table(name: 'cred_authenticators' | 'registration_keys'): keyof DB {
-    return `public.${name}` as keyof DB;
+  private table(name: 'cred_authenticators' | 'registration_keys'): keyof AuthDbTables {
+    return `auth.${name}` as keyof AuthDbTables;
   }
 
   static authenticatorFromRows(rows: CredentialAuthenticatorRow[]): Authenticator[] {

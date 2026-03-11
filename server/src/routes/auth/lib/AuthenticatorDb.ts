@@ -3,6 +3,7 @@ import { Kysely, PostgresDialect } from 'kysely';
 import type { Pool } from 'pg';
 import { z } from 'zod';
 import type { DB } from '../../../../types/db.js';
+import { AUTH_SCHEMA } from '../../../lib/serverConfig.js';
 import type { Authenticator } from '../interfaces/server.js';
 
 // This type describes the rows we pass into `authenticatorFromRows`.
@@ -46,7 +47,7 @@ export class AuthenticatorDb {
   }
 
   private table(name: 'cred_authenticators' | 'registration_keys'): AuthTableName {
-    return `auth.${name}` as AuthTableName;
+    return `${AUTH_SCHEMA}.${name}` as AuthTableName;
   }
 
   static authenticatorFromRows(rows: CredentialAuthenticatorRow[]): Authenticator[] {

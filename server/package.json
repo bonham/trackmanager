@@ -9,7 +9,7 @@
     "start": "tsx watch src/index.ts",
     "build": "node build.mjs",
     "startbuild": "node ./dist/src/index.js",
-    "test:run": "vitest run",
+    "test": "vitest run",
     "test:watch": "vitest watch",
     "test:coverage": "vitest run --coverage",
     "copyconfig": "tsx ./src/bin/copyconfig.ts",

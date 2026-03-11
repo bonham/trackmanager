@@ -31,7 +31,7 @@
     },
     "chat.tools.terminal.autoApprove": {
       "npm run typecheck": true,
-      "npm run test:run": true,
+      "npm run test": true,
       "npm run lint": true
     }
   }

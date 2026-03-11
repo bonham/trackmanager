@@ -5,7 +5,7 @@ import type { RegistrationResponseJSON, VerifiedRegistrationResponse } from '@si
 import { verifyRegistrationResponse } from '@simplewebauthn/server';
 import type { Authenticator, RequestWebauthn } from '../interfaces/server.js';
 
-import { AutenticatorDb } from './AuthenticatorDb.js';
+import { AuthenticatorDb } from './AuthenticatorDb.js';
 
 const router = Router();
 
@@ -22,7 +22,7 @@ function isRegistrationResponse(obj: unknown): obj is RegistrationResponseJSON {
     "type" in obj);
 }
 
-export function makeRegisterRoute(origin: string, rpID: string, authdb: AutenticatorDb) {
+export function makeRegisterRoute(origin: string, rpID: string, authdb: AuthenticatorDb) {
   router.post('/register', (async (req: RequestWebauthn, res) => {
     if ('session' in req) {
       // ok

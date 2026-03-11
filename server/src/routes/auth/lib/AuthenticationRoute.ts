@@ -5,13 +5,13 @@ import type { RequestWebauthn } from '../interfaces/server.js';
 
 import type { AuthenticationResponseJSON, VerifiedAuthenticationResponse, WebAuthnCredential } from '@simplewebauthn/server';
 import { verifyAuthenticationResponse } from '@simplewebauthn/server';
-import { AutenticatorDb } from './AuthenticatorDb.js';
+import { AuthenticatorDb } from './AuthenticatorDb.js';
 
 const router = Router();
 
 
 
-export function makeAuthenticationRoute(origin: string, rpID: string, authdb: AutenticatorDb) {
+export function makeAuthenticationRoute(origin: string, rpID: string, authdb: AuthenticatorDb) {
   router.post('/authentication', (async (req: RequestWebauthn, res, next) => {
     try {
       let body: AuthenticationResponseJSON

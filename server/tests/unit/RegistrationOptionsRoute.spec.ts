@@ -8,7 +8,7 @@ vi.mock('@simplewebauthn/server', () => ({
 }));
 
 import { generateRegistrationOptions } from '@simplewebauthn/server';
-import type { AutenticatorDb } from '../../src/routes/auth/lib/AuthenticatorDb.js';
+import type { AuthenticatorDb } from '../../src/routes/auth/lib/AuthenticatorDb.js';
 import { makeRegistrationOptionsRoute } from '../../src/routes/auth/lib/RegistrationOptionsRoute.js';
 
 const mockGenerateRegOptions = vi.mocked(generateRegistrationOptions);
@@ -19,7 +19,7 @@ const mockAuthDb = {
   saveAuthenticator: vi.fn(),
   getUserByRegistrationCode: vi.fn(),
   markRegistrationCodeUsed: vi.fn(),
-} as unknown as AutenticatorDb;
+} as unknown as AuthenticatorDb;
 
 function createTestApp(sessionData: Record<string, unknown> = {}) {
   const app = express();

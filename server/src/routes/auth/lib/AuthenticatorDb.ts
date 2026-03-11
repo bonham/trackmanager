@@ -32,7 +32,7 @@ const authenticatorCounterSchema = z
   .refine(Number.isSafeInteger, 'Counter must be a safe integer');
 
 
-export class AutenticatorDb {
+export class AuthenticatorDb {
   pgpool: Pool;
   db: Kysely<AuthDbTables>;
 
@@ -83,7 +83,7 @@ export class AutenticatorDb {
       ])
       .where('userid', '=', user)
       .execute();
-    return AutenticatorDb.authenticatorFromRows(rows);
+    return AuthenticatorDb.authenticatorFromRows(rows);
   }
 
   async getAuthenticatorsById(authenticatorId: string) {
@@ -101,7 +101,7 @@ export class AutenticatorDb {
         ])
         .where('credentialid', '=', authenticatorId)
         .execute();
-      return AutenticatorDb.authenticatorFromRows(rows);
+      return AuthenticatorDb.authenticatorFromRows(rows);
     } catch (e: unknown) {
       if ((e instanceof Error) && ('code' in e) && (e.code === '42P01')) {
         throw new Error(

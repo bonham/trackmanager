@@ -8,7 +8,7 @@ vi.mock('@simplewebauthn/server', () => ({
 }));
 
 import { verifyRegistrationResponse } from '@simplewebauthn/server';
-import type { AutenticatorDb } from '../../src/routes/auth/lib/AuthenticatorDb.js';
+import type { AuthenticatorDb } from '../../src/routes/auth/lib/AuthenticatorDb.js';
 import { makeRegisterRoute } from '../../src/routes/auth/lib/RegisterRoute.js';
 
 const mockVerify = vi.mocked(verifyRegistrationResponse);
@@ -19,7 +19,7 @@ const mockAuthDb = {
   saveAuthenticator: vi.fn(),
   getUserByRegistrationCode: vi.fn(),
   markRegistrationCodeUsed: vi.fn(),
-} as unknown as AutenticatorDb;
+} as unknown as AuthenticatorDb;
 
 const ORIGIN = 'https://example.com';
 const RP_ID = 'example.com';

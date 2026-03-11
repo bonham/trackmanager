@@ -2,7 +2,7 @@
 // Bundles local packages (trackmanager-shared) into the output while
 // keeping real npm dependencies external (they are installed on the server).
 import { build } from 'esbuild';
-import { mkdirSync, readFileSync, writeFileSync } from 'fs';
+import { mkdirSync, readFileSync, readdirSync, writeFileSync } from 'fs';
 
 const pkg = JSON.parse(readFileSync('./package.json', 'utf8'));
 
@@ -15,18 +15,23 @@ const external = [
   ...Object.keys(pkg.devDependencies ?? {}),
 ];
 
+const migrationEntryPoints = readdirSync('src/migrations')
+  .filter((fileName) => fileName.endsWith('.ts') && !fileName.endsWith('.d.ts'))
+  .map((fileName) => `src/migrations/${fileName}`);
+
 await build({
-  entryPoints: ['src/index.ts'],
+  entryPoints: ['src/index.ts', 'src/bin/runSchemaMigrations.ts', ...migrationEntryPoints],
   bundle: true,
   platform: 'node',
   target: 'node24',
   format: 'esm',
-  outfile: 'dist/src/index.js',
+  outdir: 'dist',
+  outbase: '.',
   external,
   sourcemap: true,
 });
 
-console.log('Build complete → dist/src/index.js');
+console.log('Build complete → dist/src output, including migration runner and migration modules');
 
 // Write a deployment-ready package.json into dist/ that:
 //   - strips devDependencies
@@ -37,7 +42,7 @@ const deployPkg = {
   version: pkg.version,
   type: pkg.type,
   engines: pkg.engines,
-  scripts: { start: 'node src/index.js' },
+  scripts: { start: 'node src/index.js', migrate: 'node src/bin/runSchemaMigrations.js' },
   dependencies: Object.fromEntries(
     Object.entries(pkg.dependencies ?? {}).filter(([, v]) => !v.startsWith('file:'))
   ),

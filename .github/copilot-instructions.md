@@ -6,7 +6,7 @@ These instructions apply to all code-change requests in this repository.
 
 For every request that changes code, run and report the results of:
 
-- `npm run tests` (if missing in the target package, run `npm run test`)
+- `npm run test`
 - `npm run typecheck`
 - `npm run lint`
 

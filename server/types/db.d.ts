@@ -105,7 +105,7 @@ export interface Segments {
   track_segment_id: number;
 }
 
-export interface TmMetaSchemaSid {
+export interface AuthSchemaSid {
   schema: string;
   sid: string;
 }
@@ -149,14 +149,14 @@ export interface DB {
   calculated_track_stats: CalculatedTrackStats;
   calculated_track_stats_tmp: CalculatedTrackStatsTmp;
   config: Config;
-  "auth.cred_authenticators": AuthCredAuthenticators;
   "public.geography_columns": PublicGeographyColumns;
   "public.geometry_columns": PublicGeometryColumns;
+  "public.spatial_ref_sys": PublicSpatialRefSys;
+  "auth.cred_authenticators": AuthCredAuthenticators;
   "auth.registration_keys": AuthRegistrationKeys;
   "auth.session": AuthSession;
-  "public.spatial_ref_sys": PublicSpatialRefSys;
+  "auth.schema_sid": AuthSchemaSid;
   segments: Segments;
-  "tm_meta.schema_sid": TmMetaSchemaSid;
   track_points: TrackPoints;
   track_points_tmp: TrackPointsTmp;
   tracks: Tracks;

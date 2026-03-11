@@ -1,12 +1,14 @@
 import type { Request as ExpressRequest, NextFunction, Response } from 'express';
 import express from 'express';
 import { Formidable } from 'formidable';
+import { Kysely, PostgresDialect } from 'kysely';
 import { mkdtemp as mkdtempprom } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { basename, join } from 'node:path';
 import pg from 'pg';
 import { MultiLineStringWithTrackIdSchema, TrackIdListSchema, TrackMetadataSchema } from 'trackmanager-shared/zodSchemas';
 import * as z from 'zod';
+import type { DB } from '../../types/db.js';
 import { Track2DbWriter } from '../lib/Track2DbWriter.js';
 import { DateStringMatcher, StringCleaner } from '../lib/analyzeString.js';
 import { asyncWrapper } from '../lib/asyncMiddlewareWrapper.js';
@@ -62,8 +64,9 @@ const poolOptions = {
   database,
 };
 const pool = new Pool(poolOptions);
-export { pool };
-const sidValidationChain = createSidValidationChain(pool);
+const db = new Kysely<DB>({ dialect: new PostgresDialect({ pool }) });
+export { db, pool };
+const sidValidationChain = createSidValidationChain(db);
 
 /**
  * getAllTracks - query all tracks for a given schema, ordered by time descending.

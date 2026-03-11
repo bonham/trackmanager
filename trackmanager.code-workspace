@@ -2,7 +2,7 @@
   "folders": [
     {
       "name": "xxx root",
-      "path": ".",
+      "path": "."
     },
     {
       "path": "client"
@@ -28,6 +28,11 @@
       "client": true,
       "server": true,
       "shared": true
+    },
+    "chat.tools.terminal.autoApprove": {
+      "npm run typecheck": true,
+      "npm run test": true,
+      "npm run lint": true
     }
   }
 }

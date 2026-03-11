@@ -12,7 +12,7 @@
     "serve": "vite preview",
     "lint": "eslint --quiet",
     "lintwarn": "sleep 10 && eslint",
-    "test:run": "vitest run",
+    "test": "vitest run",
     "test:watch": "vitest watch",
     "test:coverage": "vitest run --coverage",
     "typecheck": "vue-tsc --build --noEmit"

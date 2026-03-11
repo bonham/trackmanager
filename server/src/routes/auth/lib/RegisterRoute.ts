@@ -24,7 +24,6 @@ function isRegistrationResponse(obj: unknown): obj is RegistrationResponseJSON {
 
 export function makeRegisterRoute(origin: string, rpID: string, authdb: AutenticatorDb) {
   router.post('/register', (async (req: RequestWebauthn, res) => {
-
     if ('session' in req) {
       // ok
     } else {

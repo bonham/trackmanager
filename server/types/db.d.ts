@@ -48,7 +48,7 @@ export interface Config {
   value: string;
 }
 
-export interface PublicCredAuthenticators {
+export interface AuthCredAuthenticators {
   counter: Int8;
   creationdate: Timestamp;
   credentialbackedup: boolean;
@@ -79,14 +79,14 @@ export interface PublicGeometryColumns {
   type: string | null;
 }
 
-export interface PublicRegistrationKeys {
+export interface AuthRegistrationKeys {
   created: Generated<Timestamp>;
   regkey: Generated<string>;
   used: Generated<boolean>;
   username: string;
 }
 
-export interface PublicSession {
+export interface AuthSession {
   expire: Timestamp;
   sess: Json;
   sid: string;
@@ -149,11 +149,11 @@ export interface DB {
   calculated_track_stats: CalculatedTrackStats;
   calculated_track_stats_tmp: CalculatedTrackStatsTmp;
   config: Config;
-  "public.cred_authenticators": PublicCredAuthenticators;
+  "auth.cred_authenticators": AuthCredAuthenticators;
   "public.geography_columns": PublicGeographyColumns;
   "public.geometry_columns": PublicGeometryColumns;
-  "public.registration_keys": PublicRegistrationKeys;
-  "public.session": PublicSession;
+  "auth.registration_keys": AuthRegistrationKeys;
+  "auth.session": AuthSession;
   "public.spatial_ref_sys": PublicSpatialRefSys;
   segments: Segments;
   "tm_meta.schema_sid": TmMetaSchemaSid;

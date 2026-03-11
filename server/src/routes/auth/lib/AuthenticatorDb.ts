@@ -2,6 +2,7 @@ import type { AuthenticatorTransportFuture } from '@simplewebauthn/server';
 import { Kysely, PostgresDialect } from 'kysely';
 import type { Pool } from 'pg';
 import { z } from 'zod';
+import type { DB } from '../../../../types/db.js';
 import type { Authenticator } from '../interfaces/server.js';
 
 // This type describes the rows we pass into `authenticatorFromRows`.
@@ -16,24 +17,8 @@ interface CredentialAuthenticatorRow {
   userid: string;
 }
 
-interface AuthDbTables {
-  'auth.cred_authenticators': {
-    counter: string;
-    creationdate: Date;
-    credentialbackedup: boolean;
-    credentialdevicetype: string;
-    credentialid: string;
-    credentialpublickey: Buffer;
-    transports: string;
-    userid: string;
-  };
-  'auth.registration_keys': {
-    created: Date;
-    regkey: string;
-    used: boolean;
-    username: string;
-  };
-}
+type AuthTableName = 'auth.cred_authenticators' | 'auth.registration_keys';
+type AuthDbTables = Pick<DB, AuthTableName>;
 
 const authenticatorTransportSchema = z.custom<AuthenticatorTransportFuture>(
   (value) => typeof value === 'string',
@@ -60,8 +45,8 @@ export class AutenticatorDb {
     });
   }
 
-  private table(name: 'cred_authenticators' | 'registration_keys'): keyof AuthDbTables {
-    return `auth.${name}` as keyof AuthDbTables;
+  private table(name: 'cred_authenticators' | 'registration_keys'): AuthTableName {
+    return `auth.${name}` as AuthTableName;
   }
 
   static authenticatorFromRows(rows: CredentialAuthenticatorRow[]): Authenticator[] {

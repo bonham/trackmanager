@@ -1,5 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
-import pg from 'pg';
+import { Kysely } from 'kysely';
+import type { DB } from '../../types/db.js';
 
 import * as expressvalidator from 'express-validator';
 import getSchema from './getSchema.js';
@@ -15,7 +16,7 @@ const handleErrors = (req: Request, res: Response, next: NextFunction) => {
   return undefined;
 };
 
-function createSidValidationChain(pool: pg.Pool) {
+function createSidValidationChain(db: Kysely<DB>) {
   return [
     param('sid')
       .exists()
@@ -25,7 +26,7 @@ function createSidValidationChain(pool: pg.Pool) {
       .bail()
       .custom(async (value: string, { req }) => {
         const sid = value;
-        const schema = await getSchema(sid, pool);
+        const schema = await getSchema(sid, db);
         if (schema === null) {
           throw new Error('Could not resolve schema');
         } else {

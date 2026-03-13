@@ -1,15 +1,18 @@
 import type { Request as ExpressRequest, NextFunction, Response } from 'express';
 import express from 'express';
 import { Formidable } from 'formidable';
+import { Kysely, PostgresDialect } from 'kysely';
 import { mkdtemp as mkdtempprom } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { basename, join } from 'node:path';
 import pg from 'pg';
 import { MultiLineStringWithTrackIdSchema, TrackIdListSchema, TrackMetadataSchema } from 'trackmanager-shared/zodSchemas';
 import * as z from 'zod';
+import type { DB } from '../../types/db.js';
 import { Track2DbWriter } from '../lib/Track2DbWriter.js';
 import { DateStringMatcher, StringCleaner } from '../lib/analyzeString.js';
 import { asyncWrapper } from '../lib/asyncMiddlewareWrapper.js';
+import createCanWriteToSchema from '../lib/canWriteToSchema.js';
 import { processUpload } from '../lib/processUpload.js';
 import createSidValidationChain from '../lib/sidResolverMiddleware.js';
 import trackIdValidationMiddleware from '../lib/trackIdValidationMiddleware.js';
@@ -62,8 +65,10 @@ const poolOptions = {
   database,
 };
 const pool = new Pool(poolOptions);
-export { pool };
-const sidValidationChain = createSidValidationChain(pool);
+const db = new Kysely<DB>({ dialect: new PostgresDialect({ pool }) });
+export { db, pool };
+const sidValidationChain = createSidValidationChain(db);
+const canWriteToSchema = createCanWriteToSchema(db);
 
 /**
  * getAllTracks - query all tracks for a given schema, ordered by time descending.
@@ -433,6 +438,21 @@ router.post(
 );
 
 /**
+ * GET /canwrite/sid/:sid
+ * Returns 200 { canWrite: true } if the authenticated user has write access to this schema.
+ * Returns 401 if not authenticated, 403 if no write permission.
+ */
+router.get(
+  '/canwrite/sid/:sid',
+  isAuthenticated,
+  sidValidationChain,
+  canWriteToSchema,
+  (_req: ExpressRequest, res: Response) => {
+    res.json({ canWrite: true });
+  },
+);
+
+/**
  * PUT /byid/:trackId/sid/:sid
  * Update multiple attributes of a track (requires authentication).
  * @param trackId - Track identifier
@@ -444,6 +464,7 @@ router.put(
   '/byid/:trackId/sid/:sid',
   isAuthenticated,
   sidValidationChain,
+  canWriteToSchema,
   trackIdValidationMiddleware,
   asyncWrapper(async (req: ExpressRequest, res: Response) => {
     const validatedReq = ReqValidateSchemaTrack.parse(req);
@@ -496,6 +517,7 @@ router.patch(
   '/namefromsrc/:trackId/sid/:sid',
   isAuthenticated,
   sidValidationChain,
+  canWriteToSchema,
   trackIdValidationMiddleware,
   asyncWrapper(async (req: ExpressRequest, res: Response) => {
     const validatedReq = ReqValidateSchemaTrack.parse(req);
@@ -546,6 +568,7 @@ router.delete(
   '/byid/:trackId/sid/:sid',
   isAuthenticated,
   sidValidationChain,
+  canWriteToSchema,
   trackIdValidationMiddleware,
   asyncWrapper(async (req: ExpressRequest, res: Response) => {
     const validatedReq = ReqValidateSchemaTrack.parse(req);
@@ -596,7 +619,7 @@ router.post(
   '/addtrack/sid/:sid',
   isAuthenticated,
   sidValidationChain,
-
+  canWriteToSchema,
   asyncWrapper(async (req: ExpressRequest, res: Response, next: NextFunction) => {
     const { schema } = ReqValidateSchema.parse(req);
 

@@ -6,16 +6,19 @@ These instructions apply to all code-change requests in this repository.
 
 For every request that changes code, run and report the results of:
 
-- `npm run tests` (if missing in the target package, run `npm run test`)
+- `npm run test`
 - `npm run typecheck`
 - `npm run lint`
 
 Run checks in the correct package directory (`client`, `server`, or `shared`) based on the files changed.
 
-## Shell and OS
+## Shell and OS and cli tools
 
 - Assume Windows with PowerShell.
 - Use PowerShell-safe command syntax.
+- available cli tools
+  - rg
+  - jq
 - When changing directories in one command, use PowerShell style, for example:
   - `Set-Location .\server; npm run typecheck`
 

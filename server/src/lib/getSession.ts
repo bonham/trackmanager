@@ -1,6 +1,7 @@
 import connectPgSimple from 'connect-pg-simple';
 import session from 'express-session';
 import type { Pool } from 'pg';
+import { AUTH_SCHEMA } from './serverConfig.js';
 
 const PGSession = connectPgSimple(session);
 
@@ -25,7 +26,7 @@ function getSession(pgPool: Pool) {
       saveUninitialized: true,
       store: new PGSession({
         pool: pgPool,
-        schemaName: 'auth',
+        schemaName: AUTH_SCHEMA,
         createTableIfMissing: false,
       }),
     },

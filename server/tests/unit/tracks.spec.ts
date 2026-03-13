@@ -17,6 +17,9 @@ import { isAuthenticated } from '../../src/routes/auth/auth.js';
 
 vi.mock('../../src/routes/auth/auth');
 vi.mock('../../src/lib/getSchema.js')
+vi.mock('../../src/lib/canWriteToSchema.js', () => ({
+  default: vi.fn(() => (_req: any, _res: any, next: any) => next()),
+}))
 
 const mockedIsAuthenticated = vi.mocked(isAuthenticated);
 const mockGetSchema = vi.mocked(getSchema)
@@ -196,6 +199,21 @@ describe('Endpoints related to track metadata', () => {
 
     expect(response.body).toEqual(mockIdResults);
     expect(mockGetSchema).toHaveBeenCalled();
+  });
+
+  test('GET canwrite - authenticated with permission returns { canWrite: true }', async () => {
+    mockGetSchema.mockResolvedValue('myschema');
+    const response = await request(app)
+      .get('/api/tracks/canwrite/sid/correct')
+      .expect(200);
+    expect(response.body).toEqual({ canWrite: true });
+  });
+
+  test('GET canwrite - invalid sid returns 401', async () => {
+    mockGetSchema.mockResolvedValue('myschema');
+    await request(app)
+      .get('/api/tracks/canwrite/sid/1-2')
+      .expect(401);
   });
 
 });

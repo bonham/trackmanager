@@ -4,7 +4,7 @@ import { Router } from 'express';
 import type { TrackInitData } from 'trackmanager-shared';
 import { Track, TrackCollection } from 'trackmanager-shared';
 import * as z from 'zod/v4';
-import { getAllTracks, getTracksByIdList, pool } from '../../routes/tracks.js';
+import { db, getAllTracks, getTracksByIdList, pool } from '../../routes/tracks.js';
 import getSchema from '../getSchema.js';
 
 /**
@@ -72,7 +72,7 @@ function createMcpServer(): McpServer {
       },
     },
     async ({ sid }) => {
-      const schema = await getSchema(sid, pool);
+      const schema = await getSchema(sid, db);
       if (schema === null) {
         return {
           content: [
@@ -141,7 +141,7 @@ function createMcpServer(): McpServer {
       },
     },
     async ({ sid, trackIds }) => {
-      const schema = await getSchema(sid, pool);
+      const schema = await getSchema(sid, db);
       if (schema === null) {
         return {
           content: [
@@ -222,7 +222,7 @@ function createMcpServer(): McpServer {
       },
     },
     async ({ sid }) => {
-      const schema = await getSchema(sid, pool);
+      const schema = await getSchema(sid, db);
       if (schema === null) {
         return {
           content: [
@@ -287,7 +287,7 @@ function createMcpServer(): McpServer {
       },
     },
     async ({ sid, year }) => {
-      const schema = await getSchema(sid, pool);
+      const schema = await getSchema(sid, db);
       if (schema === null) {
         return {
           content: [
@@ -358,7 +358,7 @@ function createMcpServer(): McpServer {
       },
     },
     async ({ sid, trackIds }) => {
-      const schema = await getSchema(sid, pool);
+      const schema = await getSchema(sid, db);
       if (schema === null) {
         return {
           content: [

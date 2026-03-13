@@ -29,12 +29,12 @@
                 </router-link>
               </li>
               <li class="nav-item">
-                <router-link v-if="userLoginStore.loggedIn" class="nav-link my-1" :to="navPath('/track_multi_edit')">
+                <router-link v-if="userLoginStore.canWriteToSchema" class="nav-link my-1" :to="navPath('/track_multi_edit')">
                   Edit
                 </router-link>
               </li>
               <li class="nav-item">
-                <router-link v-if="userLoginStore.loggedIn" class="nav-link my-1" :to="navPath('/upload')">
+                <router-link v-if="userLoginStore.canWriteToSchema" class="nav-link my-1" :to="navPath('/upload')">
                   Upload
                 </router-link>
               </li>
@@ -58,6 +58,7 @@
 </template>
 
 <script setup lang="ts">
+import { watchEffect } from 'vue'
 import { BContainer } from 'bootstrap-vue-next'
 import { useUserLoginStore } from '@/stores/userlogin'
 import LoginModal from '@/components/auth/LoginModal.vue'
@@ -68,6 +69,12 @@ const props = defineProps({
   sid: {
     type: String,
     default: ''
+  }
+})
+
+watchEffect(() => {
+  if (userLoginStore.loggedIn && props.sid) {
+    void userLoginStore.checkWritePermission(props.sid)
   }
 })
 

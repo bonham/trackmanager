@@ -48,7 +48,7 @@ export interface Config {
   value: string;
 }
 
-export interface PublicCredAuthenticators {
+export interface AuthCredAuthenticators {
   counter: Int8;
   creationdate: Timestamp;
   credentialbackedup: boolean;
@@ -79,14 +79,14 @@ export interface PublicGeometryColumns {
   type: string | null;
 }
 
-export interface PublicRegistrationKeys {
+export interface AuthRegistrationKeys {
   created: Generated<Timestamp>;
   regkey: Generated<string>;
   used: Generated<boolean>;
   username: string;
 }
 
-export interface PublicSession {
+export interface AuthSession {
   expire: Timestamp;
   sess: Json;
   sid: string;
@@ -105,9 +105,14 @@ export interface Segments {
   track_segment_id: number;
 }
 
-export interface TmMetaSchemaSid {
+export interface AuthSchemaSid {
   schema: string;
   sid: string;
+}
+
+export interface AuthUserSchemaPermissions {
+  schema: string;
+  userid: string;
 }
 
 export interface TrackPoints {
@@ -149,14 +154,15 @@ export interface DB {
   calculated_track_stats: CalculatedTrackStats;
   calculated_track_stats_tmp: CalculatedTrackStatsTmp;
   config: Config;
-  "public.cred_authenticators": PublicCredAuthenticators;
   "public.geography_columns": PublicGeographyColumns;
   "public.geometry_columns": PublicGeometryColumns;
-  "public.registration_keys": PublicRegistrationKeys;
-  "public.session": PublicSession;
   "public.spatial_ref_sys": PublicSpatialRefSys;
+  "auth.cred_authenticators": AuthCredAuthenticators;
+  "auth.registration_keys": AuthRegistrationKeys;
+  "auth.session": AuthSession;
+  "auth.schema_sid": AuthSchemaSid;
+  "auth.user_schema_permissions": AuthUserSchemaPermissions;
   segments: Segments;
-  "tm_meta.schema_sid": TmMetaSchemaSid;
   track_points: TrackPoints;
   track_points_tmp: TrackPointsTmp;
   tracks: Tracks;

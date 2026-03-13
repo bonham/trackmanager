@@ -1,7 +1,9 @@
 import * as dotenv from 'dotenv';
 import type { Request, Response } from 'express';
 import express from 'express';
+import { Kysely, PostgresDialect } from 'kysely';
 import pg from 'pg';
+import type { DB } from '../../types/db.js';
 import * as z from 'zod';
 import { asyncWrapper } from '../lib/asyncMiddlewareWrapper.js';
 import createSidValidationChain from '../lib/sidResolverMiddleware.js';
@@ -26,6 +28,7 @@ const poolOptions = {
   database,
 };
 const pool = new Pool(poolOptions);
+const db = new Kysely<DB>({ dialect: new PostgresDialect({ pool }) });
 
 
 async function configExists(schema: string): Promise<boolean> {
@@ -39,7 +42,7 @@ async function configExists(schema: string): Promise<boolean> {
   return exists
 }
 
-const sidValidationChain = createSidValidationChain(pool);
+const sidValidationChain = createSidValidationChain(db);
 
 // Get single config value for a conftype
 router.get(

@@ -3,12 +3,12 @@ import { generateAuthenticationOptions } from '@simplewebauthn/server';
 import { Router } from 'express';
 import { asyncWrapper } from '../../../lib/asyncMiddlewareWrapper.js';
 import type { Authenticator, RequestWebauthn } from '../interfaces/server.js';
-import { AutenticatorDb } from './AuthenticatorDb.js';
+import { AuthenticatorDb } from './AuthenticatorDb.js';
 
 
 const router = Router();
 
-export function makeAuthenticationOptionsRoute(authdb: AutenticatorDb, rpID: string) {
+export function makeAuthenticationOptionsRoute(authdb: AuthenticatorDb, rpID: string) {
   // call this route with /authoptions?authuser=myuserid
   router.get('/authoptions', asyncWrapper(async (req: RequestWebauthn, res) => {
     // Seems to make no sense to query user authenticators and send to client

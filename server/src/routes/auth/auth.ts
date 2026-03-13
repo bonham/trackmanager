@@ -5,7 +5,7 @@ import pg from 'pg';
 import type { RequestWebauthn } from './interfaces/server.js';
 import { makeAuthenticationOptionsRoute } from './lib/AuthenticationOptionsRoute.js';
 import { makeAuthenticationRoute } from './lib/AuthenticationRoute.js';
-import { AutenticatorDb } from './lib/AuthenticatorDb.js';
+import { AuthenticatorDb } from './lib/AuthenticatorDb.js';
 import { makeLogoutRoute } from './lib/LogoutRoute.js';
 import { makeRegisterRoute } from './lib/RegisterRoute.js';
 import { makeRegistrationOptionsRoute } from './lib/RegistrationOptionsRoute.js';
@@ -44,7 +44,7 @@ const pgpool = new pg.Pool({
   database: process.env.PASSKEYPOC_PGDATABASE,
 });
 
-const authdb = new AutenticatorDb(pgpool);
+const authdb = new AuthenticatorDb(pgpool);
 
 const router = express.Router();
 

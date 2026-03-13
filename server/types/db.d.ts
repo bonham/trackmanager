@@ -110,6 +110,11 @@ export interface AuthSchemaSid {
   sid: string;
 }
 
+export interface AuthUserSchemaPermissions {
+  schema: string;
+  userid: string;
+}
+
 export interface TrackPoints {
   elevation: number | null;
   id: Generated<number>;
@@ -156,6 +161,7 @@ export interface DB {
   "auth.registration_keys": AuthRegistrationKeys;
   "auth.session": AuthSession;
   "auth.schema_sid": AuthSchemaSid;
+  "auth.user_schema_permissions": AuthUserSchemaPermissions;
   segments: Segments;
   track_points: TrackPoints;
   track_points_tmp: TrackPointsTmp;

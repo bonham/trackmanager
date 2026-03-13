@@ -17,6 +17,9 @@ import { isAuthenticated } from '../../src/routes/auth/auth.js';
 
 vi.mock('../../src/routes/auth/auth');
 vi.mock('../../src/lib/getSchema.js')
+vi.mock('../../src/lib/canWriteToSchema.js', () => ({
+  default: vi.fn(() => (_req: any, _res: any, next: any) => next()),
+}))
 
 const mockedIsAuthenticated = vi.mocked(isAuthenticated);
 const mockGetSchema = vi.mocked(getSchema)

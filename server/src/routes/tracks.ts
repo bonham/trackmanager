@@ -12,6 +12,7 @@ import type { DB } from '../../types/db.js';
 import { Track2DbWriter } from '../lib/Track2DbWriter.js';
 import { DateStringMatcher, StringCleaner } from '../lib/analyzeString.js';
 import { asyncWrapper } from '../lib/asyncMiddlewareWrapper.js';
+import createCanWriteToSchema from '../lib/canWriteToSchema.js';
 import { processUpload } from '../lib/processUpload.js';
 import createSidValidationChain from '../lib/sidResolverMiddleware.js';
 import trackIdValidationMiddleware from '../lib/trackIdValidationMiddleware.js';
@@ -67,6 +68,7 @@ const pool = new Pool(poolOptions);
 const db = new Kysely<DB>({ dialect: new PostgresDialect({ pool }) });
 export { db, pool };
 const sidValidationChain = createSidValidationChain(db);
+const canWriteToSchema = createCanWriteToSchema(db);
 
 /**
  * getAllTracks - query all tracks for a given schema, ordered by time descending.
@@ -447,6 +449,7 @@ router.put(
   '/byid/:trackId/sid/:sid',
   isAuthenticated,
   sidValidationChain,
+  canWriteToSchema,
   trackIdValidationMiddleware,
   asyncWrapper(async (req: ExpressRequest, res: Response) => {
     const validatedReq = ReqValidateSchemaTrack.parse(req);
@@ -499,6 +502,7 @@ router.patch(
   '/namefromsrc/:trackId/sid/:sid',
   isAuthenticated,
   sidValidationChain,
+  canWriteToSchema,
   trackIdValidationMiddleware,
   asyncWrapper(async (req: ExpressRequest, res: Response) => {
     const validatedReq = ReqValidateSchemaTrack.parse(req);
@@ -549,6 +553,7 @@ router.delete(
   '/byid/:trackId/sid/:sid',
   isAuthenticated,
   sidValidationChain,
+  canWriteToSchema,
   trackIdValidationMiddleware,
   asyncWrapper(async (req: ExpressRequest, res: Response) => {
     const validatedReq = ReqValidateSchemaTrack.parse(req);
@@ -599,7 +604,7 @@ router.post(
   '/addtrack/sid/:sid',
   isAuthenticated,
   sidValidationChain,
-
+  canWriteToSchema,
   asyncWrapper(async (req: ExpressRequest, res: Response, next: NextFunction) => {
     const { schema } = ReqValidateSchema.parse(req);
 

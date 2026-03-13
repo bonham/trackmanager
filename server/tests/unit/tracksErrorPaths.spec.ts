@@ -340,3 +340,14 @@ describe('getTracksByIdList – direct', () => {
     expect(result[0].name).toBe('firsttrack')
   })
 })
+
+// ─── GET /canwrite – unauthenticated ─────────────────────────────────────────
+
+describe('GET /canwrite/sid/:sid – unauthenticated', () => {
+  test('unauthenticated returns 401', async () => {
+    mockedIsAuthenticated.mockImplementationOnce((_req: any, res: any) => {
+      res.sendStatus(401)
+    })
+    await request(app).get(`/api/tracks/canwrite/sid/${VALID_SID}`).expect(401)
+  })
+})

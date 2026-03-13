@@ -438,6 +438,21 @@ router.post(
 );
 
 /**
+ * GET /canwrite/sid/:sid
+ * Returns 200 { canWrite: true } if the authenticated user has write access to this schema.
+ * Returns 401 if not authenticated, 403 if no write permission.
+ */
+router.get(
+  '/canwrite/sid/:sid',
+  isAuthenticated,
+  sidValidationChain,
+  canWriteToSchema,
+  (_req: ExpressRequest, res: Response) => {
+    res.json({ canWrite: true });
+  },
+);
+
+/**
  * PUT /byid/:trackId/sid/:sid
  * Update multiple attributes of a track (requires authentication).
  * @param trackId - Track identifier

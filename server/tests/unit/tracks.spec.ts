@@ -201,4 +201,19 @@ describe('Endpoints related to track metadata', () => {
     expect(mockGetSchema).toHaveBeenCalled();
   });
 
+  test('GET canwrite - authenticated with permission returns { canWrite: true }', async () => {
+    mockGetSchema.mockResolvedValue('myschema');
+    const response = await request(app)
+      .get('/api/tracks/canwrite/sid/correct')
+      .expect(200);
+    expect(response.body).toEqual({ canWrite: true });
+  });
+
+  test('GET canwrite - invalid sid returns 401', async () => {
+    mockGetSchema.mockResolvedValue('myschema');
+    await request(app)
+      .get('/api/tracks/canwrite/sid/1-2')
+      .expect(401);
+  });
+
 });

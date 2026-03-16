@@ -9,7 +9,6 @@ import type { Extent } from 'ol/extent'
 import { Tile as TileLayer } from 'ol/layer'
 import VectorLayer from 'ol/layer/Vector.js';
 import { OSM, Vector as VectorSource } from 'ol/source'
-import ImageTile from 'ol/ImageTile'
 import { defaults as defaultControls } from 'ol/control'
 import Collection from 'ol/Collection'
 import Select from 'ol/interaction/Select'
@@ -109,14 +108,7 @@ export class ManagedMap {
       ]),
       layers: [
         new TileLayer({
-          // maybe tileloadfunction can be removed with newer openlayers version. It is needed to prevent "Referrer Policy: no-referrer-when-downgrade" warning in console when using fetch with relative URL from osm tileserver (e.g. in MapView.vue) 
-          source: new OSM({
-            tileLoadFunction: (tile, src) => {
-              const img = (tile as ImageTile).getImage() as HTMLImageElement
-              img.referrerPolicy = 'no-referrer'
-              img.src = src
-            }
-          })
+          source: new OSM()
         })
       ],
       view: new View({

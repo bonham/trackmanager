@@ -1,0 +1,1 @@
+this page is supposed to show buttons. before it needs to load from config , then load all kind of data freom db before it can show the buttons. before that , nothing happens on screen. pls show the user a sign of acivity in the form of bootstrap placeholders until we can show all buttons.

@@ -108,7 +108,9 @@ export class ManagedMap {
       ]),
       layers: [
         new TileLayer({
-          source: new OSM()
+          source: new OSM({
+            referrerPolicy: 'strict-origin-when-cross-origin'
+          })
         })
       ],
       view: new View({

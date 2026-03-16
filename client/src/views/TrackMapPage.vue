@@ -45,7 +45,7 @@ const mapStateStore = useMapStateStore()
 
 // reactive data
 const years = ref<number[]>([])
-const buttonsLoading = ref(false)
+const buttonsLoading = ref(true)
 const buttonAll = ref(true)
 
 // buttons active

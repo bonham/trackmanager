@@ -13,8 +13,12 @@
     <div class="px-2">
       <div>
         <div>
-          <span v-if="loading">Loading <b-spinner small />
-          </span>
+        <div v-if="loading" class="placeholder-glow d-flex flex-column px-2 mt-2 year-placeholder">
+          <span class="placeholder col-8 mb-2"></span>
+          <span class="placeholder col-6 mb-2"></span>
+          <span class="placeholder col-7 mb-2"></span>
+          <span class="placeholder col-5 mb-2"></span>
+        </div>
         </div>
         <div>
           <TrackSection v-for="trCol in trackCollections" :key="trCol.year"
@@ -32,7 +36,6 @@ import TrackSection from '@/components/TrackSection.vue'
 import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'
 import { Track, TrackCollection } from '@/lib/Track'
 import { getAllTracks } from '@/lib/trackServices'
-import { BSpinner } from 'bootstrap-vue-next'
 import _ from 'lodash'
 import { ref, computed } from 'vue'
 import type { Ref } from 'vue'
@@ -140,5 +143,9 @@ const vFocus = {
 
 .expandbutton {
   min-width: 10ch;
+}
+
+.year-placeholder {
+  width: 12em;
 }
 </style>

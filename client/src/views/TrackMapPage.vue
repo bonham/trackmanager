@@ -5,6 +5,7 @@
       <button class="btn placeholder btn-outline-secondary flex-fill m-2">..</button>
       <button class="btn placeholder btn-outline-secondary flex-fill m-2">..</button>
       <button class="btn placeholder btn-outline-secondary flex-fill m-2">..</button>
+
     </div>
     <div v-else class="year-navbar border-bottom border-top">
       <button v-if="buttonAll" class="btn m-2 button-year-navbar" :class="activeClass(buttonAllActive)"
@@ -45,7 +46,7 @@ const mapStateStore = useMapStateStore()
 
 // reactive data
 const years = ref<number[]>([])
-const buttonsLoading = ref(false)
+const buttonsLoading = ref(true)
 const buttonAll = ref(true)
 
 // buttons active
@@ -61,6 +62,9 @@ const configStore = useConfigStore()
 
 configStore.loadConfig(props.sid)
   .then(async () => {
+    // TEMPORARY: 5 second delay to show loading effect
+    await new Promise(resolve => setTimeout(resolve, 5000))
+
     const initialState = configStore.get('TRACKMAP_INITIALVIEW')
     if (initialState === "ALL") {
 

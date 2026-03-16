@@ -11,6 +11,18 @@ export const useUserLoginStore = defineStore('userlogin', () => {
     return (username.value.length > 0)
   })
 
+  const canWriteToSchema = ref(false)
+
+  async function checkWritePermission(sid: string) {
+    if (!sid) { canWriteToSchema.value = false; return }
+    try {
+      const res = await fetch(`/api/tracks/canwrite/sid/${sid}`)
+      canWriteToSchema.value = res.ok
+    } catch {
+      canWriteToSchema.value = false
+    }
+  }
+
   // relay variable to trigger and listen to login requests. Should be incremented to trigger.
   const loginFailureModalVisible = ref(false)
 
@@ -71,6 +83,7 @@ export const useUserLoginStore = defineStore('userlogin', () => {
     } catch (e) {
       console.error("Error in logout procedure:", e)
     } finally {
+      canWriteToSchema.value = false
       updateUser().catch((e) => { console.log(e) })
     }
   };
@@ -81,6 +94,8 @@ export const useUserLoginStore = defineStore('userlogin', () => {
     username,
     updateUser,
     logout,
+    canWriteToSchema,
+    checkWritePermission,
     loginFailureModalVisible,
     enableLoginFailureModal,
     disableLoginFailureModal,

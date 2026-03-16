@@ -2,6 +2,8 @@ import type { AuthenticatorTransportFuture } from '@simplewebauthn/server';
 import { Kysely, PostgresDialect } from 'kysely';
 import type { Pool } from 'pg';
 import { z } from 'zod';
+import type { DB } from '../../../../types/db.js';
+import { AUTH_SCHEMA } from '../../../lib/serverConfig.js';
 import type { Authenticator } from '../interfaces/server.js';
 
 // This type describes the rows we pass into `authenticatorFromRows`.
@@ -16,24 +18,8 @@ interface CredentialAuthenticatorRow {
   userid: string;
 }
 
-interface AuthDbTables {
-  'auth.cred_authenticators': {
-    counter: string;
-    creationdate: Date;
-    credentialbackedup: boolean;
-    credentialdevicetype: string;
-    credentialid: string;
-    credentialpublickey: Buffer;
-    transports: string;
-    userid: string;
-  };
-  'auth.registration_keys': {
-    created: Date;
-    regkey: string;
-    used: boolean;
-    username: string;
-  };
-}
+type AuthTableName = 'auth.cred_authenticators' | 'auth.registration_keys';
+type AuthDbTables = Pick<DB, AuthTableName>;
 
 const authenticatorTransportSchema = z.custom<AuthenticatorTransportFuture>(
   (value) => typeof value === 'string',
@@ -47,7 +33,7 @@ const authenticatorCounterSchema = z
   .refine(Number.isSafeInteger, 'Counter must be a safe integer');
 
 
-export class AutenticatorDb {
+export class AuthenticatorDb {
   pgpool: Pool;
   db: Kysely<AuthDbTables>;
 
@@ -60,8 +46,8 @@ export class AutenticatorDb {
     });
   }
 
-  private table(name: 'cred_authenticators' | 'registration_keys'): keyof AuthDbTables {
-    return `auth.${name}` as keyof AuthDbTables;
+  private table(name: 'cred_authenticators' | 'registration_keys'): AuthTableName {
+    return `${AUTH_SCHEMA}.${name}` as AuthTableName;
   }
 
   static authenticatorFromRows(rows: CredentialAuthenticatorRow[]): Authenticator[] {
@@ -98,7 +84,7 @@ export class AutenticatorDb {
       ])
       .where('userid', '=', user)
       .execute();
-    return AutenticatorDb.authenticatorFromRows(rows);
+    return AuthenticatorDb.authenticatorFromRows(rows);
   }
 
   async getAuthenticatorsById(authenticatorId: string) {
@@ -116,7 +102,7 @@ export class AutenticatorDb {
         ])
         .where('credentialid', '=', authenticatorId)
         .execute();
-      return AutenticatorDb.authenticatorFromRows(rows);
+      return AuthenticatorDb.authenticatorFromRows(rows);
     } catch (e: unknown) {
       if ((e instanceof Error) && ('code' in e) && (e.code === '42P01')) {
         throw new Error(

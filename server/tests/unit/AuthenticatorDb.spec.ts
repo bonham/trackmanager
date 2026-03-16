@@ -1,6 +1,6 @@
 import type { Pool, QueryResult } from 'pg';
 import { describe, expect, test, vi } from 'vitest';
-import { AutenticatorDb } from '../../src/routes/auth/lib/AuthenticatorDb.js';
+import { AuthenticatorDb } from '../../src/routes/auth/lib/AuthenticatorDb.js';
 
 function makeMockPool(queryResult: Partial<QueryResult> = {}, queryError?: Error): Pool {
   const defaultResult: QueryResult = {
@@ -37,9 +37,9 @@ const sampleRow = {
   userid: 'user-abc',
 };
 
-describe('AutenticatorDb.authenticatorFromRows', () => {
+describe('AuthenticatorDb.authenticatorFromRows', () => {
   test('converts rows to Authenticator objects', () => {
-    const result = AutenticatorDb.authenticatorFromRows([sampleRow]);
+    const result = AuthenticatorDb.authenticatorFromRows([sampleRow]);
     expect(result).toHaveLength(1);
     const auth = result[0];
     expect(auth.credentialID).toBe('cred-id-123');
@@ -51,7 +51,7 @@ describe('AutenticatorDb.authenticatorFromRows', () => {
   });
 
   test('returns empty array for empty input', () => {
-    expect(AutenticatorDb.authenticatorFromRows([])).toEqual([]);
+    expect(AuthenticatorDb.authenticatorFromRows([])).toEqual([]);
   });
 
   test('throws for invalid counter values', () => {
@@ -60,14 +60,14 @@ describe('AutenticatorDb.authenticatorFromRows', () => {
       counter: 'not-a-number',
     };
 
-    expect(() => AutenticatorDb.authenticatorFromRows([badCounterRow])).toThrow();
+    expect(() => AuthenticatorDb.authenticatorFromRows([badCounterRow])).toThrow();
   });
 });
 
-describe('AutenticatorDb.getUserAuthenticators', () => {
+describe('AuthenticatorDb.getUserAuthenticators', () => {
   test('returns authenticators for valid rows', async () => {
     const pool = makeMockPool({ rows: [sampleRow] });
-    const db = new AutenticatorDb(pool);
+    const db = new AuthenticatorDb(pool);
 
     const result = await db.getUserAuthenticators('user-abc');
     expect(result).toHaveLength(1);
@@ -76,7 +76,7 @@ describe('AutenticatorDb.getUserAuthenticators', () => {
 
   test('returns empty array when no rows', async () => {
     const pool = makeMockPool({ rows: [] });
-    const db = new AutenticatorDb(pool);
+    const db = new AuthenticatorDb(pool);
 
     const result = await db.getUserAuthenticators('unknown');
     expect(result).toEqual([]);
@@ -84,16 +84,16 @@ describe('AutenticatorDb.getUserAuthenticators', () => {
 
   test('throws when rows have unexpected shape', async () => {
     const pool = makeMockPool({ rows: [{ unexpected: 'field' }] });
-    const db = new AutenticatorDb(pool);
+    const db = new AuthenticatorDb(pool);
 
     await expect(db.getUserAuthenticators('user')).rejects.toThrow();
   });
 });
 
-describe('AutenticatorDb.getAuthenticatorsById', () => {
+describe('AuthenticatorDb.getAuthenticatorsById', () => {
   test('returns authenticator for valid credential id', async () => {
     const pool = makeMockPool({ rows: [sampleRow] });
-    const db = new AutenticatorDb(pool);
+    const db = new AuthenticatorDb(pool);
 
     const result = await db.getAuthenticatorsById('cred-id-123');
     expect(result).toHaveLength(1);
@@ -102,7 +102,7 @@ describe('AutenticatorDb.getAuthenticatorsById', () => {
 
   test('throws with helpful message on missing table (42P01)', async () => {
     const pool = makeMockPool({}, Object.assign(new Error('table not found'), { code: '42P01' }));
-    const db = new AutenticatorDb(pool);
+    const db = new AuthenticatorDb(pool);
 
     await expect(db.getAuthenticatorsById('any')).rejects.toThrow(
       'Looks like the database schema for sessions is missing',
@@ -111,13 +111,13 @@ describe('AutenticatorDb.getAuthenticatorsById', () => {
 
   test('rethrows other errors', async () => {
     const pool = makeMockPool({}, new Error('network error'));
-    const db = new AutenticatorDb(pool);
+    const db = new AuthenticatorDb(pool);
 
     await expect(db.getAuthenticatorsById('any')).rejects.toThrow('network error');
   });
 });
 
-describe('AutenticatorDb.saveAuthenticator', () => {
+describe('AuthenticatorDb.saveAuthenticator', () => {
   const auth = {
     credentialID: 'cred-id-123' as import('@simplewebauthn/server').Base64URLString,
     credentialPublicKey: new Uint8Array([1, 2, 3]) as Uint8Array<ArrayBuffer>,
@@ -130,7 +130,7 @@ describe('AutenticatorDb.saveAuthenticator', () => {
 
   test('returns true on successful save (rowCount=1)', async () => {
     const pool = makeMockPool({ rowCount: 1, command: 'INSERT' });
-    const db = new AutenticatorDb(pool);
+    const db = new AuthenticatorDb(pool);
 
     const result = await db.saveAuthenticator(auth, 'user1');
     expect(result).toBe(true);
@@ -138,7 +138,7 @@ describe('AutenticatorDb.saveAuthenticator', () => {
 
   test('returns false when rowCount is not 1', async () => {
     const pool = makeMockPool({ rowCount: 0, command: 'INSERT' });
-    const db = new AutenticatorDb(pool);
+    const db = new AuthenticatorDb(pool);
 
     const result = await db.saveAuthenticator(auth, 'user1');
     expect(result).toBe(false);
@@ -146,14 +146,14 @@ describe('AutenticatorDb.saveAuthenticator', () => {
 
   test('returns false on query error', async () => {
     const pool = makeMockPool({}, new Error('db error'));
-    const db = new AutenticatorDb(pool);
+    const db = new AuthenticatorDb(pool);
 
     const result = await db.saveAuthenticator(auth, 'user1');
     expect(result).toBe(false);
   });
 });
 
-describe('AutenticatorDb.getUserByRegistrationCode', () => {
+describe('AuthenticatorDb.getUserByRegistrationCode', () => {
   const regRow = {
     regkey: 'abc123',
     username: 'testuser',
@@ -163,7 +163,7 @@ describe('AutenticatorDb.getUserByRegistrationCode', () => {
 
   test('returns registration code lookup on success', async () => {
     const pool = makeMockPool({ rows: [regRow], rowCount: 1 });
-    const db = new AutenticatorDb(pool);
+    const db = new AuthenticatorDb(pool);
 
     const result = await db.getUserByRegistrationCode('abc123');
     expect(result).toEqual(regRow);
@@ -171,7 +171,7 @@ describe('AutenticatorDb.getUserByRegistrationCode', () => {
 
   test('returns null when not found (rows.length !== 1)', async () => {
     const pool = makeMockPool({ rows: [], rowCount: 0 });
-    const db = new AutenticatorDb(pool);
+    const db = new AuthenticatorDb(pool);
 
     const result = await db.getUserByRegistrationCode('notfound');
     expect(result).toBeNull();
@@ -179,17 +179,17 @@ describe('AutenticatorDb.getUserByRegistrationCode', () => {
 
   test('returns null on query error', async () => {
     const pool = makeMockPool({}, new Error('db error'));
-    const db = new AutenticatorDb(pool);
+    const db = new AuthenticatorDb(pool);
 
     const result = await db.getUserByRegistrationCode('any');
     expect(result).toBeNull();
   });
 });
 
-describe('AutenticatorDb.markRegistrationCodeUsed', () => {
+describe('AuthenticatorDb.markRegistrationCodeUsed', () => {
   test('returns true when rowCount is 1', async () => {
     const pool = makeMockPool({ rowCount: 1, command: 'UPDATE' });
-    const db = new AutenticatorDb(pool);
+    const db = new AuthenticatorDb(pool);
 
     const result = await db.markRegistrationCodeUsed('abc123');
     expect(result).toBe(true);
@@ -197,7 +197,7 @@ describe('AutenticatorDb.markRegistrationCodeUsed', () => {
 
   test('returns false when rowCount is not 1', async () => {
     const pool = makeMockPool({ rowCount: 0, command: 'UPDATE' });
-    const db = new AutenticatorDb(pool);
+    const db = new AuthenticatorDb(pool);
 
     const result = await db.markRegistrationCodeUsed('notfound');
     expect(result).toBe(false);
@@ -205,7 +205,7 @@ describe('AutenticatorDb.markRegistrationCodeUsed', () => {
 
   test('returns false on query error', async () => {
     const pool = makeMockPool({}, new Error('db error'));
-    const db = new AutenticatorDb(pool);
+    const db = new AuthenticatorDb(pool);
 
     const result = await db.markRegistrationCodeUsed('any');
     expect(result).toBe(false);
@@ -223,7 +223,7 @@ describe('row-shape failures (tested indirectly via getUserAuthenticators)', () 
   missingFieldCases.forEach(([name, badRow]) => {
     test(`getUserAuthenticators throws for row with ${name as string}`, async () => {
       const pool = makeMockPool({ rows: [badRow] });
-      const db = new AutenticatorDb(pool);
+      const db = new AuthenticatorDb(pool);
       await expect(db.getUserAuthenticators('user')).rejects.toThrow();
     });
   });

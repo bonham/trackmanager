@@ -4,7 +4,7 @@ import { Duration } from 'luxon';
 import { asyncWrapper } from '../../../lib/asyncMiddlewareWrapper.js';
 
 import { generateRegistrationOptions } from '@simplewebauthn/server';
-import { AutenticatorDb } from './AuthenticatorDb.js';
+import { AuthenticatorDb } from './AuthenticatorDb.js';
 
 import type { Authenticator, RequestWebauthn } from '../interfaces/server.js';
 
@@ -13,7 +13,7 @@ const MAX_REGCODE_AGE_MS = 1000 * 60 * 60 * 24 * 7; // 7 days
 
 const router = Router();
 
-export function makeRegistrationOptionsRoute(rpName: string, rpID: string, authdb: AutenticatorDb) {
+export function makeRegistrationOptionsRoute(rpName: string, rpID: string, authdb: AuthenticatorDb) {
   const handleRegistration = async (req: RequestWebauthn, res: Response, reguser: string) => {
     // const registrationuser = getRegistrationUserId();
     const registrationuser = reguser;

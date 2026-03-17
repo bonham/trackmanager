@@ -1,4 +1,4 @@
-import { describe, test, expect, vi, beforeEach } from 'vitest'
+import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest'
 import { setActivePinia, createPinia } from 'pinia'
 import { useUserLoginStore } from '@/stores/userlogin'
 
@@ -201,6 +201,126 @@ describe('useUserLoginStore', () => {
         expect.any(Error)
       )
       consoleSpy.mockRestore()
+    })
+  })
+
+  // ---------------------------------------------------------------
+  // handleUnauthorized
+  // ---------------------------------------------------------------
+  describe('handleUnauthorized', () => {
+    test('clears state and shows login modal when logged in', () => {
+      const store = useUserLoginStore()
+      store.username = 'alice'
+      store.canWriteToSchema = true
+
+      store.handleUnauthorized()
+
+      expect(store.username).toBe('')
+      expect(store.canWriteToSchema).toBe(false)
+      expect(store.loginFailureModalVisible).toBe(true)
+    })
+
+    test('does not show login modal when not logged in', () => {
+      const store = useUserLoginStore()
+
+      store.handleUnauthorized()
+
+      expect(store.loginFailureModalVisible).toBe(false)
+    })
+  })
+
+  // ---------------------------------------------------------------
+  // session heartbeat
+  // ---------------------------------------------------------------
+  describe('session heartbeat', () => {
+    beforeEach(() => {
+      vi.useFakeTimers()
+    })
+
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    test('polls /session after one interval', async () => {
+      mockFetch.mockResolvedValue(makeJsonResponse({ authenticated: true, user: 'alice', expiresAt: null }))
+      const store = useUserLoginStore()
+      store.startSessionHeartbeat()
+
+      await vi.advanceTimersByTimeAsync(30_000)
+
+      expect(mockFetch).toHaveBeenCalledWith('/api/v1/auth/session')
+      store.stopSessionHeartbeat()
+    })
+
+    test('updates username when session is still active', async () => {
+      mockFetch.mockResolvedValue(makeJsonResponse({ authenticated: true, user: 'bob', expiresAt: null }))
+      const store = useUserLoginStore()
+      store.startSessionHeartbeat()
+
+      await vi.advanceTimersByTimeAsync(30_000)
+
+      expect(store.username).toBe('bob')
+      store.stopSessionHeartbeat()
+    })
+
+    test('clears state and shows login modal when session expires while logged in', async () => {
+      mockFetch.mockResolvedValue(makeJsonResponse({ authenticated: false, user: null, expiresAt: null }))
+      const store = useUserLoginStore()
+      store.username = 'alice'
+      store.startSessionHeartbeat()
+
+      await vi.advanceTimersByTimeAsync(30_000)
+
+      expect(store.username).toBe('')
+      expect(store.loginFailureModalVisible).toBe(true)
+      store.stopSessionHeartbeat()
+    })
+
+    test('does not show login modal when session expires for unauthenticated user', async () => {
+      mockFetch.mockResolvedValue(makeJsonResponse({ authenticated: false, user: null, expiresAt: null }))
+      const store = useUserLoginStore()
+      store.startSessionHeartbeat()
+
+      await vi.advanceTimersByTimeAsync(30_000)
+
+      expect(store.loginFailureModalVisible).toBe(false)
+      store.stopSessionHeartbeat()
+    })
+
+    test('leaves state unchanged on network error', async () => {
+      mockFetch.mockRejectedValue(new Error('network failure'))
+      const store = useUserLoginStore()
+      store.username = 'alice'
+      store.startSessionHeartbeat()
+
+      await vi.advanceTimersByTimeAsync(30_000)
+
+      expect(store.username).toBe('alice')
+      expect(store.loginFailureModalVisible).toBe(false)
+      store.stopSessionHeartbeat()
+    })
+
+    test('stopSessionHeartbeat stops polling', async () => {
+      mockFetch.mockResolvedValue(makeJsonResponse({ authenticated: true, user: 'alice', expiresAt: null }))
+      const store = useUserLoginStore()
+      store.startSessionHeartbeat()
+      store.stopSessionHeartbeat()
+
+      await vi.advanceTimersByTimeAsync(30_000)
+
+      expect(mockFetch).not.toHaveBeenCalled()
+    })
+
+    test('startSessionHeartbeat is idempotent — only one interval runs', async () => {
+      mockFetch.mockResolvedValue(makeJsonResponse({ authenticated: true, user: 'alice', expiresAt: null }))
+      const store = useUserLoginStore()
+      store.startSessionHeartbeat()
+      store.startSessionHeartbeat()
+
+      await vi.advanceTimersByTimeAsync(30_000)
+
+      expect(mockFetch).toHaveBeenCalledTimes(1)
+      store.stopSessionHeartbeat()
     })
   })
 })

@@ -84,6 +84,12 @@ router.get('/check', (req: RequestWebauthn, res) => {
   }
 });
 
+router.get('/session', (req: RequestWebauthn, res) => {
+  const user = req.session.user ?? null;
+  const expiresAt = req.session.cookie.expires?.getTime() ?? null;
+  res.json({ authenticated: user !== null, user, expiresAt });
+});
+
 router.get('/protected', isAuthenticated, (req, res) => {
   res.send('ok');
 });

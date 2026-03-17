@@ -1,6 +1,8 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 
+const SESSION_HEARTBEAT_INTERVAL_MS = 30_000
+
 export const useUserLoginStore = defineStore('userlogin', () => {
 
   // Not logged in: username is empty string
@@ -88,6 +90,53 @@ export const useUserLoginStore = defineStore('userlogin', () => {
     }
   };
 
+  // Called when an API response returns 401/403 — clears local state and prompts re-auth.
+  function handleUnauthorized() {
+    const wasLoggedIn = username.value.length > 0
+    username.value = ''
+    canWriteToSchema.value = false
+    if (wasLoggedIn) {
+      enableLoginFailureModal()
+    }
+  }
+
+  // Session heartbeat: periodically calls /session to detect server-side expiry.
+  let _heartbeatTimer: ReturnType<typeof setInterval> | null = null
+
+  async function _checkSession() {
+    try {
+      const res = await fetch('/api/v1/auth/session')
+      if (!res.ok) return
+      const data = await res.json() as { authenticated: boolean; user: string | null; expiresAt: number | null }
+
+      const wasLoggedIn = username.value.length > 0
+
+      if (data.authenticated && data.user) {
+        username.value = data.user
+      } else {
+        username.value = ''
+        canWriteToSchema.value = false
+      }
+
+      if (wasLoggedIn && !data.authenticated) {
+        enableLoginFailureModal()
+      }
+    } catch {
+      // Network error — leave current state unchanged
+    }
+  }
+
+  function startSessionHeartbeat() {
+    if (_heartbeatTimer !== null) return
+    _heartbeatTimer = setInterval(() => { void _checkSession() }, SESSION_HEARTBEAT_INTERVAL_MS)
+  }
+
+  function stopSessionHeartbeat() {
+    if (_heartbeatTimer !== null) {
+      clearInterval(_heartbeatTimer)
+      _heartbeatTimer = null
+    }
+  }
 
   return {
     loggedIn,
@@ -100,8 +149,10 @@ export const useUserLoginStore = defineStore('userlogin', () => {
     enableLoginFailureModal,
     disableLoginFailureModal,
     triggerLoginVar,
-    triggerLogin
+    triggerLogin,
+    handleUnauthorized,
+    startSessionHeartbeat,
+    stopSessionHeartbeat,
   }
 
 })
-

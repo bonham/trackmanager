@@ -62,9 +62,6 @@ const configStore = useConfigStore()
 
 configStore.loadConfig(props.sid)
   .then(async () => {
-    // TEMPORARY: 5 second delay to show loading effect
-    await new Promise(resolve => setTimeout(resolve, 5000))
-
     const initialState = configStore.get('TRACKMAP_INITIALVIEW')
     if (initialState === "ALL") {
 

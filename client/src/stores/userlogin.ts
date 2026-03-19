@@ -136,8 +136,8 @@ export const useUserLoginStore = defineStore('userlogin', () => {
   }
 
   function startSessionHeartbeat() {
-    // if (_heartbeatTimer !== null) return
-    // _heartbeatTimer = setInterval(() => { void _checkSession() }, SESSION_HEARTBEAT_INTERVAL_MS)
+    if (_heartbeatTimer !== null) return
+    _heartbeatTimer = setInterval(() => { void _checkSession() }, SESSION_HEARTBEAT_INTERVAL_MS)
   }
 
   function stopSessionHeartbeat() {

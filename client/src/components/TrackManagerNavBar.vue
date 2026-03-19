@@ -1,7 +1,7 @@
 <!-- eslint-disable vue/first-attribute-linebreak -->
 <template>
   <b-container id="root" class="d-flex flex-column vh-100 gx-0 border">
-    <login-modal />
+    <auth-orchestrator />
     <div class="bg-light d-flex flex-column vh-100">
       <nav class="navbar navbar-expand bg-success-subtle border-bottom py-1">
         <div class="container-fluid">
@@ -29,7 +29,8 @@
                 </router-link>
               </li>
               <li class="nav-item">
-                <router-link v-if="userLoginStore.canWriteToSchema" class="nav-link my-1" :to="navPath('/track_multi_edit')">
+                <router-link v-if="userLoginStore.canWriteToSchema" class="nav-link my-1"
+                  :to="navPath('/track_multi_edit')">
                   Edit
                 </router-link>
               </li>
@@ -61,7 +62,7 @@
 import { watchEffect } from 'vue'
 import { BContainer } from 'bootstrap-vue-next'
 import { useUserLoginStore } from '@/stores/userlogin'
-import LoginModal from '@/components/auth/LoginModal.vue'
+import AuthOrchestrator from '@/components/auth/AuthOrchestrator.vue'
 
 const userLoginStore = useUserLoginStore()
 
@@ -86,7 +87,7 @@ function navPath(path: string) {
 }
 
 function triggerLoginF() {
-  userLoginStore.triggerLoginVar++
+  userLoginStore.requestLogin()
 }
 
 </script>

@@ -39,53 +39,26 @@ describe('useUserLoginStore', () => {
   })
 
   // ---------------------------------------------------------------
-  // loginFailureModal helpers
+  // sessionExpired signal
   // ---------------------------------------------------------------
-  describe('loginFailureModal', () => {
+  describe('sessionExpired', () => {
     test('starts as false', () => {
       const store = useUserLoginStore()
-      expect(store.loginFailureModalVisible).toBe(false)
-    })
-
-    test('loginFailureTitle defaults to "Login failed"', () => {
-      const store = useUserLoginStore()
-      expect(store.loginFailureTitle).toBe('Login failed')
-    })
-
-    test('enableLoginFailureModal sets visible to true with default title', () => {
-      const store = useUserLoginStore()
-      store.enableLoginFailureModal()
-      expect(store.loginFailureModalVisible).toBe(true)
-      expect(store.loginFailureTitle).toBe('Login failed')
-    })
-
-    test('enableLoginFailureModal sets a custom title', () => {
-      const store = useUserLoginStore()
-      store.enableLoginFailureModal('Session expired')
-      expect(store.loginFailureModalVisible).toBe(true)
-      expect(store.loginFailureTitle).toBe('Session expired')
-    })
-
-    test('disableLoginFailureModal sets visible to false and resets title to default', () => {
-      const store = useUserLoginStore()
-      store.enableLoginFailureModal('Session expired')
-      store.disableLoginFailureModal()
-      expect(store.loginFailureModalVisible).toBe(false)
-      expect(store.loginFailureTitle).toBe('Login failed')
+      expect(store.sessionExpired).toBe(false)
     })
   })
 
   // ---------------------------------------------------------------
-  // triggerLogin
+  // requestLogin
   // ---------------------------------------------------------------
-  describe('triggerLogin', () => {
-    test('increments triggerLoginVar', () => {
+  describe('requestLogin', () => {
+    test('increments loginRequestCount', () => {
       const store = useUserLoginStore()
-      expect(store.triggerLoginVar).toBe(0)
-      store.triggerLogin()
-      expect(store.triggerLoginVar).toBe(1)
-      store.triggerLogin()
-      expect(store.triggerLoginVar).toBe(2)
+      expect(store.loginRequestCount).toBe(0)
+      store.requestLogin()
+      expect(store.loginRequestCount).toBe(1)
+      store.requestLogin()
+      expect(store.loginRequestCount).toBe(2)
     })
   })
 
@@ -222,7 +195,7 @@ describe('useUserLoginStore', () => {
   // handleUnauthorized
   // ---------------------------------------------------------------
   describe('handleUnauthorized', () => {
-    test('clears state and shows login modal when logged in', () => {
+    test('clears state and sets sessionExpired when logged in', () => {
       const store = useUserLoginStore()
       store.username = 'alice'
       store.canWriteToSchema = true
@@ -231,16 +204,15 @@ describe('useUserLoginStore', () => {
 
       expect(store.username).toBe('')
       expect(store.canWriteToSchema).toBe(false)
-      expect(store.loginFailureModalVisible).toBe(true)
-      expect(store.loginFailureTitle).toBe('Session expired')
+      expect(store.sessionExpired).toBe(true)
     })
 
-    test('does not show login modal when not logged in', () => {
+    test('does not set sessionExpired when not logged in', () => {
       const store = useUserLoginStore()
 
       store.handleUnauthorized()
 
-      expect(store.loginFailureModalVisible).toBe(false)
+      expect(store.sessionExpired).toBe(false)
     })
   })
 
@@ -278,7 +250,7 @@ describe('useUserLoginStore', () => {
       store.stopSessionHeartbeat()
     })
 
-    test('clears state and shows login modal when session expires while logged in', async () => {
+    test('clears state and sets sessionExpired when session expires while logged in', async () => {
       mockFetch.mockResolvedValue(makeJsonResponse({ authenticated: false, user: null, expiresAt: null }))
       const store = useUserLoginStore()
       store.username = 'alice'
@@ -287,19 +259,18 @@ describe('useUserLoginStore', () => {
       await vi.advanceTimersByTimeAsync(30_000)
 
       expect(store.username).toBe('')
-      expect(store.loginFailureModalVisible).toBe(true)
-      expect(store.loginFailureTitle).toBe('Session expired')
+      expect(store.sessionExpired).toBe(true)
       store.stopSessionHeartbeat()
     })
 
-    test('does not show login modal when session expires for unauthenticated user', async () => {
+    test('does not set sessionExpired when session expires for unauthenticated user', async () => {
       mockFetch.mockResolvedValue(makeJsonResponse({ authenticated: false, user: null, expiresAt: null }))
       const store = useUserLoginStore()
       store.startSessionHeartbeat()
 
       await vi.advanceTimersByTimeAsync(30_000)
 
-      expect(store.loginFailureModalVisible).toBe(false)
+      expect(store.sessionExpired).toBe(false)
       store.stopSessionHeartbeat()
     })
 
@@ -312,7 +283,7 @@ describe('useUserLoginStore', () => {
       await vi.advanceTimersByTimeAsync(30_000)
 
       expect(store.username).toBe('alice')
-      expect(store.loginFailureModalVisible).toBe(false)
+      expect(store.sessionExpired).toBe(false)
       store.stopSessionHeartbeat()
     })
 

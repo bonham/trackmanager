@@ -3,6 +3,16 @@ import { ref, computed } from 'vue'
 
 const SESSION_HEARTBEAT_INTERVAL_MS = 30_000
 
+/**
+ * User login store — manages authentication state and exposes reactive signals for the UI.
+ *
+ * State: username, loggedIn (computed), canWriteToSchema.
+ * Signals consumed by AuthOrchestrator:
+ *   - loginRequestCount / requestLogin() — triggers a WebAuthn login attempt
+ *   - sessionExpired — set to true by handleUnauthorized() or the session heartbeat
+ * Actions: updateUser(), logout(), checkWritePermission(), handleUnauthorized().
+ * Session heartbeat: startSessionHeartbeat() / stopSessionHeartbeat() poll /session every 30s.
+ */
 export const useUserLoginStore = defineStore('userlogin', () => {
 
   // Not logged in: username is empty string
@@ -25,24 +35,14 @@ export const useUserLoginStore = defineStore('userlogin', () => {
     }
   }
 
-  // relay variable to trigger and listen to login requests. Should be incremented to trigger.
-  const loginFailureModalVisible = ref(false)
-  const loginFailureTitle = ref('Login failed')
-
-  function enableLoginFailureModal(title = 'Login failed') {
-    loginFailureTitle.value = title
-    loginFailureModalVisible.value = true
+  // Reactive signal consumed by AuthOrchestrator to show the login flow
+  const loginRequestCount = ref(0)
+  function requestLogin() {
+    loginRequestCount.value++
   }
 
-  function disableLoginFailureModal() {
-    loginFailureModalVisible.value = false
-    loginFailureTitle.value = 'Login failed'
-  }
-
-  const triggerLoginVar = ref(0)
-  function triggerLogin() {
-    triggerLoginVar.value++
-  }
+  // Reactive signal consumed by AuthOrchestrator to show the session-expired modal
+  const sessionExpired = ref(false)
 
   async function updateUser() {
     try {
@@ -93,13 +93,13 @@ export const useUserLoginStore = defineStore('userlogin', () => {
     }
   };
 
-  // Called when an API response returns 401/403 — clears local state and prompts re-auth.
+  // Called when an API response returns 401/403 — clears local state and signals session expiry.
   function handleUnauthorized() {
     const wasLoggedIn = username.value.length > 0
     username.value = ''
     canWriteToSchema.value = false
     if (wasLoggedIn) {
-      enableLoginFailureModal('Session expired')
+      sessionExpired.value = true
     }
   }
 
@@ -122,7 +122,7 @@ export const useUserLoginStore = defineStore('userlogin', () => {
       }
 
       if (wasLoggedIn && !data.authenticated) {
-        enableLoginFailureModal('Session expired')
+        sessionExpired.value = true
       }
     } catch {
       // Network error — leave current state unchanged
@@ -148,12 +148,9 @@ export const useUserLoginStore = defineStore('userlogin', () => {
     logout,
     canWriteToSchema,
     checkWritePermission,
-    loginFailureModalVisible,
-    loginFailureTitle,
-    enableLoginFailureModal,
-    disableLoginFailureModal,
-    triggerLoginVar,
-    triggerLogin,
+    loginRequestCount,
+    requestLogin,
+    sessionExpired,
     handleUnauthorized,
     startSessionHeartbeat,
     stopSessionHeartbeat,

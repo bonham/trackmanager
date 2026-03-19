@@ -18,7 +18,7 @@ describe('NavBar', () => {
       }
     })
 
-    expect(rresult.getByText('Login')).toBeInTheDocument();
+    expect(rresult.getAllByText('Login').length).toBeGreaterThanOrEqual(1);
   })
 
 })

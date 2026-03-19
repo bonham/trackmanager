@@ -1,10 +1,13 @@
 <script setup lang="ts">
+import { onMounted, onUnmounted } from 'vue'
 import { RouterView } from 'vue-router'
 import { useUserLoginStore } from '@/stores/userlogin'
 const userLoginStore = useUserLoginStore()
 userLoginStore.updateUser().catch((e) => {
   console.log(e)
 })
+onMounted(() => { userLoginStore.startSessionHeartbeat() })
+onUnmounted(() => { userLoginStore.stopSessionHeartbeat() })
 </script>
 
 <template>

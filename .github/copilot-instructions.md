@@ -2,6 +2,10 @@
 
 These instructions apply to all code-change requests in this repository.
 
+## Unit tests
+
+For any code change, add or update unit tests to cover the new or modified functionality. Ensure that all tests pass successfully before finalizing the code change.
+
 ## Required Validation
 
 For every request that changes code, run and report the results of:

@@ -5,6 +5,7 @@ import morgan from 'morgan';
 import getPgPool from './lib/getPgPool.js';
 import getSession from './lib/getSession.js';
 import mcpRouter from './lib/mcp/mcp.js';
+import { touchSessionMiddleware } from './middleware/touchSession.js';
 import authrouter from './routes/auth/auth.js';
 import configRouter from './routes/config.js';
 import tracksRouter from './routes/tracks.js';
@@ -29,7 +30,7 @@ const session = getSession(getPgPool());
 app.use(session);
 
 app.use('/api/v1/auth', authrouter);
-app.use('/api/tracks', tracksRouter);
+app.use('/api/tracks', touchSessionMiddleware, tracksRouter); // touchSessionMiddleware to refresh session expiry on user activity (read/write operations)
 app.use('/api/config', configRouter);
 app.use('/api/mcp', mcpRouter);
 

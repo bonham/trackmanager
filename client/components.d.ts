@@ -22,7 +22,6 @@ declare module 'vue' {
     IBiPencilFill: typeof import('~icons/bi/pencil-fill')['default']
     IBiTrash: typeof import('~icons/bi/trash')['default']
     LoginFailureModal: typeof import('./src/components/auth/LoginFailureModal.vue')['default']
-    LoginModal: typeof import('./src/components/auth/LoginModal.vue')['default']
     LogoutForm: typeof import('./src/components/auth/LogoutForm.vue')['default']
     MapComponent: typeof import('./src/components/MapComponent.vue')['default']
     RegistrationModal: typeof import('./src/components/auth/RegistrationModal.vue')['default']

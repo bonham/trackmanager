@@ -1,4 +1,4 @@
-import { describe, test, expect, vi, beforeEach } from 'vitest'
+import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest'
 import { setActivePinia, createPinia } from 'pinia'
 import { useUserLoginStore } from '@/stores/userlogin'
 
@@ -39,39 +39,26 @@ describe('useUserLoginStore', () => {
   })
 
   // ---------------------------------------------------------------
-  // loginFailureModal helpers
+  // sessionExpired signal
   // ---------------------------------------------------------------
-  describe('loginFailureModal', () => {
+  describe('sessionExpired', () => {
     test('starts as false', () => {
       const store = useUserLoginStore()
-      expect(store.loginFailureModalVisible).toBe(false)
-    })
-
-    test('enableLoginFailureModal sets it to true', () => {
-      const store = useUserLoginStore()
-      store.enableLoginFailureModal()
-      expect(store.loginFailureModalVisible).toBe(true)
-    })
-
-    test('disableLoginFailureModal sets it to false', () => {
-      const store = useUserLoginStore()
-      store.enableLoginFailureModal()
-      store.disableLoginFailureModal()
-      expect(store.loginFailureModalVisible).toBe(false)
+      expect(store.sessionExpired).toBe(false)
     })
   })
 
   // ---------------------------------------------------------------
-  // triggerLogin
+  // requestLogin
   // ---------------------------------------------------------------
-  describe('triggerLogin', () => {
-    test('increments triggerLoginVar', () => {
+  describe('requestLogin', () => {
+    test('increments loginRequestCount', () => {
       const store = useUserLoginStore()
-      expect(store.triggerLoginVar).toBe(0)
-      store.triggerLogin()
-      expect(store.triggerLoginVar).toBe(1)
-      store.triggerLogin()
-      expect(store.triggerLoginVar).toBe(2)
+      expect(store.loginRequestCount).toBe(0)
+      store.requestLogin()
+      expect(store.loginRequestCount).toBe(1)
+      store.requestLogin()
+      expect(store.loginRequestCount).toBe(2)
     })
   })
 
@@ -201,6 +188,144 @@ describe('useUserLoginStore', () => {
         expect.any(Error)
       )
       consoleSpy.mockRestore()
+    })
+  })
+
+  // ---------------------------------------------------------------
+  // handleUnauthorized
+  // ---------------------------------------------------------------
+  describe('handleUnauthorized', () => {
+    test('clears state and sets sessionExpired when logged in', () => {
+      const store = useUserLoginStore()
+      store.username = 'alice'
+      store.canWriteToSchema = true
+
+      store.handleUnauthorized()
+
+      expect(store.username).toBe('')
+      expect(store.canWriteToSchema).toBe(false)
+      expect(store.sessionExpired).toBe(true)
+    })
+
+    test('does not set sessionExpired when not logged in', () => {
+      const store = useUserLoginStore()
+
+      store.handleUnauthorized()
+
+      expect(store.sessionExpired).toBe(false)
+    })
+
+    test('sets sessionExpired again when called a second time after the modal was dismissed', () => {
+      // Reproduces: after session-expired modal is shown and user presses Cancel,
+      // the next write attempt (another 401) must show the modal again.
+      const store = useUserLoginStore()
+      store.username = 'alice'
+
+      // First 401 — session expires
+      store.handleUnauthorized()
+      expect(store.sessionExpired).toBe(true)
+
+      // AuthOrchestrator consumes the signal (modal shown, user presses Cancel)
+      store.sessionExpired = false
+
+      // Second 401 — user retries without logging back in
+      store.handleUnauthorized()
+      expect(store.sessionExpired).toBe(true)
+    })
+  })
+
+  // ---------------------------------------------------------------
+  // session heartbeat
+  // ---------------------------------------------------------------
+  describe('session heartbeat', () => {
+    beforeEach(() => {
+      vi.useFakeTimers()
+    })
+
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    test('polls /session after one interval', async () => {
+      mockFetch.mockResolvedValue(makeJsonResponse({ authenticated: true, user: 'alice', expiresAt: null }))
+      const store = useUserLoginStore()
+      store.startSessionHeartbeat()
+
+      await vi.advanceTimersByTimeAsync(30_000)
+
+      expect(mockFetch).toHaveBeenCalledWith('/api/v1/auth/session')
+      store.stopSessionHeartbeat()
+    })
+
+    test('updates username when session is still active', async () => {
+      mockFetch.mockResolvedValue(makeJsonResponse({ authenticated: true, user: 'bob', expiresAt: null }))
+      const store = useUserLoginStore()
+      store.startSessionHeartbeat()
+
+      await vi.advanceTimersByTimeAsync(30_000)
+
+      expect(store.username).toBe('bob')
+      store.stopSessionHeartbeat()
+    })
+
+    test('clears state and sets sessionExpired when session expires while logged in', async () => {
+      mockFetch.mockResolvedValue(makeJsonResponse({ authenticated: false, user: null, expiresAt: null }))
+      const store = useUserLoginStore()
+      store.username = 'alice'
+      store.startSessionHeartbeat()
+
+      await vi.advanceTimersByTimeAsync(30_000)
+
+      expect(store.username).toBe('')
+      expect(store.sessionExpired).toBe(true)
+      store.stopSessionHeartbeat()
+    })
+
+    test('does not set sessionExpired when session expires for unauthenticated user', async () => {
+      mockFetch.mockResolvedValue(makeJsonResponse({ authenticated: false, user: null, expiresAt: null }))
+      const store = useUserLoginStore()
+      store.startSessionHeartbeat()
+
+      await vi.advanceTimersByTimeAsync(30_000)
+
+      expect(store.sessionExpired).toBe(false)
+      store.stopSessionHeartbeat()
+    })
+
+    test('leaves state unchanged on network error', async () => {
+      mockFetch.mockRejectedValue(new Error('network failure'))
+      const store = useUserLoginStore()
+      store.username = 'alice'
+      store.startSessionHeartbeat()
+
+      await vi.advanceTimersByTimeAsync(30_000)
+
+      expect(store.username).toBe('alice')
+      expect(store.sessionExpired).toBe(false)
+      store.stopSessionHeartbeat()
+    })
+
+    test('stopSessionHeartbeat stops polling', async () => {
+      mockFetch.mockResolvedValue(makeJsonResponse({ authenticated: true, user: 'alice', expiresAt: null }))
+      const store = useUserLoginStore()
+      store.startSessionHeartbeat()
+      store.stopSessionHeartbeat()
+
+      await vi.advanceTimersByTimeAsync(30_000)
+
+      expect(mockFetch).not.toHaveBeenCalled()
+    })
+
+    test('startSessionHeartbeat is idempotent — only one interval runs', async () => {
+      mockFetch.mockResolvedValue(makeJsonResponse({ authenticated: true, user: 'alice', expiresAt: null }))
+      const store = useUserLoginStore()
+      store.startSessionHeartbeat()
+      store.startSessionHeartbeat()
+
+      await vi.advanceTimersByTimeAsync(30_000)
+
+      expect(mockFetch).toHaveBeenCalledTimes(1)
+      store.stopSessionHeartbeat()
     })
   })
 })

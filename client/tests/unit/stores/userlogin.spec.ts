@@ -47,17 +47,31 @@ describe('useUserLoginStore', () => {
       expect(store.loginFailureModalVisible).toBe(false)
     })
 
-    test('enableLoginFailureModal sets it to true', () => {
+    test('loginFailureTitle defaults to "Login failed"', () => {
+      const store = useUserLoginStore()
+      expect(store.loginFailureTitle).toBe('Login failed')
+    })
+
+    test('enableLoginFailureModal sets visible to true with default title', () => {
       const store = useUserLoginStore()
       store.enableLoginFailureModal()
       expect(store.loginFailureModalVisible).toBe(true)
+      expect(store.loginFailureTitle).toBe('Login failed')
     })
 
-    test('disableLoginFailureModal sets it to false', () => {
+    test('enableLoginFailureModal sets a custom title', () => {
       const store = useUserLoginStore()
-      store.enableLoginFailureModal()
+      store.enableLoginFailureModal('Session expired')
+      expect(store.loginFailureModalVisible).toBe(true)
+      expect(store.loginFailureTitle).toBe('Session expired')
+    })
+
+    test('disableLoginFailureModal sets visible to false and resets title to default', () => {
+      const store = useUserLoginStore()
+      store.enableLoginFailureModal('Session expired')
       store.disableLoginFailureModal()
       expect(store.loginFailureModalVisible).toBe(false)
+      expect(store.loginFailureTitle).toBe('Login failed')
     })
   })
 
@@ -218,6 +232,7 @@ describe('useUserLoginStore', () => {
       expect(store.username).toBe('')
       expect(store.canWriteToSchema).toBe(false)
       expect(store.loginFailureModalVisible).toBe(true)
+      expect(store.loginFailureTitle).toBe('Session expired')
     })
 
     test('does not show login modal when not logged in', () => {
@@ -273,6 +288,7 @@ describe('useUserLoginStore', () => {
 
       expect(store.username).toBe('')
       expect(store.loginFailureModalVisible).toBe(true)
+      expect(store.loginFailureTitle).toBe('Session expired')
       store.stopSessionHeartbeat()
     })
 

@@ -27,13 +27,16 @@ export const useUserLoginStore = defineStore('userlogin', () => {
 
   // relay variable to trigger and listen to login requests. Should be incremented to trigger.
   const loginFailureModalVisible = ref(false)
+  const loginFailureTitle = ref('Login failed')
 
-  function enableLoginFailureModal() {
+  function enableLoginFailureModal(title = 'Login failed') {
+    loginFailureTitle.value = title
     loginFailureModalVisible.value = true
   }
 
   function disableLoginFailureModal() {
     loginFailureModalVisible.value = false
+    loginFailureTitle.value = 'Login failed'
   }
 
   const triggerLoginVar = ref(0)
@@ -96,7 +99,7 @@ export const useUserLoginStore = defineStore('userlogin', () => {
     username.value = ''
     canWriteToSchema.value = false
     if (wasLoggedIn) {
-      enableLoginFailureModal()
+      enableLoginFailureModal('Session expired')
     }
   }
 
@@ -119,7 +122,7 @@ export const useUserLoginStore = defineStore('userlogin', () => {
       }
 
       if (wasLoggedIn && !data.authenticated) {
-        enableLoginFailureModal()
+        enableLoginFailureModal('Session expired')
       }
     } catch {
       // Network error — leave current state unchanged
@@ -146,6 +149,7 @@ export const useUserLoginStore = defineStore('userlogin', () => {
     canWriteToSchema,
     checkWritePermission,
     loginFailureModalVisible,
+    loginFailureTitle,
     enableLoginFailureModal,
     disableLoginFailureModal,
     triggerLoginVar,

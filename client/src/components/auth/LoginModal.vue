@@ -1,5 +1,5 @@
 <template>
-  <BModal v-model="userLoginStore.loginFailureModalVisible" title="Login failed">
+  <BModal v-model="userLoginStore.loginFailureModalVisible" :title="userLoginStore.loginFailureTitle">
     <div v-if="loginFailureMessage.length > 0">
       <div class="text-danger">{{ loginFailureMessage }}</div>
     </div>

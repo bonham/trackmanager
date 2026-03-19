@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 
-const SESSION_HEARTBEAT_INTERVAL_MS = 30_000
+const SESSION_HEARTBEAT_INTERVAL_MS = 30000
 
 /**
  * User login store — manages authentication state and exposes reactive signals for the UI.

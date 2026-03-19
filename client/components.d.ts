@@ -11,6 +11,7 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    AuthOrchestrator: typeof import('./src/components/auth/AuthOrchestrator.vue')['default']
     DropField: typeof import('./src/components/DropField.vue')['default']
     EditableText: typeof import('./src/components/EditableText.vue')['default']
     IBiArrowDownCircleFill: typeof import('~icons/bi/arrow-down-circle-fill')['default']
@@ -20,11 +21,13 @@ declare module 'vue' {
     IBiCompassFill: typeof import('~icons/bi/compass-fill')['default']
     IBiPencilFill: typeof import('~icons/bi/pencil-fill')['default']
     IBiTrash: typeof import('~icons/bi/trash')['default']
-    LoginModal: typeof import('./src/components/auth/LoginModal.vue')['default']
+    LoginFailureModal: typeof import('./src/components/auth/LoginFailureModal.vue')['default']
     LogoutForm: typeof import('./src/components/auth/LogoutForm.vue')['default']
     MapComponent: typeof import('./src/components/MapComponent.vue')['default']
+    RegistrationModal: typeof import('./src/components/auth/RegistrationModal.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    SessionExpiredModal: typeof import('./src/components/auth/SessionExpiredModal.vue')['default']
     TrackCard: typeof import('./src/components/TrackCard.vue')['default']
     TrackManagerNavBar: typeof import('./src/components/TrackManagerNavBar.vue')['default']
     TrackSection: typeof import('./src/components/TrackSection.vue')['default']

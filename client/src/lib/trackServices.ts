@@ -2,6 +2,7 @@
 import { Track } from '@/lib/Track'
 import type { TrackPropertiesOptional } from '@/lib/Track'
 import _ from 'lodash'
+import { useUserLoginStore } from '@/stores/userlogin'
 
 import type { Extent } from 'ol/extent'
 import * as z from 'zod'
@@ -275,6 +276,9 @@ async function updateTrackById(trackId: number, keyValuePairs: TrackPropertiesOp
     if (response.ok) {
       return true
     } else {
+      if (response.status === 401 || response.status === 403) {
+        useUserLoginStore().handleUnauthorized()
+      }
       console.error(`Unable to update track ${id}`)
       console.error(response)
       console.error(await response.text())
@@ -301,6 +305,9 @@ async function updateNameFromSource(id: number, sid: string): Promise<boolean> {
       console.log("yeah")
       return true
     } else {
+      if (response.status === 401 || response.status === 403) {
+        useUserLoginStore().handleUnauthorized()
+      }
       console.error(`Unable to convert src to name for track ${id}. Response status ${response.status}`)
       const body = await response.text()
       console.error(`Body: ${body}`)
@@ -326,6 +333,9 @@ async function deleteTrack(id: number, sid: string) {
     if (response.ok) {
       return true
     } else {
+      if (response.status === 401 || response.status === 403) {
+        useUserLoginStore().handleUnauthorized()
+      }
       console.error(`Unable to delete track ${id}`)
       console.error(response)
       console.error(await response.text())

@@ -6,6 +6,11 @@ import {
 import { Track } from '@/lib/Track'
 import { describe, vi, test, expect, beforeEach, beforeAll, afterAll } from 'vitest'
 
+const mockHandleUnauthorized = vi.hoisted(() => vi.fn())
+vi.mock('@/stores/userlogin', () => ({
+  useUserLoginStore: () => ({ handleUnauthorized: mockHandleUnauthorized }),
+}))
+
 const trackData1 = {
   id: 1,
   name: 'Mountain Summit Trail',
@@ -68,6 +73,7 @@ describe('trackServices', () => {
 
   beforeEach(() => {
     mockFetch.mockReset()
+    mockHandleUnauthorized.mockReset()
   })
 
   describe('getIdListByExtentAndTime', () => {
@@ -378,6 +384,33 @@ describe('trackServices', () => {
 
       expect(result).toBe(false)
     })
+
+    test('calls handleUnauthorized and returns false on 401', async () => {
+      mockFetch.mockResolvedValue(new Response('Unauthorized', { status: 401 }))
+
+      const result = await updateTrackById(1, {}, 'mysid')
+
+      expect(result).toBe(false)
+      expect(mockHandleUnauthorized).toHaveBeenCalledOnce()
+    })
+
+    test('calls handleUnauthorized and returns false on 403', async () => {
+      mockFetch.mockResolvedValue(new Response('Forbidden', { status: 403 }))
+
+      const result = await updateTrackById(1, {}, 'mysid')
+
+      expect(result).toBe(false)
+      expect(mockHandleUnauthorized).toHaveBeenCalledOnce()
+    })
+
+    test('does not call handleUnauthorized on other error codes', async () => {
+      mockFetch.mockResolvedValue(new Response('Server Error', { status: 500 }))
+
+      const result = await updateTrackById(1, {}, 'mysid')
+
+      expect(result).toBe(false)
+      expect(mockHandleUnauthorized).not.toHaveBeenCalled()
+    })
   })
 
   describe('updateTrack', () => {
@@ -427,6 +460,33 @@ describe('trackServices', () => {
 
       expect(result).toBe(false)
     })
+
+    test('calls handleUnauthorized and returns false on 401', async () => {
+      mockFetch.mockResolvedValue(new Response('Unauthorized', { status: 401 }))
+
+      const result = await deleteTrack(1, 'mysid')
+
+      expect(result).toBe(false)
+      expect(mockHandleUnauthorized).toHaveBeenCalledOnce()
+    })
+
+    test('calls handleUnauthorized and returns false on 403', async () => {
+      mockFetch.mockResolvedValue(new Response('Forbidden', { status: 403 }))
+
+      const result = await deleteTrack(1, 'mysid')
+
+      expect(result).toBe(false)
+      expect(mockHandleUnauthorized).toHaveBeenCalledOnce()
+    })
+
+    test('does not call handleUnauthorized on other error codes', async () => {
+      mockFetch.mockResolvedValue(new Response('Not Found', { status: 404 }))
+
+      const result = await deleteTrack(1, 'mysid')
+
+      expect(result).toBe(false)
+      expect(mockHandleUnauthorized).not.toHaveBeenCalled()
+    })
   })
 
   describe('updateNameFromSource', () => {
@@ -459,6 +519,33 @@ describe('trackServices', () => {
       const result = await updateNameFromSource(1, 'mysid')
 
       expect(result).toBe(false)
+    })
+
+    test('calls handleUnauthorized and returns false on 401', async () => {
+      mockFetch.mockResolvedValue(new Response('Unauthorized', { status: 401 }))
+
+      const result = await updateNameFromSource(1, 'mysid')
+
+      expect(result).toBe(false)
+      expect(mockHandleUnauthorized).toHaveBeenCalledOnce()
+    })
+
+    test('calls handleUnauthorized and returns false on 403', async () => {
+      mockFetch.mockResolvedValue(new Response('Forbidden', { status: 403 }))
+
+      const result = await updateNameFromSource(1, 'mysid')
+
+      expect(result).toBe(false)
+      expect(mockHandleUnauthorized).toHaveBeenCalledOnce()
+    })
+
+    test('does not call handleUnauthorized on other error codes', async () => {
+      mockFetch.mockResolvedValue(new Response('Bad Request', { status: 400 }))
+
+      const result = await updateNameFromSource(1, 'mysid')
+
+      expect(result).toBe(false)
+      expect(mockHandleUnauthorized).not.toHaveBeenCalled()
     })
   })
 })

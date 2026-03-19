@@ -125,3 +125,36 @@ describe('GET /user', () => {
     expect(res.body).toEqual({ userid: undefined });
   });
 });
+
+describe('GET /session', () => {
+  test('returns authenticated user and expiresAt when user is in session', async () => {
+    const expires = new Date(Date.now() + 60_000);
+    const app = createTestApp({ user: 'alice', cookie: { expires } });
+    const res = await request(app).get('/session');
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({
+      authenticated: true,
+      user: 'alice',
+      expiresAt: expires.getTime(),
+    });
+  });
+
+  test('returns authenticated: false and null user when no user in session', async () => {
+    const expires = new Date(Date.now() + 60_000);
+    const app = createTestApp({ cookie: { expires } });
+    const res = await request(app).get('/session');
+    expect(res.status).toBe(200);
+    expect(res.body.authenticated).toBe(false);
+    expect(res.body.user).toBeNull();
+    expect(res.body.expiresAt).toBe(expires.getTime());
+  });
+
+  test('returns expiresAt: null when cookie has no expires', async () => {
+    const app = createTestApp({ user: 'bob', cookie: {} });
+    const res = await request(app).get('/session');
+    expect(res.status).toBe(200);
+    expect(res.body.authenticated).toBe(true);
+    expect(res.body.user).toBe('bob');
+    expect(res.body.expiresAt).toBeNull();
+  });
+});

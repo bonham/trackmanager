@@ -1,6 +1,18 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 
+const SESSION_HEARTBEAT_INTERVAL_MS = 30000
+
+/**
+ * User login store — manages authentication state and exposes reactive signals for the UI.
+ *
+ * State: username, loggedIn (computed), canWriteToSchema.
+ * Signals consumed by AuthOrchestrator:
+ *   - loginRequestCount / requestLogin() — triggers a WebAuthn login attempt
+ *   - sessionExpired — set to true by handleUnauthorized() or the session heartbeat
+ * Actions: updateUser(), logout(), checkWritePermission(), handleUnauthorized().
+ * Session heartbeat: startSessionHeartbeat() / stopSessionHeartbeat() poll /session every 30s.
+ */
 export const useUserLoginStore = defineStore('userlogin', () => {
 
   // Not logged in: username is empty string
@@ -23,21 +35,18 @@ export const useUserLoginStore = defineStore('userlogin', () => {
     }
   }
 
-  // relay variable to trigger and listen to login requests. Should be incremented to trigger.
-  const loginFailureModalVisible = ref(false)
-
-  function enableLoginFailureModal() {
-    loginFailureModalVisible.value = true
+  // Reactive signal consumed by AuthOrchestrator to show the login flow
+  const loginRequestCount = ref(0)
+  function requestLogin() {
+    loginRequestCount.value++
   }
 
-  function disableLoginFailureModal() {
-    loginFailureModalVisible.value = false
-  }
+  // Reactive signal consumed by AuthOrchestrator to show the session-expired modal
+  const sessionExpired = ref(false)
 
-  const triggerLoginVar = ref(0)
-  function triggerLogin() {
-    triggerLoginVar.value++
-  }
+  // Survives handleUnauthorized() so that a second 401 (after the user presses Cancel
+  // on the modal) still triggers the modal again.  Reset only on explicit logout.
+  const _sessionHasBeenActive = ref(false)
 
   async function updateUser() {
     try {
@@ -84,10 +93,59 @@ export const useUserLoginStore = defineStore('userlogin', () => {
       console.error("Error in logout procedure:", e)
     } finally {
       canWriteToSchema.value = false
+      _sessionHasBeenActive.value = false
       updateUser().catch((e) => { console.log(e) })
     }
   };
 
+  // Called when an API response returns 401/403 — clears local state and signals session expiry.
+  function handleUnauthorized() {
+    const wasLoggedIn = username.value.length > 0
+    if (wasLoggedIn) _sessionHasBeenActive.value = true
+    username.value = ''
+    canWriteToSchema.value = false
+    if (wasLoggedIn || _sessionHasBeenActive.value) {
+      sessionExpired.value = true
+    }
+  }
+
+  // Session heartbeat: periodically calls /session to detect server-side expiry.
+  let _heartbeatTimer: ReturnType<typeof setInterval> | null = null
+
+  async function _checkSession() {
+    try {
+      const res = await fetch('/api/v1/auth/session')
+      if (!res.ok) return
+      const data = await res.json() as { authenticated: boolean; user: string | null; expiresAt: number | null }
+
+      const wasLoggedIn = username.value.length > 0
+
+      if (data.authenticated && data.user) {
+        username.value = data.user
+      } else {
+        username.value = ''
+        canWriteToSchema.value = false
+      }
+
+      if (wasLoggedIn && !data.authenticated) {
+        sessionExpired.value = true
+      }
+    } catch {
+      // Network error — leave current state unchanged
+    }
+  }
+
+  function startSessionHeartbeat() {
+    if (_heartbeatTimer !== null) return
+    _heartbeatTimer = setInterval(() => { void _checkSession() }, SESSION_HEARTBEAT_INTERVAL_MS)
+  }
+
+  function stopSessionHeartbeat() {
+    if (_heartbeatTimer !== null) {
+      clearInterval(_heartbeatTimer)
+      _heartbeatTimer = null
+    }
+  }
 
   return {
     loggedIn,
@@ -96,12 +154,12 @@ export const useUserLoginStore = defineStore('userlogin', () => {
     logout,
     canWriteToSchema,
     checkWritePermission,
-    loginFailureModalVisible,
-    enableLoginFailureModal,
-    disableLoginFailureModal,
-    triggerLoginVar,
-    triggerLogin
+    loginRequestCount,
+    requestLogin,
+    sessionExpired,
+    handleUnauthorized,
+    startSessionHeartbeat,
+    stopSessionHeartbeat,
   }
 
 })
-

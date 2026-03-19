@@ -322,5 +322,26 @@ describe('AuthOrchestrator', () => {
         expect(queryByText(/Your session has expired/)).not.toBeInTheDocument()
       })
     })
+
+    test('shows modal again when sessionExpired is set a second time after cancel', async () => {
+      // Reproduces: after pressing Cancel on the session-expired modal and then
+      // retrying a write that again gets 401, the modal must reappear.
+      const { store, findByText, findByRole, queryByText } = renderAuthOrchestrator()
+
+      // First expiry
+      store.sessionExpired = true
+      await nextTick()
+      expect(await findByText(/Your session has expired/)).toBeInTheDocument()
+
+      // User presses Cancel
+      await fireEvent.click(await findByRole('button', { name: 'Cancel' }))
+      await nextTick()
+      expect(queryByText(/Your session has expired/)).not.toBeInTheDocument()
+
+      // Second expiry (user retried the write without logging in)
+      store.sessionExpired = true
+      await nextTick()
+      expect(await findByText(/Your session has expired/)).toBeInTheDocument()
+    })
   })
 })

@@ -214,6 +214,24 @@ describe('useUserLoginStore', () => {
 
       expect(store.sessionExpired).toBe(false)
     })
+
+    test('sets sessionExpired again when called a second time after the modal was dismissed', () => {
+      // Reproduces: after session-expired modal is shown and user presses Cancel,
+      // the next write attempt (another 401) must show the modal again.
+      const store = useUserLoginStore()
+      store.username = 'alice'
+
+      // First 401 — session expires
+      store.handleUnauthorized()
+      expect(store.sessionExpired).toBe(true)
+
+      // AuthOrchestrator consumes the signal (modal shown, user presses Cancel)
+      store.sessionExpired = false
+
+      // Second 401 — user retries without logging back in
+      store.handleUnauthorized()
+      expect(store.sessionExpired).toBe(true)
+    })
   })
 
   // ---------------------------------------------------------------

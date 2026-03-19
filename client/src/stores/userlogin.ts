@@ -44,6 +44,10 @@ export const useUserLoginStore = defineStore('userlogin', () => {
   // Reactive signal consumed by AuthOrchestrator to show the session-expired modal
   const sessionExpired = ref(false)
 
+  // Survives handleUnauthorized() so that a second 401 (after the user presses Cancel
+  // on the modal) still triggers the modal again.  Reset only on explicit logout.
+  const _sessionHasBeenActive = ref(false)
+
   async function updateUser() {
     try {
       const res = await fetch('/api/v1/auth/user')
@@ -89,6 +93,7 @@ export const useUserLoginStore = defineStore('userlogin', () => {
       console.error("Error in logout procedure:", e)
     } finally {
       canWriteToSchema.value = false
+      _sessionHasBeenActive.value = false
       updateUser().catch((e) => { console.log(e) })
     }
   };
@@ -96,9 +101,10 @@ export const useUserLoginStore = defineStore('userlogin', () => {
   // Called when an API response returns 401/403 — clears local state and signals session expiry.
   function handleUnauthorized() {
     const wasLoggedIn = username.value.length > 0
+    if (wasLoggedIn) _sessionHasBeenActive.value = true
     username.value = ''
     canWriteToSchema.value = false
-    if (wasLoggedIn) {
+    if (wasLoggedIn || _sessionHasBeenActive.value) {
       sessionExpired.value = true
     }
   }
@@ -130,8 +136,8 @@ export const useUserLoginStore = defineStore('userlogin', () => {
   }
 
   function startSessionHeartbeat() {
-    if (_heartbeatTimer !== null) return
-    _heartbeatTimer = setInterval(() => { void _checkSession() }, SESSION_HEARTBEAT_INTERVAL_MS)
+    // if (_heartbeatTimer !== null) return
+    // _heartbeatTimer = setInterval(() => { void _checkSession() }, SESSION_HEARTBEAT_INTERVAL_MS)
   }
 
   function stopSessionHeartbeat() {

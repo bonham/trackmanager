@@ -4,13 +4,27 @@
     <div v-if="loading" class="mapspinner">
       <b-spinner />
     </div>
-    <div ref="popupdiv"></div>
+    <div ref="popupdiv">
+      <div v-if="popoverData" class="map-popover card shadow-sm">
+        <div class="card-header py-1 px-2 small fw-bold">{{ popoverData.date }}</div>
+        <div class="card-body py-1 px-2 small">
+          <div>{{ popoverData.name }}</div>
+          <div>Dist: {{ popoverData.distance }}</div>
+          <div v-if="popoverData.ascent">Ascent: {{ popoverData.ascent }}</div>
+          <router-link :to="{ name: 'TrackDetailPage', params: { id: popoverData.trackId, sid: props.sid } }"
+            class="mt-1 d-inline-block">
+            Details
+          </router-link>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 <script setup lang="ts">
 import { ref, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import { BSpinner } from 'bootstrap-vue-next'
 import { ManagedMap } from '@/lib/mapservices/ManagedMap'
+import type { PopoverData } from '@/lib/mapservices/ManagedMap'
 import type { MultiLineStringWithTrack } from '@/lib/zodSchemas'
 import { TrackVisibilityManager } from '@/lib/mapStateHelpers'
 import { getIdListByExtentAndTime, getTrackIdsByYear } from '@/lib/trackServices'
@@ -50,6 +64,7 @@ const props = defineProps({
 // reactive data
 const popupdiv = ref<(null | HTMLElement)>(null) // template ref
 const loading = ref(false)
+const popoverData = ref<PopoverData | null>(null)
 
 // stores
 const mapStateStore = useMapStateStore()
@@ -97,7 +112,11 @@ onMounted(() => {
       return
     }
     mmap.map.setTarget('mapdiv')
-    mmap.initPopup(popupdiv.value)
+    mmap.initPopup(
+      popupdiv.value,
+      (data) => { popoverData.value = data },
+      () => { popoverData.value = null }
+    )
   }).catch((err) => {
     console.error("Error in nextTick", err)
   })
@@ -180,7 +199,7 @@ watch(
     console.log(`received command ${command.command}`)
 
     mmap.clearSelection()
-    mmap.popovermgr?.dispose()
+    mmap.disposePopover()
 
     const zoomOut = command.zoomOut ?? false
     loading.value = true // set to false in makeVisible
@@ -237,7 +256,8 @@ watch(
   position: absolute;
 }
 
-.popover-body {
-  min-width: 276px;
+.map-popover {
+  min-width: 200px;
+  white-space: nowrap;
 }
 </style>

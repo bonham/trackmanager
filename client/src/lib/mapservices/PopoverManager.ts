@@ -1,6 +1,5 @@
 import Overlay from 'ol/Overlay.js'
 import type { Coordinate } from 'ol/coordinate';
-import { Popover } from 'bootstrap'
 
 class PopoverManager {
   popupElement: HTMLElement
@@ -24,40 +23,7 @@ class PopoverManager {
   }
 
   dispose() {
-    const popover = Popover.getInstance(this.popupElement)
-    if (popover) {
-      popover.dispose();
-    }
-  }
-
-  setNewPopover(coord: Coordinate, opts: {
-    animation: boolean,
-    content: string,
-    placement: 'top',
-    title: string,
-  }) {
-
-    // dismiss previous popup
-    let popover = Popover.getInstance(this.popupElement)
-    if (popover) {
-      popover.dispose();
-    }
-
-    this.setPosition(coord)
-
-    popover = new Popover(
-      this.popupElement,
-      {
-        animation: opts.animation,
-        container: this.popupElement,
-        content: opts.content,
-        html: true,
-        placement: opts.placement,
-        title: opts.title
-      }
-    )
-    popover.show()
-
+    this.popupOverlay.setPosition(undefined)
   }
 
 }

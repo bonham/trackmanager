@@ -27,6 +27,17 @@ import type { Coordinate } from 'ol/coordinate'
 interface SelectionObject { selected: number[], deselected: number[] }
 interface FeatureIdMapMember { vectorLayerId: string, trackId: number }
 
+export interface PopoverData {
+  trackId: number
+  name: string
+  date: string
+  distance: string
+  ascent: string | null
+}
+
+export type PopoverShowCallback = (data: PopoverData) => void
+export type PopoverDismissCallback = () => void
+
 
 /*
 How to use:
@@ -62,6 +73,8 @@ export class ManagedMap {
   selectCollection: Collection<Feature<Geometry>>
   select: Select
   popovermgr = null as (null | PopoverManager)
+  onPopoverShow: PopoverShowCallback | null = null
+  onPopoverDismiss: PopoverDismissCallback | null = null
 
 
   constructor() {
@@ -91,9 +104,11 @@ export class ManagedMap {
 
   }
 
-  initPopup(popupElement: HTMLElement) {
+  initPopup(popupElement: HTMLElement, onShow: PopoverShowCallback, onDismiss: PopoverDismissCallback) {
     this.popovermgr = new PopoverManager(popupElement)
     this.map.addOverlay(this.popovermgr.getOverlay())
+    this.onPopoverShow = onShow
+    this.onPopoverDismiss = onDismiss
   }
 
   ZINDEX_DEFAULT = 0
@@ -190,11 +205,11 @@ export class ManagedMap {
       return
     } else {
       this.popovermgr.dispose()
+      this.onPopoverDismiss?.()
     }
   }
 
   showPopover(trackId: number, coord: Coordinate) {
-    // Manage popup: show on select
     if (this.popovermgr) {
 
       const track = this.trackMap.get(trackId)
@@ -204,15 +219,14 @@ export class ManagedMap {
         return
       }
       const dateopts: Intl.DateTimeFormatOptions = { weekday: 'short', month: 'short', day: '2-digit', year: '2-digit' }
-      const title = `${track.localeDateShort(dateopts)}`
-      let content = `${track.getNameOrSrc()}<br>Dist: ${(track.distance() / 1000).toFixed()} km`
-      content += track.getAscent() ? `<br>Ascent: ${track.getAscent().toFixed()} m` : ""
 
-      this.popovermgr.setNewPopover(coord, {
-        animation: false,
-        content,
-        placement: 'top',
-        title
+      this.popovermgr.setPosition(coord)
+      this.onPopoverShow?.({
+        trackId,
+        name: track.getNameOrSrc(),
+        date: track.localeDateShort(dateopts),
+        distance: `${(track.distance() / 1000).toFixed()} km`,
+        ascent: track.getAscent() ? `${track.getAscent().toFixed()} m` : null,
       })
     }
   }

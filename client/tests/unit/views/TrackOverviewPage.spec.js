@@ -19,7 +19,7 @@ describe('TrackOverview and TrackDetail', () => {
       {
         props: { sid: 'abcd1234' },
         global: {
-          plugins: [createTestingPinia(), router]
+          plugins: [createTestingPinia({ stubActions: false }), router]
         },
       }
     )
@@ -39,7 +39,7 @@ describe('TrackOverview and TrackDetail', () => {
       {
         props: { sid: 'abcd1234' },
         global: {
-          plugins: [router]
+          plugins: [createTestingPinia({ stubActions: false }), router]
         }
       }
     )

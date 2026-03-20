@@ -2,6 +2,7 @@ import { render, waitFor } from '@testing-library/vue'
 import { Track, TrackCollection } from '@/lib/Track'
 import TrackSection from '@/components/TrackSection.vue'
 import { DateTime } from 'luxon'
+import { createTestingPinia } from '@pinia/testing'
 import { describe, test, expect } from 'vitest'
 
 const initData1 = {
@@ -30,7 +31,8 @@ describe('TrackSection', () => {
           label: 'Long list',
           coll: tc,
           visible: true
-        }
+        },
+        global: { plugins: [createTestingPinia()] }
       }
     )
 
@@ -71,7 +73,8 @@ describe('TrackSection', () => {
           label: 'Long list',
           coll: tc,
           visible: false
-        }
+        },
+        global: { plugins: [createTestingPinia()] }
       }
     )
 

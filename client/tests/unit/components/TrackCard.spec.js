@@ -2,6 +2,7 @@ import { render } from '@testing-library/vue'
 import { Track } from '@/lib/Track'
 import TrackCard from '@/components/TrackCard.vue'
 import { DateTime } from 'luxon'
+import { createTestingPinia } from '@pinia/testing'
 
 import { describe, test, expect } from 'vitest'
 
@@ -23,7 +24,8 @@ describe('TrackCard', () => {
     const rresult = render(
       TrackCard,
       {
-        props: { track: mytrack }
+        props: { track: mytrack },
+        global: { plugins: [createTestingPinia()] }
       }
     )
 

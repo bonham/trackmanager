@@ -1,5 +1,6 @@
 <template>
-  <b-card class="my-2 clickable bg-light" :class="{ 'border-primary border-2': selected }" :aria-label="ariaLinkLabel" role="link" @click="navigateToPage">
+  <b-card class="my-2 clickable bg-light" :class="{ 'border-secondary border-2': selected }" :aria-label="ariaLinkLabel"
+    role="link" @click="navigateToPage">
     <b-card-text>
       <b-row class="align-items-center">
         <b-col cols="9">
@@ -75,9 +76,10 @@ const navigateToPage = async () => {
 
 .clickable {
   cursor: pointer;
+  transition: border-color 0.15s ease-in-out;
 }
 
-tyle scoped>.clickable {
-  cursor: pointer;
+.clickable:hover {
+  border: 1px solid var(--bs-secondary);
 }
 </style>

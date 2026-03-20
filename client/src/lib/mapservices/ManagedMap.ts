@@ -106,6 +106,7 @@ export class ManagedMap {
 
   initPopup(popupElement: HTMLElement, onShow: PopoverShowCallback, onDismiss: PopoverDismissCallback) {
     this.popovermgr = new PopoverManager(popupElement)
+    this.popovermgr.initDrag(this.map)
     this.map.addOverlay(this.popovermgr.getOverlay())
     this.onPopoverShow = onShow
     this.onPopoverDismiss = onDismiss

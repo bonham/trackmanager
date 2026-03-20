@@ -6,7 +6,7 @@
     </div>
     <div ref="popupdiv">
       <div v-if="popoverData" class="map-popover card shadow-sm">
-        <div class="card-header py-1 px-2 small fw-bold">{{ popoverData.date }}</div>
+        <div class="card-header py-1 px-2 small fw-bold map-popover-drag-handle">{{ popoverData.date }}</div>
         <div class="card-body py-1 px-2 small">
           <div>{{ popoverData.name }}</div>
           <div>Dist: {{ popoverData.distance }}</div>
@@ -259,5 +259,13 @@ watch(
 .map-popover {
   min-width: 200px;
   white-space: nowrap;
+}
+
+.map-popover-drag-handle {
+  cursor: grab;
+}
+
+.map-popover-drag-handle.grabbing {
+  cursor: grabbing;
 }
 </style>

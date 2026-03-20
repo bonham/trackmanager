@@ -17,6 +17,7 @@ function createCanWriteToSchema(db: Kysely<DB>) {
     }
     const { schema, session: { user: userid } } = parsed.data;
 
+    console.log(`Checking write permissions for user ${userid} on schema ${schema}`);
     try {
       const row = await db
         .selectFrom('auth.user_schema_permissions')

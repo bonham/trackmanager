@@ -5,14 +5,14 @@
       <b-spinner />
     </div>
     <div ref="popupdiv">
-      <div v-if="popoverData" class="map-popover card shadow-sm">
+      <div v-if="popoverData" class="map-popover card shadow-sm text-secondary">
         <div class="card-header py-1 px-2 small fw-bold map-popover-drag-handle">{{ popoverData.date }}</div>
         <div class="card-body py-1 px-2 small">
           <div>{{ popoverData.name }}</div>
           <div>Dist: {{ popoverData.distance }}</div>
           <div v-if="popoverData.ascent">Ascent: {{ popoverData.ascent }}</div>
           <router-link :to="{ name: 'TrackDetailPage', params: { id: popoverData.trackId, sid: props.sid } }"
-            class="mt-1 d-inline-block">
+            class="mt-1 d-inline-block text-secondary">
             Details
           </router-link>
         </div>

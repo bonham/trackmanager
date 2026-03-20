@@ -53,10 +53,12 @@ class PopoverManager {
       if (!pos) return
 
       const currentPixel = this.map.getPixelFromCoordinate(pos)
+      if (!currentPixel) return
+
       const dx = e.clientX - this.dragStartX
       const dy = e.clientY - this.dragStartY
 
-      const newPixel: [number, number] = [currentPixel[0] + dx, currentPixel[1] + dy]
+      const newPixel: [number, number] = [currentPixel[0]! + dx, currentPixel[1]! + dy]
       const newCoord = this.map.getCoordinateFromPixel(newPixel)
       this.popupOverlay.setPosition(newCoord)
 

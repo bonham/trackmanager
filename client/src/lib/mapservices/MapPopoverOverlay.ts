@@ -2,8 +2,18 @@ import Overlay from 'ol/Overlay.js'
 import type { Map as OlMap } from 'ol'
 import type { Coordinate } from 'ol/coordinate';
 
-class PopoverManager {
-  popupElement: HTMLElement
+/**
+ * MapPopoverOverlay wraps an OpenLayers Overlay and manages drag-to-reposition interaction.
+ *
+ * Responsibilities:
+ * - Creates and owns the OL Overlay attached to a popup HTML element
+ * - Controls overlay position (show at coordinate / hide via dispose)
+ * - Handles pointer-event-based dragging via a designated drag handle element
+ *
+ * No knowledge of tracks, application state, or Vue callbacks.
+ */
+class MapPopoverOverlay {
+  private popupElement: HTMLElement
   popupOverlay: Overlay
   private map: OlMap | null = null
   private dragging = false
@@ -77,4 +87,4 @@ class PopoverManager {
 
 }
 
-export { PopoverManager }
+export { MapPopoverOverlay }

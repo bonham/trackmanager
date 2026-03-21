@@ -13,7 +13,7 @@ import { OSM } from 'ol/source'
 import { StyleFactoryFixedColors } from '@/lib/mapStyles'
 
 // ---------------------------------------------------------------------------
-// Bootstrap mock (PopoverManager uses it)
+// Bootstrap mock (MapPopoverOverlay uses it)
 // ---------------------------------------------------------------------------
 vi.mock('bootstrap', () => ({
   Popover: vi.fn().mockImplementation(() => ({
@@ -32,7 +32,7 @@ if (!MockedPopover.getInstance) {
 }
 
 // ---------------------------------------------------------------------------
-// Mock PopoverManager
+// Mock MapPopoverOverlay
 // ---------------------------------------------------------------------------
 const mockPopoverManager = vi.hoisted(() => ({
   initDrag: vi.fn(),
@@ -43,8 +43,8 @@ const mockPopoverManager = vi.hoisted(() => ({
   dispose: vi.fn(),
 }))
 
-vi.mock('@/lib/mapservices/PopoverManager', () => ({
-  PopoverManager: vi.fn(function (this: typeof mockPopoverManager) {
+vi.mock('@/lib/mapservices/MapPopoverOverlay', () => ({
+  MapPopoverOverlay: vi.fn(function (this: typeof mockPopoverManager) {
     this.initDrag = mockPopoverManager.initDrag
     this.getOverlay = mockPopoverManager.getOverlay
     this.setPosition = mockPopoverManager.setPosition
@@ -129,7 +129,7 @@ describe('TrackPopoverController', () => {
   describe('constructor', () => {
     test('creates popover controller with managers', () => {
       expect(popoverController).toBeDefined()
-      expect(popoverController.isPopoverActive()).toBe(false)
+      expect(popoverController.isInitialized()).toBe(false)
     })
 
     test('sets up selection event listeners', () => {
@@ -155,7 +155,7 @@ describe('TrackPopoverController', () => {
         mockMap
       )
 
-      expect(popoverController.isPopoverActive()).toBe(true)
+      expect(popoverController.isInitialized()).toBe(true)
       expect(mockPopoverManager.initDrag).toHaveBeenCalledWith(mockMap)
       expect(mockMapAddOverlay).toHaveBeenCalled()
     })
@@ -173,7 +173,7 @@ describe('TrackPopoverController', () => {
 
       // We can't directly test if callbacks are stored, but we can test if they're called
       // This will be tested in the show/dismiss functionality tests
-      expect(popoverController.isPopoverActive()).toBe(true)
+      expect(popoverController.isInitialized()).toBe(true)
     })
   })
 
@@ -245,15 +245,6 @@ describe('TrackPopoverController', () => {
       consoleErrorSpy.mockRestore()
     })
 
-    test('shows popover for track programmatically', () => {
-      popoverController.showPopoverForTrack(track1.id, [100, 200])
-
-      expect(mockShowCallback).toHaveBeenCalledWith(
-        expect.objectContaining({
-          trackId: track1.id,
-        })
-      )
-    })
   })
 
   // -------------------------------------------------------------------------
@@ -287,13 +278,6 @@ describe('TrackPopoverController', () => {
       expect(consoleErrorSpy).toHaveBeenCalledWith('Not able to dispose popup. No popupmanager')
 
       consoleErrorSpy.mockRestore()
-    })
-
-    test('hides popover without triggering dismiss callback', () => {
-      popoverController.hidePopover()
-
-      expect(mockPopoverManager.dispose).toHaveBeenCalled()
-      expect(mockDismissCallback).not.toHaveBeenCalled()
     })
   })
 
@@ -474,7 +458,7 @@ describe('TrackPopoverController', () => {
       popoverController.dispose()
 
       expect(mockPopoverManager.dispose).toHaveBeenCalled()
-      expect(popoverController.isPopoverActive()).toBe(false)
+      expect(popoverController.isInitialized()).toBe(false)
     })
   })
 })

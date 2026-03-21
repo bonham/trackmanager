@@ -11,7 +11,7 @@ import { getUid } from 'ol/util'
 import VectorSource from 'ol/source/Vector'
 
 // ---------------------------------------------------------------------------
-// Bootstrap mock (PopoverManager uses it)
+// Bootstrap mock (MapPopoverOverlay uses it)
 // ---------------------------------------------------------------------------
 vi.mock('bootstrap', () => ({
   Popover: vi.fn().mockImplementation(() => ({

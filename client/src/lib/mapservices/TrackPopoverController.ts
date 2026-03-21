@@ -1,6 +1,6 @@
 import type { Coordinate } from 'ol/coordinate'
 import { Map as OlMap } from 'ol'
-import { PopoverManager } from './PopoverManager'
+import { MapPopoverOverlay } from './MapPopoverOverlay'
 import type { TrackLayerManager } from './TrackLayerManager'
 import type { TrackSelectionManager } from './TrackSelectionManager'
 import type { Track } from '@/lib/Track'
@@ -28,7 +28,7 @@ interface TrackSelectionEvent extends CustomEvent {
  * TrackPopoverController manages popover display and interaction.
  *
  * Responsibilities:
- * - Manages PopoverManager integration
+ * - Manages MapPopoverOverlay integration
  * - Formats track data for display
  * - Handles popover positioning and lifecycle
  * - Coordinates show/dismiss callbacks
@@ -36,7 +36,7 @@ interface TrackSelectionEvent extends CustomEvent {
 export class TrackPopoverController {
   private layerManager: TrackLayerManager
   private selectionManager: TrackSelectionManager
-  private popoverManager: PopoverManager | null = null
+  private popoverManager: MapPopoverOverlay | null = null
   private onPopoverShow: PopoverShowCallback | null = null
   private onPopoverDismiss: PopoverDismissCallback | null = null
 
@@ -62,7 +62,7 @@ export class TrackPopoverController {
     onDismiss: PopoverDismissCallback,
     map: OlMap
   ): void {
-    this.popoverManager = new PopoverManager(popupElement)
+    this.popoverManager = new MapPopoverOverlay(popupElement)
     this.popoverManager.initDrag(map)
     map.addOverlay(this.popoverManager.getOverlay())
     this.onPopoverShow = onShow
@@ -159,11 +159,11 @@ export class TrackPopoverController {
   }
 
   /**
-   * Check if popover is currently active.
+   * Check if popover is initialized.
    *
-   * @returns true if popover is initialized and available, false otherwise
+   * @returns true if initPopover() has been called, false otherwise
    */
-  isPopoverActive(): boolean {
+  isInitialized(): boolean {
     return this.popoverManager !== null
   }
 
@@ -192,28 +192,6 @@ export class TrackPopoverController {
     }
 
     this.popoverManager.setPosition(coordinate)
-  }
-
-  /**
-   * Show popover for a specific track without requiring a selection event.
-   * Useful for programmatic popover display.
-   *
-   * @param trackId - ID of track to display
-   * @param coordinate - Position coordinate
-   */
-  showPopoverForTrack(trackId: number, coordinate: Coordinate): void {
-    this.showPopover(trackId, coordinate)
-  }
-
-  /**
-   * Hide popover without triggering selection changes.
-   * Useful when you want to hide the popover but keep the track selected.
-   */
-  hidePopover(): void {
-    if (this.popoverManager) {
-      this.popoverManager.dispose()
-      // Note: Don't call onPopoverDismiss here as this is a manual hide, not a user dismissal
-    }
   }
 
   /**

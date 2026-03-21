@@ -1,6 +1,10 @@
 import Overlay from 'ol/Overlay.js'
+import type { Positioning } from 'ol/Overlay.js'
 import type { Map as OlMap } from 'ol'
-import type { Coordinate } from 'ol/coordinate';
+import type { Coordinate } from 'ol/coordinate'
+
+const FLIP_MARGIN_X = 250
+const FLIP_MARGIN_Y = 200
 
 /**
  * MapPopoverOverlay wraps an OpenLayers Overlay and manages drag-to-reposition interaction.
@@ -34,7 +38,29 @@ class MapPopoverOverlay {
   }
 
   setPosition(coord: Coordinate) {
+    this.popupOverlay.setPositioning(this.computePositioning(coord))
     this.popupOverlay.setPosition(coord)
+  }
+
+  private computePositioning(coord: Coordinate): Positioning {
+    if (!this.map) return 'top-left'
+
+    const pixel = this.map.getPixelFromCoordinate(coord)
+    const size = this.map.getSize()
+    if (!pixel || !size) return 'top-left'
+
+    const px = pixel[0]!
+    const py = pixel[1]!
+    const width = size[0]!
+    const height = size[1]!
+
+    const flipX = px > width - FLIP_MARGIN_X
+    const flipY = py > height - FLIP_MARGIN_Y
+
+    if (flipX && flipY) return 'bottom-right'
+    if (flipX) return 'top-right'
+    if (flipY) return 'bottom-left'
+    return 'top-left'
   }
 
   dispose() {

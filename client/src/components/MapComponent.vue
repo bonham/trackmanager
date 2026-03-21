@@ -112,6 +112,12 @@ onMounted(() => {
       return
     }
     mmap.map.setTarget('mapdiv')
+    /**
+     * Initializes the map popup with callback handlers
+     * @param {HTMLElement} popupdiv.value - The DOM element that will contain the popup content
+     * @param {Function} callback - Callback function invoked when popup data is available, updates popoverData with the provided data
+     * @param {Function} callback - Callback function invoked when popup is closed, clears popoverData by setting it to null
+     */
     mmap.initPopup(
       popupdiv.value,
       (data) => { popoverData.value = data },

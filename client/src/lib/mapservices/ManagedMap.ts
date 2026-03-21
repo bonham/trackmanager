@@ -39,29 +39,63 @@ export type PopoverShowCallback = (data: PopoverData) => void
 export type PopoverDismissCallback = () => void
 
 
-/*
-How to use:
+/**
+ * ManagedMap - OpenLayers map wrapper for track visualization and interaction
+ *
+ * Manages an OpenLayers map instance with support for:
+ * - Adding and managing track layers (GeoJSON-based vector layers)
+ * - Track selection via map interaction or programmatic control
+ * - Popover display for selected tracks with custom callbacks
+ * - Map extent and zoom operations
+ * - Layer visibility management
+ *
+ * The class handles the mapping between:
+ * - Track IDs ↔ Vector layers
+ * - Feature IDs ↔ Track IDs (for selection event handling)
+ * - Selection events from OpenLayers → track-level callbacks
+ *
+ * @example
+ * // See "How to use" implementation example below for Vue 3 Composition API usage
+ *
+ * @public
+ * 
+    How to use (Vue 3 Composition API):
 
-  created: async function () {
-    this.mmap = new ManagedMap()
-    await this.drawTrack()
-  },
-  mounted () {
-    this.$nextTick(() => {
-      this.mmap.map.setTarget()
-    })
-  },
-  methods: {
+      <template>
+        <div ref="mapContainer" class="map-wrapper"></div>
+      </template>
 
-    drawTrack: async function () {
-      const resultSet = await getMultiLineStringWithIdList([this.trackId], this.sid)
-      const result = resultSet[0]
-      this.mmap.addTrackLayer(result)
-      this.mmap.setExtentAndZoomOut()
-    },
-  }
-}
+      <script setup lang="ts">
+      import { ref, onMounted } from 'vue'
+      import { ManagedMap } from '@/lib/mapservices/ManagedMap'
+      import { getMultiLineStringWithIdList } from '@/lib/...'
 
+      const mapContainer = ref<HTMLDivElement | null>(null)
+      const mmap = ref<ManagedMap | null>(null)
+      const props = defineProps<{ trackId: number }>()
+
+      const drawTrack = async () => {
+        if (!mmap.value) return
+        const resultSet = await getMultiLineStringWithIdList([props.trackId], '')
+        const result = resultSet[0]
+        mmap.value.addTrackLayer(result)
+        mmap.value.setExtentAndZoomOut()
+      }
+
+      onMounted(async () => {
+        mmap.value = new ManagedMap()
+        if (mapContainer.value) {
+          mmap.value.map.setTarget(mapContainer.value)
+        }
+        await drawTrack()
+
+        // Optional: initialize popover if needed
+        // const popupEl = document.getElementById('popup-element')
+        // if (popupEl) {
+        //   mmap.value.initPopup(popupEl, onPopoverShow, onPopoverDismiss)
+        // }
+      })
+      </script>
  */
 export class ManagedMap {
 
@@ -77,6 +111,10 @@ export class ManagedMap {
   onPopoverDismiss: PopoverDismissCallback | null = null
 
 
+  /**
+   * Initialize a new ManagedMap instance with OSM base layer, selection interaction, and event handlers.
+   * Creates internal maps for tracking layer-to-track and feature-to-track relationships.
+   */
   constructor() {
 
     this.map = this._createMap()
@@ -104,6 +142,14 @@ export class ManagedMap {
 
   }
 
+  /**
+   * Initialize popover display with custom show/dismiss callbacks.
+   * Enables draggable popup functionality on the map.
+   *
+   * @param popupElement - HTML element to use as popover container
+   * @param onShow - Callback invoked when a track is selected and popover displays
+   * @param onDismiss - Callback invoked when popover is closed
+   */
   initPopup(popupElement: HTMLElement, onShow: PopoverShowCallback, onDismiss: PopoverDismissCallback) {
     this.popovermgr = new PopoverManager(popupElement)
     this.popovermgr.initDrag(this.map)
@@ -115,6 +161,13 @@ export class ManagedMap {
   ZINDEX_DEFAULT = 0
   ZINDEX_SELECTED = 5
 
+  /**
+   * Create and configure the OpenLayers map instance with base OSM layer and custom controls.
+   *
+   * @param center - Map center coordinates [x, y] in EPSG:3857 (default: [0, 0])
+   * @param zoom - Initial zoom level (default: 0)
+   * @returns Configured OlMap instance
+   */
   _createMap(center = [0, 0], zoom = 0) {
     const map = new OlMap({
       controls: defaultControls().extend([
@@ -139,19 +192,11 @@ export class ManagedMap {
 
 
   /**
-   * Function which can process 'SelectEvent' from openlayers. 
-   * 
-   * 
-   * During processing the following will happen
-   * - A SelectionObject will be composed, translating the 'openlayers'
-   *   Feature id for selected/deselected features
-   *   into track ids
-   * 
-   * - A popover will be created for 'selected' objects ( using the SelectionObject )
-   * 
-   * 
-   * @param callBackFn 
-   * @returns void
+   * Process OpenLayers SelectEvent: translate feature selections to track selections.
+   * Displays popover for single selections, throws error for multiple selections.
+   * Dismisses popover when all selections are cleared.
+   *
+   * @param event - OpenLayers SelectEvent from map interaction
    */
   processSelectEvent(event: BaseEvent | Event) {
 
@@ -182,6 +227,13 @@ export class ManagedMap {
     throw Error("Can not select multiple tracks at the moment")
   }
 
+  /**
+   * Convert OpenLayers SelectEvent to track-level selection object.
+   * Maps feature IDs to track IDs for selected/deselected features.
+   *
+   * @param sEvent - OpenLayers SelectEvent
+   * @returns SelectionObject with lists of selected and deselected track IDs
+   */
   event2selectionObject(sEvent: SelectEvent): SelectionObject {
 
     // Prepare SelectionObject
@@ -200,6 +252,9 @@ export class ManagedMap {
     return trackIdSelectObject
   }
 
+  /**
+   * Close and clean up the current popover, triggering the dismiss callback.
+   */
   disposePopover() {
     if (!this.popovermgr) {
       console.error("Not able to show popup. No popupmanager")
@@ -210,6 +265,13 @@ export class ManagedMap {
     }
   }
 
+  /**
+   * Display popover at the given coordinate with track information.
+   * Triggers the onPopoverShow callback with formatted track data.
+   *
+   * @param trackId - ID of track to display in popover
+   * @param coord - [x, y] coordinate for popover position in map projection
+   */
   showPopover(trackId: number, coord: Coordinate) {
     if (this.popovermgr) {
 
@@ -234,6 +296,12 @@ export class ManagedMap {
 
 
   // set map view from bounding box in EPSG:4326 (GPS Lat Lon system https://epsg.io/4326 ) ( aka WGS84  )
+  /**
+   * Set map view to fit a bounding box in EPSG:4326 (WGS84 GPS coordinates).
+   * Automatically transforms to EPSG:3857 (Web Mercator) for OpenLayers.
+   *
+   * @param bbox - [minX, minY, maxX, maxY] extent in EPSG:4326
+   */
   setMapViewBbox(bbox: Extent) {
     const extent = transformExtent(
       bbox,
@@ -245,6 +313,11 @@ export class ManagedMap {
   }
 
   // set map view from extent in map projection EPSG:3857 ( Web Mercator, OpenStreetmap https://epsg.io/3857 )
+  /**
+   * Set map view to fit an extent in EPSG:3857 (Web Mercator / OpenLayers native).
+   *
+   * @param extent - [minX, minY, maxX, maxY] in EPSG:3857
+   */
   setMapView(extent: Extent) {
     const mapSize = this.map.getSize()
     if (mapSize === undefined) { console.error("Map size is undefined"); return }
@@ -257,6 +330,11 @@ export class ManagedMap {
   }
 
   // get map view extent in EPSG:3857
+  /**
+   * Get the current map view extent in EPSG:3857 (Web Mercator).
+   *
+   * @returns [minX, minY, maxX, maxY] extent in EPSG:3857
+   */
   getMapViewExtent() {
     const extent = this.map.getView().calculateExtent(this.map.getSize());
     console.log(extent.join(', '))
@@ -265,6 +343,12 @@ export class ManagedMap {
 
 
   // get map view extent ( bounding box ) in EPSG:4326
+  /**
+   * Get the current map view as a bounding box in EPSG:4326 (WGS84 GPS coordinates).
+   * Transforms from internal EPSG:3857 projection.
+   *
+   * @returns [minLon, minLat, maxLon, maxLat] bbox in EPSG:4326
+   */
   getMapViewBbox() {
     const bbox = transformExtent(
       this.getMapViewExtent(),
@@ -274,11 +358,23 @@ export class ManagedMap {
     return bbox
   }
 
+  /**
+   * Replace the style factory used for rendering new track layers.
+   *
+   * @param stf - StyleFactory instance for generating layer styles
+   */
   setStyleFactory(stf: StyleFactoryLike) {
     this.styleFactory = stf
   }
 
-  addTrackLayer(multiLineStringWithTrack: MultiLineStringWithTrack) { // geojsonwithid: { id: id, geojson: geojson }
+  /**
+   * Add a track layer to the map from GeoJSON data.
+   * Creates feature-to-track mappings for selection and manages internal track registry.
+   * Does nothing if a layer with the same track ID already exists.
+   *
+   * @param multiLineStringWithTrack - GeoJSON MultiLineString with associated Track metadata
+   */
+  addTrackLayer(multiLineStringWithTrack: MultiLineStringWithTrack) {
     const multiLineString = multiLineStringWithTrack.geojson
     const track = multiLineStringWithTrack.track
     const trackId = track.id
@@ -299,6 +395,9 @@ export class ManagedMap {
     })
   }
 
+  /**
+   * Clear all track selections and reset their rendering z-index to default.
+   */
   clearSelection() {
     // reset current selection
     this.selectCollection.forEach((feature) => {
@@ -309,6 +408,12 @@ export class ManagedMap {
 
   // set a list of tracks as selected and
   // all other tracks will be 'deselected'
+  /**
+   * Programmatically select track(s) by ID (currently limited to single selection).
+   * Clears previous selection and raises z-index of new selection for visibility.
+   *
+   * @param trackIdList - Array of track IDs (only first element is used)
+   */
   setSelectedTracks(trackIdList: number[]) {
     const selected = trackIdList
 
@@ -339,6 +444,11 @@ export class ManagedMap {
     }
   }
 
+  /**
+   * Get list of currently selected track IDs.
+   *
+   * @returns Array of selected track IDs
+   */
   getSelectedTrackIds() {
     const trackIds = [] as number[]
     this.selectCollection.forEach((feature) => {
@@ -350,6 +460,12 @@ export class ManagedMap {
     return trackIds
   }
 
+  /**
+   * Handle selection event by updating z-index of selected/deselected features.
+   * Used as event handler for OpenLayers select interaction.
+   *
+   * @param e - OpenLayers SelectEvent
+   */
   manageZIndexOnSelect(e: BaseEvent | Event) {
 
     if (!(e instanceof SelectEvent)) {
@@ -365,6 +481,12 @@ export class ManagedMap {
     })
   }
 
+  /**
+   * Set the rendering z-index of a feature's track layer.
+   *
+   * @param feature - OpenLayers Feature
+   * @param index - Z-index value (higher = rendered on top)
+   */
   setZIndex(feature: Feature, index: number) {
     const fid = getUid(feature)
     const trackId = this.getTrackIdByFeatureId(fid)
@@ -374,44 +496,92 @@ export class ManagedMap {
     layer.setZIndex(index)
   }
 
+  /**
+   * Resolve a track ID from an OpenLayers Feature.
+   *
+   * @param feature - OpenLayers Feature object
+   * @returns Track ID, or undefined if not found
+   */
   getTrackIdByFeature(feature: Feature) {
     const featureId = getUid(feature)
     return this.getTrackIdByFeatureId(featureId)
   }
 
+  /**
+   * Look up internal feature metadata by feature ID.
+   *
+   * @param featureId - OpenLayers feature UID
+   * @returns FeatureIdMapMember with vectorLayerId and trackId, or undefined if not found
+   */
   getFeatureWithIdByFeatureId(featureId: string) {
     const featureWithId = this.featureIdMap.get(featureId)
     return featureWithId ?? undefined
   }
 
+  /**
+   * Resolve track ID from OpenLayers feature ID.
+   *
+   * @param featureId - OpenLayers feature UID
+   * @returns Track ID, or undefined if feature not found
+   */
   getTrackIdByFeatureId(featureId: string) {
     const featureWithId = this.getFeatureWithIdByFeatureId(featureId)
     return featureWithId ? featureWithId.trackId : undefined
   }
 
+  /**
+   * Resolve vector layer ID from OpenLayers feature ID.
+   *
+   * @param featureId - OpenLayers feature UID
+   * @returns Vector layer ID, or undefined if feature not found
+   */
   getLayerIdByFeatureId(featureId: string) {
     const featureWithId = this.getFeatureWithIdByFeatureId(featureId)
     return featureWithId ? featureWithId.vectorLayerId : undefined
   }
 
+  /**
+   * Get the vector layer for a track by ID. Throws if track not found.
+   *
+   * @param trackId - Track ID
+   * @returns VectorLayer for the track
+   * @throws Error if track layer not found
+   */
   getTrackLayer(trackId: number) {
     const tl = this.trackIdToLayerMap.get(trackId)
     if (tl === undefined) throw new Error(`Could not get track layer for id ${trackId}`)
     return tl
   }
 
+  /**
+   * Make a track layer visible on the map.
+   *
+   * @param trackId - Track ID
+   * @throws Error if track layer not found
+   */
   setVisible(trackId: number) {
     const layer = this.trackIdToLayerMap.get(trackId)
     if (layer === undefined) throw new Error(`Attempt to look up nonexisting layer with id ${trackId}`)
     layer.setVisible(true)
   }
 
+  /**
+   * Hide a track layer on the map.
+   *
+   * @param trackId - Track ID
+   * @throws Error if track layer not found
+   */
   setInvisible(trackId: number) {
     const layer = this.trackIdToLayerMap.get(trackId)
     if (layer === undefined) throw new Error(`Attempt to look up nonexisting layer with id ${trackId}`)
     layer.setVisible(false)
   }
 
+  /**
+   * Get all track IDs currently in the map (visible and hidden).
+   *
+   * @returns Array of all track IDs
+   */
   getTrackIds() {
     return Array.from(this.trackIdToLayerMap.keys())
   }
@@ -419,6 +589,11 @@ export class ManagedMap {
   /**
    * Returns all track ids which are currently visible in the map
    * @returns Array of numbers
+   */
+  /**
+   * Get all track IDs that are currently visible in the map.
+   *
+   * @returns Array of visible track IDs
    */
   getTrackIdsVisible() {
     const allIds = this.getTrackIds()
@@ -430,6 +605,11 @@ export class ManagedMap {
       })
   }
 
+  /**
+   * Get all track IDs that are currently hidden in the map.
+   *
+   * @returns Array of hidden track IDs
+   */
   getTrackIdsInVisible() {
     const allIds = this.getTrackIds()
     return _.reject(
@@ -440,6 +620,11 @@ export class ManagedMap {
       })
   }
 
+  /**
+   * Animate zoom out by a factor (default 0.97 = zoom to 97% of current level).
+   *
+   * @param scale - Zoom scale factor (default: 0.97). Values < 1 zoom out.
+   */
   zoomOut(scale = 0.97) {
     // zoom a bit out
     const view = this.map.getView()
@@ -450,6 +635,10 @@ export class ManagedMap {
     )
   }
 
+  /**
+   * Zoom and pan map to fit selected tracks (or all visible tracks if none selected).
+   * Calculates bounding box and applies zoom-out animation.
+   */
   setExtentAndZoomOut() {
     let zoomTrackids: number[]
     // if there is a selection zoom on selected tracks

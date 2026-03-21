@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 import { vi, describe, test, beforeEach, expect } from 'vitest'
 import { MapViewManager } from '@/lib/mapservices/MapViewManager'
+import { ExtentCollection } from '@/lib/mapservices/ExtentCollection'
 import ResizeObserverMock from '../../__mocks__/ResizeObserver'
 import { Map as OlMap, View } from 'ol'
 import { Tile as TileLayer } from 'ol/layer'
@@ -283,13 +284,15 @@ describe('MapViewManager', () => {
     })
 
     test('handles ExtentCollection errors gracefully', () => {
-      // Pass invalid extents that would cause ExtentCollection to throw
-      const invalidExtents = [[]] as unknown as Extent[]
+      const boundingBoxSpy = vi.spyOn(ExtentCollection.prototype, 'boundingBox').mockImplementation(() => {
+        throw new Error('Test error')
+      })
       const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => { })
 
-      viewManager.fitToExtents(invalidExtents)
+      viewManager.fitToExtents([testExtent3857])
 
       expect(consoleErrorSpy).toHaveBeenCalledWith('Failed to fit to extents:', expect.any(Error))
+      boundingBoxSpy.mockRestore()
       consoleErrorSpy.mockRestore()
     })
   })

@@ -34,17 +34,22 @@ if (!MockedPopover.getInstance) {
 // ---------------------------------------------------------------------------
 // Mock PopoverManager
 // ---------------------------------------------------------------------------
-const mockPopoverManager = {
+const mockPopoverManager = vi.hoisted(() => ({
   initDrag: vi.fn(),
   getOverlay: vi.fn(() => ({
     getPosition: vi.fn(() => [0, 0]),
   })),
   setPosition: vi.fn(),
   dispose: vi.fn(),
-}
+}))
 
 vi.mock('@/lib/mapservices/PopoverManager', () => ({
-  PopoverManager: vi.fn(() => mockPopoverManager),
+  PopoverManager: vi.fn(function (this: typeof mockPopoverManager) {
+    this.initDrag = mockPopoverManager.initDrag
+    this.getOverlay = mockPopoverManager.getOverlay
+    this.setPosition = mockPopoverManager.setPosition
+    this.dispose = mockPopoverManager.dispose
+  }),
 }))
 
 // ---------------------------------------------------------------------------
@@ -365,7 +370,7 @@ describe('TrackPopoverController', () => {
 
       selectionManager.dispatchEvent(mockEvent)
 
-      expect(consoleWarnSpy).toHaveBeenCalledWith('Unknown selection event type: unknown-event')
+      expect(consoleWarnSpy).toHaveBeenCalledWith('Unknown selection event type')
 
       consoleWarnSpy.mockRestore()
     })

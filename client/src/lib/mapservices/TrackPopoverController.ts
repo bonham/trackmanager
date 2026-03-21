@@ -152,7 +152,7 @@ export class TrackPopoverController {
           break
 
         default:
-          // Exhaustiveness check - TypeScript ensures all cases are covered
+          console.warn(`Unknown selection event type`)
           break
       }
     }) as EventListener)

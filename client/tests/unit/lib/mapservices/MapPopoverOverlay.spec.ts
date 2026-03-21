@@ -7,12 +7,14 @@ import type { Map as OlMap } from 'ol'
 // ---------------------------------------------------------------------------
 const mockOlOverlay = vi.hoisted(() => ({
   setPosition: vi.fn(),
+  setPositioning: vi.fn(),
   getPosition: vi.fn(),
 }))
 
 vi.mock('ol/Overlay.js', () => ({
   default: vi.fn(function (this: typeof mockOlOverlay) {
     this.setPosition = mockOlOverlay.setPosition
+    this.setPositioning = mockOlOverlay.setPositioning
     this.getPosition = mockOlOverlay.getPosition
   }),
 }))
@@ -23,7 +25,11 @@ vi.mock('ol/Overlay.js', () => ({
 describe('MapPopoverOverlay', () => {
   let popupElement: HTMLElement
   let sut: MapPopoverOverlay
-  let mockMap: { getPixelFromCoordinate: ReturnType<typeof vi.fn>; getCoordinateFromPixel: ReturnType<typeof vi.fn> }
+  let mockMap: {
+    getPixelFromCoordinate: ReturnType<typeof vi.fn>
+    getCoordinateFromPixel: ReturnType<typeof vi.fn>
+    getSize: ReturnType<typeof vi.fn>
+  }
 
   beforeEach(() => {
     vi.clearAllMocks()
@@ -39,6 +45,7 @@ describe('MapPopoverOverlay', () => {
     mockMap = {
       getPixelFromCoordinate: vi.fn(),
       getCoordinateFromPixel: vi.fn((p: number[]) => p),
+      getSize: vi.fn(() => [1000, 800]),
     }
   })
 
@@ -250,6 +257,57 @@ describe('MapPopoverOverlay', () => {
         popupElement.dispatchEvent(new PointerEvent('pointerup', { pointerId: 1, bubbles: true }))
         expect(popupElement.releasePointerCapture).not.toHaveBeenCalled()
       })
+    })
+  })
+
+  // -------------------------------------------------------------------------
+  // Smart positioning
+  // -------------------------------------------------------------------------
+  describe('smart positioning', () => {
+    test('uses top-left when click is far from edges', () => {
+      sut.initDrag(mockMap as unknown as OlMap)
+      // map is 1000x800, click at pixel 100,100 — far from edges
+      mockMap.getPixelFromCoordinate.mockReturnValue([100, 100])
+
+      sut.setPosition([500, 500])
+
+      expect(mockOlOverlay.setPositioning).toHaveBeenCalledWith('top-left')
+    })
+
+    test('uses top-right when click is near right edge', () => {
+      sut.initDrag(mockMap as unknown as OlMap)
+      // pixel x=800, within 250px of right edge (1000)
+      mockMap.getPixelFromCoordinate.mockReturnValue([800, 100])
+
+      sut.setPosition([500, 500])
+
+      expect(mockOlOverlay.setPositioning).toHaveBeenCalledWith('top-right')
+    })
+
+    test('uses bottom-left when click is near bottom edge', () => {
+      sut.initDrag(mockMap as unknown as OlMap)
+      // pixel y=650, within 200px of bottom edge (800)
+      mockMap.getPixelFromCoordinate.mockReturnValue([100, 650])
+
+      sut.setPosition([500, 500])
+
+      expect(mockOlOverlay.setPositioning).toHaveBeenCalledWith('bottom-left')
+    })
+
+    test('uses bottom-right when click is near bottom-right corner', () => {
+      sut.initDrag(mockMap as unknown as OlMap)
+      mockMap.getPixelFromCoordinate.mockReturnValue([800, 650])
+
+      sut.setPosition([500, 500])
+
+      expect(mockOlOverlay.setPositioning).toHaveBeenCalledWith('bottom-right')
+    })
+
+    test('defaults to top-left when map is not initialized', () => {
+      // no initDrag called — map is null
+      sut.setPosition([500, 500])
+
+      expect(mockOlOverlay.setPositioning).toHaveBeenCalledWith('top-left')
     })
   })
 })

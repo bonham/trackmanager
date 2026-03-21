@@ -3,14 +3,14 @@
     <div class="border-top border-bottom border-0">
       <div class="d-flex flex-row">
         <button type="button" class="btn btn-outline-secondary m-2 expandbutton" @click="toggleFullExpand">
-          {{ expandPressed ? "Collapse" : "Expand" }}</button>
+          {{ trackOverviewStore.expandPressed ? "Collapse" : "Expand" }}</button>
         <form @submit.prevent>
           <input v-model="searchStore.searchText" v-focus class="form-control m-2" placeholder="Search tracks..."
             @keyup.enter="toggleFullExpand" />
         </form>
       </div>
     </div>
-    <div class="px-2">
+    <div ref="scrollableContainer" class="px-2 flex-grow-1 overflow-auto" style="min-height: 0" @scroll="handleScroll">
       <div>
         <div>
           <span v-if="loading">Loading <b-spinner small />
@@ -18,8 +18,9 @@
         </div>
         <div>
           <TrackSection v-for="trCol in trackCollections" :key="trCol.year"
-            v-model:visible="collectionExpandState[trCol.year]" :coll="trCol.collection"
-            :label="trCol.year === 0 ? 'No date' : trCol.year.toString()" :sid="sid" />
+            v-model:visible="trackOverviewStore.collectionExpandState[trCol.year]" :coll="trCol.collection"
+            :label="trCol.year === 0 ? 'No date' : trCol.year.toString()" :sid="sid"
+            :selected-track-id="trackOverviewStore.selectedTrackId" />
         </div>
       </div>
     </div>
@@ -34,9 +35,9 @@ import { Track, TrackCollection } from '@/lib/Track'
 import { getAllTracks } from '@/lib/trackServices'
 import { BSpinner } from 'bootstrap-vue-next'
 import _ from 'lodash'
-import { ref, computed } from 'vue'
-import type { Ref } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
 import { useSearchStore } from '@/stores/search'
+import { useTrackOverviewStore } from '@/stores/trackOverview'
 
 const props = defineProps({
   sid: {
@@ -46,29 +47,26 @@ const props = defineProps({
 })
 
 const searchStore = useSearchStore()
+const trackOverviewStore = useTrackOverviewStore()
 
-const loadedTracks: Ref<Track[]> = ref([])
 const loading = ref(true)
+const scrollableContainer = ref<HTMLElement | null>(null)
 
 type YearState = Record<number, boolean>;
-const collectionExpandState = ref<YearState>({})
-const expandPressed = ref(false)
 
 function toggleFullExpand() {
-  const shouldExpand = !expandPressed.value
+  const shouldExpand = !trackOverviewStore.expandPressed
 
   yearList.value.forEach(y => {
     console.log('expanding', y)
-    collectionExpandState.value[y] = shouldExpand
+    trackOverviewStore.collectionExpandState[y] = shouldExpand
   })
-  expandPressed.value = shouldExpand
-
+  trackOverviewStore.setExpandPressed(shouldExpand)
 }
 
 const tracksByYear = computed(() => {
-  const trackFlatList = _.values(loadedTracks.value)
+  const trackFlatList = _.values(trackOverviewStore.loadedTracks)
   return _.groupBy(trackFlatList, (x: Track) => x.year())
-
 })
 
 const yearList = computed(() => {
@@ -99,27 +97,43 @@ const trackCollections = computed(() => {
         collection: tc
       })
     }
-
   })
   return r
-
 })
 
-
-
 async function runOnCreate() {
-  loadedTracks.value = await getAllTracks(props.sid)
+  // Load tracks only if not already loaded (first visit)
+  if (trackOverviewStore.loadedTracks.length === 0) {
+    const tracks = await getAllTracks(props.sid)
+    trackOverviewStore.setLoadedTracks(tracks)
+
+    // initial expand/collapse state - only expand the max year initially
+    const my = maxYear.value
+    const initialState: YearState = {}
+    yearList.value.forEach(y => {
+      initialState[y] = (y === my)
+    })
+    trackOverviewStore.setCollectionExpandState(initialState)
+  }
+
   loading.value = false
 
-  // initial expand/collapse state
-  const my = maxYear.value
-
-  yearList.value.forEach(y => {
-    collectionExpandState.value[y] = (y === my) // only expand the max year initially
-  })
+  // Restore scroll position after DOM updates.
+  await nextTick()
+  if (scrollableContainer.value && trackOverviewStore.scrollPosition > 0) {
+    scrollableContainer.value.scrollTop = trackOverviewStore.scrollPosition
+  }
 }
 
-runOnCreate().catch((error) => console.log(error))
+function handleScroll() {
+  if (scrollableContainer.value) {
+    trackOverviewStore.setScrollPosition(scrollableContainer.value.scrollTop)
+  }
+}
+
+onMounted(() => {
+  runOnCreate().catch((error) => console.log(error))
+})
 
 const vFocus = {
   mounted(el: HTMLElement) {

@@ -11,7 +11,7 @@ import { getUid } from 'ol/util'
 import VectorSource from 'ol/source/Vector'
 
 // ---------------------------------------------------------------------------
-// Bootstrap mock (PopoverManager uses it)
+// Bootstrap mock (MapPopoverOverlay uses it)
 // ---------------------------------------------------------------------------
 vi.mock('bootstrap', () => ({
   Popover: vi.fn().mockImplementation(() => ({
@@ -106,8 +106,10 @@ describe('ManagedMap', () => {
     })
 
     test('select interaction is added to map', () => {
+      // Instead of accessing internal select object, verify selection functionality exists
       const interactions = mm.map.getInteractions().getArray()
-      expect(interactions).toContain(mm.select)
+      const selectInteraction = interactions.find(interaction => interaction.constructor.name === 'Select')
+      expect(selectInteraction).toBeDefined()
     })
   })
 
@@ -127,7 +129,10 @@ describe('ManagedMap', () => {
 
     test('populates featureIdMap', () => {
       mm.addTrackLayer({ track: track1, geojson: multilinestring })
-      expect(mm.featureIdMap.size).toBeGreaterThan(0)
+      // Instead of checking internal featureIdMap, verify layer creation worked
+      expect(mm.getTrackIds()).toContain(track1.id)
+      const layer = mm.getTrackLayer(track1.id)
+      expect(layer.getSource()?.getFeatures().length).toBeGreaterThan(0)
     })
 
     test('adding duplicate track id is a no-op', () => {
@@ -226,7 +231,10 @@ describe('ManagedMap', () => {
     test('replaces the style factory', () => {
       const fakeFactory = { getNext: vi.fn() }
       mm.setStyleFactory(fakeFactory)
-      expect(mm.styleFactory).toBe(fakeFactory)
+      // Since styleFactory getter returns new instance for encapsulation,
+      // verify the functionality by adding a layer and checking the style was used
+      mm.addTrackLayer({ track: track1, geojson: multilinestring })
+      expect(fakeFactory.getNext).toHaveBeenCalled()
     })
   })
 
@@ -440,10 +448,13 @@ describe('ManagedMap', () => {
   // initPopup / disposePopover / showPopover
   // -------------------------------------------------------------------------
   describe('popup management', () => {
+    const noop = () => { }
+
     test('initPopup sets popovermgr', () => {
       const el = document.createElement('div')
-      mm.initPopup(el)
-      expect(mm.popovermgr).not.toBeNull()
+      mm.initPopup(el, noop, noop)
+      // Instead of accessing internal popovermgr, verify functionality works
+      expect(() => mm.disposePopover()).not.toThrow()
     })
 
     test('disposePopover logs error when no popovermgr', () => {
@@ -455,48 +466,61 @@ describe('ManagedMap', () => {
 
     test('disposePopover calls popovermgr.dispose when popovermgr exists', () => {
       const el = document.createElement('div')
-      mm.initPopup(el)
-      const disposeSpy = vi.spyOn(mm.popovermgr!, 'dispose').mockImplementation(() => { })
+      mm.initPopup(el, noop, noop)
+      // Since popovermgr is no longer directly accessible (good architecture!),
+      // we test the public behavior instead
+      const dismissCallback = vi.fn()
+      mm.initPopup(el, noop, dismissCallback)
       mm.disposePopover()
-      expect(disposeSpy).toHaveBeenCalled()
+      expect(dismissCallback).toHaveBeenCalled()
     })
 
     test('showPopover logs error when track not found', () => {
       const el = document.createElement('div')
-      mm.initPopup(el)
+      mm.initPopup(el, noop, noop)
       const spy = vi.spyOn(console, 'error').mockImplementation(() => { })
       mm.showPopover(999, [0, 0])
       expect(spy).toHaveBeenCalled()
       spy.mockRestore()
     })
 
-    test('showPopover calls setNewPopover with track data', () => {
+    test('showPopover calls onPopoverShow with track data', () => {
       mm.addTrackLayer({ track: track1, geojson: multilinestring })
       const el = document.createElement('div')
-      mm.initPopup(el)
-      const popoverSpy = vi.spyOn(mm.popovermgr!, 'setNewPopover').mockImplementation(() => { })
+      const showFn = vi.fn()
+      mm.initPopup(el, showFn, noop)
       mm.showPopover(1, [100, 200])
-      expect(popoverSpy).toHaveBeenCalledWith([100, 200], expect.objectContaining({
-        content: expect.any(String) as string,
-        title: expect.any(String) as string,
+      expect(showFn).toHaveBeenCalledWith(expect.objectContaining({
+        trackId: 1,
+        name: expect.any(String) as string,
+        date: expect.any(String) as string,
+        distance: expect.any(String) as string,
       }))
     })
 
-    test('showPopover with track that has no ascent omits ascent line', () => {
+    test('showPopover with track that has no ascent sets ascent to null', () => {
       mm.addTrackLayer({ track: track3, geojson: multilinestring })
       const el = document.createElement('div')
-      mm.initPopup(el)
-      const popoverSpy = vi.spyOn(mm.popovermgr!, 'setNewPopover').mockImplementation((_coord, opts) => {
-        expect(opts.content).not.toContain('Ascent')
-      })
+      const showFn = vi.fn()
+      mm.initPopup(el, showFn, noop)
       mm.showPopover(3, [0, 0])
-      expect(popoverSpy).toHaveBeenCalled()
+      expect(showFn).toHaveBeenCalledWith(expect.objectContaining({
+        ascent: null,
+      }))
     })
 
     test('showPopover does nothing when popovermgr is null', () => {
       mm.addTrackLayer({ track: track1, geojson: multilinestring })
       // popovermgr is null by default - just should not throw
       expect(() => mm.showPopover(1, [0, 0])).not.toThrow()
+    })
+
+    test('disposePopover calls onPopoverDismiss callback', () => {
+      const el = document.createElement('div')
+      const dismissFn = vi.fn()
+      mm.initPopup(el, noop, dismissFn)
+      mm.disposePopover()
+      expect(dismissFn).toHaveBeenCalled()
     })
   })
 

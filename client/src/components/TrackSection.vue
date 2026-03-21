@@ -23,7 +23,7 @@
     </b-card>
     <b-collapse :id="collapseId" ref="myCollapse" v-model="visible" data-testid="testbcollapse" :lazy="false"
       :no-animation="false">
-      <TrackCard v-for="item in myDataList" :key="item.id" :track="item" :sid="sid" />
+      <TrackCard v-for="item in myDataList" :key="item.id" :track="item" :sid="sid" :selected="item.id === selectedTrackId" />
     </b-collapse>
   </div>
 </template>
@@ -53,6 +53,10 @@ const props = defineProps({
   sid: {
     type: String,
     default: ''
+  },
+  selectedTrackId: {
+    type: [Number, null] as const,
+    default: null
   }
 })
 

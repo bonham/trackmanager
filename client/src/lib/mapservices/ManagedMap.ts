@@ -4,9 +4,8 @@ import { TrackSelectionManager } from './TrackSelectionManager'
 import { MapViewManager } from './MapViewManager'
 import { TrackPopoverController } from './TrackPopoverController'
 
-// Original imports preserved for compatibility
 import { ExtentCollection } from './ExtentCollection'
-import { ZoomToTracksControl } from './ZoomToTracksControl'
+import { MapZoomControlGroup } from './MapZoomControlGroup'
 import { Feature, Map as OlMap, View } from 'ol' // rename needed not to conflict with javascript native Map()
 import type { Extent } from 'ol/extent'
 import { Tile as TileLayer } from 'ol/layer'
@@ -206,9 +205,9 @@ export class ManagedMap {
    */
   private _createMap(center = [0, 0], zoom = 0): OlMap {
     const map = new OlMap({
-      controls: defaultControls().extend([
-        new ZoomToTracksControl({
-          actionCallBack: this.setExtentAndZoomOut.bind(this)
+      controls: defaultControls({ zoom: false }).extend([
+        new MapZoomControlGroup({
+          zoomToTracksCallback: this.setExtentAndZoomOut.bind(this)
         })
       ]),
       layers: [

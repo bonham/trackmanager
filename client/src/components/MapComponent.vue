@@ -253,9 +253,9 @@ watch(
   min-height: 100%;
 }
 
-.map-control-expand {
-  top: 4em;
-  left: .5em;
+.map-zoom-control-group {
+  top: 0.5em;
+  left: 0.5em;
 }
 
 .mapspinner {

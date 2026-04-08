@@ -12,6 +12,7 @@ onUnmounted(() => { userLoginStore.stopSessionHeartbeat() })
 
 <template>
   <RouterView />
+  <ErrorIndicator />
 </template>
 
 <style lang="scss">

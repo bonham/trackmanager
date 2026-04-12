@@ -3,6 +3,7 @@ import { Track } from '@/lib/Track'
 import type { TrackPropertiesOptional } from '@/lib/Track'
 import _ from 'lodash'
 import { useUserLoginStore } from '@/stores/userlogin'
+import { reportError } from '@/stores/errorstore'
 
 import type { Extent } from 'ol/extent'
 import * as z from 'zod'
@@ -46,11 +47,11 @@ async function getTrackYears(sid: string): Promise<number[]> {
   try {
     response = await fetch(url)
   } catch (error) {
-    console.error('Error when fetching years of tracks', error)
+    reportError('Error when fetching years of tracks', error)
     return []
   }
   if (!response.ok) {
-    console.error('Response not ok when fetching tracks by year', response)
+    reportError('Response not ok when fetching tracks by year', response)
     return []
   }
 
@@ -61,7 +62,7 @@ async function getTrackYears(sid: string): Promise<number[]> {
     return years
 
   } catch (error) {
-    console.error('Error when processing result from http call', error)
+    reportError('Error when processing result from http call', error)
     return []
   }
 }
@@ -76,11 +77,11 @@ async function getTrackIdsByYear(year: number, sid: string) {
   try {
     response = await fetch(url)
   } catch (error) {
-    console.error('Error when fetching tracks by year', error)
+    reportError('Error when fetching tracks by year', error)
     return []
   }
   if (!response.ok) {
-    console.error('Response not ok when fetching tracks by year', response)
+    reportError('Response not ok when fetching tracks by year', response)
     return []
   }
 
@@ -92,7 +93,7 @@ async function getTrackIdsByYear(year: number, sid: string) {
 
   } catch (error) {
 
-    console.error('Error when processing result from http call', error)
+    reportError('Error when processing result from http call', error)
     return []
 
   }
@@ -111,11 +112,11 @@ async function getTracksByExtent(extent: Extent, sid: string) {
       headers: { 'Content-Type': 'application/json' }
     })
   } catch (error) {
-    console.error('Error when fetching tracks by extent', error)
+    reportError('Error when fetching tracks by extent', error)
     return []
   }
   if (!response.ok) {
-    console.error('Response not ok when fetching tracks by extent', response)
+    reportError('Response not ok when fetching tracks by extent', response)
     return []
   }
 
@@ -126,7 +127,7 @@ async function getTracksByExtent(extent: Extent, sid: string) {
     const trackArray = trackDataArray.map(t => new Track(t))
     return trackArray
   } catch (error) {
-    console.error('Error when processing result from http call', error)
+    reportError('Error when processing result from http call', error)
     return []
   }
 }
@@ -137,12 +138,12 @@ async function getTrackById(id: number, sid: string): Promise<Track | null> {
   try {
     response = await fetch(url)
   } catch (error) {
-    console.error('Error when fetching tracks by year', error)
+    reportError('Error when fetching tracks by year', error)
     return null
   }
   if (!response.ok) {
     const errText = await response.text()
-    console.error(`Response code ${response.status} after fetching to ${url}, error: ${errText}`)
+    reportError(`Response code ${response.status} after fetching to ${url}, error: ${errText}`)
     return null
   }
 
@@ -153,7 +154,7 @@ async function getTrackById(id: number, sid: string): Promise<Track | null> {
     const track = new Track(trackData)
     return track
   } catch (error) {
-    console.error('Error when processing result from http call', error)
+    reportError('Error when processing result from http call', error)
     return null
   }
 }
@@ -174,12 +175,12 @@ async function getTrackMetaDataByIdList(idList: number[], sid: string, signal: A
     )
   } catch (error) {
     if (error instanceof Error && error.name === 'AbortError') { return [] }
-    console.error('Error when fetching tracks by year', error)
+    reportError('Error when fetching tracks by year', error)
     return []
   }
   if (!response.ok) {
     const errText = await response.text()
-    console.error(`Response code ${response.status} after fetching to ${url}, error: ${errText}`)
+    reportError(`Response code ${response.status} after fetching to ${url}, error: ${errText}`)
     return []
   }
 
@@ -193,7 +194,7 @@ async function getTrackMetaDataByIdList(idList: number[], sid: string, signal: A
   } catch (error) {
 
     if (error instanceof Error && error.name === 'AbortError') { return [] }
-    console.error('Error when processing result from http call', error)
+    reportError('Error when processing result from http call', error)
     return []
   }
 }
@@ -228,7 +229,7 @@ async function getMultiLineStringWithIdList(idList: number[], sid: string, signa
       return respJson
     } else {
       const errText = await response.text()
-      console.error(`Response code ${response.status} after fetching to ${url}, error: ${errText}`)
+      reportError(`Response code ${response.status} after fetching to ${url}, error: ${errText}`)
       return []
     }
 
@@ -236,10 +237,10 @@ async function getMultiLineStringWithIdList(idList: number[], sid: string, signa
 
     if (e instanceof Error && e.name === 'AbortError') { return [] }
     else if (e instanceof SyntaxError) {
-      console.error('Failed to convert response to json', e)
+      reportError('Failed to convert response to json', e)
       const errText = await response.text()
-      console.error("Response was not json, but: " + errText)
-    } else console.error("Unknown error after trying to read json response", e)
+      reportError("Response was not json, but: " + errText)
+    } else reportError("Unknown error after trying to read json response", e)
     return []
   }
 }
@@ -279,13 +280,13 @@ async function updateTrackById(trackId: number, keyValuePairs: TrackPropertiesOp
       if (response.status === 401 || response.status === 403) {
         useUserLoginStore().handleUnauthorized()
       }
-      console.error(`Unable to update track ${id}`)
-      console.error(response)
-      console.error(await response.text())
+      reportError(`Unable to update track ${id}`)
+      reportError(response)
+      reportError(await response.text())
       return false
     }
   } catch (err) {
-    console.error(err)
+    reportError(err)
     return false
   }
 }
@@ -308,13 +309,13 @@ async function updateNameFromSource(id: number, sid: string): Promise<boolean> {
       if (response.status === 401 || response.status === 403) {
         useUserLoginStore().handleUnauthorized()
       }
-      console.error(`Unable to convert src to name for track ${id}. Response status ${response.status}`)
+      reportError(`Unable to convert src to name for track ${id}. Response status ${response.status}`)
       const body = await response.text()
-      console.error(`Body: ${body}`)
+      reportError(`Body: ${body}`)
       return false
     }
   } catch (err) {
-    console.error(err)
+    reportError(err)
     return false
   }
 }
@@ -336,13 +337,13 @@ async function deleteTrack(id: number, sid: string) {
       if (response.status === 401 || response.status === 403) {
         useUserLoginStore().handleUnauthorized()
       }
-      console.error(`Unable to delete track ${id}`)
-      console.error(response)
-      console.error(await response.text())
+      reportError(`Unable to delete track ${id}`)
+      reportError(response)
+      reportError(await response.text())
       return false
     }
   } catch (err) {
-    console.error(err)
+    reportError(err)
     return false
   }
 }

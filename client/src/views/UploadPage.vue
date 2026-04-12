@@ -42,6 +42,7 @@ import { FileUploadQueue, makeFileIdObject } from '@/lib/FileUploadQueue'
 import type { QueueStatus, QueuedFile } from '@/lib/uploadFile'
 import { UploadError } from '@/lib/uploadFile'
 import type { AsyncResultCallback } from 'async'
+import { reportError } from '@/stores/errorstore'
 type CallbackArguments = Parameters<AsyncResultCallback<number, UploadError>>;
 
 const props = defineProps({
@@ -79,9 +80,9 @@ function setItemVisibility(key: number, visibility: boolean) {
 }
 
 function onChange(event: Event) {
-  if (event.target === null) { console.error("Event target is null"); return }
+  if (event.target === null) { reportError("Event target is null"); return }
   const target = (event.target as HTMLInputElement)
-  if (target.files === null) { console.error("target.files is null"); return }
+  if (target.files === null) { reportError("target.files is null"); return }
   processDragDrop(target.files)
 }
 
@@ -116,8 +117,8 @@ function completedCallBack(err: CallbackArguments[0], key: CallbackArguments[1])
   //console.log(`Finished processing ${key}`)
   if (key === null || key === undefined) throw Error("key is null")
   if (err) {
-    console.error('Error occured during queue processing: ', err.message)
-    console.error('Error cause: ', err)
+    reportError('Error occured during queue processing: ', err.message)
+    reportError('Error cause: ', err)
     setItemProcessingStatus(key, 'Failed')
   } else {
     setItemProcessingStatus(key, 'Completed' as QueueStatus)

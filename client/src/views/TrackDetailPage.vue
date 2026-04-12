@@ -36,6 +36,7 @@ import { nextTick, ref } from 'vue';
 import { getTrackById } from '@/lib/trackServices';
 import { useRouter } from 'vue-router'
 import { updateTrackById } from '@/lib/trackServices'
+import { reportError } from '@/stores/errorstore'
 
 import { useUserLoginStore } from '@/stores/userlogin'
 const userLoginStore = useUserLoginStore()
@@ -91,7 +92,7 @@ getTrackById(props.id, props.sid)
     }
   })
   .catch((e) => {
-    console.error(`Error while loading track ${props.id}`, e)
+    reportError(`Error while loading track ${props.id}`, e)
   })
 
 nextTick(() => {
@@ -102,7 +103,7 @@ nextTick(() => {
     zoomOut: true
   }
 
-}).catch((e) => { console.error(e) })
+}).catch((e) => { reportError(e) })
 
 const router = useRouter()
 
@@ -127,7 +128,7 @@ async function processHeadlineUpdate(value: string): Promise<boolean> {
   console.log("Updating " + value)
   try {
     const success = await updateTrackById(props.id, { name: value }, props.sid) ?? false
-    if (!success) console.error(`Updating track id ${props.id} was not successful`)
+    if (!success) reportError(`Updating track id ${props.id} was not successful`)
     return success
   } catch (e) {
     console.log(e)

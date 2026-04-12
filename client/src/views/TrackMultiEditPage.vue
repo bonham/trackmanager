@@ -49,6 +49,7 @@ import { Track } from '@/lib/Track'
 import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'
 import EditableText from '@/components/EditableText.vue'
 import { ref } from 'vue'
+import { reportError } from '@/stores/errorstore'
 
 function isString(value: unknown): value is string {
   return typeof value === 'string';
@@ -116,7 +117,7 @@ const tracksByTrackId = ref<Record<number, Track>>({})
 const loading = ref(false)
 
 
-loadTracks().catch((e) => { console.error(e) })
+loadTracks().catch((e) => { reportError(e) })
 
 
 async function loadTracks() {
@@ -164,11 +165,11 @@ async function nameFromSrc(item: TableItem): Promise<boolean> {
       updatedName = updatedTrack.name
       console.log(`Updated name ${updatedName}`)
     } else {
-      console.error(`Could not read updated track with id ${id}`)
+      reportError(`Could not read updated track with id ${id}`)
       return false
     }
   } else {
-    console.error(`Updating name from source for track ${id} failed`)
+    reportError(`Updating name from source for track ${id} failed`)
     return false
   }
 
@@ -209,7 +210,7 @@ async function processNameUpdate(item: TableItem, updatedValue: string): Promise
       return false
     }
   } catch (error) {
-    console.error(error)
+    reportError(error)
     return false
   }
 }

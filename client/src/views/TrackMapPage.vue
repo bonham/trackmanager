@@ -81,6 +81,7 @@ configStore.loadConfig(props.sid)
         const mostRecentYear = years.value[0]
         if (mostRecentYear !== undefined) {
           loadTracksOfYear(mostRecentYear, true)
+          reportError("Initial load: most recent year is " + mostRecentYear)
         } else {
           reportError("mostRecentYear is undefined")
         }

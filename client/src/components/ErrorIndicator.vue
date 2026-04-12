@@ -42,8 +42,7 @@ function confirmedDismissAll() {
 </script>
 
 <template>
-  <button v-if="errorStore.hasErrors" v-show="!overlayVisible"
-    class="error-fab btn btn-danger shadow-lg position-relative"
+  <button v-if="errorStore.hasErrors" v-show="!overlayVisible" class="error-fab btn btn-danger shadow-lg"
     :aria-label="`${errorStore.errorCount} errors — click to view`" @click="overlayVisible = true">
     <i-bi-exclamation-triangle-fill />
     <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-warning text-dark">
@@ -99,7 +98,7 @@ function confirmedDismissAll() {
 .error-fab {
   position: fixed;
   bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px));
-  right: calc(1.5rem + env(safe-area-inset-right, 0px));
+  left: calc(1.5rem + env(safe-area-inset-left, 0px));
   z-index: 1060;
   width: 3.5rem;
   height: 3.5rem;
@@ -108,4 +107,36 @@ function confirmedDismissAll() {
   align-items: center;
   justify-content: center;
 }
+
+/* Keep button inside Bootstrap container at each breakpoint */
+@media (min-width: 576px) {
+  .error-fab {
+    left: calc((100vw - 540px) / 2 + 1.5rem);
+  }
+}
+
+@media (min-width: 768px) {
+  .error-fab {
+    left: calc((100vw - 720px) / 2 + 1.5rem);
+  }
+}
+
+@media (min-width: 992px) {
+  .error-fab {
+    left: calc((100vw - 960px) / 2 + 1.5rem);
+  }
+}
+
+@media (min-width: 1200px) {
+  .error-fab {
+    left: calc((100vw - 1140px) / 2 + 1.5rem);
+  }
+}
+
+@media (min-width: 1400px) {
+  .error-fab {
+    left: calc((100vw - 1320px) / 2 + 1.5rem);
+  }
+}
+
 </style>

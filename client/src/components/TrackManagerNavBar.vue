@@ -2,7 +2,7 @@
 <template>
   <b-container id="root" class="d-flex flex-column vh-100 gx-0 border">
     <auth-orchestrator />
-    <div class="bg-light d-flex flex-column vh-100">
+    <div class="bg-light d-flex flex-column vh-100 position-relative">
       <nav class="navbar navbar-expand bg-success-subtle border-bottom py-1">
         <div class="container-fluid">
           <!-- <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup"
@@ -54,6 +54,7 @@
         </div>
       </nav>
       <slot></slot>
+      <ErrorIndicator />
     </div>
   </b-container>
 </template>

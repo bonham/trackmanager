@@ -5,6 +5,7 @@ import type { MultiLineStringWithTrack } from '@/lib/zodSchemas'
 import type { MultiLineStringWithTrackId } from 'trackmanager-shared/zodSchemas'
 import type { AsyncWorker } from 'async'
 import { getTrackMetaDataByIdList, getMultiLineStringWithIdList } from './trackServices';
+import { reportError } from '@/stores/errorstore';
 
 type IdList = number[]
 interface Task { idList: IdList, signal: AbortSignal }
@@ -27,7 +28,8 @@ function createTrackLoadingAsyncWorker(
     // ----
     const trackMetadataList = await getTrackMetaDataByIdList(idList, sid, signal)
     if (trackMetadataList === null) {
-      throw Error("Track metadata list could not be loaded")
+      reportError("Track metadata list could not be loaded")
+      return
     }
     const trackMetadataMap = new Map<number, Track>()
     trackMetadataList.forEach((track) => trackMetadataMap.set(track.id, track))
@@ -42,10 +44,10 @@ function createTrackLoadingAsyncWorker(
     if (signal.aborted) return
     idList.forEach((id) => {
       const track = trackMetadataMap.get(id)
-      if (track === undefined) throw Error(`Track for id ${id} is undefined`)
+      if (track === undefined) { reportError(`Track for id ${id} is undefined`); return }
 
       const geoJsonWithId = geoJsonMap.get(id)
-      if (geoJsonWithId === undefined) throw Error(`GeoJson for id ${id} is undefined`)
+      if (geoJsonWithId === undefined) { reportError(`GeoJson for id ${id} is undefined`); return }
 
       const geoJsonWithTrack: MultiLineStringWithTrack = {
         track,

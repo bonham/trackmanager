@@ -26,6 +26,10 @@ interface KeyValuePair {
 }
 
 
+/**
+ * Throws on invalid conftype/confkey, HTTP errors, or unexpected response shapes.
+ * Callers must handle rejection (e.g. `.catch()` with `reportError`).
+ */
 async function getConfig(sid: string, conftype: string, confkey: string): Promise<string> {
 
   if (!conftypes.includes(conftype)) {
@@ -61,6 +65,10 @@ async function getConfig(sid: string, conftype: string, confkey: string): Promis
   throw Error("Got wrong type from r.json()", { cause: rJson })
 }
 
+/**
+ * Throws on HTTP errors, unexpected response shapes, or schema validation failures.
+ * Callers must handle rejection (e.g. `.catch()` with `reportError`).
+ */
 async function getSchemaConfig(sid: string): Promise<Record<string, string>> {
 
   const conftype = 'SCHEMA'

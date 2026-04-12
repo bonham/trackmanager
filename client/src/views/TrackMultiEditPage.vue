@@ -150,7 +150,7 @@ async function loadTracks() {
 }
 async function nameFromSrc(item: TableItem): Promise<boolean> {
 
-  if (!isNumber(item.id)) throw Error("item.id not number")
+  if (!isNumber(item.id)) { reportError("nameFromSrc: item.id not number"); return false }
   const id = item.id
   item.loading = true
 
@@ -186,18 +186,22 @@ async function nameFromSrc(item: TableItem): Promise<boolean> {
 //   })
 // }
 async function deleteTrackFromTable(item: TableItem) {
-  if (!isNumber(item.id)) throw Error("item.id not number")
-  const success = await deleteTrack(item.id, props.sid)
-  if (success) {
-    delete tracksByTrackId.value[item.id]
-    // delete element
-    const idx = tableItems.value.findIndex((e) => e.id === item.id)
-    tableItems.value.splice(idx, 1)
+  if (!isNumber(item.id)) { reportError("deleteTrackFromTable: item.id not number"); return }
+  try {
+    const success = await deleteTrack(item.id, props.sid)
+    if (success) {
+      delete tracksByTrackId.value[item.id]
+      // delete element
+      const idx = tableItems.value.findIndex((e) => e.id === item.id)
+      tableItems.value.splice(idx, 1)
+    }
+  } catch (error) {
+    reportError("deleteTrackFromTable failed", error)
   }
 }
 
 async function processNameUpdate(item: TableItem, updatedValue: string): Promise<boolean> {
-  if (!isNumber(item.id)) throw Error("item.id not number")
+  if (!isNumber(item.id)) { reportError("processNameUpdate: item.id not number"); return false }
   console.log('in upper component:', item.id, updatedValue)
   try {
     const success = await updateTrackById(item.id, { name: updatedValue }, props.sid)

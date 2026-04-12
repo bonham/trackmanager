@@ -34,6 +34,7 @@ import { useMapStateStore } from '@/stores/mapstate'
 import { StyleFactoryFixedColors, THREE_BROWN_COLORSTYLE, FIVE_COLORFUL_COLORSTYLE } from '@/lib/mapStyles';
 import { queue, type QueueObject } from 'async'
 import { createTrackLoadingAsyncWorker, type IdList, type Task } from '@/lib/trackLoadAsyncWorker'
+import { reportError } from '@/stores/errorstore'
 
 const NUMWORKERS = 4
 const BATCHSIZE = 5
@@ -86,7 +87,7 @@ configStore.loadConfig(props.sid)
       throw Error(`Unknown TRACKSTYLE config value ${TRACKSTYLE}`)
     }
   })
-  .catch((e) => console.error("Could not load config", e))
+  .catch((e) => reportError("Could not load config", e))
 
 // Initialize loading worker and queue
 const addLayerFunc = (featureWithTrack: MultiLineStringWithTrack) => mmap.addTrackLayer(featureWithTrack)
@@ -124,7 +125,7 @@ onMounted(() => {
       () => { popoverData.value = null }
     )
   }).catch((err) => {
-    console.error("Error in nextTick", err)
+    reportError("Error in nextTick", err)
   })
 })
 
@@ -180,13 +181,13 @@ function makeVisible(ids: IdList, mmap: ManagedMap, queue: QueueObject<Task>, zo
           if (zoomOut) { mmap.setExtentAndZoomOut() }
         }
       )
-      .catch((e) => console.error("what??", e))
+      .catch((e) => reportError("Error draining load queue", e))
 
     loading.value = true // should be true already
     queue.push<Task>(listOfTasks, (err, retVal) => {
       if (err) {
         if (err.name === 'AbortError') console.log("Aborted worker")
-        else console.error("Error in worker", err)
+        else reportError("Error in worker", err)
       }
       if (retVal) console.log("Return value from worker", retVal)
     })

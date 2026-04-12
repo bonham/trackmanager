@@ -63,19 +63,21 @@ const visibleUploadItems = computed(() => {
   return visibleList
 })
 
-function getUploadItemByKey(key: number) {
+function getUploadItemByKey(key: number): QueuedFile | undefined {
   const item = uploadList.value.find(element => element.key === key)
-  if (item === undefined) { throw new UploadError(`Could not find Upload item with id ${key}`, "") }
+  if (item === undefined) { reportError(`Could not find Upload item with id ${key}`) }
   return item
 }
 
 function setItemProcessingStatus(key: number, status: QueueStatus) {
   const item = getUploadItemByKey(key)
+  if (!item) return
   item.status = status
 }
 
 function setItemVisibility(key: number, visibility: boolean) {
   const item = getUploadItemByKey(key)
+  if (!item) return
   item.visible = visibility
 }
 
@@ -115,7 +117,7 @@ function addItemToQueue(fileIdObject: QueuedFile) {
 
 function completedCallBack(err: CallbackArguments[0], key: CallbackArguments[1]): void {
   //console.log(`Finished processing ${key}`)
-  if (key === null || key === undefined) throw Error("key is null")
+  if (key === null || key === undefined) { reportError("completedCallBack: key is null"); return }
   if (err) {
     reportError('Error occured during queue processing: ', err.message)
     reportError('Error cause: ', err)

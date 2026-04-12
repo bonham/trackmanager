@@ -1,5 +1,6 @@
 
 import { getWithCORS, sendJSONToServer, getErrorMessage } from '@/lib/httpHelpers';
+import { reportError } from '@/stores/errorstore';
 import { startRegistration } from '@simplewebauthn/browser';
 import type { RegistrationResponseJSON, PublicKeyCredentialCreationOptionsJSON } from '@simplewebauthn/browser'
 
@@ -48,13 +49,13 @@ export async function registerPasskey(registrationKey: string): Promise<Registra
         returnStatus.success = false
         return returnStatus
       } else {
-        console.error(getErrorMessage(error))
+        reportError(getErrorMessage(error))
         returnStatus.message = "Failed on client side";
         returnStatus.success = false
         return returnStatus
       }
     } else {
-      console.error(getErrorMessage(error))
+      reportError(getErrorMessage(error))
       returnStatus.message = "Failed on client side (2)"
       returnStatus.success = false
       return returnStatus

@@ -11,6 +11,11 @@ vi.mock('@/stores/userlogin', () => ({
   useUserLoginStore: () => ({ handleUnauthorized: mockHandleUnauthorized }),
 }))
 
+const mockReportError = vi.hoisted(() => vi.fn())
+vi.mock('@/stores/errorstore', () => ({
+  reportError: mockReportError,
+}))
+
 const trackData1 = {
   id: 1,
   name: 'Mountain Summit Trail',
@@ -74,6 +79,7 @@ describe('trackServices', () => {
   beforeEach(() => {
     mockFetch.mockReset()
     mockHandleUnauthorized.mockReset()
+    mockReportError.mockReset()
   })
 
   describe('getIdListByExtentAndTime', () => {

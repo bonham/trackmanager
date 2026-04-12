@@ -6,10 +6,11 @@
 
 <script setup lang="ts">
 import { onMounted, onUnmounted } from 'vue'
+import { reportError } from '@/stores/errorstore'
 const emit = defineEmits(['files-dropped'])
 
 function onDrop(e: DragEvent) {
-  if (e.dataTransfer === null) { throw new Error("e.dataTransfer is null") }
+  if (e.dataTransfer === null) { reportError("e.dataTransfer is null"); return }
   const fileList = []
   for (let i = 0; i < e.dataTransfer.files.length; i++) {
     fileList.push(e.dataTransfer.files.item(i))

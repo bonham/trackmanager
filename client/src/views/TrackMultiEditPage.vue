@@ -49,6 +49,7 @@ import { Track } from '@/lib/Track'
 import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'
 import EditableText from '@/components/EditableText.vue'
 import { ref } from 'vue'
+import { reportError } from '@/stores/errorstore'
 
 function isString(value: unknown): value is string {
   return typeof value === 'string';
@@ -116,7 +117,7 @@ const tracksByTrackId = ref<Record<number, Track>>({})
 const loading = ref(false)
 
 
-loadTracks().catch((e) => { console.error(e) })
+loadTracks().catch((e) => { reportError(e) })
 
 
 async function loadTracks() {
@@ -149,7 +150,7 @@ async function loadTracks() {
 }
 async function nameFromSrc(item: TableItem): Promise<boolean> {
 
-  if (!isNumber(item.id)) throw Error("item.id not number")
+  if (!isNumber(item.id)) { reportError("nameFromSrc: item.id not number"); return false }
   const id = item.id
   item.loading = true
 
@@ -164,11 +165,11 @@ async function nameFromSrc(item: TableItem): Promise<boolean> {
       updatedName = updatedTrack.name
       console.log(`Updated name ${updatedName}`)
     } else {
-      console.error(`Could not read updated track with id ${id}`)
+      reportError(`Could not read updated track with id ${id}`)
       return false
     }
   } else {
-    console.error(`Updating name from source for track ${id} failed`)
+    reportError(`Updating name from source for track ${id} failed`)
     return false
   }
 
@@ -185,18 +186,22 @@ async function nameFromSrc(item: TableItem): Promise<boolean> {
 //   })
 // }
 async function deleteTrackFromTable(item: TableItem) {
-  if (!isNumber(item.id)) throw Error("item.id not number")
-  const success = await deleteTrack(item.id, props.sid)
-  if (success) {
-    delete tracksByTrackId.value[item.id]
-    // delete element
-    const idx = tableItems.value.findIndex((e) => e.id === item.id)
-    tableItems.value.splice(idx, 1)
+  if (!isNumber(item.id)) { reportError("deleteTrackFromTable: item.id not number"); return }
+  try {
+    const success = await deleteTrack(item.id, props.sid)
+    if (success) {
+      delete tracksByTrackId.value[item.id]
+      // delete element
+      const idx = tableItems.value.findIndex((e) => e.id === item.id)
+      tableItems.value.splice(idx, 1)
+    }
+  } catch (error) {
+    reportError("deleteTrackFromTable failed", error)
   }
 }
 
 async function processNameUpdate(item: TableItem, updatedValue: string): Promise<boolean> {
-  if (!isNumber(item.id)) throw Error("item.id not number")
+  if (!isNumber(item.id)) { reportError("processNameUpdate: item.id not number"); return false }
   console.log('in upper component:', item.id, updatedValue)
   try {
     const success = await updateTrackById(item.id, { name: updatedValue }, props.sid)
@@ -209,7 +214,7 @@ async function processNameUpdate(item: TableItem, updatedValue: string): Promise
       return false
     }
   } catch (error) {
-    console.error(error)
+    reportError(error)
     return false
   }
 }

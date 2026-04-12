@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+import { reportError } from '@/stores/errorstore'
 
 const SESSION_HEARTBEAT_INTERVAL_MS = 30000
 
@@ -87,10 +88,10 @@ export const useUserLoginStore = defineStore('userlogin', () => {
 
       if (!resp.ok) {
         const t = await resp.text()
-        console.error(`Logout was not successful. Response status:${resp.status}, Body:${t}`)
+        reportError(`Logout was not successful. Response status:${resp.status}, Body:${t}`)
       }
     } catch (e) {
-      console.error("Error in logout procedure:", e)
+      reportError("Error in logout procedure:", e)
     } finally {
       canWriteToSchema.value = false
       _sessionHasBeenActive.value = false

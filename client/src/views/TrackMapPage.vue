@@ -28,6 +28,7 @@ import MapComponent from '@/components/MapComponent.vue'
 import { getTrackYears } from '@/lib/trackServices'
 import { useMapStateStore } from '@/stores/mapstate'
 import { useConfigStore } from '@/stores/configstore'
+import { reportError } from '@/stores/errorstore'
 
 import { ref } from 'vue'
 
@@ -80,13 +81,14 @@ configStore.loadConfig(props.sid)
         const mostRecentYear = years.value[0]
         if (mostRecentYear !== undefined) {
           loadTracksOfYear(mostRecentYear, true)
+          reportError("Initial load: most recent year is " + mostRecentYear)
         } else {
-          console.log("mostRecentYear is undefined")
+          reportError("mostRecentYear is undefined")
         }
       }
     }
   })
-  .catch((e) => console.error("Error on initial load", e))
+  .catch((e) => reportError("Error on initial load", e))
 
 /**
  * Fetch available years for tracks and initialize button states

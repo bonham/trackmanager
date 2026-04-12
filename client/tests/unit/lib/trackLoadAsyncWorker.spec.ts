@@ -4,6 +4,11 @@ import * as trackServices from '@/lib/trackServices'
 import { Track } from '@/lib/Track'
 import type { MultiLineStringWithTrack } from '@/lib/zodSchemas'
 
+const mockReportError = vi.hoisted(() => vi.fn())
+vi.mock('@/stores/errorstore', () => ({
+  reportError: mockReportError,
+}))
+
 vi.mock('@/lib/trackServices', () => ({
   getTrackMetaDataByIdList: vi.fn(),
   getMultiLineStringWithIdList: vi.fn(),
@@ -109,38 +114,51 @@ describe('createTrackLoadingAsyncWorker', () => {
     expect(addFn).not.toHaveBeenCalled()
   })
 
-  test('throws when track metadata is missing for an id', async () => {
+  test('reports error and skips when track metadata is missing for an id', async () => {
+    const addFn = vi.fn()
     const task: Task = { idList: [1, 2], signal: new AbortController().signal }
 
     mockedGetTrackMetaData.mockResolvedValue([track1]) // only track1, missing track2
     mockedGetMultiLineString.mockResolvedValue([geoJson1, geoJson2])
 
-    await expect(
-      asAwaitable(createTrackLoadingAsyncWorker(vi.fn(), 'sid'))(task)
-    ).rejects.toThrow('Track for id 2 is undefined')
+    await asAwaitable(createTrackLoadingAsyncWorker(addFn, 'sid'))(task)
+
+    expect(mockReportError).toHaveBeenCalledWith('Track for id 2 is undefined')
+    // track1 should still be processed successfully
+    expect(addFn).toHaveBeenCalledTimes(1)
+    const arg = addFn.mock.calls[0]?.[0] as MultiLineStringWithTrack
+    expect(arg.track.id).toBe(1)
   })
 
-  test('throws when geojson is missing for an id', async () => {
+  test('reports error and skips when geojson is missing for an id', async () => {
+    const addFn = vi.fn()
     const task: Task = { idList: [1, 2], signal: new AbortController().signal }
 
     mockedGetTrackMetaData.mockResolvedValue([track1, track2])
     mockedGetMultiLineString.mockResolvedValue([geoJson1]) // only geoJson1, missing geoJson2
 
-    await expect(
-      asAwaitable(createTrackLoadingAsyncWorker(vi.fn(), 'sid'))(task)
-    ).rejects.toThrow('GeoJson for id 2 is undefined')
+    await asAwaitable(createTrackLoadingAsyncWorker(addFn, 'sid'))(task)
+
+    expect(mockReportError).toHaveBeenCalledWith('GeoJson for id 2 is undefined')
+    // track1 should still be processed successfully
+    expect(addFn).toHaveBeenCalledTimes(1)
+    const arg = addFn.mock.calls[0]?.[0] as MultiLineStringWithTrack
+    expect(arg.track.id).toBe(1)
   })
 
-  test('throws when getTrackMetaDataByIdList returns null', async () => {
+  test('reports error and returns early when getTrackMetaDataByIdList returns null', async () => {
+    const addFn = vi.fn()
     const task: Task = { idList: [1], signal: new AbortController().signal }
 
     // The `=== null` check in the worker is a defensive guard; the function's
     // return type is `Track[]`, so a cast is needed to exercise this dead branch.
     mockedGetTrackMetaData.mockResolvedValue(null as unknown as Track[])
 
-    await expect(
-      asAwaitable(createTrackLoadingAsyncWorker(vi.fn(), 'sid'))(task)
-    ).rejects.toThrow('Track metadata list could not be loaded')
+    await asAwaitable(createTrackLoadingAsyncWorker(addFn, 'sid'))(task)
+
+    expect(mockReportError).toHaveBeenCalledWith('Track metadata list could not be loaded')
+    expect(mockedGetMultiLineString).not.toHaveBeenCalled()
+    expect(addFn).not.toHaveBeenCalled()
   })
 
   test('processes single track correctly', async () => {

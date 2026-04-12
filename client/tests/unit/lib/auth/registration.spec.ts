@@ -7,6 +7,11 @@ import type { PublicKeyCredentialCreationOptionsJSON, RegistrationResponseJSON }
 vi.mock("@/lib/httpHelpers")
 vi.mock("@simplewebauthn/browser")
 
+const mockReportError = vi.hoisted(() => vi.fn())
+vi.mock("@/stores/errorstore", () => ({
+  reportError: mockReportError,
+}))
+
 const mockGetWithCORS = vi.mocked(httpHelpers.getWithCORS)
 const mockSendJSONToServer = vi.mocked(httpHelpers.sendJSONToServer)
 const mockGetErrorMessage = vi.mocked(httpHelpers.getErrorMessage)

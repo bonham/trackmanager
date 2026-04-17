@@ -6,15 +6,12 @@
     "dist"
   ],
   "compilerOptions": {
-    "outDir": "dist_random", // satisfy vs code syntax check
     "composite": true,
     "module": "ESNext",
     "target": "es2022",
-    "lib": ["ES2022", "DOM"],
-    "baseUrl": ".",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "paths": {
       "@/*": ["./src/*"]
-    },
-    "allowJs": true // do we need it?
+    }
   }
 }

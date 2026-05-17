@@ -40,7 +40,7 @@ describe("registerPasskey", () => {
       attestationObject: "test-attestation-object",
       transports: ["internal" as const]
     },
-    clientExtensionResults: {} as Record<string, unknown>,
+    clientExtensionResults: {},
     type: "public-key" as const
   } as RegistrationResponseJSON
 

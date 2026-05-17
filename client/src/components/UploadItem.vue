@@ -34,7 +34,7 @@ const props = defineProps({
   },
   status: {
     type: String as PropType<QueueStatus>,
-    default: () => "Queued" as QueueStatus
+    default: () => "Queued"
   },
   error: {
     type: UploadError as PropType<UploadError | null>,

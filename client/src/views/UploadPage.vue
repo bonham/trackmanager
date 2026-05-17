@@ -123,7 +123,7 @@ function completedCallBack(err: CallbackArguments[0], key: CallbackArguments[1])
     reportError('Error cause: ', err)
     setItemProcessingStatus(key, 'Failed')
   } else {
-    setItemProcessingStatus(key, 'Completed' as QueueStatus)
+    setItemProcessingStatus(key, 'Completed')
     setTimeout(() => {
       setItemVisibility(key, false)
       // console.log(`Removed ${key}`)

@@ -77,50 +77,70 @@ function tracksByYear(loadedTracks: Track[]): TracksByYearDict {
  * @param tracksByYear Dictionary mapping years to arrays of Track objects
  * @returns Array of Chart.js datasets with cumulative distance data, larger point radius for the most recent year
  */
-function progressDataSets(tracksByYear: TracksByYearDict) {
+function generateChartDataSets(tracksByYear: TracksByYearDict) {
+
+  interface ChartDataPoint {
+    x: DateTime<true>,
+    y: number,
+    name: string,
+    step: number,
+    originalDate: DateTime<true>
+  }
 
   interface DSet {
     label: string,
-    data: { x: DateTime, y: number }[],
+    data: ChartDataPoint[],
     pointRadius: number
   }
-
-  const returnValue: DSet[] = []
 
   const yearList = _.keys(tracksByYear).map((ys) => Number.parseInt(ys))
   yearList.sort().reverse()
 
   const maxYear = Math.max(...yearList)
+
+  // Add one dataset per year, with cumulative distance and normalized dates for comparison
+  const returnDataSetList: DSet[] = []
   for (const year of yearList) {
 
     if (tracksByYear[year] !== undefined) {
 
-      const dateAndLength = tracksByYear[year].map((t) => {
-        return { x: t.getTime(), delta: t.distance(), name: t.getNameOrSrc() }
-      })
+      // Clean and sort tracks for the year
+      const sortedValidTracks: Track[] = []
+      for (const track of tracksByYear[year]) {
 
-      const dateAndLengthClean = dateAndLength.filter((e) => {
-        return (e.x !== null)
-      }) as { x: DateTime<boolean>, delta: number, name: string }[]
+        const tTime = track.getTime()
 
-      dateAndLengthClean.sort((a, b) => (a.x.toSeconds() - b.x.toSeconds()))
+        if (tTime?.isValid) {
+          sortedValidTracks.push(track)
+        }
+        sortedValidTracks.sort((a, b) => (a.getTime()!.toSeconds() - b.getTime()!.toSeconds()))
+      }
 
+      // map tracks to dataset structure with cumulative distance, normalizing dates to 2024 for comparison across years
       let sum = 0
-      const datesAndCumulatedLength = dateAndLengthClean.map(({ x, delta, name }) => {
-        const step = delta / 1000
-        sum += step
-        const normDate = x.set({ year: 2024 })
-        return { x: normDate, y: sum, step, name }
-      })
+      const chartData: ChartDataPoint[] = sortedValidTracks.map(
+        (t: Track) => {
+          const step = t.distance() / 1000
+          sum += step
+
+          const trackDate = t.getTime() as DateTime<true>
+          const normDate = trackDate.set({ year: 2024 })
+          return {
+            x: normDate, y: sum, step, name: t.getNameOrSrc(), originalDate: trackDate
+          }
+        })
+
+      // Label below is for whole dataset, not individual points
       const dataset: DSet = {
         label: year.toString(),
-        data: datesAndCumulatedLength,
+        data: chartData,
         pointRadius: (year === maxYear) ? 5 : 3
       }
-      returnValue.push(dataset)
+
+      returnDataSetList.push(dataset)
     }
   }
-  return returnValue
+  return returnDataSetList
 }
 
 // load tracks async
@@ -149,7 +169,7 @@ onMounted(() => {
               x: {
                 type: "time",
                 time: {
-                  tooltipFormat: 'ccc MMM d',
+                  //  tooltipFormat: 'ccc MMM d',
                   displayFormats: {
                     month: 'MMM',
                     year: ''
@@ -177,8 +197,11 @@ onMounted(() => {
               tooltip: {
                 boxPadding: 10,
                 callbacks: {
+                  title: function (context) {
+                    return context[0]?.dataset.label ?? '- missing dataset label -'
+                  },
                   beforeLabel: function (context) {
-                    return context.dataset.label
+                    return "beforelabel is a label" + context.dataset.label
                   },
                   label: function (context) {
                     return Math.round((context.raw as ChartData).step) + " km"
@@ -211,7 +234,7 @@ onMounted(() => {
       // wait for loading of tracks to complete
       const allTracks = await allTracksPromise
       const tby = tracksByYear(allTracks)
-      const pgDs = progressDataSets(tby)
+      const pgDs = generateChartDataSets(tby)
 
       // update chart data
       mychart.data.datasets = pgDs

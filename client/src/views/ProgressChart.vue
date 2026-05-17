@@ -14,7 +14,9 @@
 
 <script setup lang="ts">
 import { reportError } from '@/stores/errorstore';
-import { generateChartDataSets, type TracksByYearDict, type ChartDataPoint } from '@/lib/progress/progressChart'
+import { chartConfig } from '@/lib/progress/progressChartConfig';
+import { generateChartDataSets } from '@/lib/progress/progressChart'
+import type { TracksByYearDict, ExtendedPChartDataPoint, PChartTLabel, PChartTType } from '@/lib/progress/progressChartTypes'
 import _ from 'lodash'
 
 // chartjs
@@ -51,7 +53,6 @@ import { Track } from '@/lib/Track'
 import { getAllTracks } from '@/lib/trackServices'
 import { BSpinner } from 'bootstrap-vue-next'
 import { ref, onMounted, nextTick } from 'vue'
-import { DateTime } from 'luxon';
 
 const props = defineProps({
   sid: {
@@ -80,76 +81,9 @@ onMounted(() => {
     // should be defined after mount
     if (canvasref.value !== null) {
 
-      const mychart = new Chart<"line", { x: DateTime; y: number; }[], DateTime>(
+      const mychart = new Chart<PChartTType, ExtendedPChartDataPoint[], PChartTLabel>(
         canvasref.value,
-        {
-          type: 'line',
-          data: {
-            datasets: [],
-          },
-          options: {
-            maintainAspectRatio: false,
-            scales: {
-              x: {
-                type: "time",
-                time: {
-                  //  tooltipFormat: 'ccc MMM d',
-                  displayFormats: {
-                    month: 'MMM',
-                    year: ''
-                  },
-                  unit: 'month'
-                },
-                min: '2024-01-01',
-                max: '2025-01-02',
-                title: {
-                  display: true,
-                  text: "Day in year"
-                }
-              },
-              y: {
-                title: {
-                  display: true,
-                  text: 'Mileage'
-                },
-                ticks: {
-                  callback: (value) => `${Math.round(value as number)} km`
-                }
-              }
-            },
-            plugins: {
-              tooltip: {
-                boxPadding: 10,
-                callbacks: {
-                  title: function (dataset) {
-                    return (dataset[0]?.raw as ChartDataPoint).originalDate.toLocaleString(DateTime.DATE_MED_WITH_WEEKDAY)
-                  },
-                  label: function (item) {
-                    return Math.round((item.raw as ChartDataPoint).step) + " km"
-                  },
-                  afterLabel: function (item) {
-                    return (item.raw as ChartDataPoint).name
-                  }
-                }
-              },
-              zoom: {
-                zoom: {
-                  wheel: {
-                    enabled: true,
-                  },
-                  pinch: {
-                    enabled: true
-                  },
-                  mode: 'xy',
-                },
-                pan: {
-                  enabled: true,
-
-                }
-              }
-            }
-          }
-        }
+        chartConfig
       )
 
       // wait for loading of tracks to complete

@@ -2,22 +2,8 @@ import { DateTime } from 'luxon';
 import _ from 'lodash'
 
 import { Track } from '@/lib/Track'
+import type { TracksByYearDict, ExtendedPChartDataPoint, DSet } from '@/lib/progress/progressChartTypes'
 
-type TracksByYearDict = Record<number, Track[]>;
-
-interface ChartDataPoint {
-  x: DateTime<true>,
-  y: number,
-  name: string,
-  step: number,
-  originalDate: DateTime<true>
-}
-
-interface DSet {
-  label: string,
-  data: ChartDataPoint[],
-  pointRadius: number
-}
 
 /**
  * Converts yearly track data into Chart.js line datasets, calculating
@@ -52,7 +38,7 @@ function generateChartDataSets(tracksByYear: TracksByYearDict) {
 
       // map tracks to dataset structure with cumulative distance, normalizing dates to 2024 for comparison across years
       let sum = 0
-      const chartData: ChartDataPoint[] = sortedValidTracks.map(
+      const chartData: ExtendedPChartDataPoint[] = sortedValidTracks.map(
         (t: Track) => {
           const step = t.distance() / 1000
           sum += step
@@ -77,4 +63,4 @@ function generateChartDataSets(tracksByYear: TracksByYearDict) {
   return returnDataSetList
 }
 
-export { generateChartDataSets, type TracksByYearDict, type ChartDataPoint, type DSet }
+export { generateChartDataSets }

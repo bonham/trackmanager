@@ -13,6 +13,7 @@
 </template>
 
 <script setup lang="ts">
+import { reportError } from '@/stores/errorstore';
 import _ from 'lodash'
 
 // chartjs
@@ -70,6 +71,12 @@ function tracksByYear(loadedTracks: Track[]): TracksByYearDict {
   return _.groupBy(trackFlatList, (x: Track) => x.year())
 }
 
+/**
+ * Converts yearly track data into Chart.js line datasets, calculating
+ * cumulative distance for each year with dates normalized to 2024 for comparison.
+ * @param tracksByYear Dictionary mapping years to arrays of Track objects
+ * @returns Array of Chart.js datasets with cumulative distance data, larger point radius for the most recent year
+ */
 function progressDataSets(tracksByYear: TracksByYearDict) {
 
   interface DSet {
@@ -212,10 +219,10 @@ onMounted(() => {
       loading.value = false
 
     } else {
-      console.log("Canvas null")
+      reportError("Canvas null")
     }
   }).catch((err) => {
-    console.error("Error in nextTick", err)
+    reportError("Error in nextTick", err)
   })
 })
 

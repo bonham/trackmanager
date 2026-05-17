@@ -52,6 +52,20 @@ import { BSpinner } from 'bootstrap-vue-next'
 import { ref, onMounted, nextTick } from 'vue'
 import { DateTime } from 'luxon';
 
+interface ChartDataPoint {
+  x: DateTime<true>,
+  y: number,
+  name: string,
+  step: number,
+  originalDate: DateTime<true>
+}
+
+interface DSet {
+  label: string,
+  data: ChartDataPoint[],
+  pointRadius: number
+}
+
 const props = defineProps({
   sid: {
     type: String,
@@ -78,20 +92,6 @@ function tracksByYear(loadedTracks: Track[]): TracksByYearDict {
  * @returns Array of Chart.js datasets with cumulative distance data, larger point radius for the most recent year
  */
 function generateChartDataSets(tracksByYear: TracksByYearDict) {
-
-  interface ChartDataPoint {
-    x: DateTime<true>,
-    y: number,
-    name: string,
-    step: number,
-    originalDate: DateTime<true>
-  }
-
-  interface DSet {
-    label: string,
-    data: ChartDataPoint[],
-    pointRadius: number
-  }
 
   const yearList = _.keys(tracksByYear).map((ys) => Number.parseInt(ys))
   yearList.sort().reverse()
@@ -153,9 +153,6 @@ onMounted(() => {
     // should be defined after mount
     if (canvasref.value !== null) {
 
-      // create and paint chart with no data
-      interface ChartData { x: number, y: number, step: number, name: string }
-
       const mychart = new Chart<"line", { x: DateTime; y: number; }[], DateTime>(
         canvasref.value,
         {
@@ -197,17 +194,14 @@ onMounted(() => {
               tooltip: {
                 boxPadding: 10,
                 callbacks: {
-                  title: function (context) {
-                    return context[0]?.dataset.label ?? '- missing dataset label -'
+                  title: function (dataset) {
+                    return (dataset[0]?.raw as ChartDataPoint).originalDate.toLocaleString(DateTime.DATE_MED_WITH_WEEKDAY)
                   },
-                  beforeLabel: function (context) {
-                    return "beforelabel is a label" + context.dataset.label
+                  label: function (item) {
+                    return Math.round((item.raw as ChartDataPoint).step) + " km"
                   },
-                  label: function (context) {
-                    return Math.round((context.raw as ChartData).step) + " km"
-                  },
-                  afterLabel: function (context) {
-                    return (context.raw as ChartData).name
+                  afterLabel: function (item) {
+                    return (item.raw as ChartDataPoint).name
                   }
                 }
               },

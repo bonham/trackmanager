@@ -62,7 +62,7 @@ class RelativeRequest extends OriginalRequest {
     if (typeof input === 'string' && input.startsWith('/')) {
       super(`http://localhost${input}`, init)
     } else {
-      super(input as string, init)
+      super(input, init)
     }
   }
 }

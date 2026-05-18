@@ -20,4 +20,6 @@ interface DSet {
   pointRadius: number
 }
 
-export type { TracksByYearDict, ExtendedPChartDataPoint, DSet, PChartTType, PChartDataPoint, PChartTLabel }
+type PChartSortType = 'newest_year' | 'highest_progress'
+
+export type { TracksByYearDict, ExtendedPChartDataPoint, DSet, PChartTType, PChartDataPoint, PChartTLabel, PChartSortType }

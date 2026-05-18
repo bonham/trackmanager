@@ -1,12 +1,14 @@
 <template>
   <track-manager-nav-bar :sid="sid">
-    <div class="d-flex flex-column flex-grow-1 px-2">
-      <div class="d-flex flex-column">
-        <span v-if="loading">Loading <b-spinner small />
-        </span>
-      </div>
-      <div class="d-flex flex-column flex-grow-1">
-        <canvas id="acquisitions" ref="canvasref"></canvas>
+    <div class="d-flex flex-row border-top border-bottom border-0">
+      <button type="button" class="btn btn-outline-secondary m-2 expandbutton"
+        @click="console.log('Expand/collapse not implemented yet')">
+        ThisButton</button>
+    </div>
+    <div class="d-flex flex-column flex-grow-1">
+      <canvas id="acquisitions" ref="canvasref"></canvas>
+      <div v-if="loading" class="myspinner">
+        <b-spinner />
       </div>
     </div>
   </track-manager-nav-bar>
@@ -16,7 +18,7 @@
 import { reportError } from '@/stores/errorstore';
 import { chartConfig } from '@/lib/progress/progressChartConfig';
 import { generateChartDataSets } from '@/lib/progress/progressChart'
-import type { TracksByYearDict, ExtendedPChartDataPoint, PChartTLabel, PChartTType } from '@/lib/progress/progressChartTypes'
+import type { TracksByYearDict, ExtendedPChartDataPoint, PChartTLabel, PChartTType, PChartSortType } from '@/lib/progress/progressChartTypes'
 import _ from 'lodash'
 
 // chartjs
@@ -61,7 +63,11 @@ const props = defineProps({
   }
 })
 
+// constants
+const MAX_LINES_WITH_FILTER = 5
+
 // reactives and dom refs
+const filterType = ref<PChartSortType>('highest_progress')
 const loading = ref(true)
 const canvasref = ref<(null | HTMLCanvasElement)>(null)
 
@@ -89,7 +95,7 @@ onMounted(() => {
       // wait for loading of tracks to complete
       const allTracks = await allTracksPromise
       const tby = tracksByYear(allTracks)
-      const pgDs = generateChartDataSets(tby)
+      const pgDs = generateChartDataSets(tby, filterType.value, MAX_LINES_WITH_FILTER)
 
       // update chart data
       mychart.data.datasets = pgDs
@@ -105,3 +111,14 @@ onMounted(() => {
 })
 
 </script>
+
+<style scoped>
+.myspinner {
+  position: absolute;
+
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+}
+</style>

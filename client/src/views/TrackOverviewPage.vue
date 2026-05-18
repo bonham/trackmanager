@@ -1,14 +1,12 @@
 <template>
   <track-manager-nav-bar :sid="sid">
-    <div class="border-top border-bottom border-0">
-      <div class="d-flex flex-row">
-        <button type="button" class="btn btn-outline-secondary m-2 expandbutton" @click="toggleFullExpand">
-          {{ trackOverviewStore.expandPressed ? "Collapse" : "Expand" }}</button>
-        <form @submit.prevent>
-          <input v-model="searchStore.searchText" v-focus class="form-control m-2" placeholder="Search tracks..."
-            @keyup.enter="toggleFullExpand" />
-        </form>
-      </div>
+    <div class="d-flex flex-row border-top border-bottom border-0">
+      <button type="button" class="btn btn-outline-secondary m-2 expandbutton" @click="toggleFullExpand">
+        {{ trackOverviewStore.expandPressed ? "Collapse" : "Expand" }}</button>
+      <form @submit.prevent>
+        <input v-model="searchStore.searchText" v-focus class="form-control m-2" placeholder="Search tracks..."
+          @keyup.enter="toggleFullExpand" />
+      </form>
     </div>
     <div ref="scrollableContainer" class="px-2 flex-grow-1 overflow-auto" style="min-height: 0" @scroll="handleScroll">
       <div>

@@ -16,8 +16,8 @@
 </template>
 
 <script setup lang="ts">
-import { reportError } from '@/stores/errorstore';
-import { chartConfig } from '@/lib/progress/progressChartConfig';
+import { reportError } from '@/stores/errorstore'
+import { chartConfig } from '@/lib/progress/progressChartConfig'
 import { generateChartDataSets, FilterButtonState } from '@/lib/progress/progressChart'
 import type { TracksByYearDict, ExtendedPChartDataPoint, PChartTLabel, PChartTType, PChartSortType } from '@/lib/progress/progressChartTypes'
 import _ from 'lodash'
@@ -34,6 +34,8 @@ import {
   Legend,
   Tooltip
 } from 'chart.js'
+import 'chartjs-adapter-luxon'
+import zoomPlugin from 'chartjs-plugin-zoom'
 
 Chart.register(
   LineController,
@@ -44,11 +46,8 @@ Chart.register(
   LinearScale,
   Legend,
   Tooltip
-);
-import 'chartjs-adapter-luxon';
-
-import zoomPlugin from 'chartjs-plugin-zoom';
-Chart.register(zoomPlugin);
+)
+Chart.register(zoomPlugin)
 
 // internals
 import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'
@@ -69,26 +68,27 @@ const props = defineProps({
 // constants
 const MAX_YEARLINES_WITH_FILTER = 5
 
-// reactives and dom refs
+// reactive state and DOM references
 const loading = ref(true)
-const canvasref = ref<(null | HTMLCanvasElement)>(null)
-
-
+const canvasref = ref<HTMLCanvasElement | null>(null)
 const filterState = ref(new FilterButtonState())
 
 const newestClass = computed(() => filterState.value.newestButtonClass())
 const bestClass = computed(() => filterState.value.bestButtonClass())
 
-function numYearLines() {
+// Persist track loading so the chart uses the same data from one request
+const allTracksPromise = getAllTracks(props.sid)
+let chart: ProgressChartType | null = null
+let allTracks: Track[] = []
+
+// Helpers for filter state and chart generation
+function numYearLines(): number {
   return filterState.value.filterActive() ? MAX_YEARLINES_WITH_FILTER : 0
 }
 
 function filterType(): PChartSortType {
-  if (filterState.value.bestActive) {
-    return "highest_progress"
-  } else {
-    return "newest_year"
-  }
+  // if best is inactive, it does not matter if newest is active or not, it will just show the newest years according to limit. 
+  return filterState.value.bestActive ? 'highest_progress' : 'newest_year'
 }
 
 function tracksByYear(loadedTracks: Track[]): TracksByYearDict {
@@ -96,22 +96,18 @@ function tracksByYear(loadedTracks: Track[]): TracksByYearDict {
   return _.groupBy(trackFlatList, (x: Track) => x.year())
 }
 
-// load tracks async
-const allTracksPromise = getAllTracks(props.sid)
-
-let chart: ProgressChartType | null = null
-let allTracks: Track[] = []
-
 function updateChart(ch: ProgressChartType | null, tracks: Track[]) {
-  if (ch !== null) {
-
-    const trByYear = tracksByYear(tracks)
-    const chartDataSets = generateChartDataSets(trByYear, filterType(), numYearLines())
-    ch.data.datasets = chartDataSets
-    ch.update()
+  if (ch === null) {
+    return
   }
+
+  const trByYear = tracksByYear(tracks)
+  const chartDataSets = generateChartDataSets(trByYear, filterType(), numYearLines())
+  ch.data.datasets = chartDataSets
+  ch.update()
 }
 
+// button handlers
 function toggleNewest() {
   filterState.value.toggleNewest()
   updateChart(chart, allTracks)
@@ -122,31 +118,27 @@ function toggleBest() {
   updateChart(chart, allTracks)
 }
 
-// generate empty chart
+// Lifecycle: initialize chart after mount and update when data loads
 onMounted(() => {
   nextTick(async () => {
+    if (canvasref.value === null) {
+      reportError('Canvas null')
+      return
+    }
 
-    // should be defined after mount
-    if (canvasref.value !== null) {
+    chart = new Chart<PChartTType, ExtendedPChartDataPoint[], PChartTLabel>(canvasref.value, chartConfig)
 
-      chart = new Chart<PChartTType, ExtendedPChartDataPoint[], PChartTLabel>(
-        canvasref.value,
-        chartConfig
-      )
-
-      // wait for loading of tracks to complete
+    try {
       allTracks = await allTracksPromise
       loading.value = false
       updateChart(chart, allTracks)
-
-    } else {
-      reportError("Canvas null")
+    } catch (err) {
+      reportError('Failed to load tracks', err)
     }
   }).catch((err) => {
-    reportError("Error in nextTick", err)
+    reportError('Error in nextTick', err)
   })
 })
-
 </script>
 
 <style scoped>

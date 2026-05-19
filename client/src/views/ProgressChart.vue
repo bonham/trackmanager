@@ -1,19 +1,25 @@
 <template>
   <track-manager-nav-bar :sid="sid">
-    <div class="d-flex flex-column flex-grow-1 px-2">
-      <div class="d-flex flex-column">
-        <span v-if="loading">Loading <b-spinner small />
-        </span>
-      </div>
-      <div class="d-flex flex-column flex-grow-1">
-        <canvas id="acquisitions" ref="canvasref"></canvas>
+    <div class="d-flex flex-row border-top border-bottom border-0">
+      <button type="button" class="filterbuttons btn m-2" :class="newestClass" @click="toggleNewest()">
+        Newest</button>
+      <button type="button" class="filterbuttons btn m-2" :class="bestClass" @click="toggleBest()">
+        Best</button>
+    </div>
+    <div class="d-flex flex-column flex-grow-1">
+      <canvas id="acquisitions" ref="canvasref"></canvas>
+      <div v-if="loading" class="myspinner" role="status" aria-label="Loading chart">
+        <b-spinner />
       </div>
     </div>
   </track-manager-nav-bar>
 </template>
 
 <script setup lang="ts">
-import { reportError } from '@/stores/errorstore';
+import { reportError } from '@/stores/errorstore'
+import { chartConfig } from '@/lib/progress/progressChartConfig'
+import { generateChartDataSets, FilterButtonState } from '@/lib/progress/progressChart'
+import type { TracksByYearDict, ExtendedPChartDataPoint, PChartTLabel, PChartTType, PChartSortType } from '@/lib/progress/progressChartTypes'
 import _ from 'lodash'
 
 // chartjs
@@ -28,6 +34,8 @@ import {
   Legend,
   Tooltip
 } from 'chart.js'
+import 'chartjs-adapter-luxon'
+import zoomPlugin from 'chartjs-plugin-zoom'
 
 Chart.register(
   LineController,
@@ -38,33 +46,17 @@ Chart.register(
   LinearScale,
   Legend,
   Tooltip
-);
-import 'chartjs-adapter-luxon';
-
-import zoomPlugin from 'chartjs-plugin-zoom';
-Chart.register(zoomPlugin);
+)
+Chart.register(zoomPlugin)
 
 // internals
 import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'
 import { Track } from '@/lib/Track'
 import { getAllTracks } from '@/lib/trackServices'
 import { BSpinner } from 'bootstrap-vue-next'
-import { ref, onMounted, nextTick } from 'vue'
-import { DateTime } from 'luxon';
+import { ref, onMounted, nextTick, computed } from 'vue'
 
-interface ChartDataPoint {
-  x: DateTime<true>,
-  y: number,
-  name: string,
-  step: number,
-  originalDate: DateTime<true>
-}
-
-interface DSet {
-  label: string,
-  data: ChartDataPoint[],
-  pointRadius: number
-}
+type ProgressChartType = Chart<PChartTType, ExtendedPChartDataPoint[], PChartTLabel>
 
 const props = defineProps({
   sid: {
@@ -73,174 +65,115 @@ const props = defineProps({
   }
 })
 
-// reactives and dom refs
-const loading = ref(true)
-const canvasref = ref<(null | HTMLCanvasElement)>(null)
+// constants
+const MAX_YEARLINES_WITH_FILTER = 5
 
-// helper functions
-type TracksByYearDict = Record<number, Track[]>;
+// reactive state and DOM references
+const loading = ref(true)
+const canvasref = ref<HTMLCanvasElement | null>(null)
+const filterState = ref(new FilterButtonState())
+
+const newestClass = computed(() => filterState.value.newestButtonClass())
+const bestClass = computed(() => filterState.value.bestButtonClass())
+
+// Persist track loading so the chart uses the same data from one request
+const allTracksPromise = getAllTracks(props.sid)
+let chart: ProgressChartType | null = null
+let allTracks: Track[] = []
+
+// Helpers for filter state and chart generation
+function numYearLines(): number {
+  return filterState.value.filterActive() ? MAX_YEARLINES_WITH_FILTER : 0
+}
+
+function filterType(): PChartSortType {
+  // if best is inactive, it does not matter if newest is active or not, it will just show the newest years according to limit. 
+  return filterState.value.bestActive ? 'highest_progress' : 'newest_year'
+}
 
 function tracksByYear(loadedTracks: Track[]): TracksByYearDict {
   const trackFlatList = _.values(loadedTracks)
   return _.groupBy(trackFlatList, (x: Track) => x.year())
 }
 
-/**
- * Converts yearly track data into Chart.js line datasets, calculating
- * cumulative distance for each year with dates normalized to 2024 for comparison.
- * @param tracksByYear Dictionary mapping years to arrays of Track objects
- * @returns Array of Chart.js datasets with cumulative distance data, larger point radius for the most recent year
- */
-function generateChartDataSets(tracksByYear: TracksByYearDict) {
-
-  const yearList = _.keys(tracksByYear).map((ys) => Number.parseInt(ys))
-  yearList.sort().reverse()
-
-  const maxYear = Math.max(...yearList)
-
-  // Add one dataset per year, with cumulative distance and normalized dates for comparison
-  const returnDataSetList: DSet[] = []
-  for (const year of yearList) {
-
-    if (tracksByYear[year] !== undefined) {
-
-      // Clean and sort tracks for the year
-      const sortedValidTracks: Track[] = []
-      for (const track of tracksByYear[year]) {
-
-        const tTime = track.getTime()
-
-        if (tTime?.isValid) {
-          sortedValidTracks.push(track)
-        }
-        sortedValidTracks.sort((a, b) => (a.getTime()!.toSeconds() - b.getTime()!.toSeconds()))
-      }
-
-      // map tracks to dataset structure with cumulative distance, normalizing dates to 2024 for comparison across years
-      let sum = 0
-      const chartData: ChartDataPoint[] = sortedValidTracks.map(
-        (t: Track) => {
-          const step = t.distance() / 1000
-          sum += step
-
-          const trackDate = t.getTime() as DateTime<true>
-          const normDate = trackDate.set({ year: 2024 })
-          return {
-            x: normDate, y: sum, step, name: t.getNameOrSrc(), originalDate: trackDate
-          }
-        })
-
-      // Label below is for whole dataset, not individual points
-      const dataset: DSet = {
-        label: year.toString(),
-        data: chartData,
-        pointRadius: (year === maxYear) ? 5 : 3
-      }
-
-      returnDataSetList.push(dataset)
-    }
+function updateChart(ch: ProgressChartType | null, tracks: Track[]) {
+  if (ch === null) {
+    return
   }
-  return returnDataSetList
+
+  const trByYear = tracksByYear(tracks)
+  const chartDataSets = generateChartDataSets(trByYear, filterType(), numYearLines())
+  ch.data.datasets = chartDataSets
+  ch.update()
 }
 
-// load tracks async
-const allTracksPromise = getAllTracks(props.sid)
+// button handlers
+function toggleNewest() {
+  filterState.value.toggleNewest()
+  updateChart(chart, allTracks)
+}
 
-// generate empty chart
+function toggleBest() {
+  filterState.value.toggleBest()
+  updateChart(chart, allTracks)
+}
+
+// Lifecycle: initialize chart after mount and update when data loads
 onMounted(() => {
   nextTick(async () => {
+    if (canvasref.value === null) {
+      reportError('Canvas null')
+      return
+    }
 
-    // should be defined after mount
-    if (canvasref.value !== null) {
+    chart = new Chart<PChartTType, ExtendedPChartDataPoint[], PChartTLabel>(canvasref.value, chartConfig)
 
-      const mychart = new Chart<"line", { x: DateTime; y: number; }[], DateTime>(
-        canvasref.value,
-        {
-          type: 'line',
-          data: {
-            datasets: [],
-          },
-          options: {
-            maintainAspectRatio: false,
-            scales: {
-              x: {
-                type: "time",
-                time: {
-                  //  tooltipFormat: 'ccc MMM d',
-                  displayFormats: {
-                    month: 'MMM',
-                    year: ''
-                  },
-                  unit: 'month'
-                },
-                min: '2024-01-01',
-                max: '2025-01-02',
-                title: {
-                  display: true,
-                  text: "Day in year"
-                }
-              },
-              y: {
-                title: {
-                  display: true,
-                  text: 'Mileage'
-                },
-                ticks: {
-                  callback: (value) => `${Math.round(value as number)} km`
-                }
-              }
-            },
-            plugins: {
-              tooltip: {
-                boxPadding: 10,
-                callbacks: {
-                  title: function (dataset) {
-                    return (dataset[0]?.raw as ChartDataPoint).originalDate.toLocaleString(DateTime.DATE_MED_WITH_WEEKDAY)
-                  },
-                  label: function (item) {
-                    return Math.round((item.raw as ChartDataPoint).step) + " km"
-                  },
-                  afterLabel: function (item) {
-                    return (item.raw as ChartDataPoint).name
-                  }
-                }
-              },
-              zoom: {
-                zoom: {
-                  wheel: {
-                    enabled: true,
-                  },
-                  pinch: {
-                    enabled: true
-                  },
-                  mode: 'xy',
-                },
-                pan: {
-                  enabled: true,
-
-                }
-              }
-            }
-          }
-        }
-      )
-
-      // wait for loading of tracks to complete
-      const allTracks = await allTracksPromise
-      const tby = tracksByYear(allTracks)
-      const pgDs = generateChartDataSets(tby)
-
-      // update chart data
-      mychart.data.datasets = pgDs
-      mychart.update()
+    try {
+      allTracks = await allTracksPromise
       loading.value = false
-
-    } else {
-      reportError("Canvas null")
+      updateChart(chart, allTracks)
+    } catch (err) {
+      reportError('Failed to load tracks', err)
     }
   }).catch((err) => {
-    reportError("Error in nextTick", err)
+    reportError('Error in nextTick', err)
   })
 })
-
 </script>
+
+<style scoped>
+.myspinner {
+  position: absolute;
+
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+}
+
+.filterbuttons {
+  /* disable hover effect */
+
+  &:hover {
+    background-color: var(--bs-btn-bg);
+    color: var(--bs-btn-color);
+  }
+
+  &:focus {
+    background-color: var(--bs-btn-bg);
+    color: var(--bs-btn-color);
+  }
+
+  &.active {
+    &:hover {
+      background-color: var(--bs-btn-active-bg);
+      color: var(--bs-btn-active-color);
+    }
+
+    &:focus {
+      background-color: var(--bs-btn-active-bg);
+      color: var(--bs-btn-active-color);
+    }
+  }
+}
+</style>

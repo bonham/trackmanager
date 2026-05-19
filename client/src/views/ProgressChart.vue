@@ -1,9 +1,10 @@
 <template>
   <track-manager-nav-bar :sid="sid">
     <div class="d-flex flex-row border-top border-bottom border-0">
-      <button type="button" class="btn btn-outline-secondary m-2 expandbutton"
-        @click="console.log('Expand/collapse not implemented yet')">
-        ThisButton</button>
+      <button type="button" class="filterbuttons btn m-2" :class="newestClass" @click="toggleNewest()">
+        Newest</button>
+      <button type="button" class="filterbuttons btn m-2" :class="bestClass" @click="toggleBest()">
+        Best</button>
     </div>
     <div class="d-flex flex-column flex-grow-1">
       <canvas id="acquisitions" ref="canvasref"></canvas>
@@ -17,7 +18,7 @@
 <script setup lang="ts">
 import { reportError } from '@/stores/errorstore';
 import { chartConfig } from '@/lib/progress/progressChartConfig';
-import { generateChartDataSets } from '@/lib/progress/progressChart'
+import { generateChartDataSets, FilterButtonState } from '@/lib/progress/progressChart'
 import type { TracksByYearDict, ExtendedPChartDataPoint, PChartTLabel, PChartTType, PChartSortType } from '@/lib/progress/progressChartTypes'
 import _ from 'lodash'
 
@@ -54,7 +55,9 @@ import TrackManagerNavBar from '@/components/TrackManagerNavBar.vue'
 import { Track } from '@/lib/Track'
 import { getAllTracks } from '@/lib/trackServices'
 import { BSpinner } from 'bootstrap-vue-next'
-import { ref, onMounted, nextTick } from 'vue'
+import { ref, onMounted, nextTick, computed } from 'vue'
+
+type ProgressChartType = Chart<PChartTType, ExtendedPChartDataPoint[], PChartTLabel>
 
 const props = defineProps({
   sid: {
@@ -64,21 +67,60 @@ const props = defineProps({
 })
 
 // constants
-const MAX_LINES_WITH_FILTER = 5
+const MAX_YEARLINES_WITH_FILTER = 5
 
 // reactives and dom refs
-const filterType = ref<PChartSortType>('highest_progress')
 const loading = ref(true)
 const canvasref = ref<(null | HTMLCanvasElement)>(null)
+
+
+const filterState = ref(new FilterButtonState())
+
+const newestClass = computed(() => filterState.value.newestButtonClass())
+const bestClass = computed(() => filterState.value.bestButtonClass())
+
+function numYearLines() {
+  return filterState.value.filterActive() ? MAX_YEARLINES_WITH_FILTER : 0
+}
+
+function filterType(): PChartSortType {
+  if (filterState.value.bestActive) {
+    return "highest_progress"
+  } else {
+    return "newest_year"
+  }
+}
 
 function tracksByYear(loadedTracks: Track[]): TracksByYearDict {
   const trackFlatList = _.values(loadedTracks)
   return _.groupBy(trackFlatList, (x: Track) => x.year())
 }
 
-
 // load tracks async
 const allTracksPromise = getAllTracks(props.sid)
+
+let chart: ProgressChartType | null = null
+let allTracks: Track[] = []
+
+function updateChart(ch: ProgressChartType | null, tracks: Track[]) {
+  if (ch !== null) {
+
+    const trByYear = tracksByYear(tracks)
+    const chartDataSets = generateChartDataSets(trByYear, filterType(), numYearLines())
+    ch.data.datasets = chartDataSets
+    ch.update()
+  }
+}
+
+function toggleNewest() {
+  filterState.value.toggleNewest()
+  updateChart(chart, allTracks)
+}
+
+function toggleBest() {
+  filterState.value.toggleBest()
+  updateChart(chart, allTracks)
+}
 
 // generate empty chart
 onMounted(() => {
@@ -87,20 +129,15 @@ onMounted(() => {
     // should be defined after mount
     if (canvasref.value !== null) {
 
-      const mychart = new Chart<PChartTType, ExtendedPChartDataPoint[], PChartTLabel>(
+      chart = new Chart<PChartTType, ExtendedPChartDataPoint[], PChartTLabel>(
         canvasref.value,
         chartConfig
       )
 
       // wait for loading of tracks to complete
-      const allTracks = await allTracksPromise
-      const tby = tracksByYear(allTracks)
-      const pgDs = generateChartDataSets(tby, filterType.value, MAX_LINES_WITH_FILTER)
-
-      // update chart data
-      mychart.data.datasets = pgDs
-      mychart.update()
+      allTracks = await allTracksPromise
       loading.value = false
+      updateChart(chart, allTracks)
 
     } else {
       reportError("Canvas null")
@@ -120,5 +157,31 @@ onMounted(() => {
   left: 50%;
   transform: translate(-50%, -50%);
 
+}
+
+.filterbuttons {
+  /* disable hover effect */
+
+  &:hover {
+    background-color: var(--bs-btn-bg);
+    color: var(--bs-btn-color);
+  }
+
+  &:focus {
+    background-color: var(--bs-btn-bg);
+    color: var(--bs-btn-color);
+  }
+
+  &.active {
+    &:hover {
+      background-color: var(--bs-btn-active-bg);
+      color: var(--bs-btn-active-color);
+    }
+
+    &:focus {
+      background-color: var(--bs-btn-active-bg);
+      color: var(--bs-btn-active-color);
+    }
+  }
 }
 </style>

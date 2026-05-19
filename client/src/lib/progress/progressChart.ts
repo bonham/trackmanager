@@ -89,6 +89,12 @@ function generateChartDataSets(tracksByYear: TracksByYearDict, maxSortType: PCha
     // Sort years by progress and return datasets for the top years
     progressYearPairs.sort((a, b) => b.progress - a.progress)
     const topYears = progressYearPairs.slice(0, maxLines).map(p => p.year)
+
+    // check if min 1 year, then check if current year is in top years, if not add it to the list (for visual comparison)
+    if (topYears.length > 0 && !topYears.includes(maxYear)) {
+      topYears.push(maxYear)
+    }
+
     // sort them again by year for better visual comparison
     topYears.sort().reverse()
     for (const year of topYears) {
@@ -99,4 +105,48 @@ function generateChartDataSets(tracksByYear: TracksByYearDict, maxSortType: PCha
   return returnDataSetList
 }
 
-export { generateChartDataSets }
+/**
+ * State of both buttons, for now only one can be active at a time, but maybe in the future we want to allow both to be active at the same time. 
+ * Will also print classes for active/inactive state of buttons, so that they can be styled accordingly.
+ *  */
+class FilterButtonState {
+  newestActive: boolean
+  bestActive: boolean
+
+  constructor() {
+    this.newestActive = false
+    this.bestActive = false
+  }
+
+  toggleNewest() {
+    this.newestActive = !this.newestActive
+    if (this.newestActive) {
+      this.bestActive = false
+    }
+  }
+
+  toggleBest() {
+    this.bestActive = !this.bestActive
+    if (this.bestActive) {
+      this.newestActive = false
+    }
+  }
+
+  filterActive(): boolean {
+    return this.newestActive || this.bestActive
+  }
+
+  newestButtonClass() {
+    return FilterButtonState.activeClass(this.newestActive)
+  }
+
+  bestButtonClass() {
+    return FilterButtonState.activeClass(this.bestActive)
+  }
+
+  static activeClass(active: boolean) {
+    return active ? "btn-secondary" : "btn-outline-secondary"
+  }
+}
+
+export { generateChartDataSets, FilterButtonState }

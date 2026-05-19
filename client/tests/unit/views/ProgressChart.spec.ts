@@ -94,8 +94,8 @@ describe('ProgressChart', () => {
   test('shows loading spinner while tracks are loading', () => {
     // Delay resolution so spinner is visible during render
     vi.mocked(getAllTracks).mockReturnValue(new Promise(() => undefined))
-    const { getByText } = renderProgressChart()
-    expect(getByText('Loading')).toBeInTheDocument()
+    const { getByRole } = renderProgressChart()
+    expect(getByRole('status')).toBeInTheDocument()
   })
 
   test('hides loading spinner after tracks are loaded', async () => {

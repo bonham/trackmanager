@@ -8,7 +8,7 @@
     </div>
     <div class="d-flex flex-column flex-grow-1">
       <canvas id="acquisitions" ref="canvasref"></canvas>
-      <div v-if="loading" class="myspinner">
+      <div v-if="loading" class="myspinner" role="status" aria-label="Loading chart">
         <b-spinner />
       </div>
     </div>

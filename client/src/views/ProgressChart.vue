@@ -6,10 +6,12 @@
       <button type="button" class="filterbuttons btn m-2" :class="bestClass" @click="toggleBest()">
         Best</button>
     </div>
-    <div class="d-flex flex-column flex-grow-1">
-      <canvas id="acquisitions" ref="canvasref"></canvas>
-      <div v-if="loading" class="myspinner" role="status" aria-label="Loading chart">
-        <b-spinner />
+    <div id="canvasparent" class="d-flex flex-row flex-grow-1 mh-100 justify-content-center align-items-center w-100">
+      <div id="canvas-wrapper" class="mh-100 mw-100 w-auto h-100" style="aspect-ratio: 3/4;">
+        <canvas id="acquisitions" ref="canvasref"></canvas>
+        <!-- <div v-if="loading" class="myspinner" role="status" aria-label="Loading chart">
+          <b-spinner />
+        </div> -->
       </div>
     </div>
   </track-manager-nav-bar>
@@ -142,6 +144,12 @@ onMounted(() => {
 </script>
 
 <style scoped>
+#acquisitions {
+  /* make the canvas take all available space in the wrapper, but maintain aspect ratio */
+  width: 100% !important;
+  height: 100% !important;
+}
+
 .myspinner {
   position: absolute;
 

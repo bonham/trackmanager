@@ -10,8 +10,10 @@ const chartConfig: ChartConfiguration<PChartTType, ExtendedPChartDataPoint[], PC
   },
   options: {
     maintainAspectRatio: false,
+    responsive: true,
     scales: {
       x: {
+        position: 'top',
         type: "time",
         time: {
           displayFormats: {
@@ -38,6 +40,9 @@ const chartConfig: ChartConfiguration<PChartTType, ExtendedPChartDataPoint[], PC
       }
     },
     plugins: {
+      legend: {
+        position: 'right',
+      },
       tooltip: {
         boxPadding: 10,
         callbacks: {
@@ -63,7 +68,7 @@ const chartConfig: ChartConfiguration<PChartTType, ExtendedPChartDataPoint[], PC
           mode: 'xy',
         },
         pan: {
-          enabled: true,
+          enabled: false,
 
         }
       }

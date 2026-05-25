@@ -2,7 +2,7 @@ import type { ChartConfiguration } from "chart.js"
 import { DateTime } from "luxon";
 import type { ExtendedPChartDataPoint, PChartTLabel, PChartTType } from '@/lib/progress/progressChartTypes'
 
-const X_AXIS_MIN = new Date('2024-03-01').getTime()
+const X_AXIS_MIN = new Date('2024-01-01').getTime()
 const X_AXIS_MAX = new Date('2025-01-02').getTime()
 const Y_AXIS_MIN = 0
 

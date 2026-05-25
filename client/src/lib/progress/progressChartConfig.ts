@@ -2,6 +2,9 @@ import type { ChartConfiguration } from "chart.js"
 import { DateTime } from "luxon";
 import type { ExtendedPChartDataPoint, PChartTLabel, PChartTType } from '@/lib/progress/progressChartTypes'
 
+const X_AXIS_MIN = new Date('2024-03-01').getTime()
+const X_AXIS_MAX = new Date('2025-01-02').getTime()
+const Y_AXIS_MIN = 0
 
 const chartConfig: ChartConfiguration<PChartTType, ExtendedPChartDataPoint[], PChartTLabel> = {
   type: 'line',
@@ -22,14 +25,15 @@ const chartConfig: ChartConfiguration<PChartTType, ExtendedPChartDataPoint[], PC
           },
           unit: 'month'
         },
-        min: '2024-01-01',
-        max: '2025-01-02',
+        min: X_AXIS_MIN,
+        max: X_AXIS_MAX,
         title: {
           display: true,
           text: "Day in year"
         }
       },
       y: {
+        min: Y_AXIS_MIN,
         title: {
           display: true,
           text: 'Mileage'
@@ -41,7 +45,7 @@ const chartConfig: ChartConfiguration<PChartTType, ExtendedPChartDataPoint[], PC
     },
     plugins: {
       legend: {
-        position: 'right',
+        position: 'top',
       },
       tooltip: {
         boxPadding: 10,
@@ -68,9 +72,13 @@ const chartConfig: ChartConfiguration<PChartTType, ExtendedPChartDataPoint[], PC
           mode: 'xy',
         },
         pan: {
-          enabled: false,
+          enabled: true,
 
-        }
+        },
+        limits: {
+          x: { min: X_AXIS_MIN, max: X_AXIS_MAX },
+          y: { min: Y_AXIS_MIN, max: 'original' }
+        },
       }
     }
   }

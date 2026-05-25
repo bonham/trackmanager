@@ -6,12 +6,13 @@
       <button type="button" class="filterbuttons btn m-2" :class="bestClass" @click="toggleBest()">
         Best</button>
     </div>
-    <div id="canvasparent" class="d-flex flex-row flex-grow-1 mh-100 justify-content-center align-items-center w-100">
-      <div id="canvas-wrapper" class="mh-100 mw-100 w-auto h-100" style="aspect-ratio: 3/4;">
+    <!-- <div id="canvas-parent" class="d-flex flex-row flex-grow-1 mh-100 justify-content-center align-items-center w-100"> -->
+    <div id="canvas-parent">
+      <div id="canvas-wrapper">
         <canvas id="acquisitions" ref="canvasref"></canvas>
-        <!-- <div v-if="loading" class="myspinner" role="status" aria-label="Loading chart">
+        <div v-if="loading" class="myspinner" role="status" aria-label="Loading chart">
           <b-spinner />
-        </div> -->
+        </div>
       </div>
     </div>
   </track-manager-nav-bar>
@@ -144,8 +145,32 @@ onMounted(() => {
 </script>
 
 <style scoped>
+#canvas-parent {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  align-items: center;
+  /* center the chart horizontally */
+  overflow: hidden;
+  /* needs an explicit height for children to reference 100% */
+  height: 100%;
+}
+
+#canvas-wrapper {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  /* Drive sizing from height, not width */
+  height: 100%;
+  width: auto;
+  /* width follows from aspect-ratio + height */
+  max-width: 100%;
+  /* never overflow horizontally */
+  flex-shrink: 0;
+}
+
 #acquisitions {
-  /* make the canvas take all available space in the wrapper, but maintain aspect ratio */
+  position: absolute;
+  inset: 0;
   width: 100% !important;
   height: 100% !important;
 }

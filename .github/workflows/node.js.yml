@@ -7,9 +7,9 @@ name: Node.js CI
 
 on:
   push:
-    branches: [ $default-branch ]
+    branches: [ main ]
   pull_request:
-    branches: [ $default-branch ]
+    branches: [ main ]
 
 env:
   LANG: de_DE.UTF-8
@@ -87,7 +87,7 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: "~24"
+          node-version: "24"
       - name: Clean stale lockfiles and install
         run: |
           rm -f client/package-lock.json server/package-lock.json shared/package-lock.json
@@ -107,7 +107,7 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: "~24"
+          node-version: "24"
       - name: Clean stale lockfiles and install
         run: |
           rm -f client/package-lock.json server/package-lock.json shared/package-lock.json
@@ -123,7 +123,7 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: "~24"
+          node-version: "24"
       - name: Clean stale lockfiles and install
         run: |
           rm -f client/package-lock.json server/package-lock.json shared/package-lock.json
@@ -140,7 +140,7 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: "~24"
+          node-version: "24"
       - name: Clean stale lockfiles and install
         run: |
           rm -f client/package-lock.json server/package-lock.json shared/package-lock.json
